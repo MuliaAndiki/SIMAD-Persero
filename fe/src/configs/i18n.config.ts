@@ -1,18 +1,18 @@
-import { InitOptions } from "i18next";
+import type { InitOptions } from 'i18next';
 
-export const defaultNS = "common";
-export const fallbackLng = "en";
+export const defaultNS = 'common';
+export const fallbackLng = 'en';
 
-export const languages = ["en", "id"] as const;
+export const languages = ['en', 'id'] as const;
 export type Language = (typeof languages)[number];
 
-export const defaultLanguage: Language = "en";
+export const defaultLanguage: Language = 'en';
 
 export const i18nConfig: InitOptions = {
   defaultNS,
   fallbackLng,
   supportedLngs: languages,
-  ns: ["common"],
+  ns: ['common'],
   interpolation: {
     escapeValue: false,
   },
@@ -24,11 +24,11 @@ export const i18nConfig: InitOptions = {
 // Helper function to get the language name
 export const getLanguageName = (lang: Language) => {
   const names: Record<Language, string> = {
-    en: "English",
-    id: "Indonesia",
+    en: 'English',
+    id: 'Indonesia',
   };
   return names[lang];
 };
 
 // Storage key for language preference
-export const LANGUAGE_STORAGE_KEY = "app-language-preference";
+export const LANGUAGE_STORAGE_KEY = 'app-language-preference';

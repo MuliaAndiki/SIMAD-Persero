@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { Loader2 } from 'lucide-react';
-import { Button, ButtonProps } from '../atoms';
+import * as React from 'react';
+import { Button, type ButtonProps } from '../atoms';
 
 export interface ActionButtonProps extends ButtonProps {
   isPending?: boolean;
@@ -19,7 +19,7 @@ const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
         {!isPending && iconRight}
       </Button>
     );
-  }
+  },
 );
 
 ActionButton.displayName = 'ActionButton';

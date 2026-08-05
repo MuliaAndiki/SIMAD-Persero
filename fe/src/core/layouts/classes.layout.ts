@@ -1,3 +1,3 @@
 export const blankLayoutClasses = {
-    root: "ts-blank-layout",
+  root: 'ts-blank-layout',
 };

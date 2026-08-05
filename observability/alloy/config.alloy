@@ -1,0 +1,102 @@
+// =============================================================================
+// Grafana Alloy — OTLP Collector Configuration
+// =============================================================================
+// This configuration receives OpenTelemetry data (traces, logs, metrics) via
+// both gRPC (:4317) and HTTP (:4318), batches them for performance, and
+// forwards each signal to the appropriate backend:
+//   - Traces  → Grafana Tempo (via OTLP gRPC)
+//   - Logs    → Grafana Loki  (via loki.write)
+//   - Metrics → (placeholder, ready for Prometheus/Mimir when needed)
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// 1. OTLP Receiver — accepts telemetry from instrumented applications
+// -----------------------------------------------------------------------------
+otelcol.receiver.otlp "default" {
+  // gRPC endpoint (standard OTLP port)
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+
+  // HTTP endpoint (standard OTLP port)
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  // Route each signal type to its own batch processor
+  output {
+    traces  = [otelcol.processor.batch.traces.input]
+    logs    = [otelcol.processor.batch.logs.input]
+    // Uncomment when Prometheus/Mimir is added:
+    // metrics = [otelcol.processor.batch.metrics.input]
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 2. Batch Processors — group telemetry items before export for efficiency
+// -----------------------------------------------------------------------------
+
+// Batch processor for traces
+otelcol.processor.batch "traces" {
+  timeout         = "5s"
+  send_batch_size = 1024
+
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+// Batch processor for logs
+otelcol.processor.batch "logs" {
+  timeout         = "5s"
+  send_batch_size = 1024
+
+  output {
+    logs = [otelcol.exporter.loki.default.input]
+  }
+}
+
+// Uncomment when Prometheus/Mimir is added:
+// otelcol.processor.batch "metrics" {
+//   timeout         = "5s"
+//   send_batch_size = 1024
+//
+//   output {
+//     metrics = [otelcol.exporter.prometheusremotewrite.default.input]
+//   }
+// }
+
+// -----------------------------------------------------------------------------
+// 3. Exporters — send processed telemetry to backends
+// -----------------------------------------------------------------------------
+
+// Export traces to Grafana Tempo via OTLP gRPC
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+
+    // TLS disabled for internal Docker network communication
+    tls {
+      insecure = true
+    }
+  }
+}
+
+// Export OTLP logs to Loki (converts OTLP log format → Loki-native format)
+otelcol.exporter.loki "default" {
+  forward_to = [loki.write.default.receiver]
+}
+
+// Write logs to Grafana Loki
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// Uncomment when Prometheus remote write is needed:
+// otelcol.exporter.prometheusremotewrite "default" {
+//   endpoint {
+//     url = "http://prometheus:9090/api/v1/write"
+//   }
+// }

@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-import { usePWAUpdate } from '@/hooks/usePWAUpdate';
 import { Button } from '@/components/atoms';
 import {
   AlertDialog,
@@ -13,6 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/atoms';
+import { usePWAUpdate } from '@/hooks/usePWAUpdate';
+import { useEffect } from 'react';
 
 export function PWAUpdatePrompt() {
   const { updateAvailable, updateApp, skipUpdate } = usePWAUpdate();
@@ -79,6 +79,7 @@ export function PWAUpdateToast() {
       </div>
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={updateApp}
           className="rounded-md bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700"
         >

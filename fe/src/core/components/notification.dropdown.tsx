@@ -1,10 +1,10 @@
-import { Button } from '@/components/atoms/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/atoms';
+import { Button } from '@/components/atoms/button';
 import { Bell } from 'lucide-react';
 
 export default function NotificationDropdown() {

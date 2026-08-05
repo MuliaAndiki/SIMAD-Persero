@@ -1,0 +1,49 @@
+# =============================================================================
+# Grafana — Auto-Provisioned Datasources
+# =============================================================================
+# This file is automatically loaded by Grafana on startup. It registers
+# Tempo (traces) and Loki (logs) as datasources without any manual
+# configuration needed in the Grafana UI.
+# =============================================================================
+
+apiVersion: 1
+
+datasources:
+  # --- Grafana Tempo (Traces) ---
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    isDefault: true
+    uid: tempo
+    jsonData:
+      httpMethod: GET
+      # Enable trace-to-logs navigation: click a trace to see related logs
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        filterByTraceID: true
+        filterBySpanID: false
+      # Enable trace-to-metrics (if Prometheus is added later)
+      # tracesToMetrics:
+      #   datasourceUid: prometheus
+      serviceMap:
+        datasourceUid: ""
+      nodeGraph:
+        enabled: true
+
+  # --- Grafana Loki (Logs) ---
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    uid: loki
+    jsonData:
+      # Enable derived fields to link log entries back to traces in Tempo
+      derivedFields:
+        - name: TraceID
+          datasourceUid: tempo
+          matcherRegex: '"traceId":"(\w+)"'
+          url: "$${__value.raw}"
+          matcherType: regex

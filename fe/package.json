@@ -6,10 +6,10 @@
     "dev": "bun --bun next dev",
     "build": "bun --bun next build",
     "start": "bun --bun next start",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "lint": "biome check src",
+    "lint:fix": "biome check --write --unsafe src",
+    "format": "biome format --write src",
+    "format:check": "biome format src"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -60,6 +60,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@eslint/eslintrc": "^3.3.5",
     "@iconify/react": "^5.2.1",
     "@tailwindcss/postcss": "^4.3.0",

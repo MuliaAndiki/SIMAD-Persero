@@ -1,8 +1,4 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/atoms';
-import { cn } from '@/utils/classname';
-import React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { CheckIcon, XCircle, ChevronDown, XIcon, WandSparkles } from 'lucide-react';
 import { Separator } from '@/components/atoms';
 import { Button } from '@/components/atoms';
 import { Badge } from '@/components/atoms';
@@ -16,6 +12,10 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/atoms';
+import { cn } from '@/utils/classname';
+import { type VariantProps, cva } from 'class-variance-authority';
+import { CheckIcon, ChevronDown, WandSparkles, XCircle, XIcon } from 'lucide-react';
+import React from 'react';
 
 const multiSelectVariants = cva('m-1 transition ease-in-out', {
   variants: {
@@ -78,7 +78,7 @@ export default function Autocomplete({
   maxCount = 3,
 }: SelectBaseProps) {
   const [selectedValues, setSelectedValues] = React.useState<string[]>(
-    multiple ? (defaultValue as string[]) || [] : []
+    multiple ? (defaultValue as string[]) || [] : [],
   );
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [isAnimating, setIsAnimating] = React.useState(false);
@@ -119,8 +119,8 @@ export default function Autocomplete({
               )}
             </SelectTrigger>
             <SelectContent className="w-full">
-              {options?.map((option, index) => (
-                <SelectItem key={index} value={option.value}>
+              {options?.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
                   {selectedValueRender ? selectedValueRender(option) : option.label}
                 </SelectItem>
               ))}
@@ -180,12 +180,15 @@ export default function Autocomplete({
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <label className={cn('text-zinc-800 text-sm font-medium', labelClassName)}>{label}</label>
+        <label className={cn('text-zinc-800 text-sm font-medium', labelClassName)} htmlFor={id}>
+          {label}
+        </label>
       )}
       <div className={cn('relative w-full', baseClassName)}>
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
           <PopoverTrigger asChild>
             <Button
+              id={id}
               onClick={handleTogglePopover}
               className="flex w-full p-1 rounded-lg border-2 border-gray-100 min-h-10 h-auto items-center justify-between bg-white hover:bg-white focus:border-purple-500"
               disabled={disabled}
@@ -207,7 +210,7 @@ export default function Autocomplete({
                             className={cn(
                               'font-medium',
                               isAnimating ? 'animate-bounce' : '',
-                              multiSelectVariants({ variant })
+                              multiSelectVariants({ variant }),
                             )}
                             style={{ animationDuration: `${animation}s` }}
                           >
@@ -229,7 +232,7 @@ export default function Autocomplete({
                         className={cn(
                           'bg-transparent text-foreground border-foreground/10 hover:bg-transparent',
                           isAnimating ? 'animate-bounce' : '',
-                          multiSelectVariants({ variant })
+                          multiSelectVariants({ variant }),
                         )}
                         style={{ animationDuration: `${animation}s` }}
                       >
@@ -280,7 +283,7 @@ export default function Autocomplete({
                         'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
                         allSelected
                           ? 'bg-primary text-primary-foreground'
-                          : 'opacity-50 [&_svg]:invisible'
+                          : 'opacity-50 [&_svg]:invisible',
                       )}
                     >
                       <CheckIcon className="h-4 w-4" />
@@ -303,7 +306,7 @@ export default function Autocomplete({
                             'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
                             isSelected
                               ? 'bg-primary text-primary-foreground'
-                              : 'opacity-50 [&_svg]:invisible'
+                              : 'opacity-50 [&_svg]:invisible',
                           )}
                         >
                           <CheckIcon className="h-4 w-4" />
@@ -346,7 +349,7 @@ export default function Autocomplete({
             <WandSparkles
               className={cn(
                 'cursor-pointer my-2 text-foreground bg-background w-3 h-3',
-                isAnimating ? '' : 'text-muted-foreground'
+                isAnimating ? '' : 'text-muted-foreground',
               )}
               onClick={() => setIsAnimating(!isAnimating)}
             />

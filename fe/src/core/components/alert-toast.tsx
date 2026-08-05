@@ -1,6 +1,6 @@
-import { ToastProps } from '@/types/ui';
-import toast from 'react-hot-toast';
+import type { ToastProps } from '@/types/ui';
 import { useRef } from 'react';
+import toast from 'react-hot-toast';
 
 const iconMap: Record<string, { emoji: string; color: string }> = {
   success: {

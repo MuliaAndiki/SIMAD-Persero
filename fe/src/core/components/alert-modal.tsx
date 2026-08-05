@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/atoms';
-import { ModalProps } from '@/types/ui';
+import type { ModalProps } from '@/types/ui';
 
 const iconMap = {
   success: '✅',
@@ -50,6 +50,7 @@ export function AlertModal({
         <div className="flex justify-center gap-2 pt-4">
           {cancelText && (
             <button
+              type="button"
               onClick={() => {
                 onCancel?.();
                 setOpen(false);
@@ -60,6 +61,7 @@ export function AlertModal({
             </button>
           )}
           <button
+            type="button"
             onClick={() => {
               onConfirm?.();
               setOpen(false);

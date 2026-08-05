@@ -1,0 +1,67 @@
+# =============================================================================
+# Grafana Tempo — Distributed Tracing Backend
+# =============================================================================
+# Receives traces from Grafana Alloy via OTLP (gRPC/HTTP) and stores them
+# locally on the filesystem. This configuration runs Tempo in monolithic mode,
+# which is ideal for development and single-node deployments.
+# =============================================================================
+
+# --- Server ---
+# HTTP API port (used by Grafana to query traces)
+server:
+  http_listen_port: 3200
+
+# --- Distributor ---
+# Configures how Tempo receives trace data
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        # gRPC receiver — Alloy sends traces here
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        # HTTP receiver — fallback for HTTP-based senders
+        http:
+          endpoint: "0.0.0.0:4318"
+
+# --- Ingester ---
+# Controls how traces are batched before being flushed to storage
+ingester:
+  max_block_duration: 5m
+
+# --- Compactor ---
+# Merges and optimizes stored trace blocks
+compactor:
+  compaction:
+    block_retention: 48h  # Keep traces for 48 hours in development
+
+# --- Storage ---
+# Local filesystem storage (suitable for development)
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+# --- Metrics Generator ---
+# Generates RED metrics (Rate, Error, Duration) from traces
+# Uncomment to enable service graph and span metrics:
+# metrics_generator:
+#   registry:
+#     external_labels:
+#       source: tempo
+#       cluster: docker-compose
+#   storage:
+#     path: /var/tempo/generator/wal
+#     remote_write:
+#       - url: http://prometheus:9090/api/v1/write
+#         send_exemplars: true
+
+# --- Overrides ---
+# Global defaults for trace ingestion limits
+overrides:
+  defaults:
+    metrics_generator:
+      processors: []

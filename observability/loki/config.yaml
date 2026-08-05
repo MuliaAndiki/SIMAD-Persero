@@ -1,0 +1,60 @@
+# =============================================================================
+# Grafana Loki — Log Aggregation Backend
+# =============================================================================
+# Minimal configuration for development. Runs in single binary mode using
+# the local filesystem for storage. Suitable for Docker Compose deployments.
+# =============================================================================
+
+# --- Authentication ---
+# Disabled for development (no multi-tenancy)
+auth_enabled: false
+
+# --- Server ---
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+# --- Common Settings ---
+common:
+  instance_addr: 0.0.0.0
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+# --- Schema Configuration ---
+# Defines how Loki indexes and stores log data
+schema_config:
+  configs:
+    - from: "2020-10-24"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+# --- Limits ---
+# Allow OTLP structured metadata ingestion
+limits_config:
+  allow_structured_metadata: true
+  volume_enabled: true
+
+# --- Query Range ---
+# Cache configuration for query results
+query_range:
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
+
+# --- Analytics ---
+# Disable usage reporting in development
+analytics:
+  reporting_enabled: false

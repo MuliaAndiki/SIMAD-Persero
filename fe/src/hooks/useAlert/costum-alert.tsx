@@ -1,11 +1,11 @@
 'use client';
-import { toast } from 'react-hot-toast';
-import { createContext, useContext, useState } from 'react';
-import { AlertContexType } from '@/types/ui';
-import { ModalProps } from '@/types/ui';
-import { ToastProps } from '@/types/ui';
 import { AlertModal } from '@/core/components/alert-modal';
 import { ToastEffect } from '@/core/components/alert-toast';
+import type { AlertContexType } from '@/types/ui';
+import type { ModalProps } from '@/types/ui';
+import type { ToastProps } from '@/types/ui';
+import { createContext, useContext, useState } from 'react';
+import { toast } from 'react-hot-toast';
 const AlertContex = createContext<AlertContexType | undefined>(undefined);
 
 export const useAlert = (): AlertContexType => {

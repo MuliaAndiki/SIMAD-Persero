@@ -1,17 +1,14 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { NEVER, z } from "zod";
+import { createEnv } from '@t3-oss/env-nextjs';
+import { NEVER, z } from 'zod';
 
-const requiredString = z.string().trim().min(1, "This field is required");
+const requiredString = z.string().trim().min(1, 'This field is required');
 
 export const env = createEnv({
   // Server Environment Variables Configuration
   server: {
-    NODE_ENV: z
-      .enum(["development", "production", "test"])
-      .default("development"),
+    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     AUTH_SECRET_KEY: requiredString,
     NEXT_INTERNAL_API_SECRET: requiredString,
-    
   },
 
   // Client Environment Variables Configuration
@@ -19,7 +16,6 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_URL: requiredString.url(),
     NEXT_PUBLIC_BACKEND_URL: requiredString.url(),
     NEXT_PUBLIC_BASEPATH: requiredString,
-   
   },
 
   // Runtime Environment Variables Configuration
@@ -31,7 +27,6 @@ export const env = createEnv({
     NEXT_PUBLIC_BASEPATH: process.env.NEXT_PUBLIC_BASEPATH,
 
     NEXT_INTERNAL_API_SECRET: process.env.NEXT_INTERNAL_API_SECRET,
-    
   },
 
   // Skip Validation for the following Environment Variables

@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { Input } from '@/components/atoms';
 import { cn } from '@/utils/classname';
+import * as React from 'react';
 
 export interface DecoratedInputProps extends React.ComponentProps<typeof Input> {
   iconLeft?: React.ReactNode;
@@ -30,7 +30,7 @@ const DecoratedInput = React.forwardRef<HTMLInputElement, DecoratedInputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 DecoratedInput.displayName = 'DecoratedInput';

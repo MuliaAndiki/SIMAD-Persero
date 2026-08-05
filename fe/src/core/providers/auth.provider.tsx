@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
-import { useSelector } from 'react-redux';
-import type { RootState } from '@/stores/store';
-import { usePathname, useRouter } from 'next/navigation';
-import { getCookie } from 'cookies-next';
+import { APP_SESSION_COOKIE_KEY } from '@/configs/cookies.config';
 import { useAppDispatch } from '@/hooks/dispatch/dispatch';
 import { setCurrentUser } from '@/stores/authSlice/authSlice';
-import { APP_SESSION_COOKIE_KEY } from '@/configs/cookies.config';
+import type { RootState } from '@/stores/store';
+import { getCookie } from 'cookies-next';
+import { usePathname, useRouter } from 'next/navigation';
+import React from 'react';
+import { useSelector } from 'react-redux';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();

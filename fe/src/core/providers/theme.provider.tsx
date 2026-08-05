@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
 import { themeConfig } from '@/configs';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -39,14 +39,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // Apply theme variables
     const themeValues = themeConfig[newTheme];
-    Object.entries(themeValues).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(themeValues)) {
       if (typeof value === 'string') {
         document.documentElement.style.setProperty(`--${key}`, value);
       } else if (typeof value === 'object') {
         document.documentElement.style.setProperty(`--${key}`, value.background);
         document.documentElement.style.setProperty(`--${key}-foreground`, value.foreground);
       }
-    });
+    }
   };
 
   // Prevent hydration mismatch

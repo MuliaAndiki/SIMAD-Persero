@@ -1,7 +1,8 @@
 import { cn } from '@/utils/classname';
-import React, { forwardRef, useState } from 'react';
 import { Icon } from '@iconify/react';
 import Link from 'next/link';
+import type React from 'react';
+import { forwardRef, useState } from 'react';
 
 type InputBaseProps = {
   placeholder?: string;
@@ -47,7 +48,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
       forgotPassword,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [file, setFile] = useState<File | null>(null);
     const [showPassword, setShowPassword] = useState(false);
@@ -62,7 +63,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
                 !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
                 error ? 'border-red-500' : 'border-gray-100 focus:border-purple-500',
                 inputClassName,
-                file ? 'text-gray-950' : 'text-gray-400'
+                file ? 'text-gray-950' : 'text-gray-400',
               )}
               disabled={disabled}
               onClick={() => document.getElementById(id || 'file')?.click()}
@@ -98,7 +99,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
               !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
               error ? 'border-red-500' : 'border-gray-100 focus:border-purple-500',
               inputClassName,
-              'max-h-none'
+              'max-h-none',
             )}
             placeholder={placeholder}
             onChange={onChange}
@@ -122,7 +123,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
             !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
             type === 'password' ? 'pr-12' : 'pr-4',
             error ? 'border-red-500' : 'border-gray-100 focus:border-purple-500',
-            inputClassName
+            inputClassName,
           )}
           placeholder={placeholder}
           onChange={onChange}
@@ -176,7 +177,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
     );
-  }
+  },
 );
 
 TextField.displayName = 'TextField';

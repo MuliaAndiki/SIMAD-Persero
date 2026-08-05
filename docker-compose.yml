@@ -1,0 +1,91 @@
+services:
+  db:
+    image: postgres:17
+    container_name: simad-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: simad_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - simad-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d simad_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: simad-alloy
+    restart: unless-stopped
+    command:
+      [
+        "run",
+        "--server.http.listen-addr=0.0.0.0:12345",
+        "/etc/alloy/config.alloy",
+      ]
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+    ports:
+      - "12345:12345"
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - simad-network
+    depends_on:
+      - loki
+      - tempo
+
+  loki:
+    image: grafana/loki:latest
+    container_name: simad-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./observability/loki/config.yaml:/etc/loki/local-config.yaml:ro
+    ports:
+      - "3100:3100"
+    networks:
+      - simad-network
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: simad-tempo
+    restart: unless-stopped
+    command: -config.file=/etc/tempo.yaml
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo.yaml:ro
+    ports:
+      - "3200:3200"
+    networks:
+      - simad-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: simad-grafana
+    restart: unless-stopped
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    ports:
+      - "3001:3000"
+    networks:
+      - simad-network
+    depends_on:
+      - loki
+      - tempo
+
+volumes:
+  pgdata:
+
+networks:
+  simad-network:
+    driver: bridge

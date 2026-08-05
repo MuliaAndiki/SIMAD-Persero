@@ -7,9 +7,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/atoms';
-import { ChevronDown } from 'lucide-react';
-import { getLanguageName, Language } from '@/configs/i18n.config';
+import { type Language, getLanguageName } from '@/configs/i18n.config';
 import { useLanguage } from '@/hooks/useLanguage';
+import { ChevronDown } from 'lucide-react';
 
 export default function LanguageDropdown() {
   const { currentLanguage, changeLanguage, languages } = useLanguage();

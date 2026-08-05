@@ -1,5 +1,5 @@
-import app from "./app";
-import { connectWithRetry } from "./config/databases";
+import app from './app';
+import { connectWithRetry } from './config/databases';
 
 connectWithRetry()
   .then(() => {
@@ -8,5 +8,5 @@ connectWithRetry()
     console.log(`🦊 Elysia running at http://localhost:${port}`);
   })
   .catch((err) => {
-    console.error("❌ Could not connect to database after retries:", err);
+    console.error('❌ Could not connect to database after retries:', err);
   });
