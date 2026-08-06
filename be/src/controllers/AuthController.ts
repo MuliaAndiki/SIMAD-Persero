@@ -1,111 +1,257 @@
 import type { AppContext } from '@/contex';
-import { verifyToken } from '@/middlewares/auth';
-import type { JwtPayload, PickLogin, PickLogout, PickRegister } from '@/types/auth.types';
-import bcryptjs from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import prisma from 'prisma/client';
+import { AppError } from '@/http/error';
+import { HttpResponse } from '@/http';
+import AuthService from '@/services/auth.service';
+import type {
+  ChangeEmailBody,
+  ChangeEmailVerifyBody,
+  ChangePasswordBody,
+  EmailBody,
+  LoginBody,
+  RefreshTokenBody,
+  RegisterBody,
+  ResetPasswordBody,
+  TokenBody,
+} from '@/types/auth.types';
 
+/**
+ * Controller modul Auth — tipis.
+ * Hanya bertugas mengekstrak input dari context (body/params/user/header),
+ * memanggil `AuthService`, lalu memetakan hasil ke respons HTTP
+ * menggunakan helper resmi `HttpResponse` dari `@/http`.
+ * Seluruh logika bisnis berada di `AuthService`.
+ */
 class AuthController {
+  private handleError(c: AppContext, error: unknown) {
+    if (error instanceof AppError) {
+      const response = HttpResponse(c);
+      switch (error.status) {
+        case 400:
+          return response.badRequest(error.message);
+        case 401:
+          return response.unauthorized(error.message);
+        case 403:
+          return response.forbidden(error.message);
+        case 404:
+          return response.notFound(error.message);
+        case 409:
+          return response.conflict(error.message);
+        case 422:
+          return response.unprocessable(error.message);
+        case 429:
+          return response.tooManyRequests(error.message);
+        default:
+          return response.internalError(error);
+      }
+    }
+    return HttpResponse(c).internalError(error);
+  }
+
+  // POST /auth/register
   public async register(c: AppContext) {
     try {
-      const auth: PickRegister = c.body;
-
-      if (!auth.email || !auth.fullName || !auth.password) {
-        c.set.status = 400;
-        return { message: 'All fields are required' };
-      }
-
-      const isAlreadyRegistered = await prisma.user.findUnique({
-        where: { email: auth.email },
+      const body = c.body as RegisterBody;
+      const data = await AuthService.register({
+        fullName: body.fullName,
+        email: body.email,
+        password: body.password,
       });
-
-      if (isAlreadyRegistered) {
-        c.set.status = 400;
-        return { message: 'Email already registered' };
-      }
-
-      const hashedPassword = await bcryptjs.hash(auth.password, 10);
-
-      const newUser = await prisma.user.create({
-        data: {
-          email: auth.email,
-          fullName: auth.fullName,
-          password: hashedPassword,
-          role: auth.role || 'user',
-        },
-      });
-
-      return {
-        status: 201,
-        data: newUser,
-        message: 'Account successfully registered',
-      };
+      return HttpResponse(c).created(data, 'Registration successful. Please verify your email.');
     } catch (error) {
-      console.error(error);
-      return { status: 500, message: 'Internal server error' };
+      return this.handleError(c, error);
     }
   }
 
-  public async login(c: any) {
+  // POST /auth/verify-email/send
+  public async sendVerifyEmail(c: AppContext) {
     try {
-      const auth: PickLogin = c.body;
-
-      if (!auth.email || !auth.password) {
-        return c.json({ status: 400, message: 'All fields are required' }, 400);
-      }
-
-      const user = await prisma.user.findUnique({
-        where: { email: auth.email },
-      });
-      if (!user) return c.json({ status: 404, message: 'Account not found' }, 404);
-
-      const validatePassword = await bcryptjs.compare(auth.password, user.password);
-      if (!validatePassword)
-        return c.json({ status: 400, message: 'Wrong email or password' }, 400);
-
-      const payload: JwtPayload = {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-      };
-      if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET not set');
-
-      const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '1d',
-      });
-      await prisma.user.update({ where: { id: user.id }, data: { token } });
-
-      return c.json({
-        status: 200,
-        data: { ...user, token },
-        message: 'Login successfully',
-      });
+      const body = c.body as EmailBody;
+      await AuthService.sendVerifyEmail(body.email);
+      return HttpResponse(c).ok(undefined, undefined, 'Verification email sent');
     } catch (error) {
-      console.error(error);
-      return c.json({ status: 500, message: 'Internal server error' }, 500);
+      return this.handleError(c, error);
     }
   }
 
-  public logout = [
-    verifyToken(),
-    async (c: any) => {
-      try {
-        const { id }: PickLogout = c.user;
-        const user = await prisma.user.findUnique({ where: { id } });
-        if (!user) return c.json({ status: 404, message: 'Account not found' }, 404);
+  // POST /auth/verify-email
+  public async verifyEmail(c: AppContext) {
+    try {
+      const body = c.body as TokenBody;
+      const result = await AuthService.verifyEmail(body.token);
+      return HttpResponse(c).ok(
+        undefined,
+        undefined,
+        result.alreadyVerified ? 'Email already verified' : 'Email verified successfully',
+      );
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
 
-        await prisma.user.update({ where: { id }, data: { token: null } });
-        return c.json({
-          status: 200,
-          message: 'Account logged out successfully',
-        });
-      } catch (error) {
-        console.error(error);
-        return c.json({ status: 500, message: 'Internal server error' }, 500);
-      }
-    },
-  ];
+  // POST /auth/login
+  public async login(c: AppContext) {
+    try {
+      const body = c.body as LoginBody;
+      const data = await AuthService.login(body.email, body.password);
+      return HttpResponse(c).ok(data, undefined, 'Login successful');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/magic-link/send
+  public async sendMagicLink(c: AppContext) {
+    try {
+      const body = c.body as EmailBody;
+      await AuthService.sendMagicLink(body.email);
+      return HttpResponse(c).ok(undefined, undefined, 'Magic link sent');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/magic-link/verify
+  public async verifyMagicLink(c: AppContext) {
+    try {
+      const body = c.body as TokenBody;
+      const data = await AuthService.verifyMagicLink(body.token);
+      return HttpResponse(c).ok(data, undefined, 'Login successful');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/forgot-password
+  public async forgotPassword(c: AppContext) {
+    try {
+      const body = c.body as EmailBody;
+      await AuthService.forgotPassword(body.email);
+      return HttpResponse(c).ok(undefined, undefined, 'Password reset link has been sent');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/reset-password
+  public async resetPassword(c: AppContext) {
+    try {
+      const body = c.body as ResetPasswordBody;
+      await AuthService.resetPassword(body.token, body.password);
+      return HttpResponse(c).ok(undefined, undefined, 'Password updated successfully');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/refresh-token
+  public async refreshToken(c: AppContext) {
+    try {
+      const body = c.body as RefreshTokenBody;
+      const data = await AuthService.refreshToken(body.refreshToken);
+      return HttpResponse(c).ok(data, undefined, 'Token refreshed');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/logout
+  public async logout(c: AppContext) {
+    try {
+      const user = c.user!;
+      const body = (c.body ?? {}) as Partial<RefreshTokenBody>;
+      await AuthService.logout(user.id, body.refreshToken);
+      return HttpResponse(c).ok(undefined, undefined, 'Logout successful');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/logout-all
+  public async logoutAll(c: AppContext) {
+    try {
+      const user = c.user!;
+      await AuthService.logoutAll(user.id);
+      return HttpResponse(c).ok(undefined, undefined, 'All sessions ended');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // GET /auth/me
+  public async me(c: AppContext) {
+    try {
+      const user = c.user!;
+      const data = AuthService.me(user);
+      return HttpResponse(c).ok(data);
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // PATCH /auth/change-password
+  public async changePassword(c: AppContext) {
+    try {
+      const user = c.user!;
+      const body = c.body as ChangePasswordBody;
+      await AuthService.changePassword(user.id, body.currentPassword, body.newPassword);
+      return HttpResponse(c).ok(undefined, undefined, 'Password changed successfully');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // PATCH /auth/change-email
+  public async changeEmail(c: AppContext) {
+    try {
+      const user = c.user!;
+      const body = c.body as ChangeEmailBody;
+      await AuthService.changeEmail(user.id, body.newEmail, body.password);
+      return HttpResponse(c).ok(undefined, undefined, 'Verification email sent to the new address');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/change-email/verify
+  public async changeEmailVerify(c: AppContext) {
+    try {
+      const user = c.user!;
+      const body = c.body as ChangeEmailVerifyBody;
+      await AuthService.changeEmailVerify(user.id, body.token);
+      return HttpResponse(c).ok(undefined, undefined, 'Email updated successfully');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // GET /auth/sessions
+  public async sessions(c: AppContext) {
+    try {
+      const user = c.user!;
+      const currentToken = this.getBearerToken(c);
+      const data = await AuthService.sessions(user.id, currentToken);
+      return HttpResponse(c).ok(data);
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // DELETE /auth/sessions/:sessionId
+  public async deleteSession(c: AppContext) {
+    try {
+      const user = c.user!;
+      const sessionId = c.params?.sessionId;
+      await AuthService.deleteSession(user.id, sessionId);
+      return HttpResponse(c).ok(undefined, undefined, 'Session ended');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  private getBearerToken(c: AppContext): string | null {
+    const authHeader = c.request.headers.get('authorization');
+    return authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+  }
 }
 
 export default new AuthController();

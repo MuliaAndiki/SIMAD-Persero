@@ -239,32 +239,6 @@ SIMAD terdiri dari beberapa modul utama.
 
 ---
 
-# Documentation Structure
-
-Dokumen PRD ini dibagi menjadi beberapa bagian agar lebih mudah dipelajari.
-
-| No       | Document                   | Description                 |
-| -------- | -------------------------- | --------------------------- |
-| 01       | overview.md                | Gambaran umum produk        |
-| 02       | business-process.md        | Proses bisnis As-Is & To-Be |
-| 03       | user-roles.md              | Role dan hak akses          |
-| 04       | functional-requirements.md | Functional Requirement      |
-| 05       | non-functional.md          | Non Functional Requirement  |
-| 06       | business-rules.md          | Aturan bisnis               |
-| 07       | workflow.md                | Workflow sistem             |
-| 08       | database-overview.md       | Gambaran database           |
-| 09       | api-overview.md            | Daftar endpoint API         |
-| 10       | dashboard.md               | Dashboard seluruh role      |
-| 11       | attendance.md              | Modul absensi               |
-| 12       | certificate.md             | Modul sertifikat            |
-| 13       | notification.md            | Modul notifikasi            |
-| 14       | security.md                | Keamanan aplikasi           |
-| 15       | roadmap.md                 | Roadmap pengembangan        |
-| 16       | future-features.md         | Pengembangan lanjutan       |
-| Appendix | appendix.md                | Lampiran                    |
-
----
-
 # Version History
 
 | Version | Date        | Author       | Description   |

@@ -1,42 +1,75 @@
-import Elysia, { t } from 'elysia';
-import jwt from 'jsonwebtoken';
-import type { JwtPayload } from '../types/auth.types';
+import type { AppContext } from '@/contex';
+import { HttpResponse } from '@/http';
+import type { AuthUser } from '@/types/auth.types';
+import { verifyJwtToken } from '@/utils/auth.util';
+import prisma from '../../prisma/client';
 
+/**
+ * Middleware autentikasi. Memvalidasi Bearer Token (Access Token JWT),
+ * memuat user dari database beserta role-nya (via tabel join UserRole),
+ * kemudian melampirkan `AuthUser` ke `c.user`.
+ *
+ * Semua respons (sukses/gagal) menggunakan helper resmi `HttpResponse`
+ * dari `@/http` agar format envelope konsisten.
+ */
 export const verifyToken = () => ({
-  onRequest: (c: any) => {
+  async beforeHandle(c: AppContext) {
     try {
-      const authHeader = c.req.headers.get('authorization');
-      const token = authHeader?.split(' ')[1];
+      const authHeader = c.request.headers.get('authorization');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
       if (!token) {
-        return c.text('Access denied. No token provided.', 401);
+        return HttpResponse(c).unauthorized('Access denied. No token provided.');
       }
 
-      if (!process.env.JWT_SECRET) {
-        console.error('JWT_SECRET is not defined in environment variables');
-        return c.text('Server configuration error.', 500);
+      const decoded = verifyJwtToken(token);
+
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        include: { userRoles: { include: { role: true } } },
+      });
+
+      if (!user || user.deletedAt) {
+        return HttpResponse(c).unauthorized('Account not found.');
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
+      if (!user.isActive) {
+        return HttpResponse(c).forbidden('Account is deactivated.');
+      }
 
-      c.user = decoded;
+      const authUser: AuthUser = {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        emailVerified: user.emailVerified,
+        isActive: user.isActive,
+        roles: user.userRoles.map((ur) => ur.role.code),
+      };
+
+      c.user = authUser;
     } catch (error: any) {
-      if (error.name === 'TokenExpiredError') {
-        return c.text('Token has expired.', 401);
+      if (error?.name === 'TokenExpiredError') {
+        return HttpResponse(c).unauthorized('Token has expired.');
       }
-      if (error.name === 'JsonWebTokenError') {
-        return c.text('Invalid token.', 403);
+      if (error?.name === 'JsonWebTokenError') {
+        return HttpResponse(c).forbidden('Invalid token.');
       }
       console.error('JWT verification error:', error);
-      return c.text('Token verification failed.', 500);
+      return HttpResponse(c).internalError();
     }
   },
 });
 
+/**
+ * Middleware otorisasi. Memeriksa apakah user memiliki minimal satu role
+ * dari daftar yang diizinkan. Role dicek terhadap `c.user.roles`
+ * (kode role, bukan id) yang sudah dilampirkan oleh `verifyToken`.
+ */
 export const requireRole = (roles: string[]) => ({
-  onRequest: (c: any) => {
-    if (!c.user || !roles.includes(c.user.role)) {
-      return c.text('Akses ditolak. Role tidak sesuai.', 403);
+  beforeHandle: (c: AppContext) => {
+    const user = c.user;
+    if (!user || !roles.some((role) => user.roles?.includes(role))) {
+      return HttpResponse(c).forbidden('Access denied. Insufficient role.');
     }
   },
 });
