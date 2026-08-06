@@ -1,7 +1,6 @@
 "use client";
 
 import { APP_SESSION_COOKIE_KEY } from "@/configs/cookies.config";
-import { useAppDispatch } from "@/hooks/dispatch/dispatch";
 import { getCookie } from "cookies-next";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
