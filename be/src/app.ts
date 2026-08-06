@@ -1,6 +1,6 @@
 import cors from '@elysiajs/cors';
 import Elysia from 'elysia';
-import autnRoutes from './routes/authRoutes';
+import apiRoutes from './routes/apiRoutes';
 
 class App {
   public app: Elysia;
@@ -15,7 +15,7 @@ class App {
   }
   private middlewares() {
     this.app.use(cors({ origin: '*' }));
-    this.app.use(autnRoutes);
+    this.app.use(apiRoutes);
   }
 }
 

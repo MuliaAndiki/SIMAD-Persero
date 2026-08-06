@@ -1,10 +1,10 @@
 import type { AppFile } from '@/types/app.types';
-import type { JwtPayload } from '@/types/auth.types';
+import type { AuthUser } from '@/types/auth.types';
 import type { RequestStore } from '@/types/request.type';
 import type { Context } from 'elysia';
 
 export interface AppContext extends Omit<Context, 'body' | 'query' | 'params'> {
-  user?: JwtPayload;
+  user?: AuthUser;
   json?: (data: unknown, status?: number) => Response;
   files?: Record<string, AppFile[]>;
   body: unknown;
