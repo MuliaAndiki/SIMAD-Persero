@@ -13,11 +13,11 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"],
+      "prisma/client": ["./prisma/client/index.ts"]
     }
   },
-  "include": ["src", "scripts", "types", "api"],
+  "include": ["src", "scripts", "types", "api", "prisma"],
   "exclude": ["node_modules", "dist", ".vercel"]
 }

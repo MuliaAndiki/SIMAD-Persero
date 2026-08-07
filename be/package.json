@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "prisma:generate": "prisma generate",
+    "prisma:seed": "prisma db seed",
     "dev": "bun run prisma:generate && bun --watch run src/serve.ts",
     "start": "bun run src/serve.ts",
     "build": "tsc",
@@ -12,6 +13,9 @@
     "test": "bun test",
     "format": "biome format --write src",
     "format:check": "biome format src"
+  },
+  "prisma": {
+    "seed": "bun run prisma/seed.ts"
   },
   "dependencies": {
     "@elysia/opentelemetry": "^1.4.12",

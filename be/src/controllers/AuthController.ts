@@ -1,6 +1,5 @@
 import type { AppContext } from '@/contex';
-import { AppError } from '@/http/error';
-import { HttpResponse } from '@/http';
+import { HttpResponse, handleAppError } from '@/http';
 import AuthService from '@/services/auth.service';
 import type {
   ChangeEmailBody,
@@ -23,28 +22,7 @@ import type {
  */
 class AuthController {
   private handleError(c: AppContext, error: unknown) {
-    if (error instanceof AppError) {
-      const response = HttpResponse(c);
-      switch (error.status) {
-        case 400:
-          return response.badRequest(error.message);
-        case 401:
-          return response.unauthorized(error.message);
-        case 403:
-          return response.forbidden(error.message);
-        case 404:
-          return response.notFound(error.message);
-        case 409:
-          return response.conflict(error.message);
-        case 422:
-          return response.unprocessable(error.message);
-        case 429:
-          return response.tooManyRequests(error.message);
-        default:
-          return response.internalError(error);
-      }
-    }
-    return HttpResponse(c).internalError(error);
+    return handleAppError(c, error);
   }
 
   // POST /auth/register

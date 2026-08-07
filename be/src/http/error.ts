@@ -1,3 +1,5 @@
+import type { ErrorCode } from './error-codes';
+
 /**
  * Error khusus aplikasi yang membawa status HTTP.
  * Dipakai oleh service layer untuk menandakan kegagalan bisnis
@@ -7,9 +9,13 @@
 export class AppError extends Error {
   public readonly status: number;
 
-  constructor(status: number, message: string) {
+  /** Kode error katalog (API spec §32) — opsional, diisi bila relevan. */
+  public readonly code?: ErrorCode;
+
+  constructor(status: number, message: string, code?: ErrorCode) {
     super(message);
     this.name = 'AppError';
     this.status = status;
+    this.code = code;
   }
 }
