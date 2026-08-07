@@ -554,6 +554,7 @@ model File {
   url             String?   @db.Text
   uploadedById    String?   @map("uploaded_by") @db.Uuid
   createdAt       DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamp(6)
 
   uploadedBy           User?                   @relation("FileUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict, onUpdate: Cascade)
   avatarUsers          User[]                  @relation("UserAvatar")

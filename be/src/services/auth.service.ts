@@ -3,8 +3,8 @@ import { buildFrontendUrl, sendEmail } from '@/services/email.service';
 import type { AuthUser, JwtPayload } from '@/types/auth.types';
 import {
   ACCESS_TOKEN_TTL,
-  REFRESH_TOKEN_TTL,
   type EmailTokenPurpose,
+  REFRESH_TOKEN_TTL,
   signAccessToken,
   signEmailToken,
   signRefreshToken,

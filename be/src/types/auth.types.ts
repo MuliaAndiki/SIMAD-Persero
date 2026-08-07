@@ -1,62 +1,55 @@
 /**
- * Payload yang disimpan di dalam JWT Access Token.
+ * Types modul Auth.
+ * Diturunkan dari base model `IUser` (models.types.ts) memakai Utility Types.
+ *
  * Catatan: User model pada skema baru TIDAK memiliki field `role` / `token`.
  * Role diambil melalui tabel join `UserRole` dan dilampirkan oleh middleware
  * sebagai `AuthUser.roles` (array kode role).
  */
-export interface JwtPayload {
-  id: string;
-  email: string;
-  fullName: string;
-}
+import type { IUser } from './models.types';
 
-/**
- * User context yang dilampirkan middleware `verifyToken` ke `c.user`.
- */
-export interface AuthUser extends JwtPayload {
-  roles: string[];
-  emailVerified: boolean;
-  isActive: boolean;
-}
+/** Payload yang disimpan di dalam JWT Access Token. */
+export type JwtPayload = Pick<IUser, 'id' | 'email' | 'fullName'>;
 
-export interface RegisterBody {
-  fullName: string;
-  email: string;
+/** User context yang dilampirkan middleware `verifyToken` ke `c.user`. */
+export type AuthUser = JwtPayload &
+  Pick<IUser, 'emailVerified' | 'isActive'> & {
+    roles: string[];
+  };
+
+export type RegisterBody = Pick<IUser, 'fullName' | 'email'> & {
   password: string;
-}
+};
 
-export interface LoginBody {
-  email: string;
+export type LoginBody = Pick<IUser, 'email'> & {
   password: string;
-}
+};
 
-export interface TokenBody {
+export type TokenBody = {
   token: string;
-}
+};
 
-export interface EmailBody {
-  email: string;
-}
+export type EmailBody = Pick<IUser, 'email'>;
 
-export interface ResetPasswordBody {
+export type ResetPasswordBody = {
   token: string;
   password: string;
-}
+};
 
-export interface RefreshTokenBody {
+export type RefreshTokenBody = {
   refreshToken: string;
-}
+};
 
-export interface ChangePasswordBody {
+export type ChangePasswordBody = {
   currentPassword: string;
   newPassword: string;
-}
+};
 
-export interface ChangeEmailBody {
+export type ChangeEmailBody = {
   newEmail: string;
   password: string;
-}
+};
 
-export interface ChangeEmailVerifyBody {
+export type ChangeEmailVerifyBody = {
   token: string;
-}
+};

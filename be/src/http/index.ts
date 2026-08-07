@@ -1,4 +1,6 @@
 import type { AppContext } from '@/contex';
+import { AppError } from './error';
+import type { ErrorCode } from './error-codes';
 
 type RequestTimingStore = {
   startedAt?: number;
@@ -32,6 +34,10 @@ function buildGetResponseMeta(c: AppContext, meta?: unknown) {
   return { process_time };
 }
 
+function errorResponse(c: AppContext, status: number, message: string, code?: ErrorCode) {
+  return c.json?.({ status, message, ...(code ? { code } : {}) }, status);
+}
+
 export function HttpResponse(c: AppContext) {
   return {
     ok: (data?: any, meta?: any, message = 'Berhasil') => {
@@ -44,15 +50,28 @@ export function HttpResponse(c: AppContext) {
     accepted: (data?: any, message = 'Permintaan diterima') =>
       c.json?.({ status: 202, message, data }, 202),
     noContent: (message = 'Tidak ada konten') => c.json?.({ status: 204, message }, 204),
-    badRequest: (message = 'Permintaan tidak valid') => c.json?.({ status: 400, message }, 400),
-    unauthorized: (message = 'Tidak berizin') => c.json?.({ status: 401, message }, 401),
-    forbidden: (message = 'Akses ditolak') => c.json?.({ status: 403, message }, 403),
-    notFound: (message = 'Tidak ditemukan') => c.json?.({ status: 404, message }, 404),
-    conflict: (message = 'Terjadi konflik') => c.json?.({ status: 409, message }, 409),
-    unprocessable: (message = 'Entitas tidak dapat diproses') =>
-      c.json?.({ status: 422, message }, 422),
-    tooManyRequests: (message = 'Terlalu banyak permintaan') =>
-      c.json?.({ status: 429, message }, 429),
+    badRequest: (message = 'Permintaan tidak valid', code?: ErrorCode) =>
+      errorResponse(c, 400, message, code),
+    unauthorized: (message = 'Tidak berizin', code?: ErrorCode) =>
+      errorResponse(c, 401, message, code),
+    forbidden: (message = 'Akses ditolak', code?: ErrorCode) =>
+      errorResponse(c, 403, message, code),
+    notFound: (message = 'Tidak ditemukan', code?: ErrorCode) =>
+      errorResponse(c, 404, message, code),
+    conflict: (message = 'Terjadi konflik', code?: ErrorCode) =>
+      errorResponse(c, 409, message, code),
+    unprocessable: (message = 'Entitas tidak dapat diproses', code?: ErrorCode) =>
+      errorResponse(c, 422, message, code),
+    tooManyRequests: (
+      message = 'Terlalu banyak permintaan',
+      code?: ErrorCode,
+      retryAfterSeconds?: number,
+    ) => {
+      if (retryAfterSeconds !== undefined) {
+        c.set.headers['Retry-After'] = String(retryAfterSeconds);
+      }
+      return errorResponse(c, 429, message, code);
+    },
     internalError: (error?: unknown) =>
       c.json?.(
         {
@@ -68,4 +87,37 @@ export function HttpResponse(c: AppContext) {
     serviceUnavailable: (message = 'Layanan tidak tersedia') =>
       c.json?.({ status: 503, message }, 503),
   };
+}
+
+/**
+ * Pemetaan AppError (service layer) ke response HTTP standar.
+ * Controller cukup memanggil `return handleAppError(c, error)` di catch block.
+ */
+export function handleAppError(c: AppContext, error: unknown) {
+  if (error instanceof AppError) {
+    const { status, message, code } = error;
+    switch (status) {
+      case 400:
+        return HttpResponse(c).badRequest(message, code);
+      case 401:
+        return HttpResponse(c).unauthorized(message, code);
+      case 403:
+        return HttpResponse(c).forbidden(message, code);
+      case 404:
+        return HttpResponse(c).notFound(message, code);
+      case 409:
+        return HttpResponse(c).conflict(message, code);
+      case 410:
+        // 410 "Gone" dipakai saat konten tidak tersedia (file/certificate) —
+        // pemetaan paling sesuai adalah 404 Not Found.
+        return HttpResponse(c).notFound(message, code);
+      case 422:
+        return HttpResponse(c).unprocessable(message, code);
+      case 429:
+        return HttpResponse(c).tooManyRequests(message, code);
+      default:
+        return HttpResponse(c).internalError(error);
+    }
+  }
+  return HttpResponse(c).internalError(error);
 }

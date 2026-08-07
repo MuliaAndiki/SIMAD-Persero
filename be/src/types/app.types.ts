@@ -1,3 +1,4 @@
+/** Metadata file multipart (Elysia/undici) — tidak dipetakan ke Prisma. */
 export interface AppFile {
   fieldname: string;
   originalname: string;
