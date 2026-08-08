@@ -15,8 +15,10 @@
  */
 import {
   ClientDelResponse,
+  ClientDownloadResponse,
   ClientGetResponse,
   ClientPatchResponse,
+  ClientPostFormDataResponse,
   ClientPostResponse,
   ClientPublicGetResponse,
   ClientPublicPostResponse,
@@ -37,11 +39,13 @@ export function Api() {
     client: {
       GetResponse: ClientGetResponse,
       PostResponse: ClientPostResponse,
+      PostFormDataResponse: ClientPostFormDataResponse,
       PatchResponse: ClientPatchResponse,
       PutResponse: ClientPutResponse,
       DeleteResponse: ClientDelResponse,
       PublicGetResponse: ClientPublicGetResponse,
       PublicPostResponse: ClientPublicPostResponse,
+      DownloadResponse: ClientDownloadResponse,
     },
     server: {
       GetResponse,

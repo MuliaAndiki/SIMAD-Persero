@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { APP_SESSION_COOKIE_KEY } from "@/configs/cookies.config";
-import { getCookie } from "cookies-next";
-import { usePathname, useRouter } from "next/navigation";
-import React from "react";
-import { useSelector } from "react-redux";
+import { APP_SESSION_COOKIE_KEY } from '@/configs/cookies.config';
+import { getCookie } from 'cookies-next';
+import { usePathname, useRouter } from 'next/navigation';
+import type React from 'react';
+import { useSelector } from 'react-redux';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   // const router = useRouter();
