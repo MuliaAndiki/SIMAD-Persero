@@ -1,11 +1,11 @@
-import { AppError } from '@/http/error';
+import { AppError } from "@/http/error";
 import {
   type AssignSupervisorBody,
   type ChangeDepartmentBody,
   type ExtendInternshipBody,
   InternshipStatus,
-} from '@/types/internship.types';
-import prisma from '../../prisma/client';
+} from "@/types/internship.types";
+import prisma from "../../prisma/client";
 
 /**
  * Service layer for the Internship module.
@@ -72,7 +72,7 @@ class InternshipService {
     });
 
     if (!internship) {
-      throw new AppError(404, 'Internship not found');
+      throw new AppError(404, "Internship not found");
     }
 
     return internship;
@@ -87,12 +87,12 @@ class InternshipService {
     });
 
     if (!profile) {
-      throw new AppError(422, 'Intern profile not found');
+      throw new AppError(422, "Intern profile not found");
     }
 
     const internships = await prisma.internship.findMany({
       where: { internProfileId: profile.id },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         department: { select: { id: true, code: true, name: true } },
         officeLocation: { select: { id: true, name: true } },
@@ -129,7 +129,7 @@ class InternshipService {
     ) {
       throw new AppError(
         400,
-        'Internship can only be started from ONBOARDING_PENDING or ONBOARDING_COMPLETED status',
+        "Internship can only be started from ONBOARDING_PENDING or ONBOARDING_COMPLETED status",
       );
     }
 
@@ -139,7 +139,10 @@ class InternshipService {
         where: { internshipId: id, accepted: true },
       });
       if (!onboarding) {
-        throw new AppError(400, 'Onboarding must be completed before starting the internship');
+        throw new AppError(
+          400,
+          "Onboarding must be completed before starting the internship",
+        );
       }
     }
 
@@ -159,7 +162,7 @@ class InternshipService {
         internship.status,
         InternshipStatus.ACTIVE,
         userId,
-        'Internship started',
+        "Internship started",
       );
 
       return updated;
@@ -172,7 +175,7 @@ class InternshipService {
     const internship = await this.findById(id);
 
     if (internship.status !== InternshipStatus.ACTIVE) {
-      throw new AppError(400, 'Only ACTIVE internships can be finished');
+      throw new AppError(400, "Only ACTIVE internships can be finished");
     }
 
     return prisma.$transaction(async (tx) => {
@@ -190,7 +193,7 @@ class InternshipService {
         InternshipStatus.ACTIVE,
         InternshipStatus.COMPLETED,
         userId,
-        'Internship completed',
+        "Internship completed",
       );
 
       return updated;
@@ -203,16 +206,19 @@ class InternshipService {
     const internship = await this.findById(id);
 
     if (internship.status !== InternshipStatus.ACTIVE) {
-      throw new AppError(400, 'Only ACTIVE internships can be extended');
+      throw new AppError(400, "Only ACTIVE internships can be extended");
     }
 
     const newEndDate = new Date(input.newEndDate);
     if (Number.isNaN(newEndDate.getTime())) {
-      throw new AppError(400, 'Invalid date format for newEndDate');
+      throw new AppError(400, "Invalid date format for newEndDate");
     }
 
     if (internship.actualEndDate && newEndDate <= internship.actualEndDate) {
-      throw new AppError(400, 'New end date must be after the current end date');
+      throw new AppError(
+        400,
+        "New end date must be after the current end date",
+      );
     }
 
     return prisma.$transaction(async (tx) => {
@@ -227,7 +233,7 @@ class InternshipService {
         InternshipStatus.ACTIVE,
         InternshipStatus.ACTIVE,
         userId,
-        `Internship extended to ${input.newEndDate}. ${input.reason || ''}`.trim(),
+        `Internship extended to ${input.newEndDate}. ${input.reason || ""}`.trim(),
       );
 
       return updated;
@@ -236,7 +242,11 @@ class InternshipService {
 
   // ─── 15.6 Assign Supervisor (HR_ADMIN) ──────────────────────
 
-  public async assignSupervisor(id: string, userId: string, input: AssignSupervisorBody) {
+  public async assignSupervisor(
+    id: string,
+    userId: string,
+    input: AssignSupervisorBody,
+  ) {
     const internship = await this.findById(id);
 
     if (
@@ -244,7 +254,10 @@ class InternshipService {
       internship.status === InternshipStatus.ARCHIVED ||
       internship.status === InternshipStatus.CERTIFICATE_GENERATED
     ) {
-      throw new AppError(400, 'Cannot assign supervisor to a finalized internship');
+      throw new AppError(
+        400,
+        "Cannot assign supervisor to a finalized internship",
+      );
     }
 
     // Validate supervisor user
@@ -256,12 +269,17 @@ class InternshipService {
     });
 
     if (!supervisorUser || !supervisorUser.isActive) {
-      throw new AppError(404, 'Supervisor user not found or inactive');
+      throw new AppError(404, "Supervisor user not found or inactive");
     }
 
-    const isSupervisor = supervisorUser.userRoles.some((ur) => ur.role?.code === 'SUPERVISOR');
+    const isSupervisor = supervisorUser.userRoles.some(
+      (ur) => ur.role?.code === "SUPERVISOR",
+    );
     if (!isSupervisor) {
-      throw new AppError(400, 'Selected user does not have the SUPERVISOR role');
+      throw new AppError(
+        400,
+        "Selected user does not have the SUPERVISOR role",
+      );
     }
 
     return prisma.$transaction(async (tx) => {
@@ -297,7 +315,11 @@ class InternshipService {
 
   // ─── 15.7 Change Department (HR_ADMIN) ──────────────────────
 
-  public async changeDepartment(id: string, userId: string, input: ChangeDepartmentBody) {
+  public async changeDepartment(
+    id: string,
+    userId: string,
+    input: ChangeDepartmentBody,
+  ) {
     const internship = await this.findById(id);
 
     if (
@@ -305,7 +327,10 @@ class InternshipService {
       internship.status === InternshipStatus.ARCHIVED ||
       internship.status === InternshipStatus.CERTIFICATE_GENERATED
     ) {
-      throw new AppError(400, 'Cannot change department for a finalized internship');
+      throw new AppError(
+        400,
+        "Cannot change department for a finalized internship",
+      );
     }
 
     // Validate department
@@ -313,7 +338,7 @@ class InternshipService {
       where: { id: input.departmentId },
     });
     if (!department || !department.isActive) {
-      throw new AppError(404, 'Department not found or inactive');
+      throw new AppError(404, "Department not found or inactive");
     }
 
     // Validate office location (optional)
@@ -323,7 +348,7 @@ class InternshipService {
         where: { id: input.officeLocationId },
       });
       if (!office) {
-        throw new AppError(404, 'Office location not found');
+        throw new AppError(404, "Office location not found");
       }
       officeLocationId = office.id;
     }
@@ -361,7 +386,7 @@ class InternshipService {
     ) {
       throw new AppError(
         400,
-        'Only COMPLETED or CERTIFICATE_GENERATED internships can be archived',
+        "Only COMPLETED or CERTIFICATE_GENERATED internships can be archived",
       );
     }
 
@@ -377,7 +402,7 @@ class InternshipService {
         internship.status,
         InternshipStatus.ARCHIVED,
         userId,
-        'Internship archived',
+        "Internship archived",
       );
 
       return updated;
