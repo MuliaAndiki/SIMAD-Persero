@@ -1,29 +1,29 @@
-import { InternalApiKey } from "@/middlewares/api-key";
-import Elysia from "elysia";
-import applicationRoutes from "./applicationRoutes";
-import attendanceRoutes from "./attendanceRoutes";
-import auditLogRoutes from "./auditLogRoutes";
-import authRoutes from "./authRoutes";
-import certificateRoutes from "./certificateRoutes";
-import dashboardRoutes from "./dashboardRoutes";
-import departmentRoutes from "./departmentRoutes";
-import fileRoutes from "./fileRoutes";
-import internshipRoutes from "./internshipRoutes";
-import notificationRoutes from "./notificationRoutes";
-import officeRoutes from "./officeRoutes";
-import reportingRoutes from "./reportingRoutes";
-import supervisorRoutes from "./supervisorRoutes";
-import userRoutes from "./userRoutes";
+import { InternalApiKey } from '@/middlewares/api-key';
+import Elysia from 'elysia';
+import applicationRoutes from './applicationRoutes';
+import attendanceRoutes from './attendanceRoutes';
+import auditLogRoutes from './auditLogRoutes';
+import authRoutes from './authRoutes';
+import certificateRoutes from './certificateRoutes';
+import dashboardRoutes from './dashboardRoutes';
+import departmentRoutes from './departmentRoutes';
+import fileRoutes from './fileRoutes';
+import internshipRoutes from './internshipRoutes';
+import notificationRoutes from './notificationRoutes';
+import officeRoutes from './officeRoutes';
+import reportingRoutes from './reportingRoutes';
+import supervisorRoutes from './supervisorRoutes';
+import userRoutes from './userRoutes';
 
 class ApiRouter {
   public apiRouter;
 
   constructor() {
-    this.apiRouter = new Elysia({ prefix: "/api/v1" }).derive(() => ({
+    this.apiRouter = new Elysia({ prefix: '/api/v1' }).derive(() => ({
       json(data: any, status = 200) {
         return new Response(JSON.stringify(data), {
           status,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         });
       },
     }));

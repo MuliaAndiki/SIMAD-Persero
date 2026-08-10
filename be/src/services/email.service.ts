@@ -1,3 +1,5 @@
+import { EmailParams, MailerSend, Recipient, Sender } from 'mailersend';
+
 interface MailOptions {
   to: string;
   subject: string;
@@ -5,14 +7,21 @@ interface MailOptions {
   html?: string;
 }
 
-const MAILERSEND_API_URL = 'https://api.mailersend.com/v1/email';
-const mailersendConfigured =
-  process.env.MAILERSEND_API_KEY !== undefined &&
-  process.env.MAILERSEND_API_KEY !== '' &&
-  process.env.MAILERSEND_API_KEY !== 'xxxx';
+const MAILERSEND_API_KEY = process.env.MAILERSEND_API_KEY ?? '';
+const mailersendConfigured = MAILERSEND_API_KEY !== '' && MAILERSEND_API_KEY !== 'xxxx';
+
+const mailerSend = mailersendConfigured ? new MailerSend({ apiKey: MAILERSEND_API_KEY }) : null;
+
+/** Sender dari email/domain yang sudah diverifikasi di akun MailerSend. */
+function getSender(): Sender {
+  return new Sender(
+    process.env.MAILERSEND_FROM_EMAIL ?? 'no-reply@simad.app',
+    process.env.MAILERSEND_FROM_NAME ?? 'SIMAD',
+  );
+}
 
 export async function sendEmail(options: MailOptions): Promise<void> {
-  if (!mailersendConfigured) {
+  if (!mailersendConfigured || !mailerSend) {
     console.log('[EMAIL][DEV MODE] To:', options.to);
     console.log('[EMAIL][DEV MODE] Subject:', options.subject);
     console.log('[EMAIL][DEV MODE] Body:', options.text);
@@ -20,27 +29,36 @@ export async function sendEmail(options: MailOptions): Promise<void> {
     return;
   }
 
-  const response = await fetch(MAILERSEND_API_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.MAILERSEND_API_KEY}`,
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-    },
-    body: JSON.stringify({
-      from: {
-        email: process.env.MAILERSEND_FROM_EMAIL ?? 'no-reply@simad.app',
-      },
-      to: [{ email: options.to }],
-      subject: options.subject,
-      text: options.text,
-      ...(options.html ? { html: options.html } : {}),
-    }),
-  });
+  const sentFrom = getSender();
+  const recipients = [new Recipient(options.to)];
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`[EMAIL][MAILERSEND] Gagal mengirim email (${response.status}): ${errorText}`);
+  const emailParams = new EmailParams()
+    .setFrom(sentFrom)
+    .setTo(recipients)
+    .setReplyTo(sentFrom)
+    .setSubject(options.subject)
+    .setText(options.text);
+
+  if (options.html) {
+    emailParams.setHtml(options.html);
+  }
+
+  try {
+    const response = await mailerSend.email.send(emailParams);
+    if (response.statusCode >= 400) {
+      throw new Error(
+        `[EMAIL][MAILERSEND] Gagal mengirim email (${response.statusCode}): ${JSON.stringify(response.body)}`,
+      );
+    }
+  } catch (error: unknown) {
+    // SDK melempar objek { headers, body, statusCode } saat respons bukan 2xx.
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      const apiError = error as { statusCode: number; body: unknown };
+      throw new Error(
+        `[EMAIL][MAILERSEND] Gagal mengirim email (${apiError.statusCode}): ${JSON.stringify(apiError.body)}`,
+      );
+    }
+    throw error;
   }
 }
 

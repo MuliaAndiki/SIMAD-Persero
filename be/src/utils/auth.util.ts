@@ -1,6 +1,13 @@
 import type { JwtPayload } from '@/types/auth.types';
 import jwt from 'jsonwebtoken';
 
+/**
+ * Role default untuk akun tanpa penugasan role (`user_roles` kosong),
+ * mis. akun baru atau data lama sebelum seed dijalankan.
+ * Dipakai konsisten oleh login, /auth/me, middleware verifyToken, & user profile.
+ */
+export const DEFAULT_ROLE_CODE = 'INTERN';
+
 /** Durasi Access Token dalam detik (3600s = 1 jam, sesuai API spec). */
 export const ACCESS_TOKEN_TTL = 3600;
 

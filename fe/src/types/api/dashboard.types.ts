@@ -13,6 +13,9 @@ export interface RecentActivityQuery {
   limit?: number;
 }
 
+/** Role pengguna yang menentukan varian dashboard (GET /dashboard/:role). */
+export type DashboardRole = 'INTERN' | 'HR_ADMIN' | 'SUPERVISOR';
+
 // ---------- Response (data dari backend) ----------
 
 /** Data internship di dashboard intern (GET /dashboard/intern). */

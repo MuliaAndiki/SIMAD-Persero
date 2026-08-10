@@ -1,10 +1,6 @@
-import { AppError } from "@/http/error";
-import type {
-  CreateOfficeBody,
-  OfficeQuery,
-  UpdateOfficeBody,
-} from "@/types/office.types";
-import prisma from "../../prisma/client";
+import { AppError } from '@/http/error';
+import type { CreateOfficeBody, OfficeQuery, UpdateOfficeBody } from '@/types/office.types';
+import prisma from '../../prisma/client';
 
 /**
  * Service layer modul Office (Office Location).
@@ -36,8 +32,8 @@ class OfficeService {
 
     if (query.keyword) {
       where.OR = [
-        { name: { contains: query.keyword, mode: "insensitive" } },
-        { address: { contains: query.keyword, mode: "insensitive" } },
+        { name: { contains: query.keyword, mode: 'insensitive' } },
+        { address: { contains: query.keyword, mode: 'insensitive' } },
       ];
     }
 
@@ -48,7 +44,7 @@ class OfficeService {
     const [items, total] = await prisma.$transaction([
       prisma.officeLocation.findMany({
         where,
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
@@ -70,7 +66,7 @@ class OfficeService {
   public async getById(id: string) {
     const office = await prisma.officeLocation.findUnique({ where: { id } });
     if (!office) {
-      throw new AppError(404, "Office location not found");
+      throw new AppError(404, 'Office location not found');
     }
     return this.serialize(office);
   }
@@ -79,7 +75,7 @@ class OfficeService {
   public async create(input: CreateOfficeBody) {
     const name = input.name?.trim();
     if (!name) {
-      throw new AppError(400, "Office name is required");
+      throw new AppError(400, 'Office name is required');
     }
 
     if (input.departmentId) {
@@ -104,7 +100,7 @@ class OfficeService {
   public async update(id: string, input: UpdateOfficeBody) {
     const office = await prisma.officeLocation.findUnique({ where: { id } });
     if (!office) {
-      throw new AppError(404, "Office location not found");
+      throw new AppError(404, 'Office location not found');
     }
 
     if (input.departmentId !== undefined) {
@@ -116,14 +112,12 @@ class OfficeService {
     if (input.name !== undefined) {
       const name = input.name.trim();
       if (!name) {
-        throw new AppError(400, "Office name is required");
+        throw new AppError(400, 'Office name is required');
       }
       data.name = name;
     }
-    if (input.departmentId !== undefined)
-      data.departmentId = input.departmentId || null;
-    if (input.address !== undefined)
-      data.address = input.address.trim() || null;
+    if (input.departmentId !== undefined) data.departmentId = input.departmentId || null;
+    if (input.address !== undefined) data.address = input.address.trim() || null;
     if (input.latitude !== undefined) data.latitude = input.latitude;
     if (input.longitude !== undefined) data.longitude = input.longitude;
     if (input.radiusMeter !== undefined) data.radiusMeter = input.radiusMeter;
@@ -136,7 +130,7 @@ class OfficeService {
   public async remove(id: string) {
     const office = await prisma.officeLocation.findUnique({ where: { id } });
     if (!office) {
-      throw new AppError(404, "Office location not found");
+      throw new AppError(404, 'Office location not found');
     }
 
     await prisma.officeLocation.delete({ where: { id } });
@@ -147,10 +141,10 @@ class OfficeService {
       where: { id: departmentId },
     });
     if (!department) {
-      throw new AppError(404, "Department not found");
+      throw new AppError(404, 'Department not found');
     }
     if (!department.isActive) {
-      throw new AppError(409, "Department is inactive");
+      throw new AppError(409, 'Department is inactive');
     }
   }
 }

@@ -3,6 +3,7 @@ import { buildFrontendUrl, sendEmail } from '@/services/email.service';
 import type { AuthUser, JwtPayload } from '@/types/auth.types';
 import {
   ACCESS_TOKEN_TTL,
+  DEFAULT_ROLE_CODE,
   type EmailTokenPurpose,
   REFRESH_TOKEN_TTL,
   signAccessToken,
@@ -13,8 +14,6 @@ import {
 } from '@/utils/auth.util';
 import bcryptjs from 'bcryptjs';
 import prisma from '../../prisma/client';
-
-const DEFAULT_ROLE_CODE = 'INTERN';
 
 /**
  * Service layer modul Auth.
@@ -112,6 +111,15 @@ class AuthService {
     const role = await prisma.role.findUnique({
       where: { code: DEFAULT_ROLE_CODE },
     });
+    // Tanpa role default, akun baru tidak punya penugasan role sama sekali
+    // sehingga semua endpoint role-protected akan menolaknya (403). Gagal cepat
+    // lebih baik daripada menciptakan akun yang tidak bisa dipakai.
+    if (!role) {
+      throw new AppError(
+        500,
+        `Role '${DEFAULT_ROLE_CODE}' tidak ditemukan. Jalankan prisma seed terlebih dahulu.`,
+      );
+    }
 
     const newUser = await prisma.user.create({
       data: {
@@ -120,7 +128,7 @@ class AuthService {
         password: hashedPassword,
         emailVerified: false,
         isActive: true,
-        userRoles: role ? { create: [{ roleId: role.id }] } : undefined,
+        userRoles: { create: [{ roleId: role.id }] },
       },
     });
 

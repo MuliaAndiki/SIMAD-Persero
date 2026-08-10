@@ -106,12 +106,14 @@ export default function Autocomplete({
             autoComplete="off"
             defaultValue={defaultValue as string}
             onValueChange={(value: string) => {
-              const e = { target: { value } } as React.ChangeEvent<HTMLInputElement>;
+              const e = {
+                target: { value },
+              } as React.ChangeEvent<HTMLInputElement>;
               onChange?.(e);
             }}
             disabled={disabled}
           >
-            <SelectTrigger className="h-[48px] px-4 outline-none focus-visible:ring-transparent focus:ring-transparent focus:border-purple-500 border-2 border-gray-100 rounded-lg text-gray-800">
+            <SelectTrigger className="h-[48px] px-4 outline-none focus-visible:ring-transparent focus:ring-transparent focus:border-primary border-2 border-gray-100 rounded-lg text-gray-800">
               {placeholder && !defaultValue ? (
                 <span className="text-gray-400 text-base">{placeholder}</span>
               ) : (
@@ -190,7 +192,7 @@ export default function Autocomplete({
             <Button
               id={id}
               onClick={handleTogglePopover}
-              className="flex w-full p-1 rounded-lg border-2 border-gray-100 min-h-10 h-auto items-center justify-between bg-white hover:bg-white focus:border-purple-500"
+              className="flex w-full p-1 rounded-lg border-2 border-gray-100 min-h-10 h-auto items-center justify-between bg-white hover:bg-white focus:border-primary"
               disabled={disabled}
             >
               {selectedValues.length > 0 ? (

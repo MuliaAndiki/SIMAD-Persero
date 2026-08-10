@@ -1,7 +1,7 @@
 import type { AppContext } from '@/contex';
 import { HttpResponse } from '@/http';
 import type { AuthUser } from '@/types/auth.types';
-import { verifyJwtToken } from '@/utils/auth.util';
+import { DEFAULT_ROLE_CODE, verifyJwtToken } from '@/utils/auth.util';
 import prisma from '../../prisma/client';
 
 /**
@@ -43,7 +43,12 @@ export const verifyToken = () => ({
         fullName: user.fullName,
         emailVerified: user.emailVerified,
         isActive: user.isActive,
-        roles: user.userRoles.map((ur) => ur.role.code),
+        // Konsisten dengan login & /auth/me: akun tanpa penugasan role
+        // dianggap ber-role default (INTERN), bukan daftar kosong.
+        roles:
+          user.userRoles.length > 0
+            ? user.userRoles.map((ur) => ur.role.code)
+            : [DEFAULT_ROLE_CODE],
       };
 
       c.user = authUser;

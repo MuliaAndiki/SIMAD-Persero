@@ -1,5 +1,7 @@
-import { APP_SESSION_COOKIE_KEY } from '../../config/cookies.config';
-import { baseurl } from '../../config/repo.config';
+import { refreshAccessToken } from '@/api/client/auth-refresh';
+import { AUTH_ENDPOINTS } from '@/configs/endpoints/auth.endpoints';
+import { baseurl } from '@/configs/repo.config';
+import { clearSessionCookies, getAccessToken } from '@/utils/session-cookie';
 import { ApiError as ApiErrorClass, type ApiSuccessResponse } from '../../types/api.types';
 
 export interface ClientRequestConfig {
@@ -74,19 +76,6 @@ function buildBaseHeaders(accessToken?: string): Record<string, string> {
   return headers;
 }
 
-function getAccessToken(): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-
-  const match = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith(`${APP_SESSION_COOKIE_KEY}=`));
-
-  if (!match) return undefined;
-
-  const value = match.slice(APP_SESSION_COOKIE_KEY.length + 1);
-  return value || undefined;
-}
-
 async function clientCoreFetchResponse<T>(
   path: string,
   config: ClientRequestConfig = {},
@@ -105,7 +94,9 @@ async function clientCoreFetchResponse<T>(
 
   const endpoint = await buildApiUrl(path);
 
-  const res = await fetch(endpoint, {
+  const isAuthRefresh = path.includes(AUTH_ENDPOINTS.REFRESH_TOKEN);
+
+  let res = await fetch(endpoint, {
     method,
     headers: {
       ...buildBaseHeaders(accessToken),
@@ -116,6 +107,25 @@ async function clientCoreFetchResponse<T>(
     cache,
   });
 
+  // 401 pada request ber-auth: tukar refresh token -> access token baru,
+  // lalu ulangi request sekali. Bila gagal, cookie dibersihkan & dialihkan.
+  if (res.status === 401 && options.withAuth && !isAuthRefresh) {
+    const refreshed = await refreshAccessToken();
+
+    if (refreshed) {
+      res = await fetch(endpoint, {
+        method,
+        headers: {
+          ...buildBaseHeaders(getAccessToken()),
+          ...extraHeaders,
+        },
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+        credentials: 'same-origin',
+        cache,
+      });
+    }
+  }
+
   let json: ApiSuccessResponse<T>;
   try {
     json = await res.json();
@@ -125,6 +135,8 @@ async function clientCoreFetchResponse<T>(
 
   if (!res.ok || json?.success === false) {
     if (res.status === 401 && typeof window !== 'undefined') {
+      clearSessionCookies();
+
       if (_authErrorHandler) {
         _authErrorHandler(res.status);
       } else {
@@ -258,6 +270,8 @@ export async function ClientPostFormDataResponse<T>(
 
   if (!res.ok || json?.success === false) {
     if (res.status === 401 && typeof window !== 'undefined') {
+      clearSessionCookies();
+
       if (_authErrorHandler) {
         _authErrorHandler(res.status);
       } else {
@@ -318,6 +332,8 @@ export async function ClientDownloadResponse(path: string): Promise<Response> {
 
   if (!res.ok) {
     if (res.status === 401 && typeof window !== 'undefined') {
+      clearSessionCookies();
+
       if (_authErrorHandler) {
         _authErrorHandler(res.status);
       } else {

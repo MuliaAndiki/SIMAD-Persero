@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 
 import type { TResponse } from '@/api/types/response.types';
+import { getRoleDashboardPath } from '@/configs/app.config';
 import { queryKey } from '@/configs/query-key';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import AuthService from '@/services/api/auth.service';
@@ -24,6 +25,8 @@ import type {
   VerifyMagicLinkBody,
 } from '@/types/api/auth.types';
 import { type AuthCacheContext, readAuthSnapshot } from '@/utils/cache/auth.cache';
+import { clearSessionCookies, getRefreshToken, setSessionCookies } from '@/utils/session-cookie';
+import { useRouter } from 'next/navigation';
 
 /**
  * POST /auth/register
@@ -124,6 +127,7 @@ export function useVerifyEmail() {
  */
 export function useLogin() {
   const ns = useAppNameSpace();
+  const router = useRouter();
   return useMutation<
     TResponse<AuthSessionResponse>,
     Error,
@@ -142,6 +146,21 @@ export function useLogin() {
         message: res.message,
         icon: 'success',
       });
+
+      const data = res.data;
+      if (data) {
+        // Simpan seluruh token ke cookie — backend hanya mengembalikan token di body.
+        setSessionCookies({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          role: data.user?.role,
+          expiresIn: data.expiresIn,
+        });
+      }
+
+      // Redirect sesuai role akun — setiap role punya folder dashboard sendiri.
+      const role = res.data?.user?.role;
+      router.push(getRoleDashboardPath(role));
     },
     onError: (err) => {
       ns.alert.toast({
@@ -187,6 +206,7 @@ export function useSendMagicLink() {
  */
 export function useVerifyMagicLink() {
   const ns = useAppNameSpace();
+  const router = useRouter();
   return useMutation<
     TResponse<AuthSessionResponse>,
     Error,
@@ -206,6 +226,21 @@ export function useVerifyMagicLink() {
         message: res.message,
         icon: 'success',
       });
+
+      const data = res.data;
+      if (data) {
+        // Verify magic link setara login — simpan token & role ke cookie.
+        setSessionCookies({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          role: data.user?.role,
+          expiresIn: data.expiresIn,
+        });
+      }
+
+      // Redirect sesuai role akun.
+      const role = res.data?.user?.role;
+      router.push(getRoleDashboardPath(role));
     },
     onError: (err) => {
       ns.alert.toast({
@@ -293,7 +328,9 @@ export function useRefreshToken() {
     AuthCacheContext
   >({
     mutationFn: (payload: Pick<RefreshTokenBody, 'refreshToken'>) =>
-      AuthService.RefreshToken(payload),
+      AuthService.RefreshToken({
+        refreshToken: payload?.refreshToken ?? getRefreshToken(),
+      }),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);
@@ -305,6 +342,15 @@ export function useRefreshToken() {
         message: res.message,
         icon: 'success',
       });
+
+      // Refresh hanya mengembalikan access token baru — perbarui cookie sesi.
+      const data = res.data;
+      if (data) {
+        setSessionCookies({
+          accessToken: data.accessToken,
+          expiresIn: data.expiresIn,
+        });
+      }
     },
     onError: (err) => {
       ns.alert.toast({
@@ -321,8 +367,12 @@ export function useRefreshToken() {
  */
 export function useLogout() {
   const ns = useAppNameSpace();
+  const router = useRouter();
   return useMutation<TResponse<null>, Error, Pick<LogoutBody, 'refreshToken'>, AuthCacheContext>({
-    mutationFn: (payload: Pick<LogoutBody, 'refreshToken'>) => AuthService.Logout(payload),
+    mutationFn: (payload: Pick<LogoutBody, 'refreshToken'>) =>
+      AuthService.Logout({
+        refreshToken: payload?.refreshToken ?? getRefreshToken(),
+      }),
 
     onSettled: async () => {
       await ns.queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
@@ -341,6 +391,10 @@ export function useLogout() {
         message: res.message,
         icon: 'success',
       });
+
+      // Hapus cookie sesi lalu kembali ke halaman login.
+      clearSessionCookies();
+      router.push('/login');
     },
     onError: (err) => {
       ns.alert.toast({
@@ -357,6 +411,7 @@ export function useLogout() {
  */
 export function useLogoutAll() {
   const ns = useAppNameSpace();
+  const router = useRouter();
   return useMutation<TResponse<null>, Error, void, AuthCacheContext>({
     mutationFn: () => AuthService.LogoutAll(),
 
@@ -377,6 +432,9 @@ export function useLogoutAll() {
         message: res.message,
         icon: 'success',
       });
+
+      clearSessionCookies();
+      router.push('/login');
     },
     onError: (err) => {
       ns.alert.toast({

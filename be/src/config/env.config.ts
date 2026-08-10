@@ -13,6 +13,8 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   MAILERSEND_API_KEY: z.string(),
+  MAILERSEND_FROM_EMAIL: z.string().email().optional(),
+  MAILERSEND_FROM_NAME: z.string().optional(),
 });
 
 const _env = envSchema.safeParse(process.env);

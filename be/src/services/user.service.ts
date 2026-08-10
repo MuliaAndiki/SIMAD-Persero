@@ -3,7 +3,7 @@ import FileService from '@/services/file.service';
 import type { AuthUser } from '@/types/auth.types';
 import type { UploadFileInput } from '@/types/file.types';
 import type { ChangePasswordBody, ProfileResponse, UpdateProfileBody } from '@/types/user.types';
-import { validatePasswordPolicy } from '@/utils/auth.util';
+import { DEFAULT_ROLE_CODE, validatePasswordPolicy } from '@/utils/auth.util';
 import { ALLOWED_PHOTO_MIME_TYPES, MAX_FILE_SIZE } from '@/utils/storage.util';
 import bcryptjs from 'bcryptjs';
 import prisma from '../../prisma/client';
@@ -29,7 +29,7 @@ class UserService {
       throw new AppError(404, 'Account not found');
     }
 
-    const role = dbUser.userRoles[0]?.role.code ?? 'INTERN';
+    const role = dbUser.userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE;
 
     return {
       id: dbUser.id,

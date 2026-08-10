@@ -1,48 +1,29 @@
+import { gooeyToast } from '@/components/atoms/GoeyToaster';
 import type { ToastProps } from '@/types/ui';
-import { useRef } from 'react';
-import toast from 'react-hot-toast';
 
-const iconMap: Record<string, { emoji: string; color: string }> = {
-  success: {
-    emoji: '✅',
-    color: 'border-green-500 text-green-600 bg-background',
-  },
-  error: { emoji: '❌', color: 'border-red-500 text-red-600 bg-background' },
-  warning: {
-    emoji: '⚠️',
-    color: 'border-yellow-500 text-yellow-600 bg-background',
-  },
-  info: { emoji: 'ℹ️', color: 'border-blue-500 text-blue-600 bg-background' },
-  question: {
-    emoji: '❓',
-    color: 'border-purple-500 text-purple-600 bg-background',
-  },
+const iconMap: Record<string, string> = {
+  success: '✅',
+  error: '❌',
+  warning: '⚠️',
+  info: 'ℹ️',
+  question: '❓',
 };
 
-export const ToastEffect = ({ t, title, message, icon, onVoid }: ToastProps & { t: any }) => {
-  const Run = useRef(false);
+/** Pemetaan tipe toast SIMAD ke tipe goey-toast (question tidak tersedia → info). */
+const toastTypeMap: Record<string, 'success' | 'error' | 'warning' | 'info'> = {
+  success: 'success',
+  error: 'error',
+  warning: 'warning',
+  info: 'info',
+  question: 'info',
+};
 
-  if (t.visible && !Run.current) {
-    Run.current = true;
-    setTimeout(() => {
-      onVoid?.();
-      toast.dismiss(t.id);
-    }, 2000);
-  }
+export const showAlertToast = ({ title, message, icon = 'info', onVoid }: ToastProps) => {
+  const type = toastTypeMap[icon];
 
-  const iconData = iconMap[icon || 'info'];
-
-  return (
-    <div
-      className={`w-[90%] max-w-sm p-4 rounded-2xl border shadow-lg transition-all duration-300 transform ${
-        t.visible ? 'animate-enter scale-100 opacity-100' : 'animate-leave scale-90 opacity-0'
-      } ${iconData?.color || 'border-background bg-background text-foreground'}`}
-    >
-      <div className="flex flex-col items-center text-center space-y-1">
-        <div className="text-4xl animate-pulse">{iconData?.emoji}</div>
-        <p className="text-base font-semibold tracking-wide">{title}</p>
-        <p className="text-sm">{message}</p>
-      </div>
-    </div>
-  );
+  gooeyToast[type](title, {
+    description: message,
+    icon: iconMap[icon],
+    ...(onVoid ? { onAutoClose: () => onVoid() } : {}),
+  });
 };
