@@ -26,4 +26,12 @@ export const INTERNSHIP_ENDPOINTS = {
   ARCHIVE: (id: string) => `/internships/${id}/archive`,
   /** POST /internships/profile — Simpan profil peserta magang (INTERN) */
   PROFILE: '/internships/profile',
+  /** GET /internships/profile — Ambil profil peserta magang (INTERN) */
+  MY_PROFILE: '/internships/profile',
+  /** GET /internships/skill — Ambil daftar skill (INTERN) */
+  SKILLS: '/internships/skill',
+  /** POST /internships/add-skills — Tambahkan skill ke profil magang (INTERN) */
+  ADD_SKILLS: '/internships/add-skills',
+  /** DELETE /internships/remove-skill/:skillId — Hapus skill dari profil (INTERN) */
+  REMOVE_SKILL: (skillId: string) => `/internships/remove-skill/${skillId}`,
 } as const;

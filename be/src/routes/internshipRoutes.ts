@@ -138,6 +138,8 @@ class InternshipRouter {
         params: InternshipIdParam,
       },
     );
+
+    //
     this.internshipRouter.post(
       "/profile",
       (c: AppContext) => internshipController.internProfile(c),
@@ -147,6 +149,43 @@ class InternshipRouter {
           requireRole(["INTERN"]).beforeHandle,
         ],
         body: CreateProfileInternDto,
+      },
+    );
+    this.internshipRouter.get(
+      "/profile",
+      (c: AppContext) => internshipController.getInternProfile(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["INTERN"]).beforeHandle,
+        ],
+      },
+    );
+    this.internshipRouter.get(
+      "/skill",
+      (c: AppContext) => internshipController.getSkillAll(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+      },
+    );
+    this.internshipRouter.post(
+      "/add-skills",
+      (c: AppContext) => internshipController.AddSkillInternShip(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["INTERN"]).beforeHandle,
+        ],
+      },
+    );
+    this.internshipRouter.delete(
+      "/remove-skill/:skillId",
+      (c: AppContext) => internshipController.removeSkillInternShip(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["INTERN"]).beforeHandle,
+        ],
       },
     );
   }

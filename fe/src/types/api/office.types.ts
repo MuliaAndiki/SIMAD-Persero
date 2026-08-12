@@ -6,7 +6,7 @@
  * (be/src/controllers/OfficeController.ts).
  */
 
-import type { IOfficeLocation } from "./model.type";
+import type { IOfficeLocation } from './model.type';
 
 // ---------- Payload (request body / query / path params) ----------
 
@@ -17,10 +17,8 @@ export interface OfficeQuery {
   departmentId?: string;
 }
 
-export interface CreateOfficeBody extends Pick<
-  IOfficeLocation,
-  "departmentId" | "name" | "address" | "radiusMeter"
-> {
+export interface CreateOfficeBody
+  extends Pick<IOfficeLocation, 'departmentId' | 'name' | 'address' | 'radiusMeter'> {
   latitude: number;
   longitude: number;
 }
@@ -34,10 +32,8 @@ export interface OfficeParams {
 // ---------- Response (data dari backend) ----------
 
 /** Data satu lokasi kantor (GET /offices, GET /offices/:officeId). */
-export interface OfficeResponse extends Omit<
-  IOfficeLocation,
-  "latitude" | "longitude" | "radiusMeter"
-> {
+export interface OfficeResponse
+  extends Omit<IOfficeLocation, 'latitude' | 'longitude' | 'radiusMeter'> {
   latitude: number | null;
   longitude: number | null;
   radiusMeter: number;

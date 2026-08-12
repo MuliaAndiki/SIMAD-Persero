@@ -6,11 +6,11 @@
  * (be/src/controllers/AuthController.ts).
  */
 
-import type { IUser, IRefreshToken } from "./model.type";
+import type { IRefreshToken, IUser } from './model.type';
 
 // ---------- Payload (request body / path params) ----------
 
-export interface RegisterBody extends Pick<IUser, "fullName" | "email"> {
+export interface RegisterBody extends Pick<IUser, 'fullName' | 'email'> {
   password?: string;
 }
 
@@ -79,7 +79,7 @@ export interface RegisterResponse {
 }
 
 /** User ringkas yang dibawa di dalam session login / magic link. */
-export interface AuthSessionUser extends Pick<IUser, "id" | "fullName"> {
+export interface AuthSessionUser extends Pick<IUser, 'id' | 'fullName'> {
   role: string;
 }
 
@@ -98,12 +98,12 @@ export interface RefreshTokenResponse {
 }
 
 /** Data profil pengguna saat ini (GET /auth/me). */
-export interface SafeAuthUser extends Pick<IUser, "id" | "fullName" | "email"> {
+export interface SafeAuthUser extends Pick<IUser, 'id' | 'fullName' | 'email'> {
   role: string;
 }
 
 /** Data satu sesi aktif (GET /auth/sessions). */
-export interface AuthSession extends Pick<IRefreshToken, "id"> {
+export interface AuthSession extends Pick<IRefreshToken, 'id'> {
   createdAt: string;
   expiresAt: string;
   isCurrent: boolean;

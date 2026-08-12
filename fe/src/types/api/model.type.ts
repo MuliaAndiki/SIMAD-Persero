@@ -172,6 +172,7 @@ export interface IInternProfileSkill {
   skillId: string;
   proficiency: string;
   createdAt: string;
+  skill?: ISkill;
 }
 
 export interface IInternshipApplication {

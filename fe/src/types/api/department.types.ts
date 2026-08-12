@@ -6,7 +6,7 @@
  * (be/src/controllers/DepartmentController.ts).
  */
 
-import type { IDepartment } from "./model.type";
+import type { IDepartment } from './model.type';
 
 // ---------- Payload (request body / query / path params) ----------
 
@@ -14,16 +14,13 @@ export interface DepartmentQuery {
   page?: number;
   limit?: number;
   keyword?: string;
-  status?: "ACTIVE" | "INACTIVE";
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
-export interface CreateDepartmentBody extends Pick<
-  IDepartment,
-  "code" | "name" | "description"
-> {}
+export interface CreateDepartmentBody extends Pick<IDepartment, 'code' | 'name' | 'description'> {}
 
 export type UpdateDepartmentBody = Partial<
-  Pick<IDepartment, "code" | "name" | "description" | "isActive">
+  Pick<IDepartment, 'code' | 'name' | 'description' | 'isActive'>
 >;
 
 export interface DepartmentParams {
@@ -33,13 +30,8 @@ export interface DepartmentParams {
 // ---------- Response (data dari backend) ----------
 
 /** Data satu departemen (GET /departments, GET /departments/:departmentId). */
-export interface DepartmentResponse extends Pick<
-  IDepartment,
-  | "id"
-  | "code"
-  | "name"
-  | "description"
-  | "isActive"
-  | "createdAt"
-  | "updatedAt"
-> {}
+export interface DepartmentResponse
+  extends Pick<
+    IDepartment,
+    'id' | 'code' | 'name' | 'description' | 'isActive' | 'createdAt' | 'updatedAt'
+  > {}

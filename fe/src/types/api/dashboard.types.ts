@@ -7,12 +7,12 @@
  */
 
 import type {
-  IInternship,
-  IAttendance,
-  INotification,
-  ICertificate,
   IActivityLog,
-} from "./model.type";
+  IAttendance,
+  ICertificate,
+  IInternship,
+  INotification,
+} from './model.type';
 
 // ---------- Payload (query) ----------
 
@@ -22,45 +22,38 @@ export interface RecentActivityQuery {
 }
 
 /** Role pengguna yang menentukan varian dashboard (GET /dashboard/:role). */
-export type DashboardRole = "INTERN" | "HR_ADMIN" | "SUPERVISOR";
+export type DashboardRole = 'INTERN' | 'HR_ADMIN' | 'SUPERVISOR';
 
 // ---------- Response (data dari backend) ----------
 
 /** Data internship di dashboard intern (GET /dashboard/intern). */
-export interface DashboardInternship extends Pick<
-  IInternship,
-  "id" | "status" | "actualStartDate" | "actualEndDate"
-> {
+export interface DashboardInternship
+  extends Pick<IInternship, 'id' | 'status' | 'actualStartDate' | 'actualEndDate'> {
   department: { id: string; name: string | null } | null;
   officeLocation: { id: string; name: string } | null;
 }
 
 /** Absensi hari ini di dashboard intern. */
-export interface DashboardAttendanceToday extends Pick<
-  IAttendance,
-  | "id"
-  | "attendanceDate"
-  | "checkInAt"
-  | "checkOutAt"
-  | "checkInStatus"
-  | "checkOutStatus"
-  | "attendanceStatus"
-> {}
+export interface DashboardAttendanceToday
+  extends Pick<
+    IAttendance,
+    | 'id'
+    | 'attendanceDate'
+    | 'checkInAt'
+    | 'checkOutAt'
+    | 'checkInStatus'
+    | 'checkOutStatus'
+    | 'attendanceStatus'
+  > {}
 
 /** Notifikasi di dashboard intern. */
-export interface DashboardNotification extends Pick<
-  INotification,
-  "id" | "title" | "message"
-> {
+export interface DashboardNotification extends Pick<INotification, 'id' | 'title' | 'message'> {
   createdAt: string;
   readAt: string | null;
 }
 
 /** Sertifikat di dashboard intern. */
-export interface DashboardCertificate extends Pick<
-  ICertificate,
-  "id" | "certificateNumber"
-> {
+export interface DashboardCertificate extends Pick<ICertificate, 'id' | 'certificateNumber'> {
   generatedAt: string;
 }
 
@@ -135,10 +128,7 @@ export interface ChartsResponse {
 }
 
 /** Baris aktivitas terbaru (GET /dashboard/recent-activities). */
-export interface RecentActivityResponse extends Pick<
-  IActivityLog,
-  "id" | "description"
-> {
+export interface RecentActivityResponse extends Pick<IActivityLog, 'id' | 'description'> {
   user: { id: string; fullName: string; email: string } | null;
   activity: string;
   createdAt: string;

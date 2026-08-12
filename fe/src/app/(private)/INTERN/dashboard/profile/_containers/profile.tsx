@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { ProfileSection } from "@/components/page/profile/ProfileSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
+import { ProfileSection } from '@/components/page/profile/ProfileSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
 
 /**
  * Container halaman profil (GET /users/profile; POST /users/profile/photo).
@@ -15,12 +15,13 @@ export default function ProfileContainer() {
   const ns = useAppNameSpace();
 
   const profile = api.user.query.profile();
+  const internProfile = api.internship.query.myProfile();
   const logout = api.auth.mutate.logout();
   const uploadPhoto = api.user.mutate.uploadPhoto();
 
   const handleUploadPhoto = (file: File) => {
     const formData = new FormData();
-    formData.append("photo", file);
+    formData.append('photo', file);
     uploadPhoto.mutate(formData);
   };
 
@@ -31,10 +32,11 @@ export default function ProfileContainer() {
   return (
     <ProfileSection
       state={{
-        isPending: profile.isPending || logout.isPending,
+        isPending: profile.isPending || logout.isPending || internProfile.isLoading,
         isError: profile.isError,
         errorMessage: profile.error?.message,
         profile: profile.data ?? null,
+        internProfile: internProfile.data ?? null,
         isUploading: uploadPhoto.isPending,
         alert: ns.alert,
       }}
