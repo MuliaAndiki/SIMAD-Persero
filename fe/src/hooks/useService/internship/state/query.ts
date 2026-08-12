@@ -1,7 +1,7 @@
 import { queryKey } from '@/configs/query-key';
 import Api from '@/services/props.service';
 
-import type { InternshipParams } from '@/types/api/internship.types';
+import type { InternshipParams, SkillQuery } from '@/types/api/internship.types';
 import { useQuery } from '@tanstack/react-query';
 
 export function useMyInternship() {
@@ -25,5 +25,25 @@ export function useInternshipDetail(
       return res.data;
     },
     enabled: options?.enabled,
+  });
+}
+
+export function useMyInternProfile() {
+  return useQuery({
+    queryKey: queryKey.internship.profile(),
+    queryFn: async () => {
+      const res = await Api.Internship.MyProfile();
+      return res.data;
+    },
+  });
+}
+
+export function useSkills(query: SkillQuery = {}) {
+  return useQuery({
+    queryKey: queryKey.internship.skills(query),
+    queryFn: async () => {
+      const res = await Api.Internship.GetSkills(query);
+      return res.data ?? [];
+    },
   });
 }

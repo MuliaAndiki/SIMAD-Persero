@@ -11,28 +11,19 @@ import type {
   IAttendanceLog,
   IAttendanceOverride,
   IAttendanceViolation,
-} from "./model.type";
+} from './model.type';
 
 // ---------- Enum value (vocabulary backend, attendance.types.ts) ----------
 
-export type CheckInStatus =
-  | "PRESENT"
-  | "LATE"
-  | "PENDING_REVIEW"
-  | "INVALID"
-  | "ABSENT";
-export type CheckOutStatus =
-  | "COMPLETED"
-  | "PENDING_REVIEW"
-  | "INVALID"
-  | "ABSENT";
+export type CheckInStatus = 'PRESENT' | 'LATE' | 'PENDING_REVIEW' | 'INVALID' | 'ABSENT';
+export type CheckOutStatus = 'COMPLETED' | 'PENDING_REVIEW' | 'INVALID' | 'ABSENT';
 export type AttendanceStatus =
-  | "PRESENT"
-  | "LATE"
-  | "COMPLETED"
-  | "PENDING_REVIEW"
-  | "INVALID"
-  | "ABSENT";
+  | 'PRESENT'
+  | 'LATE'
+  | 'COMPLETED'
+  | 'PENDING_REVIEW'
+  | 'INVALID'
+  | 'ABSENT';
 
 // ---------- Payload (request body / query / path params) ----------
 
@@ -51,7 +42,7 @@ export interface CheckOutBody {
 }
 
 export interface OverrideAttendanceBody {
-  status: "PRESENT" | "INVALID";
+  status: 'PRESENT' | 'INVALID';
   reason: string;
 }
 
@@ -85,11 +76,9 @@ export interface AttendanceExportQuery {
 // ---------- Response (data dari backend) ----------
 
 /** Log check-in / check-out (detail absensi). */
-export interface AttendanceLog extends Pick<
-  IAttendanceLog,
-  "id" | "insideGeofence" | "fakeGpsDetected" | "createdAt"
-> {
-  action: "CHECK_IN" | "CHECK_OUT" | null;
+export interface AttendanceLog
+  extends Pick<IAttendanceLog, 'id' | 'insideGeofence' | 'fakeGpsDetected' | 'createdAt'> {
+  action: 'CHECK_IN' | 'CHECK_OUT' | null;
   latitude: number | null;
   longitude: number | null;
   accuracyMeter: number | null;
@@ -97,10 +86,8 @@ export interface AttendanceLog extends Pick<
 }
 
 /** Data satu absensi (GET /attendance/me, GET /attendance/today, GET /attendance/:attendanceId). */
-export interface AttendanceResponse extends Omit<
-  IAttendance,
-  "checkInStatus" | "checkOutStatus" | "attendanceStatus"
-> {
+export interface AttendanceResponse
+  extends Omit<IAttendance, 'checkInStatus' | 'checkOutStatus' | 'attendanceStatus'> {
   checkInStatus: CheckInStatus | null;
   checkOutStatus: CheckOutStatus | null;
   attendanceStatus: AttendanceStatus | null;
@@ -111,20 +98,14 @@ export interface AttendanceResponse extends Omit<
 export interface AttendanceDetailResponse extends AttendanceResponse {
   intern?: { id: string; fullName: string; email: string } | null;
   department?: { id: string; name: string | null } | null;
-  overrides?: Omit<IAttendanceOverride, "attendanceId">[];
-  violations?: (Pick<
-    IAttendanceViolation,
-    "id" | "severity" | "description" | "createdAt"
-  > & {
+  overrides?: Omit<IAttendanceOverride, 'attendanceId'>[];
+  violations?: (Pick<IAttendanceViolation, 'id' | 'severity' | 'description' | 'createdAt'> & {
     type: string | null;
   })[];
 }
 
 /** Hasil override absensi (PATCH /attendance/:attendanceId/override). */
-export interface OverrideAttendanceResponse extends Pick<
-  IAttendanceOverride,
-  "attendanceId"
-> {
+export interface OverrideAttendanceResponse extends Pick<IAttendanceOverride, 'attendanceId'> {
   previousStatus: AttendanceStatus | null;
   newStatus: AttendanceStatus | null;
 }

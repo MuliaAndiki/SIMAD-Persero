@@ -5,7 +5,7 @@
  * (be/src/controllers/InstitutionController.ts).
  */
 
-import type { IInstitution } from "./model.type";
+import type { IInstitution } from './model.type';
 
 // ---------- Payload (query / path params) ----------
 
@@ -22,11 +22,7 @@ export interface InstitutionQuery {
 // ---------- Response (data dari backend) ----------
 
 export interface InstitutionResponse
-  extends
-    Partial<
-      Pick<
-        IInstitution,
-        "educationLevelId" | "name" | "shortName" | "province" | "city"
-      >
+  extends Partial<
+      Pick<IInstitution, 'educationLevelId' | 'name' | 'shortName' | 'province' | 'city'>
     >,
-    Pick<IInstitution, "id"> {}
+    Pick<IInstitution, 'id'> {}

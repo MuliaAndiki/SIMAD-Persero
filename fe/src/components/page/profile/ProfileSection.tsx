@@ -1,16 +1,11 @@
-import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/atoms/avatar";
-import { Badge } from "@/components/atoms/badge";
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import type { ProfileResponse } from "@/types/api/user.types";
-import { AlertContexType } from "@/types/ui";
+import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/atoms/avatar';
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import type { MyInternProfileResponse } from '@/types/api/internship.types';
+import type { ProfileResponse } from '@/types/api/user.types';
+import type { AlertContexType } from '@/types/ui';
 import {
   AlertCircle,
   Camera,
@@ -20,11 +15,12 @@ import {
   Mail,
   PenLine,
   Phone,
+  Sparkles,
   UserRound,
-} from "lucide-react";
-import Link from "next/link";
-import { useRef, useState } from "react";
-import type { ChangeEvent } from "react";
+} from 'lucide-react';
+import Link from 'next/link';
+import { useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 
 /** State yang disuplai container — section murni presentasi. */
 export interface ProfileSectionState {
@@ -32,6 +28,7 @@ export interface ProfileSectionState {
   isError: boolean;
   errorMessage?: string;
   profile: ProfileResponse | null;
+  internProfile: MyInternProfileResponse | null;
   isUploading: boolean;
   alert: AlertContexType;
 }
@@ -47,30 +44,30 @@ export interface ProfileSectionProps {
   service: ProfileSectionService;
 }
 
-const ALLOWED_PHOTO_TYPES = ["image/jpeg", "image/jpg", "image/png"];
+const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5 MB
 
 /** Inisial nama untuk fallback avatar. */
 function getInitials(name: string): string {
   return name
-    .split(" ")
+    .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
 }
 
 /** Label role dalam Bahasa Indonesia. */
 function roleLabel(role: string | null): string {
   switch (role) {
-    case "INTERN":
-      return "Peserta Magang";
-    case "HR_ADMIN":
-      return "HR Admin";
-    case "SUPERVISOR":
-      return "Supervisor";
+    case 'INTERN':
+      return 'Peserta Magang';
+    case 'HR_ADMIN':
+      return 'HR Admin';
+    case 'SUPERVISOR':
+      return 'Supervisor';
     default:
-      return role ?? "-";
+      return role ?? '-';
   }
 }
 
@@ -91,12 +88,9 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
       <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
         <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
         <div className="flex flex-col gap-0.5">
-          <span className="font-medium text-foreground">
-            Gagal memuat profil
-          </span>
+          <span className="font-medium text-foreground">Gagal memuat profil</span>
           <span className="text-muted-foreground">
-            {state.errorMessage ||
-              "Terjadi kesalahan saat mengambil data. Silakan coba lagi."}
+            {state.errorMessage || 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}
           </span>
         </div>
       </div>
@@ -117,6 +111,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
 
       <ProfileIdentityCard
         profile={profile}
+        internProfile={state.internProfile}
         isUploading={state.isUploading}
         onUploadPhoto={service.onUploadPhoto}
       />
@@ -127,9 +122,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
             <UserRound className="size-4 text-primary" />
             Detail Profil
           </CardTitle>
-          <CardDescription>
-            Informasi akun yang terdaftar pada sistem.
-          </CardDescription>
+          <CardDescription>Informasi akun yang terdaftar pada sistem.</CardDescription>
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -148,7 +141,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
               <dt className="text-xs text-muted-foreground">Nomor Telepon</dt>
               <dd className="flex items-center gap-1.5 text-sm font-medium">
                 <Phone className="size-3.5 shrink-0 text-primary" />
-                {profile.phone || "-"}
+                {profile.phone || '-'}
               </dd>
             </div>
             <div className="flex flex-col gap-1 rounded-lg border bg-muted/40 p-4">
@@ -167,6 +160,12 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
           </Link>
         </Button>
         <Button asChild>
+          <Link href="/INTERN/dashboard/profile/skills">
+            <Sparkles className="size-4" />
+            Kelola Skill
+          </Link>
+        </Button>
+        <Button asChild>
           <Link href="/INTERN/dashboard/profile/edit">
             <PenLine className="size-4" />
             Ubah Profil
@@ -182,9 +181,9 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
           variant="destructive"
           onClick={() =>
             state.alert.modal({
-              title: "Keluar ?",
-              deskripsi: "Apakah Anda Ingin Keluar",
-              icon: "question",
+              title: 'Keluar ?',
+              deskripsi: 'Apakah Anda Ingin Keluar',
+              icon: 'question',
               onConfirm: () => {
                 service.onLogout();
               },
@@ -192,7 +191,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
           }
           disabled={state.isPending}
         >
-          {state.isPending ? "Loading..." : "Keluar"}
+          {state.isPending ? 'Loading...' : 'Keluar'}
         </Button>
       </div>
     </section>
@@ -202,10 +201,12 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
 /** Kartu identitas: foto profil + informasi dasar. */
 function ProfileIdentityCard({
   profile,
+  internProfile,
   isUploading,
   onUploadPhoto,
 }: {
   profile: ProfileResponse;
+  internProfile: MyInternProfileResponse | null;
   isUploading: boolean;
   onUploadPhoto: (file: File) => void | Promise<void>;
 }) {
@@ -217,13 +218,13 @@ function ProfileIdentityCard({
     if (!file) return;
 
     if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
-      setLocalError("Format foto harus JPG, JPEG, atau PNG.");
-      e.target.value = "";
+      setLocalError('Format foto harus JPG, JPEG, atau PNG.');
+      e.target.value = '';
       return;
     }
     if (file.size > MAX_PHOTO_SIZE) {
-      setLocalError("Ukuran foto maksimal 5 MB.");
-      e.target.value = "";
+      setLocalError('Ukuran foto maksimal 5 MB.');
+      e.target.value = '';
       return;
     }
 
@@ -238,17 +239,27 @@ function ProfileIdentityCard({
           {profile.profilePhoto ? (
             <AvatarImage src={profile.profilePhoto} alt={profile.fullName} />
           ) : null}
-          <AvatarFallback>
-            {getInitials(profile.fullName) || "?"}
-          </AvatarFallback>
+          <AvatarFallback>{getInitials(profile.fullName) || '?'}</AvatarFallback>
         </Avatar>
 
         <div className="flex flex-1 flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-bold text-foreground">
-              {profile.fullName}
-            </h2>
-            <Badge variant="secondary">{roleLabel(profile.role)}</Badge>
+            <h2 className="text-xl font-bold text-foreground">{profile.fullName}</h2>
+            {internProfile ? (
+              <>
+                {internProfile.studentNumber ? (
+                  <Badge variant="secondary">{internProfile.studentNumber}</Badge>
+                ) : null}
+                {internProfile.institution?.shortName ? (
+                  <Badge variant="secondary">{internProfile.institution.shortName}</Badge>
+                ) : null}
+                {internProfile.major?.name ? (
+                  <Badge variant="secondary">{internProfile.major.name}</Badge>
+                ) : null}
+              </>
+            ) : (
+              <Badge variant="secondary">{roleLabel(profile.role)}</Badge>
+            )}
           </div>
           <p className="flex items-center gap-2 text-sm text-muted-foreground">
             <Mail className="size-3.5 shrink-0" />
@@ -256,7 +267,7 @@ function ProfileIdentityCard({
           </p>
           <p className="flex items-center gap-2 text-sm text-muted-foreground">
             <Phone className="size-3.5 shrink-0" />
-            {profile.phone || "-"}
+            {profile.phone || '-'}
           </p>
         </div>
 
@@ -264,7 +275,7 @@ function ProfileIdentityCard({
           <input
             ref={fileInputRef}
             type="file"
-            accept={ALLOWED_PHOTO_TYPES.join(",")}
+            accept={ALLOWED_PHOTO_TYPES.join(',')}
             className="hidden"
             onChange={handleFileChange}
           />
@@ -280,11 +291,9 @@ function ProfileIdentityCard({
             ) : (
               <Camera className="size-4" />
             )}
-            {isUploading ? "Mengunggah…" : "Ganti Foto"}
+            {isUploading ? 'Mengunggah…' : 'Ganti Foto'}
           </Button>
-          {localError && (
-            <p className="text-sm text-destructive">{localError}</p>
-          )}
+          {localError && <p className="text-sm text-destructive">{localError}</p>}
         </div>
       </CardContent>
     </Card>

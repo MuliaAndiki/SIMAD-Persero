@@ -6,18 +6,18 @@
  * (be/src/controllers/ApplicationController.ts).
  */
 
-import type { IInternship, IInternshipApplication } from "./model.type";
+import type { IInternship, IInternshipApplication } from './model.type';
 
 // ---------- Payload (request body / query / path params) ----------
 
 /** Status aplikasi magang — cocok dengan vocabulary backend (application.types.ts). */
 export type ApplicationStatusValue =
-  | "DRAFT"
-  | "SUBMITTED"
-  | "UNDER_REVIEW"
-  | "APPROVED"
-  | "REJECTED"
-  | "RESUBMITTED";
+  | 'DRAFT'
+  | 'SUBMITTED'
+  | 'UNDER_REVIEW'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'RESUBMITTED';
 
 export interface CreateApplicationBody {
   requestedStartDate: string;
@@ -80,10 +80,7 @@ export interface ApplicationInternProfile {
 }
 
 /** Data satu aplikasi magang (GET /applications/me, GET /applications/:id, ...). */
-export interface ApplicationResponse extends Omit<
-  IInternshipApplication,
-  "status"
-> {
+export interface ApplicationResponse extends Omit<IInternshipApplication, 'status'> {
   status: ApplicationStatusValue | null;
   introductionLetterFile?: ApplicationFileRef | null;
   internProfile?: ApplicationInternProfile | null;

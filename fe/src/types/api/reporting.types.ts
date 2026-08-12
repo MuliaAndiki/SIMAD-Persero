@@ -6,7 +6,7 @@
  * (be/src/controllers/ReportingController.ts).
  */
 
-import type { IAttendance, ICertificate, IInternship } from "./model.type";
+import type { IAttendance, ICertificate, IInternship } from './model.type';
 
 // ---------- Payload (query) ----------
 
@@ -20,14 +20,11 @@ export interface ReportingQuery {
 // ---------- Response (data dari backend) ----------
 
 /** Baris laporan absensi (GET /reports/attendance). */
-export interface AttendanceReportRow extends Pick<
-  IAttendance,
-  | "checkInAt"
-  | "checkOutAt"
-  | "checkInStatus"
-  | "checkOutStatus"
-  | "totalWorkMinutes"
-> {
+export interface AttendanceReportRow
+  extends Pick<
+    IAttendance,
+    'checkInAt' | 'checkOutAt' | 'checkInStatus' | 'checkOutStatus' | 'totalWorkMinutes'
+  > {
   date: string;
   intern: string;
   email: string;
@@ -39,10 +36,8 @@ export interface AttendanceReportRow extends Pick<
 }
 
 /** Baris laporan peserta magang (GET /reports/internships). */
-export interface InternshipReportRow extends Pick<
-  IInternship,
-  "actualStartDate" | "actualEndDate" | "status"
-> {
+export interface InternshipReportRow
+  extends Pick<IInternship, 'actualStartDate' | 'actualEndDate' | 'status'> {
   intern: string;
   email: string;
   studentNumber: string;
@@ -54,10 +49,8 @@ export interface InternshipReportRow extends Pick<
 }
 
 /** Baris laporan sertifikat (GET /reports/certificates). */
-export interface CertificateReportRow extends Pick<
-  ICertificate,
-  "certificateNumber" | "generatedAt"
-> {
+export interface CertificateReportRow
+  extends Pick<ICertificate, 'certificateNumber' | 'generatedAt'> {
   intern: string;
   email: string;
   department: string;

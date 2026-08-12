@@ -3,6 +3,7 @@ import {
   type AssignSupervisorBody,
   type ChangeDepartmentBody,
   type ExtendInternshipBody,
+  type AddSkillsBody,
   InternshipStatus,
   type PickMergeInternship,
 } from "@/types/internship.types";
@@ -441,6 +442,132 @@ class InternshipService {
         return [newMayor, newProfile];
       });
     return [queryInstitutionMajor, queryInternProfile];
+  }
+  //
+  public async getMyProfileIntern(userId: string) {
+    const queryService = await prisma.internProfile.findUnique({
+      where: {
+        userId: userId,
+      },
+      include: {
+        major: true,
+        institution: true,
+        internships: true,
+        profileSkills: {
+          include: {
+            skill: true,
+          },
+        },
+      },
+    });
+    return queryService;
+  }
+
+  // get All Skill
+  public async getSkillAll(
+    query: {
+      search?: string;
+      folderId?: string;
+      startDate?: string;
+      endDate?: string;
+      page?: number;
+      limit?: number;
+      sortBy?: string;
+      sortOrder?: "asc" | "desc";
+    } = {},
+  ) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const skip = (page - 1) * limit;
+
+    const where: Record<string, unknown> = {};
+
+    if (query.search) {
+      where.OR = [
+        { name: { contains: query.search, mode: "insensitive" } },
+        { category: { contains: query.search, mode: "insensitive" } },
+      ];
+    }
+
+    if (query.startDate || query.endDate) {
+      where.createdAt = {};
+      if (query.startDate)
+        (where.createdAt as Record<string, unknown>).gte = new Date(
+          query.startDate,
+        );
+      if (query.endDate)
+        (where.createdAt as Record<string, unknown>).lte = new Date(
+          query.endDate,
+        );
+    }
+
+    const orderBy: Record<string, unknown>[] = [];
+    if (query.sortBy) {
+      orderBy.push({ [query.sortBy]: query.sortOrder ?? "asc" });
+    } else {
+      orderBy.push({ createdAt: "asc" });
+    }
+
+    const [totalData, data] = await prisma.$transaction([
+      prisma.skill.count({ where }),
+      prisma.skill.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+    ]);
+    const totalPage = Math.ceil(totalData / limit);
+
+    return {
+      data,
+      meta: {
+        currentPage: page,
+        limit: limit,
+        totalData: totalData,
+        totalPage: totalPage,
+      },
+    };
+  }
+
+  public async AddSkillInternShip(input: AddSkillsBody) {
+    const query = await prisma.internProfileSkill.createMany({
+      data: input.skills.map((skill) => ({
+        skillId: skill.skillId,
+        internProfileId: input.internProfileId,
+        proficiency: skill.proficiency,
+      })),
+      skipDuplicates: true,
+    });
+
+    if (!query) {
+      throw new AppError(400, "Service Crashes");
+    }
+    return query;
+  }
+
+  // DELETE /internships/remove-skill/:skillId
+  public async removeSkillInternShip(userId: string, skillId: string) {
+    const profile = await prisma.internProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new AppError(404, "Intern profile not found");
+    }
+
+    const query = await prisma.internProfileSkill.deleteMany({
+      where: {
+        internProfileId: profile.id,
+        skillId,
+      },
+    });
+
+    if (query.count === 0) {
+      throw new AppError(404, "Skill tidak ditemukan di profil magang");
+    }
+
+    return query;
   }
 }
 

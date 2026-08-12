@@ -2,18 +2,26 @@ import { Api } from '@/api/api-entry';
 import type { TResponse } from '@/api/types/response.types';
 import { INTERNSHIP_ENDPOINTS } from '@/configs/endpoints/internship.endpoints';
 import type {
+  AddSkillBody,
+  AddSkillResponse,
   AssignSupervisorBody,
   ChangeDepartmentBody,
-  CreateInternProfileBody,
   CreateInternProfileResponse,
   ExtendInternshipBody,
   InternshipParams,
   InternshipResponse,
+  MyInternProfileResponse,
+  PickMergeInternship,
+  RemoveSkillParams,
+  RemoveSkillResponse,
+  SkillQuery,
+  SkillResponse,
 } from '@/types/api/internship.types';
+import { buildQueryString } from '@/utils/query-string';
 import { toServiceResponse } from '@/utils/service-response';
 
 /**
- * Service modul Internship — 8 method, satu method per endpoint backend
+ * Service modul Internship — satu method per endpoint backend
  * (be/src/routes/internshipRoutes.ts).
  *
  * Semua method menggunakan `Api().client` (dieksekusi di browser).
@@ -137,7 +145,7 @@ class InternshipService {
    * Membuat/update profil magang (INTERN).
    */
   public async CreateProfile(
-    body: CreateInternProfileBody,
+    body: PickMergeInternship,
   ): Promise<TResponse<CreateInternProfileResponse>> {
     const res = await client.PostResponse<CreateInternProfileResponse>(
       INTERNSHIP_ENDPOINTS.PROFILE,
@@ -146,6 +154,48 @@ class InternshipService {
     return toServiceResponse(res, {
       message: 'Profil magang berhasil disimpan',
       statusCode: 201,
+    });
+  }
+  /**
+   * GET /internships/profile
+   * Mengambil profil magang milik sendiri (INTERN).
+   */
+  public async MyProfile(): Promise<TResponse<MyInternProfileResponse>> {
+    const res = await client.GetResponse<MyInternProfileResponse>(INTERNSHIP_ENDPOINTS.MY_PROFILE);
+    return toServiceResponse(res, { message: 'Profil magang berhasil dimuat' });
+  }
+
+  /**
+   * GET /internships/skill
+   * Mengambil daftar skill (INTERN) — mendukung pencarian & paginasi.
+   */
+  public async GetSkills(query?: SkillQuery): Promise<TResponse<SkillResponse[]>> {
+    const qs = buildQueryString(
+      query as Record<string, string | number | boolean | null | undefined>,
+    );
+    const res = await client.GetResponse<SkillResponse[]>(`${INTERNSHIP_ENDPOINTS.SKILLS}${qs}`);
+    return toServiceResponse(res, { message: 'Daftar skill berhasil dimuat' });
+  }
+
+  /**
+   * POST /internships/add-skills
+   * Menambahkan skill ke profil magang (INTERN).
+   */
+  public async AddSkill(body: AddSkillBody): Promise<TResponse<AddSkillResponse>> {
+    const res = await client.PostResponse<AddSkillResponse>(INTERNSHIP_ENDPOINTS.ADD_SKILLS, body);
+    return toServiceResponse(res, { message: 'Skill berhasil ditambahkan' });
+  }
+
+  /**
+   * DELETE /internships/remove-skill/:skillId
+   * Menghapus skill dari profil magang (INTERN).
+   */
+  public async RemoveSkill(params: RemoveSkillParams): Promise<TResponse<RemoveSkillResponse>> {
+    const res = await client.DeleteResponse<RemoveSkillResponse>(
+      INTERNSHIP_ENDPOINTS.REMOVE_SKILL(params.skillId),
+    );
+    return toServiceResponse(res, {
+      message: 'Skill berhasil dihapus dari profil',
     });
   }
 }

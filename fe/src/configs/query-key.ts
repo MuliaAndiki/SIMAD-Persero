@@ -47,6 +47,8 @@ export const queryKey = {
   internshipRoot: () => ['internship'] as const,
   internship: {
     my: () => ['internship', 'my'] as const,
+    profile: () => ['internship', 'profile'] as const,
+    skills: (query?: Record<string, any>) => ['internship', 'skills', query] as const,
     detail: (id: string) => ['internship', 'detail', id] as const,
   },
 
