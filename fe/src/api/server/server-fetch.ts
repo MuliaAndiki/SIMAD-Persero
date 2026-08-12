@@ -1,3 +1,4 @@
+'use server';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -6,7 +7,11 @@ import {
   type ApiResponse,
   type ApiSuccessResponse,
 } from '@/api/types/response.types';
-import { APP_SESSION_COOKIE_KEY, APP_SESSION_COOKIE_REFRESH } from '@/configs/cookies.config';
+import {
+  APP_SESSION_COOKIE_KEY,
+  APP_SESSION_COOKIE_REFRESH,
+  APP_SESSION_COOKIE_ROLE,
+} from '@/configs/cookies.config';
 import { AUTH_ENDPOINTS } from '@/configs/endpoints/auth.endpoints';
 import { Logger } from '@/utils/log';
 
@@ -59,6 +64,7 @@ async function clearTokens(): Promise<void> {
   const store = await cookies();
   store.delete(COOKIE_KEYS.accessToken);
   store.delete(COOKIE_KEYS.refreshToken);
+  store.delete(APP_SESSION_COOKIE_ROLE);
 }
 
 function buildBaseHeaders(accessToken?: string): Record<string, string> {

@@ -1,8 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 
+import type { TResponse } from '@/api/types/response.types';
+import { getRoleDashboardPath } from '@/configs/app.config';
 import { queryKey } from '@/configs/query-key';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import AuthService from '@/services/api/auth.service';
 import type {
+  AuthSessionResponse,
   ChangeEmailBody,
   ChangeEmailVerifyBody,
   ChangePasswordBody,
@@ -10,7 +14,9 @@ import type {
   LoginBody,
   LogoutBody,
   RefreshTokenBody,
+  RefreshTokenResponse,
   RegisterBody,
+  RegisterResponse,
   ResetPasswordBody,
   SendMagicLinkBody,
   SendVerifyEmailBody,
@@ -18,14 +24,42 @@ import type {
   VerifyEmailBody,
   VerifyMagicLinkBody,
 } from '@/types/api/auth.types';
+import { type AuthCacheContext, readAuthSnapshot } from '@/utils/cache/auth.cache';
+import { clearSessionCookies, getRefreshToken, setSessionCookies } from '@/utils/session-cookie';
+import { useRouter } from 'next/navigation';
 
 /**
  * POST /auth/register
  */
 export function useRegister() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<
+    TResponse<RegisterResponse>,
+    Error,
+    Pick<RegisterBody, 'fullName' | 'email' | 'password'>,
+    AuthCacheContext
+  >({
     mutationFn: (payload: Pick<RegisterBody, 'fullName' | 'email' | 'password'>) =>
       AuthService.Register(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -33,9 +67,29 @@ export function useRegister() {
  * POST /auth/verify-email/send
  */
 export function useSendVerifyEmail() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<TResponse<null>, Error, Pick<SendVerifyEmailBody, 'email'>, AuthCacheContext>({
     mutationFn: (payload: Pick<SendVerifyEmailBody, 'email'>) =>
       AuthService.SendVerifyEmail(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -43,8 +97,28 @@ export function useSendVerifyEmail() {
  * POST /auth/verify-email
  */
 export function useVerifyEmail() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<TResponse<null>, Error, Pick<VerifyEmailBody, 'token'>, AuthCacheContext>({
     mutationFn: (payload: Pick<VerifyEmailBody, 'token'>) => AuthService.VerifyEmail(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -52,8 +126,49 @@ export function useVerifyEmail() {
  * POST /auth/login
  */
 export function useLogin() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  const router = useRouter();
+  return useMutation<
+    TResponse<AuthSessionResponse>,
+    Error,
+    Pick<LoginBody, 'email' | 'password'>,
+    AuthCacheContext
+  >({
     mutationFn: (payload: Pick<LoginBody, 'email' | 'password'>) => AuthService.Login(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+
+      const data = res.data;
+      if (data) {
+        // Simpan seluruh token ke cookie — backend hanya mengembalikan token di body.
+        setSessionCookies({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          role: data.user?.role,
+          expiresIn: data.expiresIn,
+        });
+      }
+
+      // Redirect sesuai role akun — setiap role punya folder dashboard sendiri.
+      const role = res.data?.user?.role;
+      router.push(getRoleDashboardPath(role));
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -61,8 +176,28 @@ export function useLogin() {
  * POST /auth/magic-link/send
  */
 export function useSendMagicLink() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<TResponse<null>, Error, Pick<SendMagicLinkBody, 'email'>, AuthCacheContext>({
     mutationFn: (payload: Pick<SendMagicLinkBody, 'email'>) => AuthService.SendMagicLink(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -70,9 +205,50 @@ export function useSendMagicLink() {
  * POST /auth/magic-link/verify
  */
 export function useVerifyMagicLink() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  const router = useRouter();
+  return useMutation<
+    TResponse<AuthSessionResponse>,
+    Error,
+    Pick<VerifyMagicLinkBody, 'token'>,
+    AuthCacheContext
+  >({
     mutationFn: (payload: Pick<VerifyMagicLinkBody, 'token'>) =>
       AuthService.VerifyMagicLink(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+
+      const data = res.data;
+      if (data) {
+        // Verify magic link setara login — simpan token & role ke cookie.
+        setSessionCookies({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          role: data.user?.role,
+          expiresIn: data.expiresIn,
+        });
+      }
+
+      // Redirect sesuai role akun.
+      const role = res.data?.user?.role;
+      router.push(getRoleDashboardPath(role));
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -80,8 +256,28 @@ export function useVerifyMagicLink() {
  * POST /auth/forgot-password
  */
 export function useForgotPassword() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<TResponse<null>, Error, Pick<ForgotPasswordBody, 'email'>, AuthCacheContext>({
     mutationFn: (payload: Pick<ForgotPasswordBody, 'email'>) => AuthService.ForgotPassword(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -89,9 +285,34 @@ export function useForgotPassword() {
  * POST /auth/reset-password
  */
 export function useResetPassword() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<ResetPasswordBody, 'token' | 'password'>,
+    AuthCacheContext
+  >({
     mutationFn: (payload: Pick<ResetPasswordBody, 'token' | 'password'>) =>
       AuthService.ResetPassword(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -99,9 +320,45 @@ export function useResetPassword() {
  * POST /auth/refresh-token
  */
 export function useRefreshToken() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<
+    TResponse<RefreshTokenResponse>,
+    Error,
+    Pick<RefreshTokenBody, 'refreshToken'>,
+    AuthCacheContext
+  >({
     mutationFn: (payload: Pick<RefreshTokenBody, 'refreshToken'>) =>
-      AuthService.RefreshToken(payload),
+      AuthService.RefreshToken({
+        refreshToken: payload?.refreshToken ?? getRefreshToken(),
+      }),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+
+      // Refresh hanya mengembalikan access token baru — perbarui cookie sesi.
+      const data = res.data;
+      if (data) {
+        setSessionCookies({
+          accessToken: data.accessToken,
+          expiresIn: data.expiresIn,
+        });
+      }
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -109,15 +366,41 @@ export function useRefreshToken() {
  * POST /auth/logout — mengakhiri sesi saat ini, invalidate cache user & sesi.
  */
 export function useLogout() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (payload: Pick<LogoutBody, 'refreshToken'>) => AuthService.Logout(payload),
+  const ns = useAppNameSpace();
+  const router = useRouter();
+  return useMutation<TResponse<null>, Error, Pick<LogoutBody, 'refreshToken'>, AuthCacheContext>({
+    mutationFn: (payload: Pick<LogoutBody, 'refreshToken'>) =>
+      AuthService.Logout({
+        refreshToken: payload?.refreshToken ?? getRefreshToken(),
+      }),
 
     onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
-      await queryClient.invalidateQueries({
+      await ns.queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
+      await ns.queryClient.invalidateQueries({
         queryKey: queryKey.auth.sessions(),
+      });
+    },
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+
+      // Hapus cookie sesi lalu kembali ke halaman login.
+      clearSessionCookies();
+      router.push('/login');
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
       });
     },
   });
@@ -127,15 +410,37 @@ export function useLogout() {
  * POST /auth/logout-all — mengakhiri seluruh sesi, invalidate cache user & sesi.
  */
 export function useLogoutAll() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  const ns = useAppNameSpace();
+  const router = useRouter();
+  return useMutation<TResponse<null>, Error, void, AuthCacheContext>({
     mutationFn: () => AuthService.LogoutAll(),
 
     onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
-      await queryClient.invalidateQueries({
+      await ns.queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
+      await ns.queryClient.invalidateQueries({
         queryKey: queryKey.auth.sessions(),
+      });
+    },
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+
+      clearSessionCookies();
+      router.push('/login');
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
       });
     },
   });
@@ -145,9 +450,34 @@ export function useLogoutAll() {
  * PATCH /auth/change-password
  */
 export function useChangePassword() {
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<ChangePasswordBody, 'currentPassword' | 'newPassword'>,
+    AuthCacheContext
+  >({
     mutationFn: (payload: Pick<ChangePasswordBody, 'currentPassword' | 'newPassword'>) =>
       AuthService.ChangePassword(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
   });
 }
 
@@ -155,14 +485,37 @@ export function useChangePassword() {
  * PATCH /auth/change-email — email user berpotensi berubah, invalidate profil.
  */
 export function useChangeEmail() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<ChangeEmailBody, 'newEmail' | 'password'>,
+    AuthCacheContext
+  >({
     mutationFn: (payload: Pick<ChangeEmailBody, 'newEmail' | 'password'>) =>
       AuthService.ChangeEmail(payload),
 
     onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
+      await ns.queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
+    },
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
     },
   });
 }
@@ -171,14 +524,37 @@ export function useChangeEmail() {
  * POST /auth/change-email/verify — email user berubah, invalidate profil.
  */
 export function useChangeEmailVerify() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<ChangeEmailVerifyBody, 'token'>,
+    AuthCacheContext
+  >({
     mutationFn: (payload: Pick<ChangeEmailVerifyBody, 'token'>) =>
       AuthService.ChangeEmailVerify(payload),
 
     onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
+      await ns.queryClient.invalidateQueries({ queryKey: queryKey.auth.me() });
+    },
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
     },
   });
 }
@@ -187,14 +563,32 @@ export function useChangeEmailVerify() {
  * DELETE /auth/sessions/:sessionId — daftar sesi berubah, invalidate sessions.
  */
 export function useDeleteSession() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
+  const ns = useAppNameSpace();
+  return useMutation<TResponse<null>, Error, Pick<SessionParams, 'sessionId'>, AuthCacheContext>({
     mutationFn: (payload: Pick<SessionParams, 'sessionId'>) => AuthService.DeleteSession(payload),
 
     onSettled: async () => {
-      await queryClient.invalidateQueries({
+      await ns.queryClient.invalidateQueries({
         queryKey: queryKey.auth.sessions(),
+      });
+    },
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
       });
     },
   });

@@ -1,5 +1,7 @@
-import { APP_SESSION_COOKIE_KEY } from '../../config/cookies.config';
-import { baseurl } from '../../config/repo.config';
+import { refreshAccessToken } from '@/api/client/auth-refresh';
+import { AUTH_ENDPOINTS } from '@/configs/endpoints/auth.endpoints';
+import { baseurl } from '@/configs/repo.config';
+import { clearSessionCookies, getAccessToken } from '@/utils/session-cookie';
 import { ApiError as ApiErrorClass, type ApiSuccessResponse } from '../../types/api.types';
 
 export interface ClientRequestConfig {
@@ -74,19 +76,6 @@ function buildBaseHeaders(accessToken?: string): Record<string, string> {
   return headers;
 }
 
-function getAccessToken(): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-
-  const match = document.cookie
-    .split('; ')
-    .find((row) => row.startsWith(`${APP_SESSION_COOKIE_KEY}=`));
-
-  if (!match) return undefined;
-
-  const value = match.slice(APP_SESSION_COOKIE_KEY.length + 1);
-  return value || undefined;
-}
-
 async function clientCoreFetchResponse<T>(
   path: string,
   config: ClientRequestConfig = {},
@@ -105,7 +94,9 @@ async function clientCoreFetchResponse<T>(
 
   const endpoint = await buildApiUrl(path);
 
-  const res = await fetch(endpoint, {
+  const isAuthRefresh = path.includes(AUTH_ENDPOINTS.REFRESH_TOKEN);
+
+  let res = await fetch(endpoint, {
     method,
     headers: {
       ...buildBaseHeaders(accessToken),
@@ -116,6 +107,25 @@ async function clientCoreFetchResponse<T>(
     cache,
   });
 
+  // 401 pada request ber-auth: tukar refresh token -> access token baru,
+  // lalu ulangi request sekali. Bila gagal, cookie dibersihkan & dialihkan.
+  if (res.status === 401 && options.withAuth && !isAuthRefresh) {
+    const refreshed = await refreshAccessToken();
+
+    if (refreshed) {
+      res = await fetch(endpoint, {
+        method,
+        headers: {
+          ...buildBaseHeaders(getAccessToken()),
+          ...extraHeaders,
+        },
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+        credentials: 'same-origin',
+        cache,
+      });
+    }
+  }
+
   let json: ApiSuccessResponse<T>;
   try {
     json = await res.json();
@@ -125,6 +135,8 @@ async function clientCoreFetchResponse<T>(
 
   if (!res.ok || json?.success === false) {
     if (res.status === 401 && typeof window !== 'undefined') {
+      clearSessionCookies();
+
       if (_authErrorHandler) {
         _authErrorHandler(res.status);
       } else {
@@ -206,6 +218,138 @@ export async function ClientPost<T>(path: string, data?: unknown): Promise<T> {
   return clientCoreFetch<T>(path, { method: 'POST', body: data });
 }
 
+/**
+ * POST multipart/form-data (upload file).
+ *
+ * Tidak menggunakan `clientCoreFetchResponse` karena body harus dikirim
+ * sebagai `FormData` (bukan `JSON.stringify`), dan header `Content-Type`
+ * harus dihilangkan agar browser meng-generate boundary secara otomatis.
+ */
+export async function ClientPostFormDataResponse<T>(
+  path: string,
+  formData: FormData,
+): Promise<ApiSuccessResponse<T>> {
+  let accessToken: string | undefined = undefined;
+  if (_tokenProvider) {
+    accessToken = await _tokenProvider();
+  } else {
+    accessToken = getAccessToken();
+  }
+
+  const endpoint = await buildApiUrl(path);
+
+  const internalApiKey =
+    process.env.NEXT_PUBLIC_INTERNAL_API_SECRET ||
+    process.env.NEXT_INTERNAL_API_SECRET ||
+    process.env.INTERNAL_API_SECRET ||
+    process.env.INTERNAL_API_KEY ||
+    '';
+
+  const headers: Record<string, string> = {
+    'x-internal-api-key': internalApiKey,
+  };
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: formData,
+    credentials: 'same-origin',
+    cache: 'no-store',
+  });
+
+  let json: ApiSuccessResponse<T>;
+  try {
+    json = await res.json();
+  } catch {
+    throw new ApiErrorClass(`Request failed with status ${res.status}`, res.status);
+  }
+
+  if (!res.ok || json?.success === false) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      clearSessionCookies();
+
+      if (_authErrorHandler) {
+        _authErrorHandler(res.status);
+      } else {
+        const currentPath = window.location.pathname;
+        if (!currentPath.startsWith('/login')) {
+          window.location.href = '/login';
+        }
+      }
+    }
+
+    throw new ApiErrorClass(
+      json?.message ?? `Request failed with status ${res.status}`,
+      res.status,
+      json?.errors,
+    );
+  }
+
+  return json;
+}
+
+/**
+ * GET binary download (file / certificate).
+ *
+ * Mengembalikan `Response` mentah (bukan JSON) sehingga caller dapat
+ * mengekstrak blob, header Content-Disposition, dsb.
+ */
+export async function ClientDownloadResponse(path: string): Promise<Response> {
+  let accessToken: string | undefined = undefined;
+  if (_tokenProvider) {
+    accessToken = await _tokenProvider();
+  } else {
+    accessToken = getAccessToken();
+  }
+
+  const endpoint = await buildApiUrl(path);
+
+  const internalApiKey =
+    process.env.NEXT_PUBLIC_INTERNAL_API_SECRET ||
+    process.env.NEXT_INTERNAL_API_SECRET ||
+    process.env.INTERNAL_API_SECRET ||
+    process.env.INTERNAL_API_KEY ||
+    '';
+
+  const headers: Record<string, string> = {
+    'x-internal-api-key': internalApiKey,
+  };
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  const res = await fetch(endpoint, {
+    method: 'GET',
+    headers,
+    credentials: 'same-origin',
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      clearSessionCookies();
+
+      if (_authErrorHandler) {
+        _authErrorHandler(res.status);
+      } else {
+        const currentPath = window.location.pathname;
+        if (!currentPath.startsWith('/login')) {
+          window.location.href = '/login';
+        }
+      }
+    }
+
+    throw new ApiErrorClass(`Download failed with status ${res.status}`, res.status);
+  }
+
+  return res;
+}
+
 export const GetResponse = ClientGetResponse;
 export const PostResponse = ClientPostResponse;
 export const PutResponse = ClientPutResponse;
@@ -214,3 +358,5 @@ export const DelResponse = ClientDelResponse;
 export const DeleteResponse = ClientDelResponse;
 export const PublicGetResponse = ClientPublicGetResponse;
 export const PublicPostResponse = ClientPublicPostResponse;
+export const PostFormDataResponse = ClientPostFormDataResponse;
+export const DownloadResponse = ClientDownloadResponse;
