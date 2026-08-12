@@ -5,6 +5,7 @@ import type { JwtPayload } from "@/types/auth.types";
 import type {
   AssignSupervisorBody,
   ChangeDepartmentBody,
+  AddSkillsBody,
   ExtendInternshipBody,
   PickMergeInternship,
 } from "@/types/internship.types";
@@ -131,6 +132,113 @@ class InternshipController {
       }
 
       return HttpResponse(c).ok(query);
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // GET /internships/profile
+  public async getInternProfile(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+
+      const authRespone = await unauthorizedValidate(user, c);
+
+      if (authRespone) return authRespone;
+
+      const query = await internshipService.getMyProfileIntern(user.id);
+
+      if (!query) {
+        return HttpResponse(c).badRequest();
+      }
+
+      return HttpResponse(c).ok(query, "Berhasil Mengambil intern profile");
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  public async getSkillAll(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+
+      const authRespone = await unauthorizedValidate(user, c);
+
+      if (authRespone) return authRespone;
+
+      const { search, page, limit } = c.query;
+      const query = await internshipService.getSkillAll({
+        search: typeof search === "string" ? search : undefined,
+        page: typeof page === "string" ? Number(page) : undefined,
+        limit: typeof limit === "string" ? Number(limit) : undefined,
+      });
+
+      if (!query) {
+        return HttpResponse(c).badRequest();
+      }
+
+      return HttpResponse(c).ok(
+        query.data,
+        query.meta,
+        "berhasil ambil semua skill",
+      );
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+  public async AddSkillInternShip(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+      const body = c.body as AddSkillsBody;
+
+      if (
+        !body.internProfileId ||
+        !Array.isArray(body.skills) ||
+        body.skills.length === 0
+      ) {
+        return HttpResponse(c).badRequest();
+      }
+
+      const authRespone = await unauthorizedValidate(user, c);
+
+      if (authRespone) return authRespone;
+
+      const query = await internshipService.AddSkillInternShip(body);
+
+      if (!query) {
+        return HttpResponse(c).badRequest();
+      }
+
+      return HttpResponse(c).ok(query, "berhasil menambahkan skill ");
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // DELETE /internships/remove-skill/:skillId
+  public async removeSkillInternShip(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+      const { skillId } = c.params;
+
+      const authRespone = await unauthorizedValidate(user, c);
+
+      if (authRespone) return authRespone;
+
+      if (!skillId) {
+        return HttpResponse(c).badRequest();
+      }
+
+      const query = await internshipService.removeSkillInternShip(
+        user.id,
+        skillId,
+      );
+
+      if (!query) {
+        return HttpResponse(c).badRequest();
+      }
+
+      return HttpResponse(c).ok(query, "berhasil menghapus skill dari profil");
     } catch (error) {
       return this.handleError(c, error);
     }

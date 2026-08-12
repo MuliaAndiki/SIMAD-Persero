@@ -1,11 +1,11 @@
-import { Card } from "@/components/atoms/card";
-import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
+import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
+import { Card } from '@/components/atoms/card';
 
-import InternProfileForm from "@/components/organisms/form/InternForm";
-import type { InstitutionResponse } from "@/types/api/institution.types";
-import { PickMergeInternship } from "@/types/api/internship.types";
-import { AlertCircle } from "lucide-react";
-import { FormEvent } from "react";
+import InternProfileForm from '@/components/organisms/form/InternForm';
+import type { InstitutionResponse } from '@/types/api/institution.types';
+import type { PickMergeInternship } from '@/types/api/internship.types';
+import { AlertCircle } from 'lucide-react';
+import type { FormEvent } from 'react';
 
 export interface InternProfileSectionProps {
   state: {
@@ -15,9 +15,7 @@ export interface InternProfileSectionProps {
     institutions: InstitutionResponse[];
     isSubmitting: boolean;
     formApplication: PickMergeInternship;
-    setFormApplication: React.Dispatch<
-      React.SetStateAction<PickMergeInternship>
-    >;
+    setFormApplication: React.Dispatch<React.SetStateAction<PickMergeInternship>>;
     institutionId: string;
     setInstitutionId: React.Dispatch<React.SetStateAction<string>>;
   };
@@ -26,10 +24,7 @@ export interface InternProfileSectionProps {
   };
 }
 
-export function InternProfileSection({
-  state,
-  service,
-}: InternProfileSectionProps) {
+export function InternProfileSection({ state, service }: InternProfileSectionProps) {
   if (state.isPending) {
     return (
       <PhantomSkeleton loading>
@@ -43,12 +38,9 @@ export function InternProfileSection({
       <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
         <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
         <div className="flex flex-col gap-0.5">
-          <span className="font-medium text-foreground">
-            Gagal memuat data institusi
-          </span>
+          <span className="font-medium text-foreground">Gagal memuat data institusi</span>
           <span className="text-muted-foreground">
-            {state.errorMessage ||
-              "Terjadi kesalahan saat mengambil data. Silakan coba lagi."}
+            {state.errorMessage || 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}
           </span>
         </div>
       </div>

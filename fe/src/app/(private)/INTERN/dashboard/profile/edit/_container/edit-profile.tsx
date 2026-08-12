@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { EditProfileSection } from "@/components/page/profile/EditProfileSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
+import { EditProfileSection } from '@/components/page/profile/EditProfileSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
 
 /**
  * Container halaman ubah profil (GET /users/profile; PATCH /users/profile).
@@ -19,7 +19,7 @@ export default function EditProfileContainer() {
 
   const handleUpdateProfile = (data: { fullName: string; phone: string }) => {
     updateProfile.mutate(data, {
-      onSuccess: () => ns.router.replace("/INTERN/dashboard/profile"),
+      onSuccess: () => ns.router.replace('/INTERN/dashboard/profile'),
     });
   };
 

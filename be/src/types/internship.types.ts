@@ -7,6 +7,7 @@ import type {
   IUser,
   IInternProfile,
   IInstitutionMajor,
+  IInternProfileSkill,
 } from "./models.types";
 
 /** Internship status values matching Prisma schema comment & state machine. */
@@ -89,3 +90,11 @@ export type PickCreateInternshipMajor = Pick<
 
 export type PickMergeInternship = PickCreateInternshipProfile &
   PickCreateInternshipMajor;
+
+export type AddSkillItem = Pick<IInternProfileSkill, "skillId" | "proficiency">;
+
+/** Body POST /internships/add-skills — kirim banyak skill sekaligus (bulk). */
+export type AddSkillsBody = {
+  internProfileId: string;
+  skills: AddSkillItem[];
+};
