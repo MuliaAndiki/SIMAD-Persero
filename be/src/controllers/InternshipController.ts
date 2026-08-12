@@ -1,11 +1,14 @@
-import type { AppContext } from '@/contex';
-import { HttpResponse, handleAppError } from '@/http';
-import internshipService from '@/services/internship.service';
+import type { AppContext } from "@/contex";
+import { HttpResponse, handleAppError } from "@/http";
+import internshipService from "@/services/internship.service";
+import type { JwtPayload } from "@/types/auth.types";
 import type {
   AssignSupervisorBody,
   ChangeDepartmentBody,
   ExtendInternshipBody,
-} from '@/types/internship.types';
+  PickMergeInternship,
+} from "@/types/internship.types";
+import { unauthorizedValidate } from "@/validation/auth.validate";
 
 /**
  * Thin controller for the Internship module.
@@ -41,7 +44,7 @@ class InternshipController {
   public async start(c: AppContext) {
     try {
       const data = await internshipService.start(c.params.id, c.user!.id);
-      return HttpResponse(c).ok(data, undefined, 'Internship started');
+      return HttpResponse(c).ok(data, undefined, "Internship started");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -51,7 +54,7 @@ class InternshipController {
   public async finish(c: AppContext) {
     try {
       const data = await internshipService.finish(c.params.id, c.user!.id);
-      return HttpResponse(c).ok(data, undefined, 'Internship completed');
+      return HttpResponse(c).ok(data, undefined, "Internship completed");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -61,8 +64,12 @@ class InternshipController {
   public async extend(c: AppContext) {
     try {
       const body = c.body as unknown as ExtendInternshipBody;
-      const data = await internshipService.extend(c.params.id, c.user!.id, body);
-      return HttpResponse(c).ok(data, undefined, 'Internship extended');
+      const data = await internshipService.extend(
+        c.params.id,
+        c.user!.id,
+        body,
+      );
+      return HttpResponse(c).ok(data, undefined, "Internship extended");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -72,8 +79,12 @@ class InternshipController {
   public async assignSupervisor(c: AppContext) {
     try {
       const body = c.body as unknown as AssignSupervisorBody;
-      const data = await internshipService.assignSupervisor(c.params.id, c.user!.id, body);
-      return HttpResponse(c).ok(data, undefined, 'Supervisor assigned');
+      const data = await internshipService.assignSupervisor(
+        c.params.id,
+        c.user!.id,
+        body,
+      );
+      return HttpResponse(c).ok(data, undefined, "Supervisor assigned");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -83,8 +94,12 @@ class InternshipController {
   public async changeDepartment(c: AppContext) {
     try {
       const body = c.body as unknown as ChangeDepartmentBody;
-      const data = await internshipService.changeDepartment(c.params.id, c.user!.id, body);
-      return HttpResponse(c).ok(data, undefined, 'Department changed');
+      const data = await internshipService.changeDepartment(
+        c.params.id,
+        c.user!.id,
+        body,
+      );
+      return HttpResponse(c).ok(data, undefined, "Department changed");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -94,7 +109,28 @@ class InternshipController {
   public async archive(c: AppContext) {
     try {
       const data = await internshipService.archive(c.params.id, c.user!.id);
-      return HttpResponse(c).ok(data, undefined, 'Internship archived');
+      return HttpResponse(c).ok(data, undefined, "Internship archived");
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /internships/profile
+  public async internProfile(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+      const authRespone = await unauthorizedValidate(user, c);
+      const payload = c.body as PickMergeInternship;
+
+      if (authRespone) return authRespone;
+
+      const query = await internshipService.internProfile(user.id, payload);
+
+      if (!query) {
+        return HttpResponse(c).badGateway();
+      }
+
+      return HttpResponse(c).ok(query);
     } catch (error) {
       return this.handleError(c, error);
     }

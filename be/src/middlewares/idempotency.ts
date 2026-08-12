@@ -1,5 +1,5 @@
-import type { AppContext } from "@/contex";
-import { ErrorCodes } from "@/http/error-codes";
+import type { AppContext } from '@/contex';
+import { ErrorCodes } from '@/http/error-codes';
 
 /**
  * Idempotency (API spec §29).
@@ -26,10 +26,10 @@ type IdempotencyOptions = {
 };
 
 type IdempotencyEntry =
-  | { state: "pending" }
-  | { state: "completed"; response: Response; expiresAt: number };
+  | { state: 'pending' }
+  | { state: 'completed'; response: Response; expiresAt: number };
 
-const IDEMPOTENCY_HEADER = "idempotency-key";
+const IDEMPOTENCY_HEADER = 'idempotency-key';
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
 const store = new Map<string, IdempotencyEntry>();
@@ -37,10 +37,10 @@ const store = new Map<string, IdempotencyEntry>();
 function sweepExpiredEntries(): void {
   const now = Date.now();
   for (const [key, entry] of store) {
-    if (entry.state === "completed" && entry.expiresAt <= now) {
+    if (entry.state === 'completed' && entry.expiresAt <= now) {
       store.delete(key);
     }
-    if (entry.state === "pending") {
+    if (entry.state === 'pending') {
       // Pending yang menggantung > TTL dianggap batal (handler error).
       store.delete(key);
     }
@@ -48,7 +48,7 @@ function sweepExpiredEntries(): void {
 }
 
 const sweepTimer = setInterval(sweepExpiredEntries, 60_000);
-if (typeof sweepTimer.unref === "function") {
+if (typeof sweepTimer.unref === 'function') {
   sweepTimer.unref();
 }
 
@@ -73,17 +73,17 @@ export const idempotency = (options: IdempotencyOptions = {}) => {
 
       const entry = store.get(key);
       if (!entry) {
-        store.set(key, { state: "pending" });
+        store.set(key, { state: 'pending' });
         return undefined;
       }
 
-      if (entry.state === "completed" && entry.expiresAt > Date.now()) {
+      if (entry.state === 'completed' && entry.expiresAt > Date.now()) {
         // Replay response yang sudah tersimpan — handler tidak dieksekusi.
         return entry.response.clone();
       }
 
-      if (entry.state === "completed") {
-        store.set(key, { state: "pending" });
+      if (entry.state === 'completed') {
+        store.set(key, { state: 'pending' });
         return undefined;
       }
 
@@ -92,7 +92,7 @@ export const idempotency = (options: IdempotencyOptions = {}) => {
         {
           status: 409,
           message:
-            "Permintaan dengan Idempotency-Key yang sama sedang diproses. Tunggu hingga selesai atau gunakan key baru.",
+            'Permintaan dengan Idempotency-Key yang sama sedang diproses. Tunggu hingga selesai atau gunakan key baru.',
           code: ErrorCodes.IDEM_001,
         },
         409,
@@ -105,13 +105,9 @@ export const idempotency = (options: IdempotencyOptions = {}) => {
         return;
       }
 
-      if (
-        c.response instanceof Response &&
-        c.response.status >= 200 &&
-        c.response.status < 300
-      ) {
+      if (c.response instanceof Response && c.response.status >= 200 && c.response.status < 300) {
         store.set(key, {
-          state: "completed",
+          state: 'completed',
           response: c.response,
           expiresAt: Date.now() + ttlMs,
         });

@@ -34,12 +34,12 @@ export const PWAInstallDialog = ({ trigger }: PWAInstallDialogProps) => {
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
       <AlertDialogContent className="w-full max-w-sm">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg">Download NutriPlate</AlertDialogTitle>
+          <AlertDialogTitle className="text-lg">Download SIMAD</AlertDialogTitle>
           <AlertDialogDescription className="text-sm">
             {isStandalone
-              ? 'NutriPlate sudah terpasang di perangkat kamu.'
+              ? 'SIMAD sudah terpasang di perangkat kamu.'
               : canInstall
-                ? 'Pasang NutriPlate sebagai aplikasi agar akses lebih cepat dan nyaman.'
+                ? 'Pasang SIMAD sebagai aplikasi agar akses lebih cepat dan nyaman.'
                 : 'Untuk memasang aplikasi, buka menu browser lalu pilih “Add to Home Screen” atau “Install App”.'}
           </AlertDialogDescription>
         </AlertDialogHeader>

@@ -61,7 +61,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
               className={cn(
                 'w-full py-3 pr-4 rounded-lg border-2 transition-colors duration-300 bg-white text-gray-950 max-h-[48px] text-start',
                 !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
-                error ? 'border-red-500' : 'border-gray-100 focus:border-purple-500',
+                error ? 'border-destructive' : 'border-gray-100 focus:border-primary',
                 inputClassName,
                 file ? 'text-gray-950' : 'text-gray-400',
               )}
@@ -97,7 +97,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
             className={cn(
               'w-full py-3 pr-4 rounded-lg focus:outline-none border-2 transition-colors duration-300 bg-white text-gray-950',
               !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
-              error ? 'border-red-500' : 'border-gray-100 focus:border-purple-500',
+              error ? 'border-destructive' : 'border-gray-100 focus:border-primary',
               inputClassName,
               'max-h-none',
             )}
@@ -122,7 +122,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
             'w-full py-3 rounded-lg focus:outline-none border-2 transition-colors duration-300 bg-white text-gray-950 max-h-[48px]',
             !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
             type === 'password' ? 'pr-12' : 'pr-4',
-            error ? 'border-red-500' : 'border-gray-100 focus:border-purple-500',
+            error ? 'border-destructive' : 'border-gray-100 focus:border-primary',
             inputClassName,
           )}
           placeholder={placeholder}
@@ -147,7 +147,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
             </label>
           )}
           {forgotPassword && type === 'password' && (
-            <Link href="/auth/forgot-password" className="text-blue-500 text-sm font-normal">
+            <Link href="/forgot-password" className="text-blue-500 text-sm font-normal">
               Forgot Password ?
             </Link>
           )}

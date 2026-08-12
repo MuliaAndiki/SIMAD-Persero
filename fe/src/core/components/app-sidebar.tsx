@@ -1,10 +1,5 @@
 'use client';
 
-import { cn } from '@/utils/classname';
-import { Calendar, Home, Inbox, Search, Settings } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-
 import {
   Sidebar,
   SidebarContent,
@@ -17,76 +12,73 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/atoms';
-import { kebabCaseToWords } from '@/utils/string.format';
+import { SIDEBAR_MENU, isMenuActive } from '@/configs/app.config';
+import { useInternAccess } from '@/hooks/useInternAccess';
+import { cn } from '@/utils/classname';
 import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-// Menu items with proper routes
-const items = [
-  {
-    title: 'Home',
-    url: '/',
-    icon: Home,
-  },
-  {
-    title: 'Inbox',
-    url: '/inbox',
-    icon: Inbox,
-  },
-  {
-    title: 'Calendar',
-    url: '/calendar',
-    icon: Calendar,
-  },
-  {
-    title: 'Search',
-    url: '/search',
-    icon: Search,
-  },
-  {
-    title: 'Settings',
-    url: '/settings',
-    icon: Settings,
-  },
-];
-
+/**
+ * Sidebar desktop (md+) — menampilkan navigasi modul SIMAD.
+ *
+ * Dibaca dari `SIDEBAR_MENU` (single source of truth di app.config)
+ * dan memakai warna semantik sidebar agar konsisten dengan tema PLN Blue.
+ */
 export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const { hasActiveInternship } = useInternAccess();
   const isCollapsed = state === 'collapsed';
+
+  // Sembunyikan menu yang menuntut magang aktif (Absensi/Riwayat) bila belum ada.
+  const menus = SIDEBAR_MENU.filter((item) => !item.requiresInternship || hasActiveInternship);
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="border-b p-4 h-20 flex justify-center">
+      <SidebarHeader className="flex h-20 justify-center border-b p-4">
         {isCollapsed ? (
-          // <LayoutDashboard className="size-4" />
-          <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
+          <Image src="/images/logos.png" alt="SIMAD" width={40} height={40} />
         ) : (
-          <div className="flex gap-2 items-center">
-            <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
-            <span className="text-xl font-semibold">{kebabCaseToWords(pathname)}</span>
-          </div>
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <Image src="/images/logos.png" alt="SIMAD" width={40} height={40} />
+            <div className="flex flex-col">
+              <span className="text-lg font-bold leading-tight text-sidebar-foreground">SIMAD</span>
+              <span className="text-[11px] leading-tight text-sidebar-foreground/60">
+                PLN Persero
+              </span>
+            </div>
+          </Link>
         )}
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>My Classes</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
-                const isActive = pathname === item.url;
+              {menus.map((item) => {
+                const isActive = isMenuActive(item.url, pathname);
+                const Icon = item.icon;
+
                 return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={isCollapsed ? item.title : undefined}>
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={isCollapsed ? item.name : undefined}
+                      isActive={isActive}
+                    >
                       <Link
                         href={item.url}
                         className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 h-10',
-                          isActive &&
-                            'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50',
+                          'flex h-10 items-center gap-3 rounded-lg px-3 transition-colors',
+                          isActive
+                            ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                            : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
                         )}
                       >
-                        <item.icon className="h-6 w-6 lg:h-10 lg:w-10" />
-                        <span className="text-base lg:text-lg">{!isCollapsed && item.title}</span>
+                        <Icon className="size-5 shrink-0" />
+                        <span className="text-sm">{!isCollapsed && item.name}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

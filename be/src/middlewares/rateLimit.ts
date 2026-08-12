@@ -1,5 +1,5 @@
-import type { AppContext } from "@/contex";
-import { ErrorCodes } from "@/http/error-codes";
+import type { AppContext } from '@/contex';
+import { ErrorCodes } from '@/http/error-codes';
 
 /**
  * Rate Limiting (API spec §28).
@@ -54,24 +54,24 @@ function sweepExpiredBuckets(): void {
 
 // Sweep berkala supaya Map tidak membengkak pada traffic tinggi.
 const sweepTimer = setInterval(sweepExpiredBuckets, 60_000);
-if (typeof sweepTimer.unref === "function") {
+if (typeof sweepTimer.unref === 'function') {
   sweepTimer.unref();
 }
 
 function getClientIp(c: AppContext): string {
-  const forwarded = c.request.headers.get("x-forwarded-for");
+  const forwarded = c.request.headers.get('x-forwarded-for');
   if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
+    const first = forwarded.split(',')[0]?.trim();
     if (first) {
       return first;
     }
   }
   const ip = c.server?.requestIP(c.request)?.address;
-  return ip ?? "unknown";
+  return ip ?? 'unknown';
 }
 
 /** Key generator berbasis userId — dipakai untuk endpoint terautentikasi. */
-export const keyByUser = (c: AppContext): string => c.user?.id ?? "anonymous";
+export const keyByUser = (c: AppContext): string => c.user?.id ?? 'anonymous';
 
 export const rateLimit = (options: RateLimitOptions) => ({
   beforeHandle: (c: AppContext) => {
@@ -89,12 +89,11 @@ export const rateLimit = (options: RateLimitOptions) => ({
 
     if (entry.count > options.max) {
       const retryAfter = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
-      c.set.headers["Retry-After"] = String(retryAfter);
+      c.set.headers['Retry-After'] = String(retryAfter);
       return c.json?.(
         {
           status: 429,
-          message:
-            options.message ?? "Terlalu banyak permintaan, coba lagi nanti.",
+          message: options.message ?? 'Terlalu banyak permintaan, coba lagi nanti.',
           code: ErrorCodes.RATE_LIMIT_001,
           retryAfterSeconds: retryAfter,
         },
@@ -108,14 +107,14 @@ export const rateLimit = (options: RateLimitOptions) => ({
 
 /** Konstanta batas bawaan API spec §28. */
 export const RateLimitRule = {
-  LOGIN: { windowMs: 60_000, max: 5, keyPrefix: "auth:login" },
+  LOGIN: { windowMs: 60_000, max: 5, keyPrefix: 'auth:login' },
   FORGOT_PASSWORD: {
     windowMs: 60 * 60_000,
     max: 3,
-    keyPrefix: "auth:forgot-password",
+    keyPrefix: 'auth:forgot-password',
   },
-  MAGIC_LINK: { windowMs: 60 * 60_000, max: 5, keyPrefix: "auth:magic-link" },
-  REGISTER: { windowMs: 60 * 60_000, max: 10, keyPrefix: "auth:register" },
-  ATTENDANCE: { windowMs: 10_000, max: 1, keyPrefix: "attendance" },
-  UPLOAD: { windowMs: 60_000, max: 10, keyPrefix: "upload" },
+  MAGIC_LINK: { windowMs: 60 * 60_000, max: 5, keyPrefix: 'auth:magic-link' },
+  REGISTER: { windowMs: 60 * 60_000, max: 10, keyPrefix: 'auth:register' },
+  ATTENDANCE: { windowMs: 10_000, max: 1, keyPrefix: 'attendance' },
+  UPLOAD: { windowMs: 60_000, max: 10, keyPrefix: 'upload' },
 } as const;
