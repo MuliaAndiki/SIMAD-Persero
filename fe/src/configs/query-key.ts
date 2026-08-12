@@ -50,6 +50,12 @@ export const queryKey = {
     detail: (id: string) => ['internship', 'detail', id] as const,
   },
 
+  institutionRoot: () => ['institution'] as const,
+  institution: {
+    list: (query?: Record<string, any>) => ['institution', 'list', query] as const,
+    detail: (institutionId: string) => ['institution', 'detail', institutionId] as const,
+  },
+
   attendanceRoot: () => ['attendance'] as const,
   attendance: {
     my: (query?: Record<string, any>) => ['attendance', 'my', query] as const,

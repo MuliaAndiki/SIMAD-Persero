@@ -1,7 +1,9 @@
 import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { InternDashboardResponse } from '@/types/api/dashboard.types';
 import { Award, Bell, Briefcase, CalendarCheck, MapPin } from 'lucide-react';
+import Link from 'next/link';
 
 function attendanceStatusLabel(status: string | null): string {
   switch (status) {
@@ -100,31 +102,65 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
-              <p className="text-sm text-muted-foreground">
-                Anda belum memiliki pengajuan magang yang disetujui. Setelah pengajuan disetujui HR,
-                dashboard magang aktif akan muncul di sini.
-              </p>
-              <ol className="flex flex-col gap-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    1
-                  </span>
-                  Lengkapi pengajuan magang pada menu Pengajuan.
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    2
-                  </span>
-                  Tunggu persetujuan HR terhadap surat pengantar Anda.
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    3
-                  </span>
-                  Setelah disetujui, absensi harian akan aktif otomatis.
-                </li>
-              </ol>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Anda belum memiliki pengajuan magang yang disetujui. Ikuti tata cara pengajuan
+                  magang berikut agar menu Absensi & Riwayat aktif:
+                </p>
+                <ol className="flex flex-col gap-2.5 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      1
+                    </span>
+                    <span>
+                      Pastikan <strong>profil Anda lengkap</strong> pada menu Profil.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      2
+                    </span>
+                    <span>
+                      Buka menu <strong>Pengajuan</strong> untuk memulai pengajuan magang.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      3
+                    </span>
+                    <span>Isi tanggal mulai & selesai magang serta motivasi Anda.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      4
+                    </span>
+                    <span>
+                      Unggah surat pengantar <strong>(PDF, maks. 5 MB)</strong>.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      5
+                    </span>
+                    <span>
+                      Klik <strong>Kirim Pengajuan</strong> lalu tunggu persetujuan HR.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      6
+                    </span>
+                    <span>
+                      Setelah disetujui, <strong>Absensi</strong> & <strong>Riwayat</strong> akan
+                      aktif otomatis.
+                    </span>
+                  </li>
+                </ol>
+              </div>
+              <Button asChild size="sm" className="w-fit">
+                <Link href="/INTERN/dashboard/application">Ajukan Magang Sekarang</Link>
+              </Button>
             </div>
           )}
         </CardContent>

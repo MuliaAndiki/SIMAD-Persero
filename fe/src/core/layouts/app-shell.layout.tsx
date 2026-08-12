@@ -38,7 +38,7 @@ export function AppShell({ children }: AppShellProps) {
           {/* Logo mobile (md:hidden) */}
           <div className="flex items-center gap-2 md:hidden">
             <Image
-              src="/images/logo.png"
+              src="/images/logos.png"
               alt="SIMAD"
               width={32}
               height={32}
@@ -51,13 +51,17 @@ export function AppShell({ children }: AppShellProps) {
 
           {/* Aksi header */}
           <div className="ml-auto flex items-center gap-3">
-            <PWAInstallDialog
+            {/* <PWAInstallDialog
               trigger={
-                <Button variant="ghost" className="p-0" aria-label="Install SIMAD">
+                <Button
+                  variant="ghost"
+                  className="p-0"
+                  aria-label="Install SIMAD"
+                >
                   <Download className="h-5 w-5" />
                 </Button>
               }
-            />
+            /> */}
             <ThemeToggle />
             <LanguageDropdown />
             <NotificationDropdown />

@@ -3,6 +3,9 @@ import { useAttendance } from './attendance/useAttendance';
 import { useAuth } from './auth/useAuth';
 import { useDashboard } from './dashboard/useDashboard';
 import { useFile } from './file/useFile';
+import { useInstitution } from './institution/useInstitution';
+import { useInternship } from './internship/useInternship';
+import { useUser } from './user/useUser';
 
 /**
  * Single entry point seluruh endpoint frontend.
@@ -23,5 +26,8 @@ export function useApi() {
     attendance: useAttendance(),
     application: useApplication(),
     file: useFile(),
+    institution: useInstitution(),
+    internship: useInternship(),
+    user: useUser(),
   };
 }

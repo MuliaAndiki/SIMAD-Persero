@@ -13,6 +13,7 @@ import {
   useSidebar,
 } from '@/components/atoms';
 import { SIDEBAR_MENU, isMenuActive } from '@/configs/app.config';
+import { useInternAccess } from '@/hooks/useInternAccess';
 import { cn } from '@/utils/classname';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -27,16 +28,20 @@ import { usePathname } from 'next/navigation';
 export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const { hasActiveInternship } = useInternAccess();
   const isCollapsed = state === 'collapsed';
+
+  // Sembunyikan menu yang menuntut magang aktif (Absensi/Riwayat) bila belum ada.
+  const menus = SIDEBAR_MENU.filter((item) => !item.requiresInternship || hasActiveInternship);
 
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="flex h-20 justify-center border-b p-4">
         {isCollapsed ? (
-          <Image src="/images/logo.png" alt="SIMAD" width={40} height={40} />
+          <Image src="/images/logos.png" alt="SIMAD" width={40} height={40} />
         ) : (
           <Link href="/dashboard" className="flex items-center gap-3">
-            <Image src="/images/logo.png" alt="SIMAD" width={40} height={40} />
+            <Image src="/images/logos.png" alt="SIMAD" width={40} height={40} />
             <div className="flex flex-col">
               <span className="text-lg font-bold leading-tight text-sidebar-foreground">SIMAD</span>
               <span className="text-[11px] leading-tight text-sidebar-foreground/60">
@@ -52,7 +57,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {SIDEBAR_MENU.map((item) => {
+              {menus.map((item) => {
                 const isActive = isMenuActive(item.url, pathname);
                 const Icon = item.icon;
 

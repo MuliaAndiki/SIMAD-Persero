@@ -3,6 +3,7 @@
 import { ApplicationSection } from '@/components/page/application/ApplicationSection';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useApi } from '@/hooks/useService/useApi';
+import { useEffect, useRef } from 'react';
 
 /**
  * Container untuk modul Internship Application (untuk INTERN).
@@ -11,9 +12,25 @@ import { useApi } from '@/hooks/useService/useApi';
 export default function ApplicationContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
+  const redirectedRef = useRef(false);
 
   // Queries
   const myApps = api.application.query.my();
+
+  // Profil intern belum lengkap (422 "Intern profile not found ...") —
+  // arahkan ke halaman profil agar user melengkapi data terlebih dahulu.
+  useEffect(() => {
+    if (!redirectedRef.current && myApps.error?.message?.includes('Intern profile not found')) {
+      redirectedRef.current = true;
+      ns.alert.toast({
+        title: 'Lengkapi Profil Terlebih Dahulu',
+        message:
+          'Profil intern belum lengkap. Silakan lengkapi profil Anda sebelum mengajukan magang.',
+        icon: 'warning',
+      });
+      ns.router.replace('/INTERN/dashboard/profile');
+    }
+  }, [myApps.error?.message, ns.alert, ns.router]);
 
   // Mutations
   const createMutation = api.application.mutate.create();

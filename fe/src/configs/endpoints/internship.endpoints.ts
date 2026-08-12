@@ -24,4 +24,6 @@ export const INTERNSHIP_ENDPOINTS = {
   CHANGE_DEPARTMENT: (id: string) => `/internships/${id}/change-department`,
   /** PATCH /internships/:id/archive — Arsipkan magang (HR_ADMIN) */
   ARCHIVE: (id: string) => `/internships/${id}/archive`,
+  /** POST /internships/profile — Simpan profil peserta magang (INTERN) */
+  PROFILE: '/internships/profile',
 } as const;

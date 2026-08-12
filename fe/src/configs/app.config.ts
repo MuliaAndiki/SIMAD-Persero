@@ -1,5 +1,5 @@
 import type { DashboardRole } from '@/types/api/dashboard.types';
-import { Clock, FileText, History, Home, User } from 'lucide-react';
+import { Clock, FileText, History, Home, type LucideIcon, User } from 'lucide-react';
 import type React from 'react';
 
 interface AppConfig {
@@ -102,7 +102,19 @@ export const navigationMenuConfig: NavigationMenuConfig = {
   ],
 };
 
-export const SIDEBAR_MENU = [
+export interface SidebarMenuItem {
+  name: string;
+  url: string;
+  icon: LucideIcon;
+  subMenu: [];
+  /**
+   * Menu hanya boleh diakses jika intern memiliki magang aktif
+   * (`internship` tidak null pada GET /dashboard/intern).
+   */
+  requiresInternship?: boolean;
+}
+
+export const SIDEBAR_MENU: SidebarMenuItem[] = [
   { name: 'Beranda', url: '/INTERN/dashboard', icon: Home, subMenu: [] },
   {
     name: 'Pengajuan',
@@ -115,12 +127,14 @@ export const SIDEBAR_MENU = [
     url: '/INTERN/dashboard/attendance',
     icon: Clock,
     subMenu: [],
+    requiresInternship: true,
   },
   {
     name: 'Riwayat',
     url: '/INTERN/dashboard/history',
     icon: History,
     subMenu: [],
+    requiresInternship: true,
   },
   { name: 'Profil', url: '/INTERN/dashboard/profile', icon: User, subMenu: [] },
 ];

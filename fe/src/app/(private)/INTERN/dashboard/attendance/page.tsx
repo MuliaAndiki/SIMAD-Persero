@@ -1,3 +1,4 @@
+import { InternAccessGate } from '@/components/page/intern/InternAccessGate';
 import type { Metadata } from 'next';
 import AttendanceContainer from './_containers/attendance';
 
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function AttendancePage() {
-  return <AttendanceContainer />;
+  return (
+    <InternAccessGate>
+      <AttendanceContainer />
+    </InternAccessGate>
+  );
 }

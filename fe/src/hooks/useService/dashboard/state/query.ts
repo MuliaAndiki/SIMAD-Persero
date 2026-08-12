@@ -4,13 +4,14 @@ import Api from '@/services/props.service';
 import type { RecentActivityQuery } from '@/types/api/dashboard.types';
 import { useQuery } from '@tanstack/react-query';
 
-export function useDashboardIntern() {
+export function useDashboardIntern(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKey.dashboard.intern(),
     queryFn: async () => {
       const res = await Api.Dashboard.Intern();
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }
 

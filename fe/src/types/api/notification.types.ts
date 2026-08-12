@@ -6,6 +6,8 @@
  * (be/src/controllers/NotificationController.ts).
  */
 
+import type { INotification } from "./model.type";
+
 // ---------- Payload (request body / query / path params) ----------
 
 export interface NotificationQuery {
@@ -28,17 +30,11 @@ export interface NotificationParams {
 // ---------- Response (data dari backend) ----------
 
 /** Data satu notifikasi hasil serialisasi backend. */
-export interface NotificationResponse {
-  id: string;
+export interface NotificationResponse extends Omit<INotification, "typeId"> {
   typeId: string;
   typeCode: string | null;
   typeName: string;
-  title: string;
-  message: string;
-  isBroadcast: boolean;
-  senderId: string;
   senderName: string | null;
-  createdAt: string;
   readAt: string | null;
   isRead: boolean;
 }

@@ -6,11 +6,14 @@
  * (be/src/controllers/CertificateController.ts).
  */
 
+import type { ICertificate } from "./model.type";
+
 // ---------- Payload (request body / path params) ----------
 
-export interface GenerateCertificateBody {
-  internshipId: string;
-}
+export interface GenerateCertificateBody extends Pick<
+  ICertificate,
+  "internshipId"
+> {}
 
 export interface CertificateParams {
   certificateId: string;
@@ -23,8 +26,17 @@ export interface CertificateVerifyParams {
 // ---------- Response (data dari backend) ----------
 
 /** Sertifikat hasil serialisasi backend (GET /certificates/me, GET /certificates/:certificateId). */
-export interface CertificateResponse {
-  id: string;
+export interface CertificateResponse extends Omit<
+  ICertificate,
+  | "internshipId"
+  | "certificateNumber"
+  | "templateId"
+  | "fileId"
+  | "generatedById"
+  | "generatedAt"
+  | "verificationToken"
+  | "createdAt"
+> {
   internshipId: string;
   certificateNumber: string;
   templateId: string;

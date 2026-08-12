@@ -2,6 +2,7 @@ import {
   useArchiveInternship,
   useAssignSupervisorInternship,
   useChangeDepartmentInternship,
+  useCreateInternProfile,
   useExtendInternship,
   useFinishInternship,
   useStartInternship,
@@ -21,6 +22,7 @@ export const useInternship = () => {
       assignSupervisor: useAssignSupervisorInternship,
       changeDepartment: useChangeDepartmentInternship,
       archive: useArchiveInternship,
+      createProfile: useCreateInternProfile,
     },
   };
 };

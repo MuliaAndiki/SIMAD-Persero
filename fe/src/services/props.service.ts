@@ -6,6 +6,7 @@ import certificateService from '@/services/api/certificate.service';
 import dashboardService from '@/services/api/dashboard.service';
 import departmentService from '@/services/api/department.service';
 import fileService from '@/services/api/file.service';
+import institutionService from '@/services/api/institution.service';
 import internshipService from '@/services/api/internship.service';
 import notificationService from '@/services/api/notification.service';
 import officeService from '@/services/api/office.service';
@@ -20,6 +21,7 @@ class Api {
   static Auth = WrapApi(authService);
   static Department = WrapApi(departmentService);
   static Office = WrapApi(officeService);
+  static Institution = WrapApi(institutionService);
   static User = WrapApi(userService);
   static File = WrapApi(fileService);
   static Application = WrapApi(applicationService);

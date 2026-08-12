@@ -6,6 +6,8 @@
  * (be/src/controllers/AuditLogController.ts).
  */
 
+import type { IAuditLog } from "./model.type";
+
 // ---------- Payload (query / path params) ----------
 
 export interface AuditLogQuery {
@@ -36,8 +38,17 @@ export interface AuditLogUser {
 }
 
 /** Data satu audit log (GET /audit-logs, GET /audit-logs/:auditId). */
-export interface AuditLogResponse {
-  id: string;
+export interface AuditLogResponse extends Omit<
+  IAuditLog,
+  | "userId"
+  | "module"
+  | "action"
+  | "tableName"
+  | "recordId"
+  | "oldData"
+  | "newData"
+  | "createdAt"
+> {
   user: AuditLogUser | null;
   module: string;
   action: string;
@@ -45,7 +56,5 @@ export interface AuditLogResponse {
   recordId: string;
   oldData: Record<string, unknown> | null;
   newData: Record<string, unknown> | null;
-  ipAddress: string | null;
-  userAgent: string | null;
   createdAt: string;
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { SIDEBAR_MENU, isMenuActive } from '@/configs/app.config';
+import { useInternAccess } from '@/hooks/useInternAccess';
 import { cn } from '@/utils/classname';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,6 +14,10 @@ import { usePathname } from 'next/navigation';
  */
 export function BottomNav() {
   const pathname = usePathname();
+  const { hasActiveInternship } = useInternAccess();
+
+  // Sembunyikan menu yang menuntut magang aktif (Absensi/Riwayat) bila belum ada.
+  const menus = SIDEBAR_MENU.filter((item) => !item.requiresInternship || hasActiveInternship);
 
   return (
     <nav
@@ -20,7 +25,7 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/90 backdrop-blur-md md:hidden"
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around px-2 pb-[env(safe-area-inset-bottom)]">
-        {SIDEBAR_MENU.map((item) => {
+        {menus.map((item) => {
           const isActive = isMenuActive(item.url, pathname);
           const Icon = item.icon;
 

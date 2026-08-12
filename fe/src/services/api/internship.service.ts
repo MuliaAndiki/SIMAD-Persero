@@ -4,6 +4,8 @@ import { INTERNSHIP_ENDPOINTS } from '@/configs/endpoints/internship.endpoints';
 import type {
   AssignSupervisorBody,
   ChangeDepartmentBody,
+  CreateInternProfileBody,
+  CreateInternProfileResponse,
   ExtendInternshipBody,
   InternshipParams,
   InternshipResponse,
@@ -128,6 +130,23 @@ class InternshipService {
       {},
     );
     return toServiceResponse(res, { message: 'Magang berhasil diarsipkan' });
+  }
+
+  /**
+   * POST /internships/profile
+   * Membuat/update profil magang (INTERN).
+   */
+  public async CreateProfile(
+    body: CreateInternProfileBody,
+  ): Promise<TResponse<CreateInternProfileResponse>> {
+    const res = await client.PostResponse<CreateInternProfileResponse>(
+      INTERNSHIP_ENDPOINTS.PROFILE,
+      body,
+    );
+    return toServiceResponse(res, {
+      message: 'Profil magang berhasil disimpan',
+      statusCode: 201,
+    });
   }
 }
 

@@ -6,16 +6,18 @@
  * (be/src/controllers/ApplicationController.ts).
  */
 
+import type { IInternship, IInternshipApplication } from "./model.type";
+
 // ---------- Payload (request body / query / path params) ----------
 
 /** Status aplikasi magang — cocok dengan vocabulary backend (application.types.ts). */
 export type ApplicationStatusValue =
-  | 'DRAFT'
-  | 'SUBMITTED'
-  | 'UNDER_REVIEW'
-  | 'APPROVED'
-  | 'REJECTED'
-  | 'RESUBMITTED';
+  | "DRAFT"
+  | "SUBMITTED"
+  | "UNDER_REVIEW"
+  | "APPROVED"
+  | "REJECTED"
+  | "RESUBMITTED";
 
 export interface CreateApplicationBody {
   requestedStartDate: string;
@@ -24,12 +26,7 @@ export interface CreateApplicationBody {
   coverLetterFileId: string;
 }
 
-export interface UpdateApplicationBody {
-  requestedStartDate?: string;
-  requestedEndDate?: string;
-  motivation?: string;
-  coverLetterFileId?: string;
-}
+export type UpdateApplicationBody = Partial<CreateApplicationBody>;
 
 export interface ApproveApplicationBody {
   departmentId: string;
@@ -83,20 +80,11 @@ export interface ApplicationInternProfile {
 }
 
 /** Data satu aplikasi magang (GET /applications/me, GET /applications/:id, ...). */
-export interface ApplicationResponse {
-  id: string;
-  internProfileId: string;
-  applicationNumber: string | null;
-  introductionLetterFileId: string;
-  requestedStartDate: string | null;
-  requestedEndDate: string | null;
-  motivation: string | null;
+export interface ApplicationResponse extends Omit<
+  IInternshipApplication,
+  "status"
+> {
   status: ApplicationStatusValue | null;
-  reviewedById: string | null;
-  reviewedAt: string | null;
-  rejectionReason: string | null;
-  createdAt: string | null;
-  updatedAt: string | null;
   introductionLetterFile?: ApplicationFileRef | null;
   internProfile?: ApplicationInternProfile | null;
   reviewedBy?: ApplicationUserRef | null;
@@ -106,18 +94,5 @@ export interface ApplicationResponse {
 /** Hasil approve aplikasi — aplikasi ter-update + internship baru dibuat. */
 export interface ApproveApplicationResponse {
   application: ApplicationResponse;
-  internship: {
-    id: string;
-    applicationId: string | null;
-    internProfileId: string | null;
-    departmentId: string | null;
-    officeLocationId: string | null;
-    actualStartDate: string | null;
-    actualEndDate: string | null;
-    status: string | null;
-    onboardingCompleted: boolean;
-    completedAt: string | null;
-    createdAt: string | null;
-    updatedAt: string | null;
-  };
+  internship: IInternship;
 }

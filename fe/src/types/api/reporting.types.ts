@@ -6,6 +6,8 @@
  * (be/src/controllers/ReportingController.ts).
  */
 
+import type { IAttendance, ICertificate, IInternship } from "./model.type";
+
 // ---------- Payload (query) ----------
 
 export interface ReportingQuery {
@@ -18,7 +20,14 @@ export interface ReportingQuery {
 // ---------- Response (data dari backend) ----------
 
 /** Baris laporan absensi (GET /reports/attendance). */
-export interface AttendanceReportRow {
+export interface AttendanceReportRow extends Pick<
+  IAttendance,
+  | "checkInAt"
+  | "checkOutAt"
+  | "checkInStatus"
+  | "checkOutStatus"
+  | "totalWorkMinutes"
+> {
   date: string;
   intern: string;
   email: string;
@@ -26,16 +35,14 @@ export interface AttendanceReportRow {
   institution: string;
   department: string;
   office: string;
-  checkInAt: string | null;
-  checkOutAt: string | null;
-  checkInStatus: string | null;
-  checkOutStatus: string | null;
   status: string | null;
-  totalWorkMinutes: number | null;
 }
 
 /** Baris laporan peserta magang (GET /reports/internships). */
-export interface InternshipReportRow {
+export interface InternshipReportRow extends Pick<
+  IInternship,
+  "actualStartDate" | "actualEndDate" | "status"
+> {
   intern: string;
   email: string;
   studentNumber: string;
@@ -43,19 +50,17 @@ export interface InternshipReportRow {
   major: string;
   department: string;
   office: string;
-  actualStartDate: string | null;
-  actualEndDate: string | null;
-  status: string | null;
   supervisor: string;
 }
 
 /** Baris laporan sertifikat (GET /reports/certificates). */
-export interface CertificateReportRow {
-  certificateNumber: string;
+export interface CertificateReportRow extends Pick<
+  ICertificate,
+  "certificateNumber" | "generatedAt"
+> {
   intern: string;
   email: string;
   department: string;
-  generatedAt: string | null;
   generatedBy: string;
 }
 
