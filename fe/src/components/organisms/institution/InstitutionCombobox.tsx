@@ -1,5 +1,6 @@
-import { Button } from '@/components/atoms/button';
+import { useState } from 'react';
 
+import { Button } from '@/components/atoms/button';
 import {
   Command,
   CommandEmpty,
@@ -8,11 +9,10 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/atoms/command';
-
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/atoms/popover';
 import type { InstitutionResponse } from '@/types/api/institution.types';
 import { Building2, ChevronsUpDown } from 'lucide-react';
-import { useState } from 'react';
+
 export function InstitutionCombobox({
   institutions,
   value,

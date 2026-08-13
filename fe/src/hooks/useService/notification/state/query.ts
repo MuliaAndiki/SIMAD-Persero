@@ -4,23 +4,25 @@ import Api from '@/services/props.service';
 import type { NotificationParams, NotificationQuery } from '@/types/api/notification.types';
 import { useQuery } from '@tanstack/react-query';
 
-export function useNotificationList(query?: NotificationQuery) {
+export function useNotificationList(query?: NotificationQuery, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKey.notification.list(query),
     queryFn: async () => {
       const res = await Api.Notification.List(query);
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }
 
-export function useUnreadCount() {
+export function useUnreadCount(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKey.notification.unreadCount(),
     queryFn: async () => {
       const res = await Api.Notification.UnreadCount();
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }
 

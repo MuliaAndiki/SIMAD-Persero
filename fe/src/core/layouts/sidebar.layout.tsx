@@ -3,8 +3,8 @@
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/atoms';
 import { AppSidebar } from '@/core/components/app-sidebar';
 
+import NotificationDropdownContainer from '@/core/containers/notification.dropdown.container';
 import LanguageDropdown from '../components/language.dropdown';
-import NotificationDropdown from '../components/notification.dropdown';
 import ThemeToggle from '../components/theme-toggle';
 // import UserDropdown from '../components/user.dropdown';
 
@@ -42,7 +42,7 @@ export function SidebarLayout({ children }: AppLayoutProps) {
                 <div className="flex items-center gap-4">
                   <ThemeToggle />
                   <LanguageDropdown />
-                  <NotificationDropdown />
+                  <NotificationDropdownContainer />
                   {/* <UserDropdown /> */}
                 </div>
               </div>

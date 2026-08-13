@@ -5,8 +5,8 @@ import { PWAInstallDialog } from '@/components/pwa/PWAInstallDialog';
 import { AppSidebar } from '@/core/components/app-sidebar';
 import { BottomNav } from '@/core/components/bottom-nav';
 import LanguageDropdown from '@/core/components/language.dropdown';
-import NotificationDropdown from '@/core/components/notification.dropdown';
 import ThemeToggle from '@/core/components/theme-toggle';
+import NotificationDropdownContainer from '@/core/containers/notification.dropdown.container';
 import { Download } from 'lucide-react';
 import Image from 'next/image';
 
@@ -64,7 +64,7 @@ export function AppShell({ children }: AppShellProps) {
             /> */}
             <ThemeToggle />
             <LanguageDropdown />
-            <NotificationDropdown />
+            <NotificationDropdownContainer />
             <Image
               src="/avatars/2.png"
               alt="Avatar"

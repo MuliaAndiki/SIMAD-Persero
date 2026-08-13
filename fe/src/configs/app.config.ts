@@ -1,5 +1,18 @@
 import type { DashboardRole } from '@/types/api/dashboard.types';
-import { Clock, FileText, History, Home, type LucideIcon, User } from 'lucide-react';
+import {
+  BarChart3,
+  Building2,
+  Clock,
+  FileText,
+  History,
+  Home,
+  type LucideIcon,
+  MapPin,
+  ScrollText,
+  User,
+  UserCheck,
+  Users,
+} from 'lucide-react';
 import type React from 'react';
 
 interface AppConfig {
@@ -139,6 +152,71 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
   { name: 'Profil', url: '/INTERN/dashboard/profile', icon: User, subMenu: [] },
 ];
 
+/** Menu sidebar khusus HR_ADMIN. */
+export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
+  { name: 'Beranda', url: '/HR_ADMIN/dashboard', icon: Home, subMenu: [] },
+  {
+    name: 'Pengajuan',
+    url: '/HR_ADMIN/dashboard/applications',
+    icon: FileText,
+    subMenu: [],
+  },
+  {
+    name: 'Departemen',
+    url: '/HR_ADMIN/dashboard/departments',
+    icon: Building2,
+    subMenu: [],
+  },
+  {
+    name: 'Kantor',
+    url: '/HR_ADMIN/dashboard/offices',
+    icon: MapPin,
+    subMenu: [],
+  },
+  {
+    name: 'Supervisor',
+    url: '/HR_ADMIN/dashboard/supervisors',
+    icon: UserCheck,
+    subMenu: [],
+  },
+  {
+    name: 'Laporan',
+    url: '/HR_ADMIN/dashboard/reports',
+    icon: BarChart3,
+    subMenu: [],
+  },
+  {
+    name: 'Audit Log',
+    url: '/HR_ADMIN/dashboard/audit-logs',
+    icon: ScrollText,
+    subMenu: [],
+  },
+];
+
+/** Menu sidebar khusus SUPERVISOR. */
+export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
+  { name: 'Beranda', url: '/SUPERVISOR/dashboard', icon: Home, subMenu: [] },
+  {
+    name: 'Intern Bimbingan',
+    url: '/SUPERVISOR/dashboard/interns',
+    icon: Users,
+    subMenu: [],
+  },
+  {
+    name: 'Absensi',
+    url: '/SUPERVISOR/dashboard/attendance',
+    icon: Clock,
+    subMenu: [],
+  },
+];
+
+/** Peta menu sidebar per role — dipakai AppSidebar (single source of truth). */
+export const ROLE_SIDEBAR_MENU: Record<DashboardRole, SidebarMenuItem[]> = {
+  INTERN: SIDEBAR_MENU,
+  HR_ADMIN: SIDEBAR_MENU_HR_ADMIN,
+  SUPERVISOR: SIDEBAR_MENU_SUPERVISOR,
+};
+
 /** Label role untuk UI (header dashboard, badge, dll). */
 export const DASHBOARD_ROLE_LABELS: Record<DashboardRole, string> = {
   INTERN: 'Peserta Magang',
@@ -186,12 +264,14 @@ export function getRoleDashboardPath(role?: string | null): string {
  * /INTERN/dashboard, /HR_ADMIN/dashboard, atau /SUPERVISOR/dashboard.
  */
 export function isMenuActive(menuUrl: string, pathname: string): boolean {
-  if (menuUrl === '/dashboard' || menuUrl === '/INTERN/dashboard') {
+  const isDashboardPath = (url: string) => url === '/dashboard' || url.endsWith('/dashboard');
+
+  // Menu Beranda aktif saat berada di area dashboard role manapun.
+  if (isDashboardPath(menuUrl)) {
     return (
-      pathname === '/dashboard' ||
-      pathname === '/INTERN/dashboard' ||
-      pathname === '/HR_ADMIN/dashboard' ||
-      pathname === '/SUPERVISOR/dashboard'
+      pathname === menuUrl ||
+      pathname.startsWith(`${menuUrl}/`) ||
+      (menuUrl === '/INTERN/dashboard' && pathname === '/dashboard')
     );
   }
   return pathname === menuUrl || pathname.startsWith(`${menuUrl}/`);
