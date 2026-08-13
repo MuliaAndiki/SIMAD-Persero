@@ -23,7 +23,7 @@ const { client } = Api();
 
 class DashboardService {
   /**
-   * GET /dashboard/intern
+   * GET /intern/dashboard
    * Mengambil dashboard intern (INTERN).
    */
   public async Intern(): Promise<TResponse<InternDashboardResponse>> {
@@ -34,7 +34,7 @@ class DashboardService {
   }
 
   /**
-   * GET /dashboard/hr
+   * GET /hr-admin/dashboard
    * Mengambil dashboard HR (HR_ADMIN).
    */
   public async Hr(): Promise<TResponse<HrDashboardResponse>> {
@@ -43,7 +43,7 @@ class DashboardService {
   }
 
   /**
-   * GET /dashboard/supervisor
+   * GET /supervisor/dashboard
    * Mengambil dashboard supervisor (SUPERVISOR).
    */
   public async Supervisor(): Promise<TResponse<SupervisorDashboardData>> {
@@ -54,7 +54,7 @@ class DashboardService {
   }
 
   /**
-   * GET /dashboard/statistics
+   * GET /hr-admin/dashboard/statistics
    * Mengambil statistik dashboard (HR_ADMIN).
    */
   public async Statistics(): Promise<TResponse<DashboardStatistics>> {
@@ -63,7 +63,7 @@ class DashboardService {
   }
 
   /**
-   * GET /dashboard/charts
+   * GET /hr-admin/dashboard/charts
    * Mengambil data chart dashboard (HR_ADMIN).
    */
   public async Charts(): Promise<TResponse<ChartsResponse>> {
@@ -72,8 +72,8 @@ class DashboardService {
   }
 
   /**
-   * GET /dashboard/recent-activities
-   * Mengambil aktivitas terbaru (semua role).
+   * GET /hr-admin/dashboard/recent-activities
+   * Mengambil aktivitas terbaru (HR_ADMIN).
    */
   public async RecentActivities(
     query?: RecentActivityQuery,

@@ -258,8 +258,72 @@ SIMAD terdiri dari beberapa modul utama.
 
 ---
 
-# Next Document
+# Next Documents
 
-➡️ **01-overview.md**
+Dokumentasi teknis dan fungsional SIMAD dikembangkan secara bertahap berdasarkan urutan berikut:
 
-Dokumen selanjutnya menjelaskan secara rinci mengenai latar belakang proyek, analisis masalah, tujuan bisnis, visi produk, nilai yang diberikan kepada pengguna, serta ruang lingkup sistem yang akan dibangun.
+| No  | Document                    | Description                                                                                                                                                                                      |
+| --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 01  | `01-overview.md`            | Menjelaskan overview proyek, latar belakang, problem analysis, tujuan bisnis, visi produk, nilai yang diberikan, stakeholder, serta scope sistem.                                                |
+| 02  | `02-business-process.md`    | Menjelaskan business process SIMAD secara menyeluruh, mulai dari registrasi peserta, pengajuan magang, proses approval, penempatan, onboarding, absensi, monitoring, hingga penyelesaian magang. |
+| 03  | `03-erd.sql`                | Mendefinisikan struktur database SIMAD, termasuk tabel, relationship, constraint, enum, serta struktur data utama yang digunakan sistem.                                                         |
+| 04  | `04-business-rules.md`      | Mendefinisikan business rules yang berlaku pada setiap modul, termasuk aturan registrasi, approval, placement, onboarding, attendance, certificate, dan akses berdasarkan role.                  |
+| 05  | `05-state-machine.md`       | Mendefinisikan state dan transition pada entity utama SIMAD seperti pengajuan magang, peserta, absensi, dan proses lainnya.                                                                      |
+| 06  | `06-system-architecture.md` | Menjelaskan arsitektur sistem, pembagian frontend dan backend, database, storage, authentication, notification, deployment, serta komunikasi antar-komponen.                                     |
+| 07  | `07-api-specification.md`   | Mendefinisikan kontrak API backend yang digunakan oleh frontend, termasuk endpoint, HTTP method, authentication, request, response, validation, dan error handling.                              |
+
+## Documentation Flow
+
+Urutan pembacaan dokumentasi SIMAD:
+
+```text
+prd.md
+   │
+   ▼
+01-overview.md
+   │
+   ▼
+02-business-process.md
+   │
+   ▼
+03-erd.sql
+   │
+   ▼
+04-business-rules.md
+   │
+   ▼
+05-state-machine.md
+   │
+   ▼
+06-system-architecture.md
+   │
+   ▼
+07-api-specification.md
+```
+
+Setiap dokumen menjadi referensi bagi dokumen berikutnya. Perubahan pada business process, database, business rules, state machine, architecture, atau API specification harus mempertimbangkan dampaknya terhadap dokumen lain agar seluruh dokumentasi SIMAD tetap konsisten.
+
+## Documentation Dependency
+
+| Document                    | Depends On                                                                               | Primary Output               |
+| --------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------- |
+| `01-overview.md`            | `prd.md`                                                                                 | Product & problem definition |
+| `02-business-process.md`    | `01-overview.md`                                                                         | Business workflow            |
+| `03-erd.sql`                | `02-business-process.md`                                                                 | Database structure           |
+| `04-business-rules.md`      | `02-business-process.md`, `03-erd.sql`                                                   | System rules                 |
+| `05-state-machine.md`       | `02-business-process.md`, `04-business-rules.md`                                         | Entity lifecycle             |
+| `06-system-architecture.md` | `03-erd.sql`, `04-business-rules.md`, `05-state-machine.md`                              | Technical architecture       |
+| `07-api-specification.md`   | `03-erd.sql`, `04-business-rules.md`, `05-state-machine.md`, `06-system-architecture.md` | API contract                 |
+
+## Documentation Principle
+
+Dokumentasi SIMAD mengikuti prinsip:
+
+> **Product Requirement → Business Process → Data Model → Business Rules → State Machine → System Architecture → API Specification**
+
+Dengan urutan tersebut, implementasi frontend dan backend dapat menggunakan dokumentasi yang sama sebagai source of truth selama proses development.
+
+---
+
+**Current Document:** `prd.md`
+**Next Document:** `01-overview.md`

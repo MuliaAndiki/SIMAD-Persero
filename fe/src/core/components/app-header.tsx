@@ -8,13 +8,13 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/atoms/navigation-menu';
 import { navigationMenuConfig } from '@/configs/app.config';
+// import UserDropdown from './user.dropdown';
+import NotificationDropdownContainer from '@/core/containers/notification.dropdown.container';
 import { cn } from '@/utils/classname';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-// import UserDropdown from './user.dropdown';
 import LanguageDropdown from './language.dropdown';
-import NotificationDropdown from './notification.dropdown';
 import ThemeToggle from './theme-toggle';
 
 export default function AppHeader() {
@@ -63,7 +63,7 @@ export default function AppHeader() {
         <div className="flex items-center gap-4">
           <ThemeToggle />
           <LanguageDropdown />
-          <NotificationDropdown />
+          <NotificationDropdownContainer />
           {/* <UserDropdown /> */}
         </div>
       </div>

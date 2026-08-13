@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/atoms/select';
 
-import { InstitutionCombobox } from '@/components/atoms/InstitutionCombobox';
+import { InstitutionCombobox } from '@/components/organisms/institution/InstitutionCombobox';
 import type { InstitutionResponse } from '@/types/api/institution.types';
 import { GraduationCap, Loader2, Save } from 'lucide-react';
 import Link from 'next/link';

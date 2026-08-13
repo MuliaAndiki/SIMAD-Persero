@@ -1,19 +1,19 @@
 import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
-import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
 import type {
   ApplicationResponse,
   CreateApplicationBody,
   UpdateApplicationBody,
 } from '@/types/api/application.types';
 import { cn } from '@/utils/classname';
+import { formatDate } from '@/utils/string.format';
 import {
   AlertCircle,
   CalendarCheck,
   CalendarClock,
-  CheckCircle2,
   FileText,
   Send,
   Trash2,
@@ -48,54 +48,6 @@ export interface ApplicationSectionService {
 export interface ApplicationSectionProps {
   state: ApplicationSectionState;
   service: ApplicationSectionService;
-}
-
-/** Label status aplikasi dalam Bahasa Indonesia. */
-function applicationStatusLabel(status: string | null): string {
-  switch (status) {
-    case 'DRAFT':
-      return 'Draft';
-    case 'SUBMITTED':
-      return 'Diajukan';
-    case 'UNDER_REVIEW':
-      return 'Sedang Direview';
-    case 'RESUBMITTED':
-      return 'Diajukan Ulang';
-    case 'APPROVED':
-      return 'Disetujui';
-    case 'REJECTED':
-      return 'Ditolak';
-    default:
-      return status ?? '-';
-  }
-}
-
-function ApplicationStatusBadge({ status }: { status: string | null }) {
-  const approved = status === 'APPROVED';
-  const rejected = status === 'REJECTED';
-  const reviewed = status === 'SUBMITTED' || status === 'UNDER_REVIEW' || status === 'RESUBMITTED';
-  const Icon = approved ? CheckCircle2 : rejected ? XCircle : reviewed ? Send : FileText;
-
-  return (
-    <Badge
-      variant={approved ? 'default' : rejected ? 'destructive' : reviewed ? 'secondary' : 'outline'}
-      className={cn(approved && 'bg-green-600 hover:bg-green-700')}
-    >
-      <Icon className="size-3" />
-      {applicationStatusLabel(status)}
-    </Badge>
-  );
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
 }
 
 const ACTIVE_STATUSES = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'RESUBMITTED'];
@@ -147,10 +99,6 @@ export function ApplicationSection({ state, service }: ApplicationSectionProps) 
           isSubmitting={state.isSubmitting}
           isUploading={state.isUploading}
         />
-      )}
-
-      {state.applications.length > 0 && (
-        <ApplicationHistoryList applications={state.applications} />
       )}
     </section>
   );
@@ -417,45 +365,10 @@ function NewApplicationForm({
                 ? 'Mengunggah File…'
                 : isSubmitting
                   ? 'Menyimpan…'
-                  : 'Buat Draft Pengajuan'}
+                  : 'Sumbit Draft Pengajuan'}
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ApplicationHistoryList({
-  applications,
-}: {
-  applications: ApplicationResponse[];
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Riwayat Pengajuan</CardTitle>
-        <CardDescription>Daftar seluruh pengajuan yang pernah Anda buat.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col divide-y">
-          {applications.map((app) => (
-            <div
-              key={app.id}
-              className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
-            >
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <span className="truncate text-sm font-medium">
-                  {app.applicationNumber ?? 'Draft'}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {formatDate(app.requestedStartDate)} — {formatDate(app.requestedEndDate)}
-                </span>
-              </div>
-              <ApplicationStatusBadge status={app.status} />
-            </div>
-          ))}
-        </div>
       </CardContent>
     </Card>
   );

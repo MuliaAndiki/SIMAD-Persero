@@ -1831,7 +1831,7 @@ Base URL
 ## 19.1 Intern Dashboard
 
 ```http
-GET /dashboard/intern
+GET /intern/dashboard
 ```
 
 Data:
@@ -1846,7 +1846,7 @@ Data:
 ## 19.2 HR Dashboard
 
 ```http
-GET /dashboard/hr
+GET /hr-admin/dashboard
 ```
 
 Data:
@@ -1862,7 +1862,7 @@ Data:
 ## 19.3 Supervisor Dashboard
 
 ```http
-GET /dashboard/supervisor
+GET /supervisor/dashboard
 ```
 
 Data:
@@ -1877,7 +1877,7 @@ Data:
 ## 19.4 Dashboard Statistics
 
 ```http
-GET /dashboard/statistics
+GET /hr-admin/dashboard/statistics
 ```
 
 ### Required Role
@@ -1891,7 +1891,7 @@ Menghasilkan statistik sistem.
 ## 19.5 Dashboard Chart
 
 ```http
-GET /dashboard/charts
+GET /hr-admin/dashboard/charts
 ```
 
 Menghasilkan data grafik.
@@ -1907,7 +1907,7 @@ Contoh:
 ## 19.6 Recent Activities
 
 ```http
-GET /dashboard/recent-activities
+GET /hr-admin/dashboard/recent-activities
 ```
 
 Mengambil Activity Log terbaru.
