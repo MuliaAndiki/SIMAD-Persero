@@ -837,6 +837,7 @@ async function main() {
   const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? "admin@simad.com")
     .toLowerCase()
     .trim();
+
   const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "Admin@12345";
   const hashedPassword = await bcryptjs.hash(adminPassword, 10);
 

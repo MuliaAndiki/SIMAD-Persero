@@ -12,8 +12,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/atoms';
-import { SIDEBAR_MENU, isMenuActive } from '@/configs/app.config';
+import { ROLE_SIDEBAR_MENU, SIDEBAR_MENU, isMenuActive } from '@/configs/app.config';
 import { useInternAccess } from '@/hooks/useInternAccess';
+import { useApi } from '@/hooks/useService/useApi';
 import { cn } from '@/utils/classname';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -22,17 +23,25 @@ import { usePathname } from 'next/navigation';
 /**
  * Sidebar desktop (md+) — menampilkan navigasi modul SIMAD.
  *
- * Dibaca dari `SIDEBAR_MENU` (single source of truth di app.config)
- * dan memakai warna semantik sidebar agar konsisten dengan tema PLN Blue.
+ * Menu dipilih berdasarkan role akun yang sedang login
+ * (`ROLE_SIDEBAR_MENU` di app.config) sehingga INTERN, HR_ADMIN,
+ * dan SUPERVISOR mendapat navigasi yang sesuai perannya.
  */
 export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const api = useApi();
   const { hasActiveInternship } = useInternAccess();
   const isCollapsed = state === 'collapsed';
 
+  const role = api.auth.query.me().data?.role;
+  const roleMenus =
+    (role === 'INTERN' || role === 'HR_ADMIN' || role === 'SUPERVISOR'
+      ? ROLE_SIDEBAR_MENU[role]
+      : null) ?? SIDEBAR_MENU;
+
   // Sembunyikan menu yang menuntut magang aktif (Absensi/Riwayat) bila belum ada.
-  const menus = SIDEBAR_MENU.filter((item) => !item.requiresInternship || hasActiveInternship);
+  const menus = roleMenus.filter((item) => !item.requiresInternship || hasActiveInternship);
 
   return (
     <Sidebar collapsible="icon" className="border-r">

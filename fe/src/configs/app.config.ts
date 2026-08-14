@@ -1,6 +1,20 @@
-import type { DashboardRole } from '@/types/api/dashboard.types';
-import { Clock, FileText, History, Home, type LucideIcon, User } from 'lucide-react';
-import type React from 'react';
+import type { DashboardRole } from "@/types/api/dashboard.types";
+import {
+  BarChart3,
+  Building2,
+  Clock,
+  FileText,
+  History,
+  Home,
+  type LucideIcon,
+  MapPin,
+  ScrollText,
+  User,
+  UserCheck,
+  Users,
+  Sparkles,
+} from "lucide-react";
+import type React from "react";
 
 interface AppConfig {
   name: string;
@@ -43,36 +57,36 @@ export type PropsParams = {
 };
 
 export const appConfig: AppConfig = {
-  name: 'App',
-  description: 'App',
-  logo: '/images/logo.png',
+  name: "App",
+  description: "App",
+  logo: "/images/logo.png",
   metadata: {
-    title: 'App',
-    description: 'App',
-    keywords: ['App'],
-    author: 'App',
-    image: 'App',
+    title: "App",
+    description: "App",
+    keywords: ["App"],
+    author: "App",
+    image: "App",
   },
   social_media: {
     twitter: {
-      url: 'https://twitter.com/app',
-      icon: 'hugeicons:new-twitter-rectangle',
+      url: "https://twitter.com/app",
+      icon: "hugeicons:new-twitter-rectangle",
     },
     instagram: {
-      url: 'https://instagram.com/app',
-      icon: 'basil:instagram-outline',
+      url: "https://instagram.com/app",
+      icon: "basil:instagram-outline",
     },
     linkedin: {
-      url: 'https://linkedin.com/app',
-      icon: 'tabler:brand-linkedin',
+      url: "https://linkedin.com/app",
+      icon: "tabler:brand-linkedin",
     },
     youtube: {
-      url: 'https://youtube.com/app',
-      icon: 'mingcute:youtube-line',
+      url: "https://youtube.com/app",
+      icon: "mingcute:youtube-line",
     },
     tiktok: {
-      url: 'https://tiktok.com/app',
-      icon: 'hugeicons:tiktok',
+      url: "https://tiktok.com/app",
+      icon: "hugeicons:tiktok",
     },
   },
 };
@@ -83,21 +97,21 @@ interface NavigationMenuConfig {
     href: string;
     icon?: React.ReactNode;
     description?: string;
-    children?: NavigationMenuConfig['items'];
+    children?: NavigationMenuConfig["items"];
   }[];
 }
 
 export const navigationMenuConfig: NavigationMenuConfig = {
   items: [
     {
-      title: 'Home',
-      href: '/',
-      description: 'Home',
+      title: "Home",
+      href: "/",
+      description: "Home",
     },
     {
-      title: 'masuk',
-      href: '/login',
-      description: 'masuk',
+      title: "masuk",
+      href: "/login",
+      description: "masuk",
     },
   ],
 };
@@ -115,35 +129,106 @@ export interface SidebarMenuItem {
 }
 
 export const SIDEBAR_MENU: SidebarMenuItem[] = [
-  { name: 'Beranda', url: '/INTERN/dashboard', icon: Home, subMenu: [] },
+  { name: "Beranda", url: "/INTERN/dashboard", icon: Home, subMenu: [] },
   {
-    name: 'Pengajuan',
-    url: '/INTERN/dashboard/application',
+    name: "Pengajuan",
+    url: "/INTERN/dashboard/application",
     icon: FileText,
     subMenu: [],
   },
   {
-    name: 'Absensi',
-    url: '/INTERN/dashboard/attendance',
+    name: "Absensi",
+    url: "/INTERN/dashboard/attendance",
     icon: Clock,
     subMenu: [],
     requiresInternship: true,
   },
   {
-    name: 'Riwayat',
-    url: '/INTERN/dashboard/history',
+    name: "Riwayat",
+    url: "/INTERN/dashboard/history",
     icon: History,
     subMenu: [],
     requiresInternship: true,
   },
-  { name: 'Profil', url: '/INTERN/dashboard/profile', icon: User, subMenu: [] },
+  { name: "Profil", url: "/INTERN/dashboard/profile", icon: User, subMenu: [] },
 ];
+
+/** Menu sidebar khusus HR_ADMIN. */
+export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
+  { name: "Beranda", url: "/HR_ADMIN/dashboard", icon: Home, subMenu: [] },
+  {
+    name: "Pengajuan",
+    url: "/HR_ADMIN/dashboard/applications",
+    icon: FileText,
+    subMenu: [],
+  },
+  {
+    name: "Departemen",
+    url: "/HR_ADMIN/dashboard/departments",
+    icon: Building2,
+    subMenu: [],
+  },
+  {
+    name: "Kantor",
+    url: "/HR_ADMIN/dashboard/offices",
+    icon: MapPin,
+    subMenu: [],
+  },
+  {
+    name: "Supervisor",
+    url: "/HR_ADMIN/dashboard/supervisors",
+    icon: UserCheck,
+    subMenu: [],
+  },
+  {
+    name: "Laporan",
+    url: "/HR_ADMIN/dashboard/reports",
+    icon: BarChart3,
+    subMenu: [],
+  },
+  {
+    name: "Audit Log",
+    url: "/HR_ADMIN/dashboard/audit-logs",
+    icon: ScrollText,
+    subMenu: [],
+  },
+  {
+    name: "Keterampilan",
+    url: "/HR_ADMIN/dashboard/skills",
+    icon: Sparkles,
+    subMenu: [],
+  },
+];
+
+/** Menu sidebar khusus SUPERVISOR. */
+export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
+  { name: "Beranda", url: "/SUPERVISOR/dashboard", icon: Home, subMenu: [] },
+  {
+    name: "Intern Bimbingan",
+    url: "/SUPERVISOR/dashboard/interns",
+    icon: Users,
+    subMenu: [],
+  },
+  {
+    name: "Absensi",
+    url: "/SUPERVISOR/dashboard/attendance",
+    icon: Clock,
+    subMenu: [],
+  },
+];
+
+/** Peta menu sidebar per role — dipakai AppSidebar (single source of truth). */
+export const ROLE_SIDEBAR_MENU: Record<DashboardRole, SidebarMenuItem[]> = {
+  INTERN: SIDEBAR_MENU,
+  HR_ADMIN: SIDEBAR_MENU_HR_ADMIN,
+  SUPERVISOR: SIDEBAR_MENU_SUPERVISOR,
+};
 
 /** Label role untuk UI (header dashboard, badge, dll). */
 export const DASHBOARD_ROLE_LABELS: Record<DashboardRole, string> = {
-  INTERN: 'Peserta Magang',
-  HR_ADMIN: 'HR Admin',
-  SUPERVISOR: 'Supervisor',
+  INTERN: "Peserta Magang",
+  HR_ADMIN: "HR Admin",
+  SUPERVISOR: "Supervisor",
 };
 
 /**
@@ -154,9 +239,9 @@ export const DASHBOARD_ROLE_LABELS: Record<DashboardRole, string> = {
  * cukup dibuat di dalam folder role tersebut (scalable).
  */
 export const ROLE_DASHBOARD_PATH: Record<DashboardRole, string> = {
-  INTERN: '/INTERN/dashboard',
-  HR_ADMIN: '/HR_ADMIN/dashboard',
-  SUPERVISOR: '/SUPERVISOR/dashboard',
+  INTERN: "/INTERN/dashboard",
+  HR_ADMIN: "/HR_ADMIN/dashboard",
+  SUPERVISOR: "/SUPERVISOR/dashboard",
 };
 
 /**
@@ -168,14 +253,14 @@ export const ROLE_DASHBOARD_PATH: Record<DashboardRole, string> = {
  */
 export function getRoleDashboardPath(role?: string | null): string {
   switch (role) {
-    case 'INTERN':
-    case 'HR_ADMIN':
-    case 'SUPERVISOR':
+    case "INTERN":
+    case "HR_ADMIN":
+    case "SUPERVISOR":
       return ROLE_DASHBOARD_PATH[role];
-    case 'HR':
+    case "HR":
       return ROLE_DASHBOARD_PATH.HR_ADMIN;
     default:
-      return '/dashboard';
+      return "/dashboard";
   }
 }
 
@@ -186,12 +271,15 @@ export function getRoleDashboardPath(role?: string | null): string {
  * /INTERN/dashboard, /HR_ADMIN/dashboard, atau /SUPERVISOR/dashboard.
  */
 export function isMenuActive(menuUrl: string, pathname: string): boolean {
-  if (menuUrl === '/dashboard' || menuUrl === '/INTERN/dashboard') {
+  const isDashboardPath = (url: string) =>
+    url === "/dashboard" || url.endsWith("/dashboard");
+
+  // Menu Beranda aktif saat berada di area dashboard role manapun.
+  if (isDashboardPath(menuUrl)) {
     return (
-      pathname === '/dashboard' ||
-      pathname === '/INTERN/dashboard' ||
-      pathname === '/HR_ADMIN/dashboard' ||
-      pathname === '/SUPERVISOR/dashboard'
+      pathname === menuUrl ||
+      pathname.startsWith(`${menuUrl}/`) ||
+      (menuUrl === "/INTERN/dashboard" && pathname === "/dashboard")
     );
   }
   return pathname === menuUrl || pathname.startsWith(`${menuUrl}/`);

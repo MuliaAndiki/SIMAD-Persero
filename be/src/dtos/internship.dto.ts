@@ -40,3 +40,15 @@ export const CreateProfileInternDto = t.Object({
   majorId: t.Optional(t.String()),
   id: t.Optional(t.String()),
 });
+
+/** POST /internships/skill */
+export const CreateSkillDto = t.Object({
+  name: t.String({ minLength: 1, error: "Nama skill wajib diisi" }),
+  category: t.String({ minLength: 1, error: "Kategori skill wajib diisi" }),
+});
+
+/** PUT /internships/skill/:id */
+export const UpdateSkillDto = t.Object({
+  name: t.Optional(t.String({ minLength: 1 })),
+  category: t.Optional(t.String({ minLength: 1 })),
+});
