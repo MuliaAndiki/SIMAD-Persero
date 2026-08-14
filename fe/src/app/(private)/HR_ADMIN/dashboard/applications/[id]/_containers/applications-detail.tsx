@@ -1,6 +1,5 @@
 "use client";
 
-import { ApplicationsSection } from "@/components/page/hr/ApplicationsSection";
 import type {
   ApproveApplicationFormField,
   ApproveApplicationFormState,
@@ -9,11 +8,8 @@ import type {
   RejectApplicationFormField,
   RejectApplicationFormState,
 } from "@/components/organisms/application/ApplicationRejectForm";
+import { ApplicationReviewSection } from "@/components/page/hr/ApplicationReviewSection";
 import { useApi } from "@/hooks/useService/useApi";
-import type {
-  ApplicationResponse,
-  ApplicationStatusValue,
-} from "@/types/api/application.types";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -28,32 +24,17 @@ const EMPTY_REJECT_FORM: RejectApplicationFormState = {
   reason: "",
 };
 
-/**
- * Container halaman Pengajuan Magang (HR Admin) — orchestration layer.
- *
- * Seluruh fetch & mutasi dilakukan di sini: list aplikasi dengan filter status
- * dan keyword, plus approve/reject langsung dari tabel (modal).
- */
-export default function HrApplicationsContainer() {
+export default function HrApplicationDetailContainer({ id }: { id: string }) {
   const api = useApi();
   const router = useRouter();
 
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [keyword, setKeyword] = useState<string>("");
-  const [modalMode, setModalMode] = useState<"approve" | "reject" | null>(null);
-  const [modalTarget, setModalTarget] = useState<ApplicationResponse | null>(
-    null,
-  );
+  const [mode, setMode] = useState<"view" | "approve" | "reject">("view");
   const [approveForm, setApproveForm] =
     useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
   const [rejectForm, setRejectForm] =
     useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
 
-  const list = api.application.query.list({
-    status: (statusFilter || undefined) as ApplicationStatusValue | undefined,
-    keyword: keyword || undefined,
-    limit: 100,
-  });
+  const detail = api.application.query.detail({ id }, { enabled: Boolean(id) });
 
   const departments = api.department.query.list({ limit: 100 });
   const offices = api.office.query.list({ limit: 100 });
@@ -61,34 +42,6 @@ export default function HrApplicationsContainer() {
 
   const approve = api.application.mutate.approve();
   const reject = api.application.mutate.reject();
-
-  const handleSelectApplication = useCallback(
-    (id: string) => {
-      router.push(`/HR_ADMIN/dashboard/applications/${id}`);
-    },
-    [router],
-  );
-
-  const handleOpenApprove = useCallback((app: ApplicationResponse) => {
-    setModalTarget(app);
-    setApproveForm(EMPTY_APPROVE_FORM);
-    setRejectForm(EMPTY_REJECT_FORM);
-    setModalMode("approve");
-  }, []);
-
-  const handleOpenReject = useCallback((app: ApplicationResponse) => {
-    setModalTarget(app);
-    setApproveForm(EMPTY_APPROVE_FORM);
-    setRejectForm(EMPTY_REJECT_FORM);
-    setModalMode("reject");
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setModalMode(null);
-    setModalTarget(null);
-    setApproveForm(EMPTY_APPROVE_FORM);
-    setRejectForm(EMPTY_REJECT_FORM);
-  }, []);
 
   const handleApproveFieldChange = useCallback(
     (field: ApproveApplicationFormField, value: string) => {
@@ -104,10 +57,24 @@ export default function HrApplicationsContainer() {
     [],
   );
 
+  const handleOpenApprove = useCallback(() => {
+    setApproveForm(EMPTY_APPROVE_FORM);
+    setMode("approve");
+  }, []);
+
+  const handleOpenReject = useCallback(() => {
+    setRejectForm(EMPTY_REJECT_FORM);
+    setMode("reject");
+  }, []);
+
+  const handleBackToView = useCallback(() => {
+    setMode("view");
+  }, []);
+
   const handleSubmitApprove = useCallback(async () => {
-    if (!modalTarget) return;
+    if (!id) return;
     await approve.mutateAsync({
-      params: { id: modalTarget.id },
+      params: { id },
       body: {
         departmentId: approveForm.departmentId,
         officeLocationId: approveForm.officeLocationId || undefined,
@@ -115,44 +82,44 @@ export default function HrApplicationsContainer() {
         notes: approveForm.notes || undefined,
       },
     });
-    handleCloseModal();
-  }, [approve, approveForm, modalTarget, handleCloseModal]);
+    setMode("view");
+    setApproveForm(EMPTY_APPROVE_FORM);
+    setRejectForm(EMPTY_REJECT_FORM);
+    router.push("/HR_ADMIN/dashboard/applications");
+  }, [approve, approveForm, id, router]);
 
   const handleSubmitReject = useCallback(async () => {
-    if (!modalTarget) return;
+    if (!id) return;
     await reject.mutateAsync({
-      params: { id: modalTarget.id },
+      params: { id },
       body: { reason: rejectForm.reason.trim() },
     });
-    handleCloseModal();
-  }, [reject, rejectForm, modalTarget, handleCloseModal]);
+    setMode("view");
+    setApproveForm(EMPTY_APPROVE_FORM);
+    setRejectForm(EMPTY_REJECT_FORM);
+    router.push("/HR_ADMIN/dashboard/applications");
+  }, [reject, rejectForm, id, router]);
 
   return (
-    <ApplicationsSection
+    <ApplicationReviewSection
       state={{
-        isPending: list.isPending,
-        isError: list.isError,
-        errorMessage: list.error?.message,
-        applications: list.data ?? [],
-        statusFilter,
-        keyword,
-        modalMode,
-        approveForm,
-        rejectForm,
+        isPending: detail.isPending,
+        isError: detail.isError,
+        errorMessage: detail.error?.message,
+        detail: detail.data ?? null,
+        mode,
         isApproving: approve.isPending,
         isRejecting: reject.isPending,
         departments: departments.data ?? [],
         offices: offices.data ?? [],
         supervisors: supervisors.data ?? [],
+        approveForm,
+        rejectForm,
       }}
       actions={{
-        onStatusChange: setStatusFilter,
-        onKeywordChange: setKeyword,
-        onSearch: () => {},
-        onSelectApplication: handleSelectApplication,
         onOpenApprove: handleOpenApprove,
         onOpenReject: handleOpenReject,
-        onCloseModal: handleCloseModal,
+        onBackToView: handleBackToView,
         onApproveFieldChange: handleApproveFieldChange,
         onRejectFieldChange: handleRejectFieldChange,
         onSubmitApprove: handleSubmitApprove,

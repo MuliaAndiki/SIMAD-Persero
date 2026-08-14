@@ -186,6 +186,46 @@ class InternshipController {
       return this.handleError(c, error);
     }
   }
+  public async createSkill(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+      const authRespone = await unauthorizedValidate(user, c);
+      if (authRespone) return authRespone;
+      const body = c.body as { name: string; category: string };
+      const result = await internshipService.createSkill(body);
+      return HttpResponse(c).created(result, "Berhasil membuat skill");
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  public async updateSkill(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+      const authRespone = await unauthorizedValidate(user, c);
+      if (authRespone) return authRespone;
+      const params = c.params as { id: string };
+      const body = c.body as { name?: string; category?: string };
+      const result = await internshipService.updateSkill(params.id, body);
+      return HttpResponse(c).ok(result, "Berhasil memperbarui skill");
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  public async deleteSkill(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+      const authRespone = await unauthorizedValidate(user, c);
+      if (authRespone) return authRespone;
+      const params = c.params as { id: string };
+      const result = await internshipService.deleteSkill(params.id);
+      return HttpResponse(c).ok(result, "Berhasil menghapus skill");
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
   public async AddSkillInternShip(c: AppContext) {
     try {
       const user = c.user as JwtPayload;

@@ -1,6 +1,6 @@
-import { Api } from '@/api/api-entry';
-import type { TResponse } from '@/api/types/response.types';
-import { INTERNSHIP_ENDPOINTS } from '@/configs/endpoints/internship.endpoints';
+import { Api } from "@/api/api-entry";
+import type { TResponse } from "@/api/types/response.types";
+import { INTERNSHIP_ENDPOINTS } from "@/configs/endpoints/internship.endpoints";
 import type {
   AddSkillBody,
   AddSkillResponse,
@@ -16,9 +16,11 @@ import type {
   RemoveSkillResponse,
   SkillQuery,
   SkillResponse,
-} from '@/types/api/internship.types';
-import { buildQueryString } from '@/utils/query-string';
-import { toServiceResponse } from '@/utils/service-response';
+  CreateSkillBody,
+  UpdateSkillBody,
+} from "@/types/api/internship.types";
+import { buildQueryString } from "@/utils/query-string";
+import { toServiceResponse } from "@/utils/service-response";
 
 /**
  * Service modul Internship — satu method per endpoint backend
@@ -34,8 +36,10 @@ class InternshipService {
    * Mengambil data magang milik sendiri (INTERN).
    */
   public async My(): Promise<TResponse<InternshipResponse>> {
-    const res = await client.GetResponse<InternshipResponse>(INTERNSHIP_ENDPOINTS.MY);
-    return toServiceResponse(res, { message: 'Data magang berhasil dimuat' });
+    const res = await client.GetResponse<InternshipResponse>(
+      INTERNSHIP_ENDPOINTS.MY,
+    );
+    return toServiceResponse(res, { message: "Data magang berhasil dimuat" });
   }
 
   /**
@@ -43,24 +47,26 @@ class InternshipService {
    * Mengambil detail magang (HR_ADMIN, SUPERVISOR).
    */
   public async Detail(
-    params: Pick<InternshipParams, 'id'>,
+    params: Pick<InternshipParams, "id">,
   ): Promise<TResponse<InternshipResponse>> {
     const res = await client.GetResponse<InternshipResponse>(
       INTERNSHIP_ENDPOINTS.DETAIL(params.id),
     );
-    return toServiceResponse(res, { message: 'Detail magang berhasil dimuat' });
+    return toServiceResponse(res, { message: "Detail magang berhasil dimuat" });
   }
 
   /**
    * PATCH /internships/:id/start
    * Memulai magang (HR_ADMIN).
    */
-  public async Start(params: Pick<InternshipParams, 'id'>): Promise<TResponse<InternshipResponse>> {
+  public async Start(
+    params: Pick<InternshipParams, "id">,
+  ): Promise<TResponse<InternshipResponse>> {
     const res = await client.PatchResponse<InternshipResponse>(
       INTERNSHIP_ENDPOINTS.START(params.id),
       {},
     );
-    return toServiceResponse(res, { message: 'Magang berhasil dimulai' });
+    return toServiceResponse(res, { message: "Magang berhasil dimulai" });
   }
 
   /**
@@ -68,13 +74,13 @@ class InternshipService {
    * Menyelesaikan magang (HR_ADMIN).
    */
   public async Finish(
-    params: Pick<InternshipParams, 'id'>,
+    params: Pick<InternshipParams, "id">,
   ): Promise<TResponse<InternshipResponse>> {
     const res = await client.PatchResponse<InternshipResponse>(
       INTERNSHIP_ENDPOINTS.FINISH(params.id),
       {},
     );
-    return toServiceResponse(res, { message: 'Magang berhasil diselesaikan' });
+    return toServiceResponse(res, { message: "Magang berhasil diselesaikan" });
   }
 
   /**
@@ -82,14 +88,14 @@ class InternshipService {
    * Memperpanjang magang (HR_ADMIN).
    */
   public async Extend(
-    params: Pick<InternshipParams, 'id'>,
-    body: Pick<ExtendInternshipBody, 'newEndDate' | 'reason'>,
+    params: Pick<InternshipParams, "id">,
+    body: Pick<ExtendInternshipBody, "newEndDate" | "reason">,
   ): Promise<TResponse<InternshipResponse>> {
     const res = await client.PatchResponse<InternshipResponse>(
       INTERNSHIP_ENDPOINTS.EXTEND(params.id),
       body,
     );
-    return toServiceResponse(res, { message: 'Magang berhasil diperpanjang' });
+    return toServiceResponse(res, { message: "Magang berhasil diperpanjang" });
   }
 
   /**
@@ -97,15 +103,15 @@ class InternshipService {
    * Menugaskan supervisor ke magang (HR_ADMIN).
    */
   public async AssignSupervisor(
-    params: Pick<InternshipParams, 'id'>,
-    body: Pick<AssignSupervisorBody, 'supervisorId'>,
+    params: Pick<InternshipParams, "id">,
+    body: Pick<AssignSupervisorBody, "supervisorId">,
   ): Promise<TResponse<InternshipResponse>> {
     const res = await client.PatchResponse<InternshipResponse>(
       INTERNSHIP_ENDPOINTS.ASSIGN_SUPERVISOR(params.id),
       body,
     );
     return toServiceResponse(res, {
-      message: 'Supervisor berhasil ditugaskan',
+      message: "Supervisor berhasil ditugaskan",
     });
   }
 
@@ -114,15 +120,15 @@ class InternshipService {
    * Memindahkan departemen magang (HR_ADMIN).
    */
   public async ChangeDepartment(
-    params: Pick<InternshipParams, 'id'>,
-    body: Pick<ChangeDepartmentBody, 'departmentId' | 'officeLocationId'>,
+    params: Pick<InternshipParams, "id">,
+    body: Pick<ChangeDepartmentBody, "departmentId" | "officeLocationId">,
   ): Promise<TResponse<InternshipResponse>> {
     const res = await client.PatchResponse<InternshipResponse>(
       INTERNSHIP_ENDPOINTS.CHANGE_DEPARTMENT(params.id),
       body,
     );
     return toServiceResponse(res, {
-      message: 'Departemen berhasil dipindahkan',
+      message: "Departemen berhasil dipindahkan",
     });
   }
 
@@ -131,13 +137,13 @@ class InternshipService {
    * Mengarsipkan magang (HR_ADMIN).
    */
   public async Archive(
-    params: Pick<InternshipParams, 'id'>,
+    params: Pick<InternshipParams, "id">,
   ): Promise<TResponse<InternshipResponse>> {
     const res = await client.PatchResponse<InternshipResponse>(
       INTERNSHIP_ENDPOINTS.ARCHIVE(params.id),
       {},
     );
-    return toServiceResponse(res, { message: 'Magang berhasil diarsipkan' });
+    return toServiceResponse(res, { message: "Magang berhasil diarsipkan" });
   }
 
   /**
@@ -152,7 +158,7 @@ class InternshipService {
       body,
     );
     return toServiceResponse(res, {
-      message: 'Profil magang berhasil disimpan',
+      message: "Profil magang berhasil disimpan",
       statusCode: 201,
     });
   }
@@ -161,41 +167,85 @@ class InternshipService {
    * Mengambil profil magang milik sendiri (INTERN).
    */
   public async MyProfile(): Promise<TResponse<MyInternProfileResponse>> {
-    const res = await client.GetResponse<MyInternProfileResponse>(INTERNSHIP_ENDPOINTS.MY_PROFILE);
-    return toServiceResponse(res, { message: 'Profil magang berhasil dimuat' });
+    const res = await client.GetResponse<MyInternProfileResponse>(
+      INTERNSHIP_ENDPOINTS.MY_PROFILE,
+    );
+    return toServiceResponse(res, { message: "Profil magang berhasil dimuat" });
   }
 
   /**
    * GET /internships/skill
    * Mengambil daftar skill (INTERN) — mendukung pencarian & paginasi.
    */
-  public async GetSkills(query?: SkillQuery): Promise<TResponse<SkillResponse[]>> {
+  public async GetSkills(
+    query?: SkillQuery,
+  ): Promise<TResponse<SkillResponse[]>> {
     const qs = buildQueryString(
       query as Record<string, string | number | boolean | null | undefined>,
     );
-    const res = await client.GetResponse<SkillResponse[]>(`${INTERNSHIP_ENDPOINTS.SKILLS}${qs}`);
-    return toServiceResponse(res, { message: 'Daftar skill berhasil dimuat' });
+    const res = await client.GetResponse<SkillResponse[]>(
+      `${INTERNSHIP_ENDPOINTS.SKILLS}${qs}`,
+    );
+    return toServiceResponse(res, { message: "Daftar skill berhasil dimuat" });
+  }
+
+  public async CreateSkill(
+    body: CreateSkillBody,
+  ): Promise<TResponse<SkillResponse>> {
+    const res = await client.PostResponse<SkillResponse>(
+      INTERNSHIP_ENDPOINTS.CREATE_SKILL,
+      body,
+    );
+    return toServiceResponse(res, {
+      message: "Skill berhasil dibuat",
+      statusCode: 201,
+    });
+  }
+
+  public async UpdateSkill(
+    params: { id: string },
+    body: UpdateSkillBody,
+  ): Promise<TResponse<SkillResponse>> {
+    const res = await client.PutResponse<SkillResponse>(
+      INTERNSHIP_ENDPOINTS.UPDATE_SKILL(params.id),
+      body,
+    );
+    return toServiceResponse(res, { message: "Skill berhasil diperbarui" });
+  }
+
+  public async DeleteSkill(params: { id: string }): Promise<TResponse<null>> {
+    const res = await client.DeleteResponse<null>(
+      INTERNSHIP_ENDPOINTS.DELETE_SKILL(params.id),
+    );
+    return toServiceResponse(res, { message: "Skill berhasil dihapus" });
   }
 
   /**
    * POST /internships/add-skills
    * Menambahkan skill ke profil magang (INTERN).
    */
-  public async AddSkill(body: AddSkillBody): Promise<TResponse<AddSkillResponse>> {
-    const res = await client.PostResponse<AddSkillResponse>(INTERNSHIP_ENDPOINTS.ADD_SKILLS, body);
-    return toServiceResponse(res, { message: 'Skill berhasil ditambahkan' });
+  public async AddSkill(
+    body: AddSkillBody,
+  ): Promise<TResponse<AddSkillResponse>> {
+    const res = await client.PostResponse<AddSkillResponse>(
+      INTERNSHIP_ENDPOINTS.ADD_SKILLS,
+      body,
+    );
+    return toServiceResponse(res, { message: "Skill berhasil ditambahkan" });
   }
 
   /**
    * DELETE /internships/remove-skill/:skillId
    * Menghapus skill dari profil magang (INTERN).
    */
-  public async RemoveSkill(params: RemoveSkillParams): Promise<TResponse<RemoveSkillResponse>> {
+  public async RemoveSkill(
+    params: RemoveSkillParams,
+  ): Promise<TResponse<RemoveSkillResponse>> {
     const res = await client.DeleteResponse<RemoveSkillResponse>(
       INTERNSHIP_ENDPOINTS.REMOVE_SKILL(params.skillId),
     );
     return toServiceResponse(res, {
-      message: 'Skill berhasil dihapus dari profil',
+      message: "Skill berhasil dihapus dari profil",
     });
   }
 }

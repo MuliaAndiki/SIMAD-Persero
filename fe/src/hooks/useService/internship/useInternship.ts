@@ -4,12 +4,20 @@ import {
   useAssignSupervisorInternship,
   useChangeDepartmentInternship,
   useCreateInternProfile,
+  useCreateSkill,
+  useDeleteSkill,
   useExtendInternship,
   useFinishInternship,
   useRemoveSkillFromIntern,
   useStartInternship,
-} from './state/mutate';
-import { useInternshipDetail, useMyInternProfile, useMyInternship, useSkills } from './state/query';
+  useUpdateSkill,
+} from "./state/mutate";
+import {
+  useInternshipDetail,
+  useMyInternProfile,
+  useMyInternship,
+  useSkills,
+} from "./state/query";
 
 export const useInternship = () => {
   return {
@@ -29,6 +37,9 @@ export const useInternship = () => {
       createProfile: useCreateInternProfile,
       addSkill: useAddSkillToIntern,
       removeSkill: useRemoveSkillFromIntern,
+      createSkill: useCreateSkill,
+      updateSkill: useUpdateSkill,
+      deleteSkill: useDeleteSkill,
     },
   };
 };

@@ -530,6 +530,51 @@ class InternshipService {
     };
   }
 
+  public async createSkill(data: { name: string; category: string }) {
+    const existing = await prisma.skill.findFirst({
+      where: { name: { equals: data.name, mode: "insensitive" } },
+    });
+    if (existing) {
+      throw new AppError(400, "Skill dengan nama tersebut sudah ada");
+    }
+    return await prisma.skill.create({ data });
+  }
+
+  public async updateSkill(
+    id: string,
+    data: { name?: string; category?: string },
+  ) {
+    const existing = await prisma.skill.findUnique({ where: { id } });
+    if (!existing) {
+      throw new AppError(404, "Skill tidak ditemukan");
+    }
+    if (
+      data.name &&
+      existing.name &&
+      data.name.toLowerCase() !== existing.name.toLowerCase()
+    ) {
+      const duplicate = await prisma.skill.findFirst({
+        where: { name: { equals: data.name, mode: "insensitive" } },
+      });
+      if (duplicate) {
+        throw new AppError(400, "Skill dengan nama tersebut sudah ada");
+      }
+    }
+    return await prisma.skill.update({
+      where: { id },
+      data,
+    });
+  }
+
+  public async deleteSkill(id: string) {
+    const existing = await prisma.skill.findUnique({ where: { id } });
+    if (!existing) {
+      throw new AppError(404, "Skill tidak ditemukan");
+    }
+    await prisma.internProfileSkill.deleteMany({ where: { skillId: id } });
+    return await prisma.skill.delete({ where: { id } });
+  }
+
   public async AddSkillInternShip(input: AddSkillsBody) {
     const query = await prisma.internProfileSkill.createMany({
       data: input.skills.map((skill) => ({
