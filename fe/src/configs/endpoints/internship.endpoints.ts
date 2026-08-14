@@ -9,7 +9,7 @@
 
 export const INTERNSHIP_ENDPOINTS = {
   /** GET /internships/me — Magang saya (INTERN) */
-  MY: '/internships/me',
+  MY: "/internships/me",
   /** GET /internships/:id — Detail magang (HR_ADMIN, SUPERVISOR) */
   DETAIL: (id: string) => `/internships/${id}`,
   /** PATCH /internships/:id/start — Mulai magang (HR_ADMIN) */
@@ -25,13 +25,19 @@ export const INTERNSHIP_ENDPOINTS = {
   /** PATCH /internships/:id/archive — Arsipkan magang (HR_ADMIN) */
   ARCHIVE: (id: string) => `/internships/${id}/archive`,
   /** POST /internships/profile — Simpan profil peserta magang (INTERN) */
-  PROFILE: '/internships/profile',
+  PROFILE: "/internships/profile",
   /** GET /internships/profile — Ambil profil peserta magang (INTERN) */
-  MY_PROFILE: '/internships/profile',
+  MY_PROFILE: "/internships/profile",
   /** GET /internships/skill — Ambil daftar skill (INTERN) */
-  SKILLS: '/internships/skill',
+  SKILLS: "/internships/skill",
+  /** POST /internships/skill — Buat skill baru (HR_ADMIN) */
+  CREATE_SKILL: "/internships/skill",
+  /** PUT /internships/skill/:id — Update skill (HR_ADMIN) */
+  UPDATE_SKILL: (id: string) => `/internships/skill/${id}`,
+  /** DELETE /internships/skill/:id — Hapus skill (HR_ADMIN) */
+  DELETE_SKILL: (id: string) => `/internships/skill/${id}`,
   /** POST /internships/add-skills — Tambahkan skill ke profil magang (INTERN) */
-  ADD_SKILLS: '/internships/add-skills',
+  ADD_SKILLS: "/internships/add-skills",
   /** DELETE /internships/remove-skill/:skillId — Hapus skill dari profil (INTERN) */
   REMOVE_SKILL: (skillId: string) => `/internships/remove-skill/${skillId}`,
 } as const;

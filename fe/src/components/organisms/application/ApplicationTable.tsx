@@ -1,27 +1,50 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
-import type { ApplicationResponse } from '@/types/api/application.types';
-import { formatDate } from '@/utils/string.format';
-import { Eye, FileText } from 'lucide-react';
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import { ApplicationStatusBadge } from "@/components/organisms/application/ApplicationStatusBadge";
+import { REVIEWABLE_STATUSES } from "@/components/organisms/application/ApplicationReviewDetail";
+import type {
+  ApplicationResponse,
+  ApplicationStatusValue,
+} from "@/types/api/application.types";
+import { formatDate } from "@/utils/string.format";
+import { CheckCircle2, Eye, FileText, XCircle } from "lucide-react";
 
 export interface ApplicationTableProps {
   applications: ApplicationResponse[];
   onSelectApplication: (id: string) => void;
+  onApprove: (app: ApplicationResponse) => void;
+  onReject: (app: ApplicationResponse) => void;
+  isApproving: boolean;
+  isRejecting: boolean;
 }
 
 /**
  * ApplicationTable — organism tabel daftar pengajuan magang (HR Admin).
  * Presentasi murni; data & handler disuplai container/section.
  */
-export function ApplicationTable({ applications, onSelectApplication }: ApplicationTableProps) {
+export function ApplicationTable({
+  applications,
+  onSelectApplication,
+  onApprove,
+  onReject,
+  isApproving,
+  isRejecting,
+}: ApplicationTableProps) {
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Daftar Pengajuan</CardTitle>
-        <CardDescription>{applications.length} pengajuan ditemukan</CardDescription>
+        <CardDescription>
+          {applications.length} pengajuan ditemukan
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {applications.length === 0 ? (
@@ -49,14 +72,17 @@ export function ApplicationTable({ applications, onSelectApplication }: Applicat
                     key={app.id}
                     className="border-b transition-colors last:border-0 hover:bg-muted/40"
                   >
-                    <td className="px-6 py-4 font-medium">{app.applicationNumber ?? '-'}</td>
+                    <td className="px-6 py-4 font-medium">
+                      {app.applicationNumber ?? "-"}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="font-medium">
-                          {app.internProfile?.user.fullName ?? '-'}
+                          {app.internProfile?.user.fullName ?? "-"}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {app.internProfile?.studentNumber || app.internProfile?.user.email}
+                          {app.internProfile?.studentNumber ||
+                            app.internProfile?.user.email}
                         </span>
                       </div>
                     </td>
@@ -72,14 +98,39 @@ export function ApplicationTable({ applications, onSelectApplication }: Applicat
                       <ApplicationStatusBadge status={app.status} />
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onSelectApplication(app.id)}
-                      >
-                        <Eye className="size-4" />
-                        Review
-                      </Button>
+                      <div className="flex items-center justify-end gap-2">
+                        {REVIEWABLE_STATUSES.includes(
+                          app.status as ApplicationStatusValue,
+                        ) && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onReject(app)}
+                              disabled={isApproving || isRejecting}
+                            >
+                              <XCircle className="size-4" />
+                              Tolak
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => onApprove(app)}
+                              disabled={isApproving || isRejecting}
+                            >
+                              <CheckCircle2 className="size-4" />
+                              Setujui
+                            </Button>
+                          </>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onSelectApplication(app.id)}
+                        >
+                          <Eye className="size-4" />
+                          Review
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

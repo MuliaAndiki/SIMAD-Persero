@@ -4,8 +4,10 @@ import {
   AssignSupervisorDto,
   ChangeDepartmentDto,
   CreateProfileInternDto,
+  CreateSkillDto,
   ExtendInternshipDto,
   InternshipIdParam,
+  UpdateSkillDto,
 } from "@/dtos/internship.dto";
 import { requireRole, verifyToken } from "@/middlewares/auth";
 import { idempotency } from "@/middlewares/idempotency";
@@ -166,6 +168,38 @@ class InternshipRouter {
       (c: AppContext) => internshipController.getSkillAll(c),
       {
         beforeHandle: [verifyToken().beforeHandle],
+      },
+    );
+    this.internshipRouter.post(
+      "/skill",
+      (c: AppContext) => internshipController.createSkill(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["HR_ADMIN", "SUPERVISOR"]).beforeHandle,
+        ],
+        body: CreateSkillDto,
+      },
+    );
+    this.internshipRouter.put(
+      "/skill/:id",
+      (c: AppContext) => internshipController.updateSkill(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["HR_ADMIN", "SUPERVISOR"]).beforeHandle,
+        ],
+        body: UpdateSkillDto,
+      },
+    );
+    this.internshipRouter.delete(
+      "/skill/:id",
+      (c: AppContext) => internshipController.deleteSkill(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["HR_ADMIN", "SUPERVISOR"]).beforeHandle,
+        ],
       },
     );
     this.internshipRouter.post(
