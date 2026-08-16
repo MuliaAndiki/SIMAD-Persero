@@ -1,5 +1,15 @@
-import { useAssignIntern, useRemoveAssignment } from './state/mutate';
-import { useSupervisorDashboard, useSupervisorDetail, useSupervisorList } from './state/query';
+import {
+  useAssignIntern,
+  useCreateSupervisor,
+  useDeleteSupervisor,
+  useRemoveAssignment,
+  useUpdateSupervisor,
+} from "./state/mutate";
+import {
+  useSupervisorDashboard,
+  useSupervisorDetail,
+  useSupervisorList,
+} from "./state/query";
 
 export const useSupervisor = () => {
   return {
@@ -11,6 +21,9 @@ export const useSupervisor = () => {
     mutate: {
       assign: useAssignIntern,
       removeAssignment: useRemoveAssignment,
+      create: useCreateSupervisor,
+      update: useUpdateSupervisor,
+      delete: useDeleteSupervisor,
     },
   };
 };

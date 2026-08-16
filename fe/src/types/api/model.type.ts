@@ -115,7 +115,6 @@ export interface IDepartment {
 
 export interface IOfficeLocation {
   id: string;
-  departmentId: string;
   name: string;
   address: string;
   latitude: Decimal;

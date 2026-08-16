@@ -82,7 +82,7 @@ export function ApplicationTable({
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {app.internProfile?.studentNumber ||
-                            app.internProfile?.user.email}
+                            app.internProfile?.user.email}{" "}
                         </span>
                       </div>
                     </td>

@@ -71,6 +71,18 @@ function roleLabel(role: string | null): string {
   }
 }
 
+/** Base path halaman profil sesuai role — dipakai untuk link aksi terkait. */
+function profileBasePath(role: string | null): string {
+  switch (role) {
+    case 'HR_ADMIN':
+      return '/HR_ADMIN/profile';
+    case 'SUPERVISOR':
+      return '/SUPERVISOR/profile';
+    default:
+      return '/INTERN/profile';
+  }
+}
+
 export function ProfileSection({ state, service }: ProfileSectionProps) {
   if (state.isPending) {
     return (
@@ -99,6 +111,11 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
 
   const profile = state.profile;
   if (!profile) return null;
+
+  // Role dari GET /users/profile menjadi dasar render kondisional:
+  // menu khusus intern (Profil Magang / Kelola Skill) hanya muncul untuk INTERN.
+  const isIntern = profile.role === 'INTERN';
+  const basePath = profileBasePath(profile.role);
 
   return (
     <section className="flex flex-col gap-6">
@@ -153,30 +170,38 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
       </Card>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button asChild>
-          <Link href="/INTERN/dashboard/profile/intern">
-            <GraduationCap className="size-4" />
-            Profil Magang
-          </Link>
-        </Button>
-        <Button asChild>
-          <Link href="/INTERN/dashboard/profile/skills">
-            <Sparkles className="size-4" />
-            Kelola Skill
-          </Link>
-        </Button>
-        <Button asChild>
-          <Link href="/INTERN/dashboard/profile/edit">
-            <PenLine className="size-4" />
-            Ubah Profil
-          </Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/INTERN/dashboard/profile/password">
-            <KeyRound className="size-4" />
-            Ganti Password
-          </Link>
-        </Button>
+        {isIntern && (
+          <>
+            <Button asChild>
+              <Link href={`${basePath}/intern`}>
+                <GraduationCap className="size-4" />
+                Profil Magang
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href={`${basePath}/skills`}>
+                <Sparkles className="size-4" />
+                Kelola Skill
+              </Link>
+            </Button>
+          </>
+        )}
+        {(profile.role === 'INTERN' || profile.role === 'HR_ADMIN') && (
+          <>
+            <Button asChild>
+              <Link href={`${basePath}/edit`}>
+                <PenLine className="size-4" />
+                Ubah Profil
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={`${basePath}/password`}>
+                <KeyRound className="size-4" />
+                Ganti Password
+              </Link>
+            </Button>
+          </>
+        )}
         <Button
           variant="destructive"
           onClick={() =>

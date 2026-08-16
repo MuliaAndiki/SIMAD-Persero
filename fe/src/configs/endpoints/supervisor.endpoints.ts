@@ -12,8 +12,14 @@ export const SUPERVISOR_ENDPOINTS = {
   DASHBOARD: '/supervisors/dashboard',
   /** GET /supervisors — Daftar supervisor (HR_ADMIN) */
   LIST: '/supervisors',
+  /** POST /supervisors - Create supervisor (HR_ADMIN) */
+  CREATE: '/supervisors',
   /** GET /supervisors/:supervisorId — Detail supervisor (HR_ADMIN) */
   DETAIL: (supervisorId: string) => `/supervisors/${supervisorId}`,
+  /** UPDATE /supervisors/:supervisorId - Update supervisor (HR_ADMIN) */
+  UPDATE: (supervisorId: string) => `/supervisors/${supervisorId}`,
+  /** DELETE /supervisors/:supervisorId - Delete supervisor (HR_ADMIN) */
+  DELETE: (supervisorId: string) => `/supervisors/${supervisorId}`,
   /** POST /supervisors/:supervisorId/assign — Assign intern (HR_ADMIN) */
   ASSIGN: (supervisorId: string) => `/supervisors/${supervisorId}/assign`,
   /** DELETE /supervisors/:supervisorId/assignments/:assignmentId — Hapus assignment (HR_ADMIN) */

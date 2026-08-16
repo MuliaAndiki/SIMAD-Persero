@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { LoginSection } from '@/components/page/auth/login/LoginSection';
-import { useApi } from '@/hooks/useService/useApi';
-import type { LoginBody } from '@/types/api/auth.types';
-import { useState } from 'react';
+import { LoginSection } from "@/components/page/auth/login/LoginSection";
+import { useApi } from "@/hooks/useService/useApi";
+import type { LoginBody } from "@/types/api/auth.types";
+import { useState } from "react";
 
 export default function LoginContainer() {
   const api = useApi();
 
   const [formLogin, setFormLogin] = useState<LoginBody>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);

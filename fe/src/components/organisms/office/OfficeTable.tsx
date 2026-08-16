@@ -1,30 +1,41 @@
-'use client';
+"use client";
 
-import { Badge } from '@/components/atoms/badge';
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { DepartmentResponse } from '@/types/api/department.types';
-import type { OfficeResponse } from '@/types/api/office.types';
-import { MapPin, Pencil, Trash2 } from 'lucide-react';
+import { MapPin, Pencil, Settings2, Trash2 } from "lucide-react";
+
+import { Badge } from "@/components/atoms/badge";
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import type { OfficeResponse } from "@/types/api/office.types";
+import { AlertContexType } from "@/types/ui";
 
 export interface OfficeTableProps {
   offices: OfficeResponse[];
-  departments: DepartmentResponse[];
   isDeleting: boolean;
   onOpenEdit: (office: OfficeResponse) => void;
+  onManageDepartments: (office: OfficeResponse) => void;
   onDelete: (id: string) => void;
+  alert: AlertContexType;
 }
 
 /**
  * OfficeTable — organism tabel daftar kantor (HR Admin).
  * Presentasi murni; data & handler disuplai container/section.
+ * Departemen ditampilkan sebagai badge karena satu kantor melayani
+ * banyak departemen (many-to-many).
  */
 export function OfficeTable({
   offices,
-  departments,
   isDeleting,
   onOpenEdit,
+  onManageDepartments,
   onDelete,
+  alert,
 }: OfficeTableProps) {
   return (
     <Card>
@@ -49,49 +60,64 @@ export function OfficeTable({
                   <th className="px-6 py-3 font-medium">Departemen</th>
                   <th className="px-6 py-3 font-medium">Alamat</th>
                   <th className="px-6 py-3 font-medium">Radius</th>
-                  <th className="px-6 py-3 font-medium">Status</th>
                   <th className="px-6 py-3 text-right font-medium">Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {offices.map((office) => {
-                  const department = departments.find((d) => d.id === office.departmentId);
-                  return (
-                    <tr
-                      key={office.id}
-                      className="border-b transition-colors last:border-0 hover:bg-muted/40"
-                    >
-                      <td className="px-6 py-4 font-medium">{office.name}</td>
-                      <td className="px-6 py-4">{department?.name ?? '-'}</td>
-                      <td className="max-w-xs truncate px-6 py-4 text-muted-foreground">
-                        {office.address}
-                      </td>
-                      <td className="px-6 py-4">{office.radiusMeter} m</td>
-                      <td className="px-6 py-4">
-                        <Badge variant={office.isActive ? 'default' : 'secondary'}>
-                          {office.isActive ? 'Aktif' : 'Nonaktif'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="outline" size="sm" onClick={() => onOpenEdit(office)}>
-                            <Pencil className="size-4" />
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            disabled={isDeleting}
-                            onClick={() => onDelete(office.id)}
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
+                {offices.map((office) => (
+                  <tr
+                    key={office.id}
+                    className="border-b transition-colors last:border-0 hover:bg-muted/40"
+                  >
+                    <td className="px-6 py-4 font-medium">{office.name}</td>
+                    <td className="px-6 py-4">
+                      {office.departments.length === 0 ? (
+                        "-"
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {office.departments.map((department) => (
+                            <Badge key={department.id} variant="secondary">
+                              {department.name}
+                            </Badge>
+                          ))}
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                      )}
+                    </td>
+                    <td className="max-w-xs truncate px-6 py-4 text-muted-foreground">
+                      {office.address}
+                    </td>
+                    <td className="px-6 py-4">{office.radiusMeter} m</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onManageDepartments(office)}
+                        >
+                          <Settings2 className="size-4" />
+                          Departemen
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onOpenEdit(office)}
+                        >
+                          <Pencil className="size-4" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          disabled={isDeleting}
+                          onClick={() => onDelete(office.id)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

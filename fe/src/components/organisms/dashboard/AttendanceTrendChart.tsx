@@ -1,7 +1,22 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { AttendanceTrendPoint } from '@/types/api/dashboard.types';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
-const MAX_BAR_HEIGHT = 120;
+/** Seri absensi yang digambar sebagai area bertumpuk (token chart dari tema). */
+const ATTENDANCE_SERIES = [
+  { key: 'present', name: 'Hadir', color: 'var(--chart-3)' },
+  { key: 'late', name: 'Terlambat', color: 'var(--chart-4)' },
+  { key: 'invalid', name: 'Tidak valid', color: 'var(--chart-5)' },
+] as const;
 
 function monthLabel(month: string): string {
   const [year, monthNum] = month.split('-').map(Number);
@@ -11,16 +26,28 @@ function monthLabel(month: string): string {
   });
 }
 
+/** Gaya tooltip agar selaras dengan tema aplikasi. */
+const TOOLTIP_STYLE = {
+  borderRadius: 12,
+  border: '1px solid var(--border)',
+  background: 'var(--card)',
+  color: 'var(--foreground)',
+  fontSize: 12,
+} as const;
+
 /**
  * AttendanceTrendChart — tren absensi 6 bulan terakhir (GET /dashboard/charts).
- * Bar chart CSS murni (presentasi); data disuplai oleh section/container.
+ * Dibangun dengan recharts (stacked area); data disuplai oleh section/container.
  */
 export function AttendanceTrendChart({
   data,
 }: {
   data: AttendanceTrendPoint[];
 }) {
-  const max = Math.max(1, ...data.flatMap((d) => [d.present, d.late, d.invalid]));
+  const chartData = data.map((point) => ({
+    ...point,
+    label: monthLabel(point.month),
+  }));
 
   return (
     <Card>
@@ -28,48 +55,49 @@ export function AttendanceTrendChart({
         <CardTitle>Tren Absensi</CardTitle>
         <CardDescription>6 bulan terakhir</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-emerald-500" />
-            Hadir
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-amber-500" />
-            Terlambat
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-rose-500" />
-            Tidak valid
-          </span>
-        </div>
-        <div className="flex items-end justify-between gap-2">
-          {data.map((point) => (
-            <div key={point.month} className="flex flex-1 flex-col items-center gap-2">
-              <div
-                className="flex w-full items-end justify-center gap-1"
-                style={{ height: MAX_BAR_HEIGHT }}
-              >
-                <div
-                  className="w-2.5 rounded-t bg-emerald-500"
-                  style={{
-                    height: `${(point.present / max) * MAX_BAR_HEIGHT}px`,
-                  }}
+      <CardContent>
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+              <defs>
+                {ATTENDANCE_SERIES.map((series) => (
+                  <linearGradient
+                    key={series.key}
+                    id={`attendance-${series.key}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor={series.color} stopOpacity={0.35} />
+                    <stop offset="95%" stopColor={series.color} stopOpacity={0.02} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12 }} />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12 }}
+                allowDecimals={false}
+              />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+              {ATTENDANCE_SERIES.map((series) => (
+                <Area
+                  key={series.key}
+                  type="monotone"
+                  dataKey={series.key}
+                  name={series.name}
+                  stackId="1"
+                  stroke={series.color}
+                  fill={`url(#attendance-${series.key})`}
+                  strokeWidth={2}
                 />
-                <div
-                  className="w-2.5 rounded-t bg-amber-500"
-                  style={{ height: `${(point.late / max) * MAX_BAR_HEIGHT}px` }}
-                />
-                <div
-                  className="w-2.5 rounded-t bg-rose-500"
-                  style={{
-                    height: `${(point.invalid / max) * MAX_BAR_HEIGHT}px`,
-                  }}
-                />
-              </div>
-              <span className="text-[11px] text-muted-foreground">{monthLabel(point.month)}</span>
-            </div>
-          ))}
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>

@@ -1,15 +1,15 @@
-import { Api } from '@/api/api-entry';
-import type { TResponse } from '@/api/types/response.types';
-import { OFFICE_ENDPOINTS } from '@/configs/endpoints/office.endpoints';
+import { Api } from "@/api/api-entry";
+import type { TResponse } from "@/api/types/response.types";
+import { OFFICE_ENDPOINTS } from "@/configs/endpoints/office.endpoints";
 import type {
   CreateOfficeBody,
   OfficeParams,
   OfficeQuery,
   OfficeResponse,
   UpdateOfficeBody,
-} from '@/types/api/office.types';
-import { buildQueryString } from '@/utils/query-string';
-import { toServiceResponse } from '@/utils/service-response';
+} from "@/types/api/office.types";
+import { buildQueryString } from "@/utils/query-string";
+import { toServiceResponse } from "@/utils/service-response";
 
 /**
  * Service modul Office — 5 method, satu method per endpoint backend
@@ -25,10 +25,14 @@ class OfficeService {
    * Mengambil daftar lokasi kantor dengan pagination dan filter.
    */
   public async List(query?: OfficeQuery): Promise<TResponse<OfficeResponse[]>> {
-    const qs = buildQueryString(query as Record<string, string | number | boolean>);
-    const res = await client.GetResponse<OfficeResponse[]>(`${OFFICE_ENDPOINTS.LIST}${qs}`);
+    const qs = buildQueryString(
+      query as Record<string, string | number | boolean>,
+    );
+    const res = await client.GetResponse<OfficeResponse[]>(
+      `${OFFICE_ENDPOINTS.LIST}${qs}`,
+    );
     return toServiceResponse(res, {
-      message: 'Daftar lokasi kantor berhasil dimuat',
+      message: "Daftar lokasi kantor berhasil dimuat",
     });
   }
 
@@ -36,10 +40,14 @@ class OfficeService {
    * GET /offices/:officeId
    * Mengambil detail satu lokasi kantor.
    */
-  public async Detail(params: Pick<OfficeParams, 'officeId'>): Promise<TResponse<OfficeResponse>> {
-    const res = await client.GetResponse<OfficeResponse>(OFFICE_ENDPOINTS.DETAIL(params.officeId));
+  public async Detail(
+    params: Pick<OfficeParams, "officeId">,
+  ): Promise<TResponse<OfficeResponse>> {
+    const res = await client.GetResponse<OfficeResponse>(
+      OFFICE_ENDPOINTS.DETAIL(params.officeId),
+    );
     return toServiceResponse(res, {
-      message: 'Detail lokasi kantor berhasil dimuat',
+      message: "Detail lokasi kantor berhasil dimuat",
     });
   }
 
@@ -50,12 +58,20 @@ class OfficeService {
   public async Create(
     body: Pick<
       CreateOfficeBody,
-      'name' | 'address' | 'latitude' | 'longitude' | 'radiusMeter' | 'departmentId'
+      | "name"
+      | "address"
+      | "latitude"
+      | "longitude"
+      | "radiusMeter"
+      | "departmentIds"
     >,
   ): Promise<TResponse<OfficeResponse>> {
-    const res = await client.PostResponse<OfficeResponse>(OFFICE_ENDPOINTS.CREATE, body);
+    const res = await client.PostResponse<OfficeResponse>(
+      OFFICE_ENDPOINTS.CREATE,
+      body,
+    );
     return toServiceResponse(res, {
-      message: 'Lokasi kantor berhasil dibuat',
+      message: "Lokasi kantor berhasil dibuat",
       statusCode: 201,
     });
   }
@@ -65,7 +81,7 @@ class OfficeService {
    * Memperbarui lokasi kantor.
    */
   public async Update(
-    params: Pick<OfficeParams, 'officeId'>,
+    params: Pick<OfficeParams, "officeId">,
     body: UpdateOfficeBody,
   ): Promise<TResponse<OfficeResponse>> {
     const res = await client.PatchResponse<OfficeResponse>(
@@ -73,7 +89,7 @@ class OfficeService {
       body,
     );
     return toServiceResponse(res, {
-      message: 'Lokasi kantor berhasil diperbarui',
+      message: "Lokasi kantor berhasil diperbarui",
     });
   }
 
@@ -81,10 +97,14 @@ class OfficeService {
    * DELETE /offices/:officeId
    * Menonaktifkan lokasi kantor (soft delete).
    */
-  public async Delete(params: Pick<OfficeParams, 'officeId'>): Promise<TResponse<null>> {
-    const res = await client.DeleteResponse<null>(OFFICE_ENDPOINTS.DELETE(params.officeId));
+  public async Delete(
+    params: Pick<OfficeParams, "officeId">,
+  ): Promise<TResponse<null>> {
+    const res = await client.DeleteResponse<null>(
+      OFFICE_ENDPOINTS.DELETE(params.officeId),
+    );
     return toServiceResponse(res, {
-      message: 'Lokasi kantor berhasil dihapus',
+      message: "Lokasi kantor berhasil dihapus",
     });
   }
 }
