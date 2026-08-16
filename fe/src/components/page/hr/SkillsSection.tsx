@@ -4,6 +4,7 @@ import { Button } from "@/components/atoms/button";
 import { Search, AlertCircle, Trash2, Pencil, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import type { SkillResponse } from "@/types/api/internship.types";
+import { AlertContexType } from "@/types/ui";
 
 export interface SkillsSectionState {
   isPending: boolean;
@@ -13,6 +14,7 @@ export interface SkillsSectionState {
   keyword: string;
   isSaving: boolean;
   isDeleting: boolean;
+  alert: AlertContexType;
 }
 
 export interface SkillsSectionActions {
@@ -171,7 +173,16 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
                         variant="ghost"
                         size="icon"
                         className="size-8 text-destructive hover:text-destructive"
-                        onClick={() => void handleDelete(skill)}
+                        onClick={() =>
+                          state.alert.confirm({
+                            title: "Hapus",
+                            deskripsi: "Apakah Kamu Ingin Menghapus Skill Ini?",
+                            icon: "question",
+                            onConfirm: () => {
+                              handleDelete(skill);
+                            },
+                          })
+                        }
                         disabled={state.isDeleting && deletingId === skill.id}
                         aria-label={`Hapus ${skill.name ?? "skill"}`}
                       >

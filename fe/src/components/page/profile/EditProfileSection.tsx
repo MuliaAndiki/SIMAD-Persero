@@ -30,6 +30,18 @@ export interface EditProfileSectionProps {
   service: EditProfileSectionService;
 }
 
+/** Base path halaman profil sesuai role — dipakai untuk link kembali. */
+function profileBasePath(role: string | null): string {
+  switch (role) {
+    case 'HR_ADMIN':
+      return '/HR_ADMIN/profile';
+    case 'SUPERVISOR':
+      return '/SUPERVISOR/profile';
+    default:
+      return '/INTERN/profile';
+  }
+}
+
 export function EditProfileSection({ state, service }: EditProfileSectionProps) {
   if (state.isPending) {
     return (
@@ -90,6 +102,9 @@ function EditProfileForm({
   const [fullName, setFullName] = useState(profile.fullName);
   const [phone, setPhone] = useState(profile.phone ?? '');
   const [localError, setLocalError] = useState<string | null>(null);
+
+  // Path kembali menyesuaikan role (dari GET /users/profile).
+  const backPath = profileBasePath(profile.role);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -164,7 +179,7 @@ function EditProfileForm({
 
           <div className="flex justify-end gap-3 border-t pt-4">
             <Button asChild type="button" variant="outline">
-              <Link href="/INTERN/dashboard/profile">Batal</Link>
+              <Link href={backPath}>Batal</Link>
             </Button>
             <Button type="submit" disabled={isUpdating}>
               {isUpdating ? (

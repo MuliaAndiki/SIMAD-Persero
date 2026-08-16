@@ -1,7 +1,7 @@
-import type { DashboardRole } from "@/types/api/dashboard.types";
 import {
   BarChart3,
   Building2,
+  ClipboardCheck,
   Clock,
   FileText,
   History,
@@ -9,12 +9,14 @@ import {
   type LucideIcon,
   MapPin,
   ScrollText,
+  Sparkles,
   User,
   UserCheck,
   Users,
-  Sparkles,
 } from "lucide-react";
 import type React from "react";
+
+import type { DashboardRole } from "@/types/api/dashboard.types";
 
 interface AppConfig {
   name: string;
@@ -132,25 +134,32 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
   { name: "Beranda", url: "/INTERN/dashboard", icon: Home, subMenu: [] },
   {
     name: "Pengajuan",
-    url: "/INTERN/dashboard/application",
+    url: "/INTERN/application",
     icon: FileText,
     subMenu: [],
   },
   {
+    name: "Onboarding",
+    url: "/INTERN/onboarding",
+    icon: ClipboardCheck,
+    subMenu: [],
+    requiresInternship: true,
+  },
+  {
     name: "Absensi",
-    url: "/INTERN/dashboard/attendance",
+    url: "/INTERN/attendance",
     icon: Clock,
     subMenu: [],
     requiresInternship: true,
   },
   {
     name: "Riwayat",
-    url: "/INTERN/dashboard/history",
+    url: "/INTERN/history",
     icon: History,
     subMenu: [],
     requiresInternship: true,
   },
-  { name: "Profil", url: "/INTERN/dashboard/profile", icon: User, subMenu: [] },
+  { name: "Profil", url: "/INTERN/profile", icon: User, subMenu: [] },
 ];
 
 /** Menu sidebar khusus HR_ADMIN. */
@@ -158,44 +167,50 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
   { name: "Beranda", url: "/HR_ADMIN/dashboard", icon: Home, subMenu: [] },
   {
     name: "Pengajuan",
-    url: "/HR_ADMIN/dashboard/applications",
+    url: "/HR_ADMIN/applications",
     icon: FileText,
     subMenu: [],
   },
   {
     name: "Departemen",
-    url: "/HR_ADMIN/dashboard/departments",
+    url: "/HR_ADMIN/departments",
     icon: Building2,
     subMenu: [],
   },
   {
     name: "Kantor",
-    url: "/HR_ADMIN/dashboard/offices",
+    url: "/HR_ADMIN/offices",
     icon: MapPin,
     subMenu: [],
   },
   {
     name: "Supervisor",
-    url: "/HR_ADMIN/dashboard/supervisors",
+    url: "/HR_ADMIN/supervisors",
     icon: UserCheck,
     subMenu: [],
   },
   {
     name: "Laporan",
-    url: "/HR_ADMIN/dashboard/reports",
+    url: "/HR_ADMIN/reports",
     icon: BarChart3,
     subMenu: [],
   },
   {
     name: "Audit Log",
-    url: "/HR_ADMIN/dashboard/audit-logs",
+    url: "/HR_ADMIN/audit-logs",
     icon: ScrollText,
     subMenu: [],
   },
   {
     name: "Keterampilan",
-    url: "/HR_ADMIN/dashboard/skills",
+    url: "/HR_ADMIN/skills",
     icon: Sparkles,
+    subMenu: [],
+  },
+  {
+    name: "Profil",
+    url: "/HR_ADMIN/profile",
+    icon: User,
     subMenu: [],
   },
 ];
@@ -205,13 +220,13 @@ export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
   { name: "Beranda", url: "/SUPERVISOR/dashboard", icon: Home, subMenu: [] },
   {
     name: "Intern Bimbingan",
-    url: "/SUPERVISOR/dashboard/interns",
+    url: "/SUPERVISOR/interns",
     icon: Users,
     subMenu: [],
   },
   {
     name: "Absensi",
-    url: "/SUPERVISOR/dashboard/attendance",
+    url: "/SUPERVISOR/attendance",
     icon: Clock,
     subMenu: [],
   },

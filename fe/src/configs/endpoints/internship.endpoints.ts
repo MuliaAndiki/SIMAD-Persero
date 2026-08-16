@@ -10,6 +10,8 @@
 export const INTERNSHIP_ENDPOINTS = {
   /** GET /internships/me — Magang saya (INTERN) */
   MY: "/internships/me",
+  /** PATCH /internships/:id/onboarding — Selesaikan onboarding (INTERN) */
+  ONBOARDING: (id: string) => `/internships/${id}/onboarding`,
   /** GET /internships/:id — Detail magang (HR_ADMIN, SUPERVISOR) */
   DETAIL: (id: string) => `/internships/${id}`,
   /** PATCH /internships/:id/start — Mulai magang (HR_ADMIN) */

@@ -9,6 +9,8 @@ import type { FormEvent } from 'react';
 /** State yang disuplai container — section murni presentasi. */
 export interface ChangePasswordSectionState {
   isChangingPassword: boolean;
+  /** Path halaman profil sesuai role — dipakai tombol Batal. */
+  backPath?: string;
 }
 
 /** Aksi dari container (mutation) — section hanya memanggil. */
@@ -36,6 +38,7 @@ export function ChangePasswordSection({ state, service }: ChangePasswordSectionP
 
       <ChangePasswordForm
         isChangingPassword={state.isChangingPassword}
+        backPath={state.backPath ?? '/INTERN/profile'}
         onChangePassword={service.onChangePassword}
       />
     </section>
@@ -45,9 +48,11 @@ export function ChangePasswordSection({ state, service }: ChangePasswordSectionP
 /** Form ganti password (old + new + konfirmasi). */
 function ChangePasswordForm({
   isChangingPassword,
+  backPath,
   onChangePassword,
 }: {
   isChangingPassword: boolean;
+  backPath: string;
   onChangePassword: (data: {
     oldPassword: string;
     newPassword: string;
@@ -140,7 +145,7 @@ function ChangePasswordForm({
 
           <div className="flex justify-end gap-3 border-t pt-4">
             <Button asChild type="button" variant="outline">
-              <Link href="/INTERN/dashboard/profile">Batal</Link>
+              <Link href={backPath}>Batal</Link>
             </Button>
             <Button type="submit" disabled={isChangingPassword}>
               {isChangingPassword ? (

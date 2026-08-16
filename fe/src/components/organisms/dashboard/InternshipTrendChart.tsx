@@ -1,67 +1,104 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { InternshipTrendPoint } from '@/types/api/dashboard.types';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import type { InternshipTrendPoint } from "@/types/api/dashboard.types";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-const MAX_BAR_HEIGHT = 120;
+/** Seri tren magang yang digambar sebagai garis (token chart dari tema). */
+const INTERNSHIP_SERIES = [
+  { key: "started", name: "Mulai", color: "var(--chart-2)" },
+  { key: "completed", name: "Selesai", color: "var(--chart-3)" },
+] as const;
 
 function monthLabel(month: string): string {
-  const [year, monthNum] = month.split('-').map(Number);
+  const [year, monthNum] = month.split("-").map(Number);
   if (!year || !monthNum) return month;
-  return new Date(year, monthNum - 1, 1).toLocaleDateString('id-ID', {
-    month: 'short',
+  return new Date(year, monthNum - 1, 1).toLocaleDateString("id-ID", {
+    month: "short",
   });
 }
 
+/** Gaya tooltip agar selaras dengan tema aplikasi. */
+const TOOLTIP_STYLE = {
+  borderRadius: 12,
+  border: "1px solid var(--border)",
+  background: "var(--card)",
+  color: "var(--foreground)",
+  fontSize: 12,
+} as const;
+
 /**
  * InternshipTrendChart — tren magang (mulai vs selesai) 6 bulan terakhir
- * (GET /dashboard/charts). Bar chart CSS murni (presentasi).
+ * (GET /dashboard/charts). Dibangun dengan recharts (line); data disuplai
+ * oleh section/container.
  */
 export function InternshipTrendChart({
   data,
 }: {
   data: InternshipTrendPoint[];
 }) {
-  const max = Math.max(1, ...data.flatMap((d) => [d.started, d.completed]));
+  const chartData = data.map((point) => ({
+    ...point,
+    label: monthLabel(point.month),
+  }));
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Tren Magang</CardTitle>
-        <CardDescription>Mulai vs selesai per bulan (6 bulan terakhir)</CardDescription>
+        <CardDescription>
+          Mulai vs selesai per bulan (6 bulan terakhir)
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-sky-500" />
-            Mulai
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-emerald-500" />
-            Selesai
-          </span>
-        </div>
-        <div className="flex items-end justify-between gap-2">
-          {data.map((point) => (
-            <div key={point.month} className="flex flex-1 flex-col items-center gap-2">
-              <div
-                className="flex w-full items-end justify-center gap-1"
-                style={{ height: MAX_BAR_HEIGHT }}
-              >
-                <div
-                  className="w-2.5 rounded-t bg-sky-500"
-                  style={{
-                    height: `${(point.started / max) * MAX_BAR_HEIGHT}px`,
-                  }}
+      <CardContent>
+        <div className="h-72 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 8, right: 8, left: -12, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12 }}
+                allowDecimals={false}
+              />
+              <Tooltip contentStyle={TOOLTIP_STYLE} />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+              {INTERNSHIP_SERIES.map((series) => (
+                <Line
+                  key={series.key}
+                  type="monotone"
+                  dataKey={series.key}
+                  name={series.name}
+                  stroke={series.color}
+                  strokeWidth={2}
+                  dot={{ r: 3, strokeWidth: 0, fill: series.color }}
+                  activeDot={{ r: 5 }}
                 />
-                <div
-                  className="w-2.5 rounded-t bg-emerald-500"
-                  style={{
-                    height: `${(point.completed / max) * MAX_BAR_HEIGHT}px`,
-                  }}
-                />
-              </div>
-              <span className="text-[11px] text-muted-foreground">{monthLabel(point.month)}</span>
-            </div>
-          ))}
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>

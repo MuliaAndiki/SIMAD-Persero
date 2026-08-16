@@ -52,10 +52,8 @@ export function ApplicationApproveForm({
   onBack,
   onSubmit,
 }: ApplicationApproveFormProps) {
-  const filteredOffices = offices.filter(
-    (office) => !form.departmentId || office.departmentId === form.departmentId,
-  );
-
+  // Daftar kantor tidak difilter oleh departemen — seluruh kantor terdaftar
+  // selalu tampil agar dropdown tidak kosong setelah memilih departemen.
   const canSubmit = Boolean(form.departmentId && form.supervisorId);
 
   const handleSubmit = (e: FormEvent) => {
@@ -109,16 +107,16 @@ export function ApplicationApproveForm({
               <SelectValue placeholder="Pilih kantor (opsional)" />
             </SelectTrigger>
             <SelectContent>
-              {filteredOffices.map((office) => (
+              {offices.map((office) => (
                 <SelectItem key={office.id} value={office.id}>
                   {office.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {!form.departmentId && (
+          {offices.length === 0 && (
             <p className="text-xs text-muted-foreground">
-              Pilih departemen terlebih dahulu untuk memfilter kantor.
+              Belum ada kantor yang terdaftar.
             </p>
           )}
         </div>

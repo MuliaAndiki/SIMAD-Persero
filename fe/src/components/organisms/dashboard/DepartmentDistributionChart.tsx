@@ -1,43 +1,66 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { DepartmentDistributionPoint } from '@/types/api/dashboard.types';
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+
+/** Palet donut memakai token chart dari tema (globals.css). */
+const DONUT_COLORS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+];
+
+/** Gaya tooltip agar selaras dengan tema aplikasi. */
+const TOOLTIP_STYLE = {
+  borderRadius: 12,
+  border: '1px solid var(--border)',
+  background: 'var(--card)',
+  color: 'var(--foreground)',
+  fontSize: 12,
+} as const;
 
 /**
  * DepartmentDistributionChart — distribusi peserta magang per bidang
- * (GET /dashboard/charts). Bar horizontal CSS murni (presentasi).
+ * (GET /dashboard/charts). Dibangun dengan recharts (donut); data disuplai
+ * oleh section/container.
  */
 export function DepartmentDistributionChart({
   data,
 }: {
   data: DepartmentDistributionPoint[];
 }) {
-  const max = Math.max(1, ...data.map((d) => d.internCount));
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Distribusi Bidang</CardTitle>
         <CardDescription>Peserta magang per bidang</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3.5">
+      <CardContent>
         {data.length === 0 ? (
           <p className="text-sm text-muted-foreground">Belum ada data distribusi.</p>
         ) : (
-          data.map((point) => (
-            <div key={point.department} className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="truncate font-medium text-foreground">{point.department}</span>
-                <span className="shrink-0 text-muted-foreground">
-                  {point.internCount.toLocaleString('id-ID')} peserta
-                </span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${(point.internCount / max) * 100}%` }}
-                />
-              </div>
-            </div>
-          ))
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  dataKey="internCount"
+                  nameKey="department"
+                  innerRadius="55%"
+                  outerRadius="80%"
+                  paddingAngle={3}
+                  strokeWidth={0}
+                >
+                  {data.map((point, index) => (
+                    <Cell key={point.department} fill={DONUT_COLORS[index % DONUT_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={TOOLTIP_STYLE} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </CardContent>
     </Card>

@@ -1,14 +1,19 @@
-'use client';
+"use client";
 
-import { Button, SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/atoms';
-import { PWAInstallDialog } from '@/components/pwa/PWAInstallDialog';
-import { AppSidebar } from '@/core/components/app-sidebar';
-import { BottomNav } from '@/core/components/bottom-nav';
-import LanguageDropdown from '@/core/components/language.dropdown';
-import ThemeToggle from '@/core/components/theme-toggle';
-import NotificationDropdownContainer from '@/core/containers/notification.dropdown.container';
-import { Download } from 'lucide-react';
-import Image from 'next/image';
+import {
+  Button,
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/atoms";
+import { PWAInstallDialog } from "@/components/pwa/PWAInstallDialog";
+import { AppSidebar } from "@/core/components/app-sidebar";
+import { BottomNav } from "@/core/components/bottom-nav";
+import LanguageDropdown from "@/core/components/language.dropdown";
+import ThemeToggle from "@/core/components/theme-toggle";
+import NotificationDropdownContainer from "@/core/containers/notification.dropdown.container";
+import { Download } from "lucide-react";
+import Image from "next/image";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -44,7 +49,9 @@ export function AppShell({ children }: AppShellProps) {
               height={32}
               className="h-8 w-8 object-contain"
             />
-            <span className="text-base font-bold leading-tight text-foreground">SIMAD</span>
+            <span className="text-base font-bold leading-tight text-foreground">
+              SIMAD
+            </span>
           </div>
 
           <SidebarTrigger className="hidden md:inline-flex" />

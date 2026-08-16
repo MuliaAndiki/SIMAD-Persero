@@ -1,32 +1,40 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/atoms/button';
-import { Card } from '@/components/atoms/card';
-import { Input } from '@/components/atoms/input';
+import { AlertCircle, Plus, Search } from "lucide-react";
+import type { FormEvent } from "react";
+import { useState } from "react";
+
+import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
+import { Input } from "@/components/atoms/input";
+import { OfficeDepartmentDialog } from "@/components/organisms/office/OfficeDepartmentDialog";
 import {
   OfficeFormDialog,
   type OfficeFormField,
   type OfficeFormState,
-} from '@/components/organisms/office/OfficeFormDialog';
-import { OfficeTable } from '@/components/organisms/office/OfficeTable';
-import type { DepartmentResponse } from '@/types/api/department.types';
-import type { OfficeResponse } from '@/types/api/office.types';
-import { AlertCircle, Plus, Search } from 'lucide-react';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+} from "@/components/organisms/office/OfficeFormDialog";
+import { OfficeTable } from "@/components/organisms/office/OfficeTable";
+import type { DepartmentResponse } from "@/types/api/department.types";
+import type { OfficeResponse } from "@/types/api/office.types";
+import { AlertContexType } from "@/types/ui";
 
 export interface OfficesSectionState {
   isPending: boolean;
   isError: boolean;
   errorMessage?: string;
   offices: OfficeResponse[];
-  departments: DepartmentResponse[];
   keyword: string;
   formOpen: boolean;
   editing: OfficeResponse | null;
   form: OfficeFormState;
   isSaving: boolean;
   isDeleting: boolean;
+  departments: DepartmentResponse[];
+  deptDialogOpen: boolean;
+  deptTarget: OfficeResponse | null;
+  selectedDeptIds: string[];
+  isSavingDepartments: boolean;
+  alert: AlertContexType;
 }
 
 export interface OfficesSectionActions {
@@ -38,6 +46,10 @@ export interface OfficesSectionActions {
   onFieldChange: (field: OfficeFormField, value: string) => void;
   onSubmit: () => void | Promise<void>;
   onDelete: (id: string) => void | Promise<void>;
+  onOpenManageDepartments: (office: OfficeResponse) => void;
+  onCloseManageDepartments: () => void;
+  onToggleDepartment: (departmentId: string) => void;
+  onSubmitDepartments: () => void | Promise<void>;
 }
 
 export interface OfficesSectionProps {
@@ -62,7 +74,8 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-foreground">Kantor</h1>
         <p className="text-sm text-muted-foreground">
-          Kelola lokasi kantor dan titik koordinat absensi per departemen.
+          Kelola lokasi kantor dan titik koordinat absensi. Satu kantor dapat
+          melayani banyak departemen.
         </p>
       </header>
 
@@ -79,7 +92,10 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
       ) : (
         <>
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
+            <form
+              onSubmit={handleSubmitSearch}
+              className="flex flex-1 items-center gap-2"
+            >
               <div className="relative flex-1">
                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -104,10 +120,11 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
 
           <OfficeTable
             offices={state.offices}
-            departments={state.departments}
             isDeleting={state.isDeleting}
             onOpenEdit={actions.onOpenEdit}
+            onManageDepartments={actions.onOpenManageDepartments}
             onDelete={actions.onDelete}
+            alert={state.alert}
           />
         </>
       )}
@@ -116,11 +133,21 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
         open={state.formOpen}
         editing={state.editing}
         form={state.form}
-        departments={state.departments}
         isSaving={state.isSaving}
         onFieldChange={actions.onFieldChange}
         onClose={actions.onCloseForm}
         onSubmit={actions.onSubmit}
+      />
+
+      <OfficeDepartmentDialog
+        open={state.deptDialogOpen}
+        office={state.deptTarget}
+        departments={state.departments}
+        selectedIds={state.selectedDeptIds}
+        isSaving={state.isSavingDepartments}
+        onToggle={actions.onToggleDepartment}
+        onClose={actions.onCloseManageDepartments}
+        onSubmit={actions.onSubmitDepartments}
       />
     </section>
   );

@@ -1,12 +1,9 @@
+import { useMutation } from "@tanstack/react-query";
+
 import type { TResponse } from "@/api/types/response.types";
 import { queryKey } from "@/configs/query-key";
 import { useAppNameSpace } from "@/hooks/useAppNameSpace";
 import Api from "@/services/props.service";
-import {
-  type InternshipCacheContext,
-  readInternshipSnapshot,
-} from "@/utils/cache/internship.cache";
-
 import type {
   AddSkillBody,
   AddSkillResponse,
@@ -23,7 +20,10 @@ import type {
   SkillResponse,
   UpdateSkillBody,
 } from "@/types/api/internship.types";
-import { useMutation } from "@tanstack/react-query";
+import {
+  type InternshipCacheContext,
+  readInternshipSnapshot,
+} from "@/utils/cache/internship.cache";
 
 export function useStartInternship() {
   const ns = useAppNameSpace();
@@ -35,6 +35,45 @@ export function useStartInternship() {
   >({
     mutationFn: (params: Pick<InternshipParams, "id">) =>
       Api.Internship.Start(params),
+    onSettled: async () => {
+      await ns.queryClient.invalidateQueries({
+        queryKey: queryKey.internshipRoot(),
+      });
+    },
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({
+        queryKey: queryKey.internshipRoot(),
+      });
+      const previousData = readInternshipSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: "success",
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: "error",
+      });
+    },
+  });
+}
+
+export function useCompleteOnboarding() {
+  const ns = useAppNameSpace();
+  return useMutation<
+    TResponse<InternshipResponse>,
+    Error,
+    Pick<InternshipParams, "id">,
+    InternshipCacheContext
+  >({
+    mutationFn: (params: Pick<InternshipParams, "id">) =>
+      Api.Internship.CompleteOnboarding(params),
     onSettled: async () => {
       await ns.queryClient.invalidateQueries({
         queryKey: queryKey.internshipRoot(),
