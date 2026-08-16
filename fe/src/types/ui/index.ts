@@ -1,10 +1,11 @@
-type ToastType = 'success' | 'error' | 'warning' | 'info' | 'question';
+type ToastType = "success" | "error" | "warning" | "info" | "question";
 export interface ModalProps {
   title: string;
   icon: ToastType;
   deskripsi: string;
   confirmButtonText?: string;
   confirmButtonColor?: string;
+  cancelText?: string;
   onConfirm?: () => void;
   onClose?: () => void;
 }

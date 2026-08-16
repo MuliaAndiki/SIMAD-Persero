@@ -7,6 +7,7 @@ import type {
   AssignSupervisorBody,
   ChangeDepartmentBody,
   CreateInternProfileResponse,
+  CreateSkillBody,
   ExtendInternshipBody,
   InternshipParams,
   InternshipResponse,
@@ -16,7 +17,6 @@ import type {
   RemoveSkillResponse,
   SkillQuery,
   SkillResponse,
-  CreateSkillBody,
   UpdateSkillBody,
 } from "@/types/api/internship.types";
 import { buildQueryString } from "@/utils/query-string";
@@ -40,6 +40,22 @@ class InternshipService {
       INTERNSHIP_ENDPOINTS.MY,
     );
     return toServiceResponse(res, { message: "Data magang berhasil dimuat" });
+  }
+
+  /**
+   * PATCH /internships/:id/onboarding
+   * Menyelesaikan onboarding magang (INTERN).
+   */
+  public async CompleteOnboarding(
+    params: Pick<InternshipParams, "id">,
+  ): Promise<TResponse<InternshipResponse>> {
+    const res = await client.PatchResponse<InternshipResponse>(
+      INTERNSHIP_ENDPOINTS.ONBOARDING(params.id),
+      {},
+    );
+    return toServiceResponse(res, {
+      message: "Onboarding berhasil diselesaikan",
+    });
   }
 
   /**

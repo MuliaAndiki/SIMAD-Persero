@@ -6,6 +6,7 @@ import { InternOverview } from '@/components/organisms/dashboard/InternOverview'
 import { RecentActivityList } from '@/components/organisms/dashboard/RecentActivityList';
 import { StatCard } from '@/components/organisms/dashboard/StatCard';
 import { StatisticsGrid } from '@/components/organisms/dashboard/StatisticsGrid';
+import { SupervisorAttendanceChart } from '@/components/organisms/dashboard/SupervisorAttendanceChart';
 import { SupervisorOverview } from '@/components/organisms/dashboard/SupervisorOverview';
 import { DASHBOARD_ROLE_LABELS } from '@/configs/app.config';
 import type {
@@ -173,7 +174,7 @@ function ChartsSkeleton() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="h-64 lg:col-span-2" />
         <Card className="h-64" />
-        <Card className="h-56 lg:col-span-3" />
+        <Card className="h-72 lg:col-span-3" />
       </div>
     </PhantomSkeleton>
   );
@@ -353,7 +354,12 @@ export function SupervisorDashboardSection({ state, service }: SupervisorDashboa
       skeletonCount={4}
       skeletonColumns="sm:grid-cols-2 lg:grid-cols-4"
     >
-      {state.data ? <SupervisorOverview data={state.data} /> : null}
+      {state.data ? (
+        <>
+          <SupervisorOverview data={state.data} />
+          <SupervisorAttendanceChart data={state.data} />
+        </>
+      ) : null}
     </DashboardFrame>
   );
 }
