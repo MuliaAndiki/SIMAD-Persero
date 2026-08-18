@@ -1,31 +1,28 @@
-"use client";
+'use client';
 
-import { ApplicationsSection } from "@/components/page/hr/ApplicationsSection";
 import type {
   ApproveApplicationFormField,
   ApproveApplicationFormState,
-} from "@/components/organisms/application/ApplicationApproveForm";
+} from '@/components/organisms/application/ApplicationApproveForm';
 import type {
   RejectApplicationFormField,
   RejectApplicationFormState,
-} from "@/components/organisms/application/ApplicationRejectForm";
-import { useApi } from "@/hooks/useService/useApi";
-import type {
-  ApplicationResponse,
-  ApplicationStatusValue,
-} from "@/types/api/application.types";
-import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
+} from '@/components/organisms/application/ApplicationRejectForm';
+import { ApplicationsSection } from '@/components/page/hr/ApplicationsSection';
+import { useApi } from '@/hooks/useService/useApi';
+import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 
 const EMPTY_APPROVE_FORM: ApproveApplicationFormState = {
-  departmentId: "",
-  officeLocationId: "",
-  supervisorId: "",
-  notes: "",
+  departmentId: '',
+  officeLocationId: '',
+  supervisorId: '',
+  notes: '',
 };
 
 const EMPTY_REJECT_FORM: RejectApplicationFormState = {
-  reason: "",
+  reason: '',
 };
 
 /**
@@ -38,16 +35,12 @@ export default function HrApplicationsContainer() {
   const api = useApi();
   const router = useRouter();
 
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [keyword, setKeyword] = useState<string>("");
-  const [modalMode, setModalMode] = useState<"approve" | "reject" | null>(null);
-  const [modalTarget, setModalTarget] = useState<ApplicationResponse | null>(
-    null,
-  );
-  const [approveForm, setApproveForm] =
-    useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
-  const [rejectForm, setRejectForm] =
-    useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [keyword, setKeyword] = useState<string>('');
+  const [modalMode, setModalMode] = useState<'approve' | 'reject' | null>(null);
+  const [modalTarget, setModalTarget] = useState<ApplicationResponse | null>(null);
+  const [approveForm, setApproveForm] = useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
+  const [rejectForm, setRejectForm] = useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
 
   const list = api.application.query.list({
     status: (statusFilter || undefined) as ApplicationStatusValue | undefined,
@@ -73,14 +66,14 @@ export default function HrApplicationsContainer() {
     setModalTarget(app);
     setApproveForm(EMPTY_APPROVE_FORM);
     setRejectForm(EMPTY_REJECT_FORM);
-    setModalMode("approve");
+    setModalMode('approve');
   }, []);
 
   const handleOpenReject = useCallback((app: ApplicationResponse) => {
     setModalTarget(app);
     setApproveForm(EMPTY_APPROVE_FORM);
     setRejectForm(EMPTY_REJECT_FORM);
-    setModalMode("reject");
+    setModalMode('reject');
   }, []);
 
   const handleCloseModal = useCallback(() => {

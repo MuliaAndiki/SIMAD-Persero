@@ -43,7 +43,32 @@ class InternshipRouter {
       },
     );
 
+    // 15.2 PATCH /internships/:id/onboarding — Complete onboarding (INTERN)
+    this.internshipRouter.patch(
+      "/:id/onboarding",
+      (c: AppContext) => internshipController.completeOnboarding(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["INTERN"]).beforeHandle,
+        ],
+        params: InternshipIdParam,
+      },
+    );
+
     // ─── HR / Admin / Supervisor Routes ────────────────────────
+
+    // 15.1b GET /internships — List all internships (HR_ADMIN)
+    this.internshipRouter.get(
+      "/",
+      (c: AppContext) => internshipController.list(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["HR_ADMIN"]).beforeHandle,
+        ],
+      },
+    );
 
     // 15.2 GET /internships/:id — Internship detail (HR_ADMIN, SUPERVISOR)
     this.internshipRouter.get(

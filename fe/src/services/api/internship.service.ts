@@ -32,6 +32,17 @@ const { client } = Api();
 
 class InternshipService {
   /**
+   * GET /internships
+   * Mengambil daftar semua magang (HR_ADMIN).
+   */
+  public async List(): Promise<TResponse<InternshipResponse[]>> {
+    const res = await client.GetResponse<InternshipResponse[]>(
+      INTERNSHIP_ENDPOINTS.BASE,
+    );
+    return toServiceResponse(res, { message: "Daftar magang berhasil dimuat" });
+  }
+
+  /**
    * GET /internships/me
    * Mengambil data magang milik sendiri (INTERN).
    */

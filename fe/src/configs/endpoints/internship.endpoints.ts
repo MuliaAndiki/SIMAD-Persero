@@ -8,6 +8,8 @@
  */
 
 export const INTERNSHIP_ENDPOINTS = {
+  /** GET /internships — Daftar semua magang (HR_ADMIN) */
+  BASE: "/internships",
   /** GET /internships/me — Magang saya (INTERN) */
   MY: "/internships/me",
   /** PATCH /internships/:id/onboarding — Selesaikan onboarding (INTERN) */

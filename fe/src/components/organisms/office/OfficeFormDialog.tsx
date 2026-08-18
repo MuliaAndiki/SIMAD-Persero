@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/atoms/button";
+import { Button } from '@/components/atoms/button';
 import {
   Dialog,
   DialogContent,
@@ -8,35 +8,25 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/atoms/dialog";
-import { Input } from "@/components/atoms/input";
-import type { OfficeResponse } from "@/types/api/office.types";
-import dynamic from "next/dynamic";
-import type { FormEvent } from "react";
+} from '@/components/atoms/dialog';
+import { Input } from '@/components/atoms/input';
+import type { OfficeResponse } from '@/types/api/office.types';
+import dynamic from 'next/dynamic';
+import type { FormEvent } from 'react';
 
 /**
  * Peta Leaflet untuk memilih koordinat — di-import dinamis dengan `ssr: false`
  * karena Leaflet membutuhkan browser API (window/document).
  */
 const OfficeMapPicker = dynamic(
-  () =>
-    import("@/components/organisms/office/OfficeMapPicker").then(
-      (mod) => mod.OfficeMapPicker,
-    ),
+  () => import('@/components/organisms/office/OfficeMapPicker').then((mod) => mod.OfficeMapPicker),
   {
     ssr: false,
-    loading: () => (
-      <div className="h-72 w-full animate-pulse rounded-lg border bg-muted" />
-    ),
+    loading: () => <div className="h-72 w-full animate-pulse rounded-lg border bg-muted" />,
   },
 );
 
-export type OfficeFormField =
-  | "name"
-  | "address"
-  | "latitude"
-  | "longitude"
-  | "radiusMeter";
+export type OfficeFormField = 'name' | 'address' | 'latitude' | 'longitude' | 'radiusMeter';
 
 /**
  * Object state form kantor — dimiliki container (§19.4). Koordinat disimpan string.
@@ -76,11 +66,11 @@ export function OfficeFormDialog({
 }: OfficeFormDialogProps) {
   const isEdit = Boolean(editing);
   const canSubmit =
-    form.name.trim() !== "" &&
-    form.address.trim() !== "" &&
-    form.latitude !== "" &&
-    form.longitude !== "" &&
-    form.radiusMeter !== "";
+    form.name.trim() !== '' &&
+    form.address.trim() !== '' &&
+    form.latitude !== '' &&
+    form.longitude !== '' &&
+    form.radiusMeter !== '';
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -89,13 +79,13 @@ export function OfficeFormDialog({
   };
 
   const handleMapPick = (latitude: number, longitude: number) => {
-    onFieldChange("latitude", String(latitude));
-    onFieldChange("longitude", String(longitude));
+    onFieldChange('latitude', String(latitude));
+    onFieldChange('longitude', String(longitude));
   };
 
-  const mapLatitude = form.latitude === "" ? null : Number(form.latitude);
-  const mapLongitude = form.longitude === "" ? null : Number(form.longitude);
-  const mapRadius = form.radiusMeter === "" ? 100 : Number(form.radiusMeter);
+  const mapLatitude = form.latitude === '' ? null : Number(form.latitude);
+  const mapLongitude = form.longitude === '' ? null : Number(form.longitude);
+  const mapRadius = form.radiusMeter === '' ? 100 : Number(form.radiusMeter);
 
   return (
     <Dialog
@@ -106,10 +96,9 @@ export function OfficeFormDialog({
     >
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Kantor" : "Tambah Kantor"}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Edit Kantor' : 'Tambah Kantor'}</DialogTitle>
           <DialogDescription>
-            Lengkapi informasi lokasi kantor. Klik peta untuk memilih titik
-            koordinat absensi.
+            Lengkapi informasi lokasi kantor. Klik peta untuk memilih titik koordinat absensi.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -120,7 +109,7 @@ export function OfficeFormDialog({
             <Input
               id="officeName"
               value={form.name}
-              onChange={(e) => onFieldChange("name", e.target.value)}
+              onChange={(e) => onFieldChange('name', e.target.value)}
               placeholder="cth: Kantor Pusat Bandung"
               required
             />
@@ -132,7 +121,7 @@ export function OfficeFormDialog({
             <textarea
               id="officeAddress"
               value={form.address}
-              onChange={(e) => onFieldChange("address", e.target.value)}
+              onChange={(e) => onFieldChange('address', e.target.value)}
               placeholder="Alamat lengkap kantor"
               rows={3}
               required
@@ -161,7 +150,7 @@ export function OfficeFormDialog({
                 type="number"
                 step="any"
                 value={form.latitude}
-                onChange={(e) => onFieldChange("latitude", e.target.value)}
+                onChange={(e) => onFieldChange('latitude', e.target.value)}
                 placeholder="cth: -6.9175"
                 required
               />
@@ -175,7 +164,7 @@ export function OfficeFormDialog({
                 type="number"
                 step="any"
                 value={form.longitude}
-                onChange={(e) => onFieldChange("longitude", e.target.value)}
+                onChange={(e) => onFieldChange('longitude', e.target.value)}
                 placeholder="cth: 107.6191"
                 required
               />
@@ -190,22 +179,17 @@ export function OfficeFormDialog({
               type="number"
               min={1}
               value={form.radiusMeter}
-              onChange={(e) => onFieldChange("radiusMeter", e.target.value)}
+              onChange={(e) => onFieldChange('radiusMeter', e.target.value)}
               placeholder="cth: 100"
               required
             />
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isSaving}
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>
               Batal
             </Button>
             <Button type="submit" disabled={isSaving || !canSubmit}>
-              {isSaving ? "Menyimpan…" : isEdit ? "Simpan Perubahan" : "Simpan"}
+              {isSaving ? 'Menyimpan…' : isEdit ? 'Simpan Perubahan' : 'Simpan'}
             </Button>
           </DialogFooter>
         </form>

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/atoms/button";
-import { XCircle } from "lucide-react";
-import type { FormEvent } from "react";
+import { Button } from '@/components/atoms/button';
+import { XCircle } from 'lucide-react';
+import type { FormEvent } from 'react';
 
-export type RejectApplicationFormField = "reason";
+export type RejectApplicationFormField = 'reason';
 
 /** Object state form tolak — dimiliki container (§19.4). */
 export interface RejectApplicationFormState {
@@ -50,12 +50,10 @@ export function ApplicationRejectForm({
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium text-muted-foreground">
-            Alasan Penolakan *
-          </span>
+          <span className="text-xs font-medium text-muted-foreground">Alasan Penolakan *</span>
           <textarea
             value={form.reason}
-            onChange={(e) => onFieldChange("reason", e.target.value)}
+            onChange={(e) => onFieldChange('reason', e.target.value)}
             rows={4}
             placeholder="Tuliskan alasan penolakan…"
             className="border-input placeholder:text-muted-foreground flex min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
@@ -63,12 +61,7 @@ export function ApplicationRejectForm({
         </div>
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end mt-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            disabled={isSubmitting}
-          >
+          <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
             Kembali
           </Button>
           <Button
@@ -76,7 +69,7 @@ export function ApplicationRejectForm({
             variant="destructive"
             disabled={!form.reason.trim() || isSubmitting}
           >
-            {isSubmitting ? "Menolak…" : "Tolak Pengajuan"}
+            {isSubmitting ? 'Menolak…' : 'Tolak Pengajuan'}
           </Button>
         </div>
       </form>

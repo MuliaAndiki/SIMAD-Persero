@@ -1,75 +1,69 @@
-import { Award, Bell, Briefcase, CalendarCheck, MapPin } from "lucide-react";
-import Link from "next/link";
+import { Award, Bell, Briefcase, CalendarCheck, MapPin } from 'lucide-react';
+import Link from 'next/link';
 
-import { Badge } from "@/components/atoms/badge";
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import type { InternDashboardResponse } from "@/types/api/dashboard.types";
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import type { InternDashboardResponse } from '@/types/api/dashboard.types';
 
 function attendanceStatusLabel(status: string | null): string {
   switch (status) {
-    case "ON_TIME":
-      return "Tepat Waktu";
-    case "LATE":
-      return "Terlambat";
-    case "PRESENT":
-      return "Hadir";
-    case "ABSENT":
-      return "Tidak Hadir";
-    case "INVALID":
-      return "Tidak Valid";
+    case 'ON_TIME':
+      return 'Tepat Waktu';
+    case 'LATE':
+      return 'Terlambat';
+    case 'PRESENT':
+      return 'Hadir';
+    case 'ABSENT':
+      return 'Tidak Hadir';
+    case 'INVALID':
+      return 'Tidak Valid';
     default:
-      return status ?? "-";
+      return status ?? '-';
   }
 }
 
 function internshipStatusLabel(status: string | null): string {
   switch (status) {
-    case "DRAFT":
-      return "Draft";
-    case "PENDING":
-      return "Menunggu";
-    case "APPROVED":
-      return "Disetujui";
-    case "REJECTED":
-      return "Ditolak";
-    case "ACTIVE":
-      return "Aktif";
-    case "COMPLETED":
-      return "Selesai";
-    case "TERMINATED":
-      return "Diakhiri";
-    case "ARCHIVED":
-      return "Diarsipkan";
+    case 'DRAFT':
+      return 'Draft';
+    case 'PENDING':
+      return 'Menunggu';
+    case 'APPROVED':
+      return 'Disetujui';
+    case 'REJECTED':
+      return 'Ditolak';
+    case 'ACTIVE':
+      return 'Aktif';
+    case 'COMPLETED':
+      return 'Selesai';
+    case 'TERMINATED':
+      return 'Diakhiri';
+    case 'ARCHIVED':
+      return 'Diarsipkan';
     default:
-      return status ?? "-";
+      return status ?? '-';
   }
 }
 
 function formatTime(value: string | null): string {
-  if (!value) return "-";
+  if (!value) return '-';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return "-";
+  if (!value) return '-';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
   });
 }
 
@@ -97,23 +91,21 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
               <div className="flex flex-col gap-1 text-sm">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="size-4 shrink-0" />
-                  {data.internship.officeLocation?.name ??
-                    "Belum ada penempatan"}
+                  {data.internship.officeLocation?.name ?? 'Belum ada penempatan'}
                 </span>
                 <span className="text-muted-foreground">
-                  Bidang: {data.internship.department?.name ?? "-"}
+                  Bidang: {data.internship.department?.name ?? '-'}
                 </span>
                 <span className="text-muted-foreground">
-                  Periode: {formatDate(data.internship.actualStartDate)} –{" "}
+                  Periode: {formatDate(data.internship.actualStartDate)} –{' '}
                   {formatDate(data.internship.actualEndDate)}
                 </span>
               </div>
-              {data.internship.status === "ONBOARDING_PENDING" && (
+              {data.internship.status === 'ONBOARDING_PENDING' && (
                 <div className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3">
                   <p className="text-sm">
-                    Status magang Anda masih{" "}
-                    <strong>Menunggu Onboarding</strong>. Selesaikan onboarding
-                    agar HR dapat mengaktifkan magang Anda.
+                    Status magang Anda masih <strong>Menunggu Onboarding</strong>. Selesaikan
+                    onboarding agar HR dapat mengaktifkan magang Anda.
                   </p>
                   <Button asChild size="sm" className="w-fit">
                     <Link href="/INTERN/onboarding">Selesaikan Onboarding</Link>
@@ -125,9 +117,8 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3">
                 <p className="text-sm text-muted-foreground">
-                  Anda belum memiliki pengajuan magang yang disetujui. Ikuti
-                  tata cara pengajuan magang berikut agar menu Absensi & Riwayat
-                  aktif:
+                  Anda belum memiliki pengajuan magang yang disetujui. Ikuti tata cara pengajuan
+                  magang berikut agar menu Absensi & Riwayat aktif:
                 </p>
                 <ol className="flex flex-col gap-2.5 text-sm">
                   <li className="flex items-start gap-2">
@@ -135,8 +126,7 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                       1
                     </span>
                     <span>
-                      Pastikan <strong>profil Anda lengkap</strong> pada menu
-                      Profil.
+                      Pastikan <strong>profil Anda lengkap</strong> pada menu Profil.
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -144,17 +134,14 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                       2
                     </span>
                     <span>
-                      Buka menu <strong>Pengajuan</strong> untuk memulai
-                      pengajuan magang.
+                      Buka menu <strong>Pengajuan</strong> untuk memulai pengajuan magang.
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                       3
                     </span>
-                    <span>
-                      Isi tanggal mulai & selesai magang serta motivasi Anda.
-                    </span>
+                    <span>Isi tanggal mulai & selesai magang serta motivasi Anda.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
@@ -169,8 +156,7 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                       5
                     </span>
                     <span>
-                      Klik <strong>Kirim Pengajuan</strong> lalu tunggu
-                      persetujuan HR.
+                      Klik <strong>Kirim Pengajuan</strong> lalu tunggu persetujuan HR.
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -178,16 +164,14 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                       6
                     </span>
                     <span>
-                      Setelah disetujui, <strong>Absensi</strong> &{" "}
-                      <strong>Riwayat</strong> akan aktif otomatis.
+                      Setelah disetujui, <strong>Absensi</strong> & <strong>Riwayat</strong> akan
+                      aktif otomatis.
                     </span>
                   </li>
                 </ol>
               </div>
               <Button asChild size="sm" className="w-fit">
-                <Link href="/INTERN/dashboard/application">
-                  Ajukan Magang Sekarang
-                </Link>
+                <Link href="/INTERN/dashboard/application">Ajukan Magang Sekarang</Link>
               </Button>
             </div>
           )}
@@ -228,15 +212,11 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
               </div>
               <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
                 <span className="text-muted-foreground">Status</span>
-                <Badge>
-                  {attendanceStatusLabel(data.todayAttendance.attendanceStatus)}
-                </Badge>
+                <Badge>{attendanceStatusLabel(data.todayAttendance.attendanceStatus)}</Badge>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Belum ada absensi hari ini.
-            </p>
+            <p className="text-sm text-muted-foreground">Belum ada absensi hari ini.</p>
           )}
         </CardContent>
       </Card>
@@ -253,28 +233,19 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
           {data.notifications.length > 0 ? (
             <ul className="flex flex-col divide-y divide-border">
               {data.notifications.slice(0, 5).map((item) => (
-                <li
-                  key={item.id}
-                  className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0"
-                >
+                <li key={item.id} className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-foreground">
-                      {item.title}
-                    </span>
+                    <span className="text-sm font-medium text-foreground">{item.title}</span>
                     <span className="shrink-0 text-xs text-muted-foreground">
                       {formatDate(item.createdAt)}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {item.message}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{item.message}</p>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Tidak ada notifikasi.
-            </p>
+            <p className="text-sm text-muted-foreground">Tidak ada notifikasi.</p>
           )}
         </CardContent>
       </Card>
@@ -298,9 +269,7 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
               </span>
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Belum ada sertifikat.
-            </p>
+            <p className="text-sm text-muted-foreground">Belum ada sertifikat.</p>
           )}
         </CardContent>
       </Card>

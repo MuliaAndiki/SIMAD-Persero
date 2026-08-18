@@ -1,15 +1,9 @@
-"use client";
+'use client';
 
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { useMemo } from "react";
-import {
-  Circle,
-  MapContainer,
-  Marker,
-  TileLayer,
-  useMapEvents,
-} from "react-leaflet";
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { useMemo } from 'react';
+import { Circle, MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
 
 /**
  * Pin SVG kustom (divIcon) — menghindari masalah asset ikon default Leaflet
@@ -18,7 +12,7 @@ import {
 const PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ef4444" stroke="#ffffff" stroke-width="1.5"/><circle cx="12" cy="9" r="3" fill="#ffffff"/></svg>`;
 
 const pinIcon = L.divIcon({
-  className: "",
+  className: '',
   html: PIN_SVG,
   iconSize: [36, 44],
   iconAnchor: [18, 42],
@@ -39,7 +33,7 @@ export interface OfficeMapPickerProps {
 }
 
 /** Menangkap klik pada peta lalu melaporkan koordinat ke parent. */
-function MapClickHandler({ onPick }: Pick<OfficeMapPickerProps, "onPick">) {
+function MapClickHandler({ onPick }: Pick<OfficeMapPickerProps, 'onPick'>) {
   useMapEvents({
     click(event) {
       onPick(event.latlng.lat, event.latlng.lng);
@@ -85,8 +79,8 @@ export function OfficeMapPicker({
               center={position}
               radius={Math.max(1, radiusMeter)}
               pathOptions={{
-                color: "#ef4444",
-                fillColor: "#ef4444",
+                color: '#ef4444',
+                fillColor: '#ef4444',
                 fillOpacity: 0.12,
               }}
             />

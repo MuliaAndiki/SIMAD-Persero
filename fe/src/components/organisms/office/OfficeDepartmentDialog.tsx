@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Building2 } from "lucide-react";
-import type { FormEvent } from "react";
+import { Building2 } from 'lucide-react';
+import type { FormEvent } from 'react';
 
-import { Button } from "@/components/atoms/button";
+import { Button } from '@/components/atoms/button';
 import {
   Dialog,
   DialogContent,
@@ -11,9 +11,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/atoms/dialog";
-import type { DepartmentResponse } from "@/types/api/department.types";
-import type { OfficeResponse } from "@/types/api/office.types";
+} from '@/components/atoms/dialog';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import type { OfficeResponse } from '@/types/api/office.types';
 
 export interface OfficeDepartmentDialogProps {
   open: boolean;
@@ -60,19 +60,14 @@ export function OfficeDepartmentDialog({
             Kelola Departemen Kantor
           </DialogTitle>
           <DialogDescription>
-            Pilih departemen yang dilayani oleh{" "}
-            <span className="font-medium text-foreground">
-              {office?.name ?? "kantor"}
-            </span>
-            .
+            Pilih departemen yang dilayani oleh{' '}
+            <span className="font-medium text-foreground">{office?.name ?? 'kantor'}</span>.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {departments.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-6 py-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                Belum ada departemen terdaftar.
-              </p>
+              <p className="text-sm text-muted-foreground">Belum ada departemen terdaftar.</p>
             </div>
           ) : (
             <div className="flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
@@ -89,13 +84,9 @@ export function OfficeDepartmentDialog({
                       onChange={() => onToggle(department.id)}
                       className="size-4 shrink-0 accent-primary"
                     />
-                    <span className="flex-1 font-medium">
-                      {department.name}
-                    </span>
+                    <span className="flex-1 font-medium">{department.name}</span>
                     {department.code && (
-                      <span className="text-xs text-muted-foreground">
-                        {department.code}
-                      </span>
+                      <span className="text-xs text-muted-foreground">{department.code}</span>
                     )}
                   </label>
                 );
@@ -103,16 +94,11 @@ export function OfficeDepartmentDialog({
             </div>
           )}
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isSaving}
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>
               Batal
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Menyimpan…" : "Simpan"}
+              {isSaving ? 'Menyimpan…' : 'Simpan'}
             </Button>
           </DialogFooter>
         </form>

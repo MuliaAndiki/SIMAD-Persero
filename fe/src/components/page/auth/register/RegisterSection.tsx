@@ -1,8 +1,8 @@
-import { RegisterForm } from "@/components/organisms/RegisterForm";
-import type { RegisterBody } from "@/types/api/auth.types";
-import Link from "next/link";
-import type React from "react";
-import Image from "next/image";
+import { RegisterForm } from '@/components/organisms/RegisterForm';
+import type { RegisterBody } from '@/types/api/auth.types';
+import Image from 'next/image';
+import Link from 'next/link';
+import type React from 'react';
 export interface RegisterSectionProps {
   state: {
     formRegister: RegisterBody;
@@ -23,16 +23,9 @@ export function RegisterSection({ state, service }: RegisterSectionProps) {
         <div className="px-8 py-10">
           <div className="text-center mb-10">
             <div className="w-full flex justify-center ">
-              <Image
-                alt="logo"
-                src={"/images/logos.png"}
-                height={86}
-                width={86}
-              />
+              <Image alt="logo" src={'/images/logos.png'} height={86} width={86} />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Daftar Akun
-            </h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Daftar Akun</h1>
             <p className="text-sm text-foreground/60">SIMAD PLN Persero</p>
           </div>
 
@@ -44,11 +37,8 @@ export function RegisterSection({ state, service }: RegisterSectionProps) {
           />
 
           <div className="mt-6 text-center text-sm text-foreground/70">
-            Sudah punya akun?{" "}
-            <Link
-              href="/login"
-              className="text-primary hover:underline font-medium"
-            >
+            Sudah punya akun?{' '}
+            <Link href="/login" className="text-primary hover:underline font-medium">
               Masuk
             </Link>
           </div>

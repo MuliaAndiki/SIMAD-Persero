@@ -8,7 +8,7 @@ import type {
   IInternship,
   ISupervisorAssignment,
   IUser,
-} from './models.types';
+} from "./models.types";
 
 export type SupervisorQuery = Partial<{
   page: number;
@@ -16,36 +16,37 @@ export type SupervisorQuery = Partial<{
 }>;
 
 export type AssignInternBody = {
-  internshipId: IInternship['id'];
+  internshipId: IInternship["id"];
 };
 
 export type SupervisorResponse = Pick<
   IUser,
-  'id' | 'fullName' | 'email' | 'isActive' | 'avatarFileId' | 'createdAt'
+  "id" | "fullName" | "email" | "isActive" | "avatarFileId" | "createdAt"
 > & {
   activeAssignmentsCount: number;
+  departmentId: IUser["departmentId"];
 };
 
 export type SupervisorAssignmentResponse = {
-  id: ISupervisorAssignment['id'];
-  internshipId: ISupervisorAssignment['internshipId'];
-  supervisorId: ISupervisorAssignment['supervisorId'];
-  assignedById: ISupervisorAssignment['assignedById'];
-  assignedAt: ISupervisorAssignment['assignedAt'];
-  endedAt: ISupervisorAssignment['endedAt'];
-  isActive: ISupervisorAssignment['isActive'];
+  id: ISupervisorAssignment["id"];
+  internshipId: ISupervisorAssignment["internshipId"];
+  supervisorId: ISupervisorAssignment["supervisorId"];
+  assignedById: ISupervisorAssignment["assignedById"];
+  assignedAt: ISupervisorAssignment["assignedAt"];
+  endedAt: ISupervisorAssignment["endedAt"];
+  isActive: ISupervisorAssignment["isActive"];
   internship: {
-    id: IInternship['id'];
-    status: IInternship['status'];
-    actualStartDate: IInternship['actualStartDate'];
-    actualEndDate: IInternship['actualEndDate'];
+    id: IInternship["id"];
+    status: IInternship["status"];
+    actualStartDate: IInternship["actualStartDate"];
+    actualEndDate: IInternship["actualEndDate"];
     intern: {
-      id: IUser['id'];
-      fullName: IUser['fullName'];
-      email: IUser['email'];
-      studentNumber: IInternProfile['studentNumber'] | null;
+      id: IUser["id"];
+      fullName: IUser["fullName"];
+      email: IUser["email"];
+      studentNumber: IInternProfile["studentNumber"] | null;
     } | null;
-    department: Pick<IDepartment, 'id' | 'name'> | null;
+    department: Pick<IDepartment, "id" | "name"> | null;
   } | null;
 };
 
@@ -60,4 +61,12 @@ export type SupervisorDashboardResponse = {
   todayAttendance: number;
   totalInterns: number;
   recentAssignments: SupervisorAssignmentResponse[];
+};
+
+export type CreateSupervisorBody = Pick<
+  IUser,
+  "fullName" | "email" | "password" | "departmentId"
+> & { departmentId: string };
+export type UpdateSupervisorBody = Partial<CreateSupervisorBody> & {
+  isActive?: boolean;
 };

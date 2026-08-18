@@ -21,6 +21,28 @@ class InternshipController {
     return handleAppError(c, error);
   }
 
+  private getMeta(c: AppContext): { ipAddress?: string; userAgent?: string } {
+    const ipAddress =
+      (c.request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() ||
+      undefined;
+    const userAgent = c.request.headers.get("user-agent") ?? undefined;
+    return { ipAddress, userAgent };
+  }
+
+  // GET /internships
+  public async list(c: AppContext) {
+    try {
+      const data = await internshipService.list();
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        "Daftar magang berhasil dimuat",
+      );
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
   // GET /internships/me
   public async getMyInternship(c: AppContext) {
     try {
@@ -36,6 +58,24 @@ class InternshipController {
     try {
       const data = await internshipService.getById(c.params.id);
       return HttpResponse(c).ok(data);
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // PATCH /internships/:id/onboarding — Complete onboarding (INTERN)
+  public async completeOnboarding(c: AppContext) {
+    try {
+      const data = await internshipService.completeOnboarding(
+        c.params.id,
+        c.user!.id,
+        this.getMeta(c),
+      );
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        "Onboarding berhasil diselesaikan",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }

@@ -1,27 +1,24 @@
-"use client";
+'use client';
 
-import { AlertCircle, Plus, Search } from "lucide-react";
-import type { FormEvent } from "react";
-import { useState } from "react";
+import { AlertCircle, Plus, Search } from 'lucide-react';
+import type { FormEvent } from 'react';
+import { useState } from 'react';
 
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
-import { SupervisorAssignInternDialog } from "@/components/organisms/supervisor/SupervisorAssignInternDialog";
-import { SupervisorDetailDialog } from "@/components/organisms/supervisor/SupervisorDetailDialog";
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
+import { SupervisorAssignInternDialog } from '@/components/organisms/supervisor/SupervisorAssignInternDialog';
+import { SupervisorDetailDialog } from '@/components/organisms/supervisor/SupervisorDetailDialog';
 import {
   SupervisorFormDialog,
   type SupervisorFormType,
-} from "@/components/organisms/supervisor/SupervisorFormDialog";
-import { SupervisorTable } from "@/components/organisms/supervisor/SupervisorTable";
-import type { ApplicationResponse } from "@/types/api/application.types";
-import type { DepartmentResponse } from "@/types/api/department.types";
-import type { OfficeResponse } from "@/types/api/office.types";
-import type {
-  SupervisorDetailResponse,
-  SupervisorResponse,
-} from "@/types/api/supervisor.types";
-import { AlertContexType } from "@/types/ui";
+} from '@/components/organisms/supervisor/SupervisorFormDialog';
+import { SupervisorTable } from '@/components/organisms/supervisor/SupervisorTable';
+import type { ApplicationResponse } from '@/types/api/application.types';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import type { OfficeResponse } from '@/types/api/office.types';
+import type { SupervisorDetailResponse, SupervisorResponse } from '@/types/api/supervisor.types';
+import type { AlertContexType } from '@/types/ui';
 
 export interface SupervisorsSectionState {
   isPending: boolean;
@@ -72,10 +69,7 @@ export interface SupervisorsSectionProps {
  * SupervisorsSection — komposisi halaman Supervisor (HR Admin).
  * Murni presentasi: tanpa fetch API, tanpa state fitur, tanpa komponen besar.
  */
-export function SupervisorsSection({
-  state,
-  actions,
-}: SupervisorsSectionProps) {
+export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
   const handleSubmitSearch = (e: FormEvent) => {
@@ -107,10 +101,7 @@ export function SupervisorsSection({
           </div>
         </div>
       ) : (
-        <form
-          onSubmit={handleSubmitSearch}
-          className="flex flex-1 items-center gap-2"
-        >
+        <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input

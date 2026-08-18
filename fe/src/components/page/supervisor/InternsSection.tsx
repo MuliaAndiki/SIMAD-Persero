@@ -3,9 +3,11 @@
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card';
 import { AttendanceStatusBadge } from '@/components/organisms/attendance/AttendanceStatusBadge';
+import Api from '@/services/props.service';
 import type { AttendanceSupervisorRow } from '@/types/api/attendance.types';
-import { AlertCircle, CalendarCheck2, UsersRound } from 'lucide-react';
+import { AlertCircle, CalendarCheck2, Download, UsersRound } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export interface InternsSectionState {
   isPending: boolean;
@@ -29,14 +31,34 @@ export interface InternsSectionProps {
  * `/SUPERVISOR/dashboard/interns`.
  */
 export function InternsSection({ state, service }: InternsSectionProps) {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      await Api.Attendance.DownloadExcel();
+    } catch (error) {
+      console.error('Failed to export:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">Peserta Bimbingan</h1>
-        <p className="text-sm text-muted-foreground">
-          Daftar peserta magang yang ditugaskan kepada Anda beserta status absensi hari ini.
-        </p>
-      </header>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <header className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold text-foreground">Peserta Bimbingan</h1>
+          <p className="text-sm text-muted-foreground">
+            Daftar peserta magang yang ditugaskan kepada Anda beserta status absensi hari ini.
+          </p>
+        </header>
+
+        <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+          <Download className="mr-2 size-4" />
+          {isExporting ? 'Mengekspor...' : 'Export Excel'}
+        </Button>
+      </div>
 
       {state.isPending ? (
         <Card className="h-64" />
