@@ -1,10 +1,10 @@
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
-import { Button } from "@/components/atoms/button";
-import { Search, AlertCircle, Trash2, Pencil, X } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import type { SkillResponse } from "@/types/api/internship.types";
-import { AlertContexType } from "@/types/ui";
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
+import type { SkillResponse } from '@/types/api/internship.types';
+import type { AlertContexType } from '@/types/ui';
+import { AlertCircle, Pencil, Search, Trash2, X } from 'lucide-react';
+import { type FormEvent, useState } from 'react';
 
 export interface SkillsSectionState {
   isPending: boolean;
@@ -41,10 +41,10 @@ interface SkillFormState {
   category: string;
 }
 
-const EMPTY_FORM: SkillFormState = { name: "", category: "" };
+const EMPTY_FORM: SkillFormState = { name: '', category: '' };
 
 export function SkillsSection({ state, actions }: SkillsSectionProps) {
-  const [editing, setEditing] = useState<SkillResponse | "new" | null>(null);
+  const [editing, setEditing] = useState<SkillResponse | 'new' | null>(null);
   const [form, setForm] = useState<SkillFormState>(EMPTY_FORM);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -55,13 +55,13 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
-    setEditing("new");
+    setEditing('new');
   };
 
   const openEdit = (skill: SkillResponse) => {
     setForm({
-      name: skill.name ?? "",
-      category: skill.category ?? "",
+      name: skill.name ?? '',
+      category: skill.category ?? '',
     });
     setEditing(skill);
   };
@@ -74,7 +74,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
   const handleSubmitForm = async (e: FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.category.trim()) return;
-    if (editing === "new") {
+    if (editing === 'new') {
       await actions.onAddSkill({
         name: form.name.trim(),
         category: form.category.trim(),
@@ -119,10 +119,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
       ) : (
         <>
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <form
-              onSubmit={handleSubmitSearch}
-              className="flex flex-1 items-center gap-2"
-            >
+            <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
               <div className="relative flex-1">
                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -153,10 +150,10 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex flex-col gap-1">
                       <span className="font-semibold text-foreground">
-                        {skill.name ?? "Tidak ada nama"}
+                        {skill.name ?? 'Tidak ada nama'}
                       </span>
                       <span className="w-fit rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                        {skill.category ?? "Tidak dikategorikan"}
+                        {skill.category ?? 'Tidak dikategorikan'}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -165,7 +162,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
                         size="icon"
                         className="size-8"
                         onClick={() => openEdit(skill)}
-                        aria-label={`Edit ${skill.name ?? "skill"}`}
+                        aria-label={`Edit ${skill.name ?? 'skill'}`}
                       >
                         <Pencil className="size-4" />
                       </Button>
@@ -175,16 +172,16 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
                         className="size-8 text-destructive hover:text-destructive"
                         onClick={() =>
                           state.alert.confirm({
-                            title: "Hapus",
-                            deskripsi: "Apakah Kamu Ingin Menghapus Skill Ini?",
-                            icon: "question",
+                            title: 'Hapus',
+                            deskripsi: 'Apakah Kamu Ingin Menghapus Skill Ini?',
+                            icon: 'question',
                             onConfirm: () => {
                               handleDelete(skill);
                             },
                           })
                         }
                         disabled={state.isDeleting && deletingId === skill.id}
-                        aria-label={`Hapus ${skill.name ?? "skill"}`}
+                        aria-label={`Hapus ${skill.name ?? 'skill'}`}
                       >
                         <Trash2 className="size-4" />
                       </Button>
@@ -202,9 +199,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
           <Card className="w-full max-w-md p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">
-                {editing === "new"
-                  ? "Tambah Keterampilan"
-                  : "Edit Keterampilan"}
+                {editing === 'new' ? 'Tambah Keterampilan' : 'Edit Keterampilan'}
               </h2>
               <Button
                 variant="ghost"
@@ -218,26 +213,18 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
             </div>
             <form onSubmit={handleSubmitForm} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <span className="text-xs font-medium text-muted-foreground">
-                  Nama *
-                </span>
+                <span className="text-xs font-medium text-muted-foreground">Nama *</span>
                 <Input
                   value={form.name}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, name: e.target.value }))
-                  }
+                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="Contoh: JavaScript"
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <span className="text-xs font-medium text-muted-foreground">
-                  Kategori *
-                </span>
+                <span className="text-xs font-medium text-muted-foreground">Kategori *</span>
                 <Input
                   value={form.category}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, category: e.target.value }))
-                  }
+                  onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
                   placeholder="Contoh: Programming"
                 />
               </div>
@@ -247,11 +234,9 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={
-                    !form.name.trim() || !form.category.trim() || state.isSaving
-                  }
+                  disabled={!form.name.trim() || !form.category.trim() || state.isSaving}
                 >
-                  {state.isSaving ? "Menyimpan…" : "Simpan"}
+                  {state.isSaving ? 'Menyimpan…' : 'Simpan'}
                 </Button>
               </div>
             </form>

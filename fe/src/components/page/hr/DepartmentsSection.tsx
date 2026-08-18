@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
 import {
   DepartmentFormDialog,
   type DepartmentFormField,
   type DepartmentFormState,
-} from "@/components/organisms/department/DepartmentFormDialog";
-import { DepartmentTable } from "@/components/organisms/department/DepartmentTable";
-import type { DepartmentResponse } from "@/types/api/department.types";
-import { AlertContexType } from "@/types/ui";
-import { AlertCircle, Plus, Search } from "lucide-react";
-import { useState } from "react";
-import type { FormEvent } from "react";
+} from '@/components/organisms/department/DepartmentFormDialog';
+import { DepartmentTable } from '@/components/organisms/department/DepartmentTable';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import type { AlertContexType } from '@/types/ui';
+import { AlertCircle, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 
 export interface DepartmentsSectionState {
   isPending: boolean;
@@ -50,10 +50,7 @@ export interface DepartmentsSectionProps {
  * DepartmentsSection — komposisi halaman Departemen (HR Admin).
  * Murni presentasi: tanpa fetch API, tanpa state fitur, tanpa komponen besar.
  */
-export function DepartmentsSection({
-  state,
-  actions,
-}: DepartmentsSectionProps) {
+export function DepartmentsSection({ state, actions }: DepartmentsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
   const handleSubmitSearch = (e: FormEvent) => {
@@ -83,10 +80,7 @@ export function DepartmentsSection({
       ) : (
         <>
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <form
-              onSubmit={handleSubmitSearch}
-              className="flex flex-1 items-center gap-2"
-            >
+            <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
               <div className="relative flex-1">
                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input

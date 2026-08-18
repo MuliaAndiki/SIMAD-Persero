@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { HrDashboardSection } from "@/components/page/dashboard/DashboardSection";
-import { useApi } from "@/hooks/useService/useApi";
+import { HrDashboardSection } from '@/components/page/dashboard/DashboardSection';
+import { useApi } from '@/hooks/useService/useApi';
 
 /**
  * Container dashboard HR Admin (orchestration layer).

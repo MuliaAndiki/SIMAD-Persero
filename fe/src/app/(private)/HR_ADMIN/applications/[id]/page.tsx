@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
-import HrApplicationDetailContainer from "./_containers/applications-detail";
+import type { Metadata } from 'next';
+import HrApplicationDetailContainer from './_containers/applications-detail';
 
 export const metadata: Metadata = {
-  title: "Detail Pengajuan Magang - SIMAD",
-  description: "Review dan kelola detail pengajuan magang peserta",
+  title: 'Detail Pengajuan Magang - SIMAD',
+  description: 'Review dan kelola detail pengajuan magang peserta',
 };
 
 interface PageProps {

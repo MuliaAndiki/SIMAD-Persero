@@ -1,19 +1,16 @@
-import type { TResponse } from "@/api/types/response.types";
-import { queryKey } from "@/configs/query-key";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import Api from "@/services/props.service";
-import {
-  type OfficeCacheContext,
-  readOfficeSnapshot,
-} from "@/utils/cache/office.cache";
+import type { TResponse } from '@/api/types/response.types';
+import { queryKey } from '@/configs/query-key';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import Api from '@/services/props.service';
+import { type OfficeCacheContext, readOfficeSnapshot } from '@/utils/cache/office.cache';
 
 import type {
   CreateOfficeBody,
   OfficeParams,
   OfficeResponse,
   UpdateOfficeBody,
-} from "@/types/api/office.types";
-import { useMutation } from "@tanstack/react-query";
+} from '@/types/api/office.types';
+import { useMutation } from '@tanstack/react-query';
 
 export function useCreateOffice() {
   const ns = useAppNameSpace();
@@ -22,24 +19,14 @@ export function useCreateOffice() {
     Error,
     Pick<
       CreateOfficeBody,
-      | "name"
-      | "address"
-      | "latitude"
-      | "longitude"
-      | "radiusMeter"
-      | "departmentIds"
+      'name' | 'address' | 'latitude' | 'longitude' | 'radiusMeter' | 'departmentIds'
     >,
     OfficeCacheContext
   >({
     mutationFn: (
       body: Pick<
         CreateOfficeBody,
-        | "name"
-        | "address"
-        | "latitude"
-        | "longitude"
-        | "radiusMeter"
-        | "departmentIds"
+        'name' | 'address' | 'latitude' | 'longitude' | 'radiusMeter' | 'departmentIds'
       >,
     ) => Api.Office.Create(body),
     onSettled: async () => {
@@ -56,14 +43,14 @@ export function useCreateOffice() {
       ns.alert.toast({
         title: res.message,
         message: res.message,
-        icon: "success",
+        icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
         title: err.message,
         message: err.message,
-        icon: "error",
+        icon: 'error',
       });
     },
   });
@@ -74,14 +61,14 @@ export function useUpdateOffice() {
   return useMutation<
     TResponse<OfficeResponse>,
     Error,
-    { params: Pick<OfficeParams, "officeId">; body: UpdateOfficeBody },
+    { params: Pick<OfficeParams, 'officeId'>; body: UpdateOfficeBody },
     OfficeCacheContext
   >({
     mutationFn: ({
       params,
       body,
     }: {
-      params: Pick<OfficeParams, "officeId">;
+      params: Pick<OfficeParams, 'officeId'>;
       body: UpdateOfficeBody;
     }) => Api.Office.Update(params, body),
     onSettled: async () => {
@@ -98,14 +85,14 @@ export function useUpdateOffice() {
       ns.alert.toast({
         title: res.message,
         message: res.message,
-        icon: "success",
+        icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
         title: err.message,
         message: err.message,
-        icon: "error",
+        icon: 'error',
       });
     },
   });
@@ -113,14 +100,8 @@ export function useUpdateOffice() {
 
 export function useDeleteOffice() {
   const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<null>,
-    Error,
-    Pick<OfficeParams, "officeId">,
-    OfficeCacheContext
-  >({
-    mutationFn: (params: Pick<OfficeParams, "officeId">) =>
-      Api.Office.Delete(params),
+  return useMutation<TResponse<null>, Error, Pick<OfficeParams, 'officeId'>, OfficeCacheContext>({
+    mutationFn: (params: Pick<OfficeParams, 'officeId'>) => Api.Office.Delete(params),
     onSettled: async () => {
       await ns.queryClient.invalidateQueries({
         queryKey: queryKey.officeRoot(),
@@ -135,14 +116,14 @@ export function useDeleteOffice() {
       ns.alert.toast({
         title: res.message,
         message: res.message,
-        icon: "success",
+        icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
         title: err.message,
         message: err.message,
-        icon: "error",
+        icon: 'error',
       });
     },
   });

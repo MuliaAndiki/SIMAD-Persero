@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BriefcaseBusiness,
   Building2,
   ClipboardCheck,
   Clock,
@@ -169,6 +170,12 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
     name: "Pengajuan",
     url: "/HR_ADMIN/applications",
     icon: FileText,
+    subMenu: [],
+  },
+  {
+    name: "Magang",
+    url: "/HR_ADMIN/internships",
+    icon: BriefcaseBusiness,
     subMenu: [],
   },
   {

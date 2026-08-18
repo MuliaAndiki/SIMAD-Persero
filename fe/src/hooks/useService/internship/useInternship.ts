@@ -15,6 +15,7 @@ import {
 } from "./state/mutate";
 import {
   useInternshipDetail,
+  useInternshipList,
   useMyInternProfile,
   useMyInternship,
   useSkills,
@@ -24,6 +25,7 @@ export const useInternship = () => {
   return {
     query: {
       my: useMyInternship,
+      list: useInternshipList,
       myProfile: useMyInternProfile,
       skills: useSkills,
       detail: useInternshipDetail,

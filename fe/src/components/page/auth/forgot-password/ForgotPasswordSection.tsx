@@ -1,9 +1,9 @@
-import { ForgotPasswordForm } from "@/components/organisms/ForgotPasswordForm";
-import type { ForgotPasswordBody } from "@/types/api/auth.types";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import type React from "react";
-import Image from "next/image";
+import { ForgotPasswordForm } from '@/components/organisms/ForgotPasswordForm';
+import type { ForgotPasswordBody } from '@/types/api/auth.types';
+import { ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import type React from 'react';
 
 export interface ForgotPasswordSectionProps {
   state: {
@@ -17,10 +17,7 @@ export interface ForgotPasswordSectionProps {
   };
 }
 
-export function ForgotPasswordSection({
-  state,
-  service,
-}: ForgotPasswordSectionProps) {
+export function ForgotPasswordSection({ state, service }: ForgotPasswordSectionProps) {
   return (
     <section className="min-h-screen flex items-center justify-center bg-muted px-4 py-8">
       <div className="w-full max-w-md bg-card rounded-2xl shadow-xl overflow-hidden card-glass">
@@ -35,19 +32,11 @@ export function ForgotPasswordSection({
 
           <div className="text-center mb-8">
             <div className="w-full flex justify-center ">
-              <Image
-                alt="logo"
-                src={"/images/logos.png"}
-                height={86}
-                width={86}
-              />
+              <Image alt="logo" src={'/images/logos.png'} height={86} width={86} />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Lupa Password
-            </h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Lupa Password</h1>
             <p className="text-sm text-foreground/60">
-              Masukkan email Anda dan kami akan mengirimkan instruksi untuk
-              reset password.
+              Masukkan email Anda dan kami akan mengirimkan instruksi untuk reset password.
             </p>
           </div>
 

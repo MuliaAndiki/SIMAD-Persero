@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { AlertCircle, Plus, Search } from "lucide-react";
-import type { FormEvent } from "react";
-import { useState } from "react";
+import { AlertCircle, Plus, Search } from 'lucide-react';
+import type { FormEvent } from 'react';
+import { useState } from 'react';
 
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
-import { OfficeDepartmentDialog } from "@/components/organisms/office/OfficeDepartmentDialog";
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
+import { OfficeDepartmentDialog } from '@/components/organisms/office/OfficeDepartmentDialog';
 import {
   OfficeFormDialog,
   type OfficeFormField,
   type OfficeFormState,
-} from "@/components/organisms/office/OfficeFormDialog";
-import { OfficeTable } from "@/components/organisms/office/OfficeTable";
-import type { DepartmentResponse } from "@/types/api/department.types";
-import type { OfficeResponse } from "@/types/api/office.types";
-import { AlertContexType } from "@/types/ui";
+} from '@/components/organisms/office/OfficeFormDialog';
+import { OfficeTable } from '@/components/organisms/office/OfficeTable';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import type { OfficeResponse } from '@/types/api/office.types';
+import type { AlertContexType } from '@/types/ui';
 
 export interface OfficesSectionState {
   isPending: boolean;
@@ -74,8 +74,8 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-foreground">Kantor</h1>
         <p className="text-sm text-muted-foreground">
-          Kelola lokasi kantor dan titik koordinat absensi. Satu kantor dapat
-          melayani banyak departemen.
+          Kelola lokasi kantor dan titik koordinat absensi. Satu kantor dapat melayani banyak
+          departemen.
         </p>
       </header>
 
@@ -92,10 +92,7 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
       ) : (
         <>
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <form
-              onSubmit={handleSubmitSearch}
-              className="flex flex-1 items-center gap-2"
-            >
+            <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
               <div className="relative flex-1">
                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input

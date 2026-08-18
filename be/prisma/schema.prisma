@@ -20,6 +20,8 @@ model User {
   createdAt                 DateTime?                 @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt                 DateTime?                 @updatedAt @map("updated_at") @db.Timestamp(6)
   deletedAt                 DateTime?                 @map("deleted_at") @db.Timestamp(6)
+  departmentId              String?                   @map("department_id") @db.Uuid
+  department                Department?               @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   activityLogs              ActivityLog[]
   trustedDevices            AttendanceDevice[]
   overriddenAttendances     AttendanceOverride[]
@@ -165,13 +167,13 @@ model Department {
   updatedAt       DateTime?        @updatedAt @map("updated_at") @db.Timestamp(6)
   internships     Internship[]
   officeLocations OfficeLocation[]
+  users           User[]
 
   @@map("departments")
 }
 
 model OfficeLocation {
   id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  departmentId       String?             @map("department_id") @db.Uuid
   name               String?             @db.VarChar(150)
   address            String?
   latitude           Decimal?            @db.Decimal
@@ -179,11 +181,10 @@ model OfficeLocation {
   radiusMeter        Int?                @map("radius_meter")
   createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt          DateTime?           @updatedAt @map("updated_at") @db.Timestamp(6)
+  departments        Department[]
   attendanceSettings AttendanceSetting[]
   internships        Internship[]
-  department         Department?         @relation(fields: [departmentId], references: [id], onDelete: Restrict)
 
-  @@index([departmentId])
   @@map("office_locations")
 }
 
