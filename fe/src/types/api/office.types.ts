@@ -6,7 +6,7 @@
  * (be/src/controllers/OfficeController.ts).
  */
 
-import type { IOfficeLocation } from "./model.type";
+import type { IOfficeLocation } from './model.type';
 
 // ---------- Payload (request body / query / path params) ----------
 
@@ -17,10 +17,8 @@ export interface OfficeQuery {
   departmentId?: string;
 }
 
-export interface CreateOfficeBody extends Pick<
-  IOfficeLocation,
-  "name" | "address" | "radiusMeter"
-> {
+export interface CreateOfficeBody
+  extends Pick<IOfficeLocation, 'name' | 'address' | 'radiusMeter'> {
   /**
    * Banyak-ke-banyak: sebuah kantor dapat melayani beberapa departemen
    * sekaligus (prisma: implicit join table `_DepartmentToOfficeLocation`).
@@ -45,10 +43,8 @@ export interface OfficeDepartmentRef {
 }
 
 /** Data satu lokasi kantor (GET /offices, GET /offices/:officeId). */
-export interface OfficeResponse extends Omit<
-  IOfficeLocation,
-  "latitude" | "longitude" | "radiusMeter"
-> {
+export interface OfficeResponse
+  extends Omit<IOfficeLocation, 'latitude' | 'longitude' | 'radiusMeter'> {
   /** Daftar departemen yang dilayani kantor (banyak-ke-banyak). */
   departments: OfficeDepartmentRef[];
   latitude: number | null;

@@ -13,7 +13,7 @@
  * - Kolom `BigInt` dipetakan ke `bigint`.
  * - Relasi antar tabel TIDAK disertakan (fokus: kontrak scalar field per tabel).
  */
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from "@prisma/client";
 
 /** Tipe Prisma untuk kolom Decimal. */
 type Decimal = Prisma.Decimal;
@@ -36,6 +36,7 @@ export interface IUser {
   createdAt: Date | null;
   updatedAt: Date | null;
   deletedAt: Date | null;
+  departmentId: string | null;
 }
 
 export interface IRole {
@@ -122,7 +123,6 @@ export interface IDepartment {
 
 export interface IOfficeLocation {
   id: string;
-  departmentId: string | null;
   name: string | null;
   address: string | null;
   latitude: Decimal | null;
@@ -172,6 +172,7 @@ export interface IInternProfile {
   createdAt: Date | null;
   updatedAt: Date | null;
   deletedAt: Date | null;
+  departmentId: string | null;
 }
 
 export interface IInternProfileSkill {

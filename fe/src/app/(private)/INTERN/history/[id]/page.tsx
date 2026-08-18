@@ -1,23 +1,21 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
-import { AttendanceDetailFallback } from "@/components/page/intern/AttendanceDetailSection";
-import { InternAccessGate } from "@/components/page/intern/InternAccessGate";
+import { AttendanceDetailFallback } from '@/components/page/intern/AttendanceDetailSection';
+import { InternAccessGate } from '@/components/page/intern/InternAccessGate';
 
-import AttendanceDetailContainer from "./_containers/attendance-detail";
+import AttendanceDetailContainer from './_containers/attendance-detail';
 
 export const metadata: Metadata = {
-  title: "Detail Absensi - SIMAD",
-  description: "Detail absensi peserta magang PLN Persero",
+  title: 'Detail Absensi - SIMAD',
+  description: 'Detail absensi peserta magang PLN Persero',
 };
 
 type InternHistoryDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
-export default async function InternHistoryDetailPage({
-  params,
-}: InternHistoryDetailPageProps) {
+export default async function InternHistoryDetailPage({ params }: InternHistoryDetailPageProps) {
   const { id } = await params;
 
   return (

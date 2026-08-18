@@ -1,21 +1,12 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import { ApplicationStatusBadge } from "@/components/organisms/application/ApplicationStatusBadge";
-import { REVIEWABLE_STATUSES } from "@/components/organisms/application/ApplicationReviewDetail";
-import type {
-  ApplicationResponse,
-  ApplicationStatusValue,
-} from "@/types/api/application.types";
-import { formatDate } from "@/utils/string.format";
-import { CheckCircle2, Eye, FileText, XCircle } from "lucide-react";
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { REVIEWABLE_STATUSES } from '@/components/organisms/application/ApplicationReviewDetail';
+import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
+import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
+import { formatDate } from '@/utils/string.format';
+import { CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
 
 export interface ApplicationTableProps {
   applications: ApplicationResponse[];
@@ -42,9 +33,7 @@ export function ApplicationTable({
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Daftar Pengajuan</CardTitle>
-        <CardDescription>
-          {applications.length} pengajuan ditemukan
-        </CardDescription>
+        <CardDescription>{applications.length} pengajuan ditemukan</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {applications.length === 0 ? (
@@ -72,17 +61,14 @@ export function ApplicationTable({
                     key={app.id}
                     className="border-b transition-colors last:border-0 hover:bg-muted/40"
                   >
-                    <td className="px-6 py-4 font-medium">
-                      {app.applicationNumber ?? "-"}
-                    </td>
+                    <td className="px-6 py-4 font-medium">{app.applicationNumber ?? '-'}</td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="font-medium">
-                          {app.internProfile?.user.fullName ?? "-"}
+                          {app.internProfile?.user.fullName ?? '-'}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {app.internProfile?.studentNumber ||
-                            app.internProfile?.user.email}{" "}
+                          {app.internProfile?.studentNumber || app.internProfile?.user.email}{' '}
                         </span>
                       </div>
                     </td>
@@ -99,9 +85,7 @@ export function ApplicationTable({
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {REVIEWABLE_STATUSES.includes(
-                          app.status as ApplicationStatusValue,
-                        ) && (
+                        {REVIEWABLE_STATUSES.includes(app.status as ApplicationStatusValue) && (
                           <>
                             <Button
                               variant="outline"

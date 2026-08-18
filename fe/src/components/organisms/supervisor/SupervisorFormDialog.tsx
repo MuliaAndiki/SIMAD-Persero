@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import type { FormEvent } from "react";
+import type { FormEvent } from 'react';
 
-import { Button } from "@/components/atoms/button";
+import { Button } from '@/components/atoms/button';
 import {
   Dialog,
   DialogContent,
@@ -10,10 +10,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/atoms/dialog";
-import { Input } from "@/components/atoms/input";
-import type { OfficeResponse } from "@/types/api/office.types";
-import type { CreateSupervisorBody } from "@/types/api/supervisor.types";
+} from '@/components/atoms/dialog';
+import { Input } from '@/components/atoms/input';
+import type { OfficeResponse } from '@/types/api/office.types';
+import type { CreateSupervisorBody } from '@/types/api/supervisor.types';
 
 export type SupervisorFormType = CreateSupervisorBody & {
   isActive?: boolean;
@@ -56,13 +56,11 @@ export function SupervisorFormDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <DialogHeader>
-            <DialogTitle>
-              {isEditing ? "Edit Supervisor" : "Buat Supervisor"}
-            </DialogTitle>
+            <DialogTitle>{isEditing ? 'Edit Supervisor' : 'Buat Supervisor'}</DialogTitle>
             <DialogDescription>
               {isEditing
-                ? "Ubah detail data supervisor."
-                : "Tambahkan akun supervisor baru ke dalam sistem."}
+                ? 'Ubah detail data supervisor.'
+                : 'Tambahkan akun supervisor baru ke dalam sistem.'}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
@@ -97,10 +95,8 @@ export function SupervisorFormDialog({
               </label>
               <select
                 id="officeId"
-                value={formData.officeId ?? ""}
-                onChange={(e) =>
-                  onChange({ officeId: e.target.value, departmentId: "" })
-                }
+                value={formData.officeId ?? ''}
+                onChange={(e) => onChange({ officeId: e.target.value, departmentId: '' })}
                 required
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -127,9 +123,7 @@ export function SupervisorFormDialog({
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="" disabled>
-                  {formData.officeId
-                    ? "Pilih departemen..."
-                    : "Pilih kantor terlebih dahulu"}
+                  {formData.officeId ? 'Pilih departemen...' : 'Pilih kantor terlebih dahulu'}
                 </option>
                 {filteredDepartments.map((dept) => (
                   <option key={dept.id} value={dept.id}>
@@ -140,16 +134,14 @@ export function SupervisorFormDialog({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password {isEditing && "(Opsional)"}
+                Password {isEditing && '(Opsional)'}
               </label>
               <Input
                 id="password"
                 type="password"
-                value={formData.password || ""}
+                value={formData.password || ''}
                 onChange={(e) => onChange({ password: e.target.value })}
-                placeholder={
-                  isEditing ? "Kosongkan jika tidak ingin diubah" : "••••••••"
-                }
+                placeholder={isEditing ? 'Kosongkan jika tidak ingin diubah' : '••••••••'}
                 required={!isEditing}
               />
             </div>
@@ -160,10 +152,8 @@ export function SupervisorFormDialog({
                 </label>
                 <select
                   id="isActive"
-                  value={formData.isActive ? "true" : "false"}
-                  onChange={(e) =>
-                    onChange({ isActive: e.target.value === "true" })
-                  }
+                  value={formData.isActive ? 'true' : 'false'}
+                  onChange={(e) => onChange({ isActive: e.target.value === 'true' })}
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
                   <option value="true">Aktif</option>
@@ -173,16 +163,11 @@ export function SupervisorFormDialog({
             )}
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isPending}
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
               Batal
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Menyimpan..." : "Simpan"}
+              {isPending ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </DialogFooter>
         </form>

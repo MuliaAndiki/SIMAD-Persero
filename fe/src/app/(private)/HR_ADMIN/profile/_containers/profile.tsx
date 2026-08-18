@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { ProfileSection } from "@/components/page/profile/ProfileSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
+import { ProfileSection } from '@/components/page/profile/ProfileSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
 
 /**
  * Container halaman profil HR Admin (GET /users/profile; POST /users/profile/photo).
@@ -20,7 +20,7 @@ export default function HrProfileContainer() {
 
   const handleUploadPhoto = (file: File) => {
     const formData = new FormData();
-    formData.append("photo", file);
+    formData.append('photo', file);
     uploadPhoto.mutate(formData);
   };
 

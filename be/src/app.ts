@@ -1,7 +1,8 @@
-import cors from '@elysiajs/cors';
-import { helmet } from 'elysia-helmet';
-import Elysia from 'elysia';
-import apiRoutes from './routes/apiRoutes';
+import cors from "@elysiajs/cors";
+import { helmet } from "elysia-helmet";
+import Elysia from "elysia";
+import { internshipCron } from "./cron/internship.cron";
+import apiRoutes from "./routes/apiRoutes";
 
 class App {
   public app: Elysia;
@@ -12,12 +13,13 @@ class App {
     this.routes();
   }
   private routes(): void {
-    this.app.get('/', () => 'Hello Elysia! Bun js');
+    this.app.get("/", () => "Hello Elysia! Bun js");
   }
   private middlewares() {
     this.app.use(helmet());
-    this.app.use(cors({ origin: '*' }));
+    this.app.use(cors({ origin: "*" }));
     this.app.use(apiRoutes);
+    this.app.use(internshipCron);
   }
 }
 

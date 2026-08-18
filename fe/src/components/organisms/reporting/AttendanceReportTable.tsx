@@ -1,11 +1,14 @@
 'use client';
 
 import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import { ReportError } from '@/components/organisms/reporting/ReportError';
+import Api from '@/services/props.service';
 import type { AttendanceReportRow } from '@/types/api/reporting.types';
 import { formatDate } from '@/utils/string.format';
-import { ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck, Download } from 'lucide-react';
+import { useState } from 'react';
 
 export interface AttendanceReportTableProps {
   rows: AttendanceReportRow[];
@@ -25,14 +28,33 @@ export function AttendanceReportTable({
   errorMessage,
   onRetry,
 }: AttendanceReportTableProps) {
+  const [isExporting, setIsExporting] = useState(false);
+
   if (isPending) return <Card className="h-64" />;
   if (isError) return <ReportError message={errorMessage} onRetry={onRetry} />;
 
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      await Api.Attendance.DownloadExcel();
+    } catch (error) {
+      console.error('Failed to export:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <Card>
-      <CardHeader className="border-b">
-        <CardTitle>Laporan Absensi</CardTitle>
-        <CardDescription>{rows.length} catatan absensi</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between border-b space-y-0">
+        <div>
+          <CardTitle>Laporan Absensi</CardTitle>
+          <CardDescription>{rows.length} catatan absensi</CardDescription>
+        </div>
+        <Button variant="outline" size="sm" onClick={handleExport} disabled={isExporting}>
+          <Download className="mr-2 size-4" />
+          {isExporting ? 'Mengekspor...' : 'Export Excel'}
+        </Button>
       </CardHeader>
       <CardContent className="p-0">
         {rows.length === 0 ? (

@@ -1,6 +1,10 @@
-import { AppError } from '@/http/error';
-import type { CreateOfficeBody, OfficeQuery, UpdateOfficeBody } from '@/types/office.types';
-import prisma from '../../prisma/client';
+import { AppError } from "@/http/error";
+import type {
+  CreateOfficeBody,
+  OfficeQuery,
+  UpdateOfficeBody,
+} from "@/types/office.types";
+import prisma from "../../prisma/client";
 
 /**
  * Service layer modul Office (Office Location).
@@ -9,6 +13,11 @@ import prisma from '../../prisma/client';
  * Sumber aturan: docs/07-api-specification.md §23.
  */
 class OfficeService {
+  // Proyeksi departemen yang dikembalikan bersama kantor (m2m).
+  private readonly departmentSelect = {
+    select: { id: true, name: true },
+  } as const;
+
   // Konversi Decimal Prisma ke Number agar respons JSON ringkas (koordinat).
   private serialize(office: {
     latitude: unknown;
@@ -32,21 +41,23 @@ class OfficeService {
 
     if (query.keyword) {
       where.OR = [
-        { name: { contains: query.keyword, mode: 'insensitive' } },
-        { address: { contains: query.keyword, mode: 'insensitive' } },
+        { name: { contains: query.keyword, mode: "insensitive" } },
+        { address: { contains: query.keyword, mode: "insensitive" } },
       ];
     }
 
+    // Filter m2m: kantor yang terhubung dengan departemen tertentu.
     if (query.departmentId) {
-      where.departmentId = query.departmentId;
+      where.departments = { some: { id: query.departmentId } };
     }
 
     const [items, total] = await prisma.$transaction([
       prisma.officeLocation.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limit,
+        include: { departments: this.departmentSelect },
       }),
       prisma.officeLocation.count({ where }),
     ]);
@@ -64,9 +75,12 @@ class OfficeService {
 
   // GET /offices/:officeId
   public async getById(id: string) {
-    const office = await prisma.officeLocation.findUnique({ where: { id } });
+    const office = await prisma.officeLocation.findUnique({
+      where: { id },
+      include: { departments: this.departmentSelect },
+    });
     if (!office) {
-      throw new AppError(404, 'Office location not found');
+      throw new AppError(404, "Office location not found");
     }
     return this.serialize(office);
   }
@@ -75,22 +89,26 @@ class OfficeService {
   public async create(input: CreateOfficeBody) {
     const name = input.name?.trim();
     if (!name) {
-      throw new AppError(400, 'Office name is required');
+      throw new AppError(400, "Office name is required");
     }
 
-    if (input.departmentId) {
-      await this.ensureDepartmentExists(input.departmentId);
+    const departmentIds = input.departmentIds ?? [];
+    for (const departmentId of departmentIds) {
+      await this.ensureDepartmentExists(departmentId);
     }
 
     const office = await prisma.officeLocation.create({
       data: {
-        departmentId: input.departmentId || null,
         name,
         address: input.address?.trim() || null,
         latitude: input.latitude,
         longitude: input.longitude,
         radiusMeter: input.radiusMeter,
+        departments: {
+          connect: departmentIds.map((id) => ({ id })),
+        },
       },
+      include: { departments: this.departmentSelect },
     });
 
     return this.serialize(office);
@@ -100,11 +118,14 @@ class OfficeService {
   public async update(id: string, input: UpdateOfficeBody) {
     const office = await prisma.officeLocation.findUnique({ where: { id } });
     if (!office) {
-      throw new AppError(404, 'Office location not found');
+      throw new AppError(404, "Office location not found");
     }
 
-    if (input.departmentId !== undefined) {
-      await this.ensureDepartmentExists(input.departmentId);
+    const departmentIds = input.departmentIds;
+    if (departmentIds !== undefined) {
+      for (const departmentId of departmentIds) {
+        await this.ensureDepartmentExists(departmentId);
+      }
     }
 
     const data: Record<string, unknown> = {};
@@ -112,17 +133,24 @@ class OfficeService {
     if (input.name !== undefined) {
       const name = input.name.trim();
       if (!name) {
-        throw new AppError(400, 'Office name is required');
+        throw new AppError(400, "Office name is required");
       }
       data.name = name;
     }
-    if (input.departmentId !== undefined) data.departmentId = input.departmentId || null;
-    if (input.address !== undefined) data.address = input.address.trim() || null;
+    if (departmentIds !== undefined) {
+      data.departments = { set: departmentIds.map((id) => ({ id })) };
+    }
+    if (input.address !== undefined)
+      data.address = input.address.trim() || null;
     if (input.latitude !== undefined) data.latitude = input.latitude;
     if (input.longitude !== undefined) data.longitude = input.longitude;
     if (input.radiusMeter !== undefined) data.radiusMeter = input.radiusMeter;
 
-    const updated = await prisma.officeLocation.update({ where: { id }, data });
+    const updated = await prisma.officeLocation.update({
+      where: { id },
+      data,
+      include: { departments: this.departmentSelect },
+    });
     return this.serialize(updated);
   }
 
@@ -130,10 +158,20 @@ class OfficeService {
   public async remove(id: string) {
     const office = await prisma.officeLocation.findUnique({ where: { id } });
     if (!office) {
-      throw new AppError(404, 'Office location not found');
+      throw new AppError(404, "Office location not found");
     }
 
-    await prisma.officeLocation.delete({ where: { id } });
+    try {
+      await prisma.officeLocation.delete({ where: { id } });
+    } catch (error: any) {
+      if (error.code === "P2003") {
+        throw new AppError(
+          409,
+          "Tidak dapat menghapus kantor karena masih digunakan oleh data Absensi atau Penempatan Magang",
+        );
+      }
+      throw error;
+    }
   }
 
   private async ensureDepartmentExists(departmentId: string) {
@@ -141,10 +179,10 @@ class OfficeService {
       where: { id: departmentId },
     });
     if (!department) {
-      throw new AppError(404, 'Department not found');
+      throw new AppError(404, "Department not found");
     }
     if (!department.isActive) {
-      throw new AppError(409, 'Department is inactive');
+      throw new AppError(409, "Department is inactive");
     }
   }
 }

@@ -1,17 +1,11 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/atoms/badge";
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import type { DepartmentResponse } from "@/types/api/department.types";
-import { AlertContexType } from "@/types/ui";
-import { Building2, Pencil, Trash2 } from "lucide-react";
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import type { AlertContexType } from '@/types/ui';
+import { Building2, Pencil, Trash2 } from 'lucide-react';
 
 export interface DepartmentTableProps {
   departments: DepartmentResponse[];
@@ -38,9 +32,7 @@ export function DepartmentTable({
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Daftar Departemen</CardTitle>
-        <CardDescription>
-          {departments.length} departemen ditemukan
-        </CardDescription>
+        <CardDescription>{departments.length} departemen ditemukan</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {departments.length === 0 ? (
@@ -71,22 +63,16 @@ export function DepartmentTable({
                     <td className="px-6 py-4 font-medium">{department.code}</td>
                     <td className="px-6 py-4">{department.name}</td>
                     <td className="max-w-xs truncate px-6 py-4 text-muted-foreground">
-                      {department.description || "-"}
+                      {department.description || '-'}
                     </td>
                     <td className="px-6 py-4">
-                      <Badge
-                        variant={department.isActive ? "default" : "secondary"}
-                      >
-                        {department.isActive ? "Aktif" : "Nonaktif"}
+                      <Badge variant={department.isActive ? 'default' : 'secondary'}>
+                        {department.isActive ? 'Aktif' : 'Nonaktif'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onOpenEdit(department)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => onOpenEdit(department)}>
                           <Pencil className="size-4" />
                           Edit
                         </Button>
@@ -96,7 +82,7 @@ export function DepartmentTable({
                           disabled={isDeleting}
                           onClick={() => onToggleActive(department)}
                         >
-                          {department.isActive ? "Nonaktifkan" : "Aktifkan"}
+                          {department.isActive ? 'Nonaktifkan' : 'Aktifkan'}
                         </Button>
                         <Button
                           variant="ghost"
@@ -105,10 +91,9 @@ export function DepartmentTable({
                           disabled={isDeleting}
                           onClick={() =>
                             alert.confirm({
-                              title: "Hapus ?",
-                              deskripsi:
-                                "Apakah Kamu Akan Menghapus Depertemen Ini",
-                              icon: "question",
+                              title: 'Hapus ?',
+                              deskripsi: 'Apakah Kamu Akan Menghapus Depertemen Ini',
+                              icon: 'question',
                               onConfirm: () => {
                                 onDelete(department.id);
                               },

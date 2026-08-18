@@ -1,14 +1,14 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from "@sinclair/typebox";
 
 // ── Params ─────────────────────────────────────────────────────────────
 
 export const SupervisorIdParam = Type.Object({
-  supervisorId: Type.String({ format: 'uuid' }),
+  supervisorId: Type.String({ format: "uuid" }),
 });
 
 export const SupervisorAssignmentParam = Type.Object({
-  supervisorId: Type.String({ format: 'uuid' }),
-  assignmentId: Type.String({ format: 'uuid' }),
+  supervisorId: Type.String({ format: "uuid" }),
+  assignmentId: Type.String({ format: "uuid" }),
 });
 
 // ── List query ─────────────────────────────────────────────────────────
@@ -21,5 +21,22 @@ export const SupervisorListQuery = Type.Object({
 // ── Assign body (HR_ADMIN) ─────────────────────────────────────────────
 
 export const AssignInternDto = Type.Object({
-  internshipId: Type.String({ format: 'uuid' }),
+  internshipId: Type.String({ format: "uuid" }),
+});
+
+// ── Create & Update body ─────────────────────────────────────────────
+
+export const CreateSupervisorDto = Type.Object({
+  fullName: Type.String({ minLength: 1, maxLength: 150 }),
+  email: Type.String({ format: "email", maxLength: 150 }),
+  departmentId: Type.String({ format: "uuid" }),
+  password: Type.String({ minLength: 8 }),
+});
+
+export const UpdateSupervisorDto = Type.Object({
+  fullName: Type.Optional(Type.String({ minLength: 1, maxLength: 150 })),
+  email: Type.Optional(Type.String({ format: "email", maxLength: 150 })),
+  departmentId: Type.Optional(Type.String({ format: "uuid" })),
+  password: Type.Optional(Type.String({ minLength: 8 })),
+  isActive: Type.Optional(Type.Boolean()),
 });

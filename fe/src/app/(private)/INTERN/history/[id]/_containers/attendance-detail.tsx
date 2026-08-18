@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { AttendanceDetailSection } from "@/components/page/intern/AttendanceDetailSection";
-import { useApi } from "@/hooks/useService/useApi";
+import { AttendanceDetailSection } from '@/components/page/intern/AttendanceDetailSection';
+import { useApi } from '@/hooks/useService/useApi';
 
 export interface AttendanceDetailContainerProps {
   attendanceId: string;
@@ -17,10 +17,7 @@ export default function AttendanceDetailContainer({
 }: AttendanceDetailContainerProps) {
   const api = useApi();
 
-  const detail = api.attendance.query.detail(
-    { attendanceId },
-    { enabled: Boolean(attendanceId) },
-  );
+  const detail = api.attendance.query.detail({ attendanceId }, { enabled: Boolean(attendanceId) });
 
   return (
     <AttendanceDetailSection

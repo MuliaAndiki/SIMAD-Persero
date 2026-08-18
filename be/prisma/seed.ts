@@ -603,7 +603,8 @@ const OFFICES = [
     latitude: -6.2088,
     longitude: 106.8456,
     radiusMeter: 200,
-    departmentCode: "IT",
+    // Banyak-ke-banyak: satu kantor melayani beberapa departemen.
+    departmentCodes: ["IT", "HR", "FINANCE"],
   },
   {
     name: "Cabang Surabaya",
@@ -611,7 +612,7 @@ const OFFICES = [
     latitude: -7.2575,
     longitude: 112.7521,
     radiusMeter: 150,
-    departmentCode: "OPS",
+    departmentCodes: ["OPS"],
   },
 ] as const;
 
@@ -786,8 +787,8 @@ async function main() {
   console.log(`  ✓ Department: ${DEPARTMENTS.length}`);
 
   for (const office of OFFICES) {
-    const department = await prisma.department.findUnique({
-      where: { code: office.departmentCode },
+    const departments = await prisma.department.findMany({
+      where: { code: { in: [...office.departmentCodes] } },
     });
     const savedOffice = await findOrCreate(
       () => prisma.officeLocation.findFirst({ where: { name: office.name } }),
@@ -799,10 +800,23 @@ async function main() {
             latitude: office.latitude,
             longitude: office.longitude,
             radiusMeter: office.radiusMeter,
-            departmentId: department?.id ?? null,
+            departments: {
+              connect: departments.map((department) => ({ id: department.id })),
+            },
           },
         }),
     );
+
+    // Idempotent: pastikan relasi m2m selalu sinkron walau kantor sudah ada
+    // dari seed / migrate sebelumnya (set = replace seluruh relasi).
+    await prisma.officeLocation.update({
+      where: { id: savedOffice.id },
+      data: {
+        departments: {
+          set: departments.map((department) => ({ id: department.id })),
+        },
+      },
+    });
 
     // AttendanceSetting (WIB wall-clock disimpan sebagai nilai time mentah,
     // dibaca via getUTCHours() di AttendanceService.validateTimeWindow).

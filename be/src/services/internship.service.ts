@@ -7,6 +7,7 @@ import {
   InternshipStatus,
   type PickMergeInternship,
 } from "@/types/internship.types";
+import { createAuditLog } from "@/utils/audit.util";
 import prisma from "../../prisma/client";
 
 /**
@@ -23,7 +24,7 @@ class InternshipService {
     internshipId: string,
     oldStatus: string | null,
     newStatus: string,
-    changedById: string,
+    changedById: string | null,
     notes?: string,
   ) {
     await tx.internshipStatusHistory.create({
@@ -82,6 +83,42 @@ class InternshipService {
 
   // ─── 15.1 Get My Internship ─────────────────────────────────
 
+  public async list() {
+    return prisma.internship.findMany({
+      include: {
+        department: { select: { id: true, code: true, name: true } },
+        officeLocation: { select: { id: true, name: true, address: true } },
+        internProfile: {
+          select: {
+            id: true,
+            studentNumber: true,
+            user: { select: { id: true, fullName: true, email: true } },
+            institution: { select: { id: true, name: true } },
+            major: { select: { id: true, name: true } },
+          },
+        },
+        application: {
+          select: {
+            id: true,
+            applicationNumber: true,
+            status: true,
+            requestedStartDate: true,
+            requestedEndDate: true,
+          },
+        },
+        supervisorAssignments: {
+          where: { isActive: true },
+          select: {
+            id: true,
+            supervisor: { select: { id: true, fullName: true, email: true } },
+            assignedAt: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   public async getMyInternship(userId: string) {
     const profile = await prisma.internProfile.findUnique({
       where: { userId },
@@ -118,6 +155,105 @@ class InternshipService {
 
   public async getById(id: string) {
     return this.findById(id);
+  }
+
+  // ─── Complete Onboarding (INTERN) ───────────────────────────
+  //
+  // Menyelesaikan onboarding digital: menandai onboardingHistory sebagai
+  // diterima (accepted = true) dan memindahkan status internship dari
+  // ONBOARDING_PENDING ke ONBOARDING_COMPLETED (docs/05-state-machine.md §9).
+  // Side effects: waktu persetujuan, IP Address, user agent, audit log.
+
+  public async completeOnboarding(
+    id: string,
+    userId: string,
+    meta: { ipAddress?: string; userAgent?: string },
+  ) {
+    const internship = await this.findById(id);
+
+    // Ownership — hanya pemilik internship yang boleh menyelesaikan onboarding.
+    const profile = await prisma.internProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+
+    if (!profile) {
+      throw new AppError(422, "Intern profile not found");
+    }
+
+    if (internship.internProfileId !== profile.id) {
+      throw new AppError(
+        403,
+        "You can only complete onboarding for your own internship",
+      );
+    }
+
+    // State machine — hanya boleh dari ONBOARDING_PENDING.
+    if (internship.status !== InternshipStatus.ONBOARDING_PENDING) {
+      throw new AppError(
+        400,
+        "Onboarding can only be completed from ONBOARDING_PENDING status",
+      );
+    }
+
+    return prisma.$transaction(async (tx) => {
+      // 1. Tandai onboarding history sebagai diterima.
+      const onboarding = await tx.onboardingHistory.findFirst({
+        where: { internshipId: id },
+      });
+
+      if (onboarding) {
+        await tx.onboardingHistory.update({
+          where: { id: onboarding.id },
+          data: {
+            accepted: true,
+            acceptedAt: new Date(),
+            ipAddress: meta.ipAddress ?? null,
+            userAgent: meta.userAgent ?? null,
+          },
+        });
+      }
+
+      // 2. Pindahkan status internship ke ONBOARDING_COMPLETED.
+      const updated = await tx.internship.update({
+        where: { id },
+        data: {
+          status: InternshipStatus.ONBOARDING_COMPLETED,
+          onboardingCompleted: true,
+        },
+      });
+
+      // 3. Catat histori status.
+      await this.recordStatusHistory(
+        tx,
+        id,
+        internship.status,
+        InternshipStatus.ONBOARDING_COMPLETED,
+        userId,
+        "Onboarding completed by intern",
+      );
+
+      // 4. Audit log (BR-AUDIT-001/003).
+      await createAuditLog(tx, {
+        userId,
+        module: "INTERNSHIP",
+        action: "COMPLETE_ONBOARDING",
+        tableName: "internships",
+        recordId: id,
+        oldData: {
+          status: internship.status,
+          onboardingCompleted: internship.onboardingCompleted,
+        },
+        newData: {
+          status: InternshipStatus.ONBOARDING_COMPLETED,
+          onboardingCompleted: true,
+        },
+        ipAddress: meta.ipAddress ?? null,
+        userAgent: meta.userAgent ?? null,
+      });
+
+      return updated;
+    });
   }
 
   // ─── 15.3 Start Internship (HR_ADMIN) ───────────────────────
@@ -169,6 +305,63 @@ class InternshipService {
 
       return updated;
     });
+  }
+
+  // ─── 15.3b Auto-Start Due Internships (Scheduled Job) ───────
+
+  /**
+   * Automatically start internships whose determined start date
+   * (actualStartDate) has arrived.
+   *
+   * Only ONBOARDING_COMPLETED internships are considered — the onboarding
+   * flow must be finished before an internship may become ACTIVE
+   * (docs/05-state-machine.md §9). Called by the daily cron job
+   * (src/cron/internship.cron.ts); transitions are recorded with
+   * changedById = null (system-triggered).
+   */
+  public async autoStartDueInternships() {
+    const now = new Date();
+
+    const dueInternships = await prisma.internship.findMany({
+      where: {
+        status: InternshipStatus.ONBOARDING_COMPLETED,
+        actualStartDate: { lte: now },
+      },
+      select: { id: true, status: true, actualStartDate: true },
+    });
+
+    let started = 0;
+    for (const internship of dueInternships) {
+      try {
+        await prisma.$transaction(async (tx) => {
+          await tx.internship.update({
+            where: { id: internship.id },
+            data: {
+              status: InternshipStatus.ACTIVE,
+              onboardingCompleted: true,
+              actualStartDate: internship.actualStartDate ?? now,
+            },
+          });
+
+          await this.recordStatusHistory(
+            tx,
+            internship.id,
+            internship.status,
+            InternshipStatus.ACTIVE,
+            null,
+            "Auto-started by scheduled job (start date reached)",
+          );
+        });
+        started += 1;
+      } catch (error) {
+        console.error(
+          `[internship-cron] Failed to auto-start internship ${internship.id}:`,
+          error,
+        );
+      }
+    }
+
+    return { processed: dueInternships.length, started };
   }
 
   // ─── 15.4 Finish Internship (HR_ADMIN) ──────────────────────

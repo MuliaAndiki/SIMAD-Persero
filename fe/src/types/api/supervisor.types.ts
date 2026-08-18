@@ -6,7 +6,7 @@
  * (be/src/controllers/SupervisorController.ts).
  */
 
-import type { ISupervisorAssignment, IUser } from "./model.type";
+import type { ISupervisorAssignment, IUser } from './model.type';
 
 // ---------- Payload (request body / query / path params) ----------
 
@@ -32,27 +32,20 @@ export interface SupervisorAssignmentParams {
 // ---------- Response (data dari backend) ----------
 
 /** Referensi user (intern) yang di-embed di respons assignment. */
-export interface SupervisorInternRef extends Pick<
-  IUser,
-  "id" | "fullName" | "email"
-> {
+export interface SupervisorInternRef extends Pick<IUser, 'id' | 'fullName' | 'email'> {
   studentNumber: string | null;
 }
 
 /** Data satu supervisor (GET /supervisors, GET /supervisors/:supervisorId). */
-export interface SupervisorResponse extends Pick<
-  IUser,
-  "id" | "fullName" | "email" | "isActive" | "avatarFileId" | "createdAt"
-> {
+export interface SupervisorResponse
+  extends Pick<IUser, 'id' | 'fullName' | 'email' | 'isActive' | 'avatarFileId' | 'createdAt'> {
   activeAssignmentsCount: number;
   departmentId: string | null;
 }
 
 /** Data satu penugasan supervisor ke internship. */
-export interface SupervisorAssignmentResponse extends Omit<
-  ISupervisorAssignment,
-  "internshipId" | "supervisorId" | "assignedById"
-> {
+export interface SupervisorAssignmentResponse
+  extends Omit<ISupervisorAssignment, 'internshipId' | 'supervisorId' | 'assignedById'> {
   internshipId: string;
   supervisorId: string;
   assignedById: string;

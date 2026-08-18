@@ -1,8 +1,8 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
-import { APP_SESSION_COOKIE_KEY } from "@/configs/cookies.config";
-import BlankLayout from "@/core/layouts/blank.layout";
+import { APP_SESSION_COOKIE_KEY } from '@/configs/cookies.config';
+import BlankLayout from '@/core/layouts/blank.layout';
 
 export default async function AuthLayout({
   children,
@@ -14,7 +14,7 @@ export default async function AuthLayout({
   const accessToken = store.get(APP_SESSION_COOKIE_KEY)?.value;
 
   if (accessToken) {
-    redirect("/dashboard");
+    redirect('/dashboard');
   }
 
   return (

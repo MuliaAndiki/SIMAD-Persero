@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/atoms/badge";
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { SupervisorAssignInternDialog } from "@/components/organisms/supervisor/SupervisorAssignInternDialog";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
-import { formatDate } from "@/utils/string.format";
-import { ArrowLeft, UserPlus, Users, XCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { SupervisorAssignInternDialog } from '@/components/organisms/supervisor/SupervisorAssignInternDialog';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
+import { formatDate } from '@/utils/string.format';
+import { ArrowLeft, UserPlus, Users, XCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 
 export default function SupervisorDetailContainer({
   supervisorId,
@@ -21,12 +21,12 @@ export default function SupervisorDetailContainer({
   const ns = useAppNameSpace();
 
   const [assignOpen, setAssignOpen] = useState(false);
-  const [internshipId, setInternshipId] = useState("");
+  const [internshipId, setInternshipId] = useState('');
 
   const detailParams = { supervisorId };
   const detail = api.supervisor.query.detail(detailParams);
   const approvedApplications = api.application.query.list({
-    status: "APPROVED",
+    status: 'APPROVED',
     limit: 100,
   });
 
@@ -34,12 +34,12 @@ export default function SupervisorDetailContainer({
   const removeAssignment = api.supervisor.mutate.removeAssignment();
 
   const handleOpenAssign = useCallback(() => {
-    setInternshipId("");
+    setInternshipId('');
     setAssignOpen(true);
   }, []);
 
   const handleCloseAssign = useCallback(() => {
-    setInternshipId("");
+    setInternshipId('');
     setAssignOpen(false);
   }, []);
 
@@ -50,17 +50,17 @@ export default function SupervisorDetailContainer({
       body: { internshipId },
     });
     setAssignOpen(false);
-    setInternshipId("");
+    setInternshipId('');
   }, [assign, internshipId, supervisorId]);
 
   const handleRemoveAssignment = useCallback(
     async (assignmentId: string) => {
       const confirmed = await ns.alert.confirm({
-        title: "Lepas Penugasan?",
-        icon: "question",
+        title: 'Lepas Penugasan?',
+        icon: 'question',
         deskripsi:
-          "Intern akan dilepas dari bimbingan supervisor ini. Supervisor dapat di-assign ulang kapan saja.",
-        confirmButtonText: "Lepas",
+          'Intern akan dilepas dari bimbingan supervisor ini. Supervisor dapat di-assign ulang kapan saja.',
+        confirmButtonText: 'Lepas',
       });
       if (!confirmed) return;
       await removeAssignment.mutateAsync({
@@ -101,9 +101,7 @@ export default function SupervisorDetailContainer({
           <ArrowLeft className="size-4" />
         </Button>
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">
-            Detail Supervisor
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">Detail Supervisor</h1>
           <p className="text-sm text-muted-foreground">
             {supervisor.fullName} · {supervisor.email}
           </p>
@@ -115,28 +113,17 @@ export default function SupervisorDetailContainer({
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <div className="flex flex-col gap-0.5">
               <span className="text-xs text-muted-foreground">Status</span>
-              <Badge
-                variant={supervisor.isActive ? "default" : "secondary"}
-                className="w-fit"
-              >
-                {supervisor.isActive ? "Aktif" : "Nonaktif"}
+              <Badge variant={supervisor.isActive ? 'default' : 'secondary'} className="w-fit">
+                {supervisor.isActive ? 'Aktif' : 'Nonaktif'}
               </Badge>
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-muted-foreground">
-                Bimbingan Aktif
-              </span>
-              <span className="font-medium">
-                {supervisor.activeAssignmentsCount}
-              </span>
+              <span className="text-xs text-muted-foreground">Bimbingan Aktif</span>
+              <span className="font-medium">{supervisor.activeAssignmentsCount}</span>
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs text-muted-foreground">
-                Total Penugasan
-              </span>
-              <span className="font-medium">
-                {supervisor.assignments.length}
-              </span>
+              <span className="text-xs text-muted-foreground">Total Penugasan</span>
+              <span className="font-medium">{supervisor.assignments.length}</span>
             </div>
           </div>
 
@@ -170,51 +157,38 @@ export default function SupervisorDetailContainer({
                   </thead>
                   <tbody>
                     {supervisor.assignments.map((assignment) => (
-                      <tr
-                        key={assignment.id}
-                        className="border-b last:border-0"
-                      >
+                      <tr key={assignment.id} className="border-b last:border-0">
                         <td className="px-4 py-3">
                           <div className="flex flex-col">
                             <span className="font-medium">
-                              {assignment.internship?.intern?.fullName ?? "-"}
+                              {assignment.internship?.intern?.fullName ?? '-'}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {assignment.internship?.intern?.studentNumber ??
-                                ""}
+                              {assignment.internship?.intern?.studentNumber ?? ''}
                             </span>
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          {assignment.internship?.department?.name ?? "-"}
+                          {assignment.internship?.department?.name ?? '-'}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex flex-col gap-0.5">
                             <span>
-                              {formatDate(
-                                assignment.internship?.actualStartDate ?? null,
-                              )}
+                              {formatDate(assignment.internship?.actualStartDate ?? null)}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              s.d.{" "}
-                              {formatDate(
-                                assignment.internship?.actualEndDate ?? null,
-                              )}
+                              s.d. {formatDate(assignment.internship?.actualEndDate ?? null)}
                             </span>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
-                          {assignment.internship?.status ?? "-"}
-                        </td>
+                        <td className="px-4 py-3">{assignment.internship?.status ?? '-'}</td>
                         <td className="px-4 py-3 text-right">
                           <Button
                             variant="ghost"
                             size="sm"
                             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                             disabled={isRemoving}
-                            onClick={() =>
-                              handleRemoveAssignment(assignment.id)
-                            }
+                            onClick={() => handleRemoveAssignment(assignment.id)}
                           >
                             <XCircle className="size-4" />
                             Lepas

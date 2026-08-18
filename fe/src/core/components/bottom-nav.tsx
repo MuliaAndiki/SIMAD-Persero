@@ -1,15 +1,11 @@
-"use client";
+'use client';
 
-import {
-  ROLE_SIDEBAR_MENU,
-  SIDEBAR_MENU,
-  isMenuActive,
-} from "@/configs/app.config";
-import { useInternAccess } from "@/hooks/useInternAccess";
-import { useApi } from "@/hooks/useService/useApi";
-import { cn } from "@/utils/classname";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { ROLE_SIDEBAR_MENU, SIDEBAR_MENU, isMenuActive } from '@/configs/app.config';
+import { useInternAccess } from '@/hooks/useInternAccess';
+import { useApi } from '@/hooks/useService/useApi';
+import { cn } from '@/utils/classname';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 /**
  * Bottom navigation khusus mobile (md:hidden).
@@ -24,14 +20,12 @@ export function BottomNav() {
 
   const role = api.auth.query.me().data?.role;
   const roleMenus =
-    (role === "INTERN" || role === "HR_ADMIN" || role === "SUPERVISOR"
+    (role === 'INTERN' || role === 'HR_ADMIN' || role === 'SUPERVISOR'
       ? ROLE_SIDEBAR_MENU[role]
       : null) ?? SIDEBAR_MENU;
 
   // Sembunyikan menu yang menuntut magang aktif (Absensi/Riwayat) bila belum ada.
-  const menus = roleMenus.filter(
-    (item) => !item.requiresInternship || hasActiveInternship,
-  );
+  const menus = roleMenus.filter((item) => !item.requiresInternship || hasActiveInternship);
 
   return (
     <nav
@@ -47,12 +41,10 @@ export function BottomNav() {
             <li key={item.url} className="flex-1">
               <Link
                 href={item.url}
-                aria-current={isActive ? "page" : undefined}
+                aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground",
+                  'flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors',
+                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
                 )}
               >
                 <Icon className="size-5" strokeWidth={isActive ? 2.2 : 1.8} />

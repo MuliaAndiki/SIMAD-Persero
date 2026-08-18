@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
-import { InternAccessGate } from "@/components/page/intern/InternAccessGate";
+import { InternAccessGate } from '@/components/page/intern/InternAccessGate';
 
-import InternHistoryContainer from "./_containers/history";
+import InternHistoryContainer from './_containers/history';
 
 export const metadata: Metadata = {
-  title: "Riwayat Absensi - SIMAD",
-  description: "Riwayat absensi peserta magang PLN Persero",
+  title: 'Riwayat Absensi - SIMAD',
+  description: 'Riwayat absensi peserta magang PLN Persero',
 };
 
 export default function InternHistoryPage() {

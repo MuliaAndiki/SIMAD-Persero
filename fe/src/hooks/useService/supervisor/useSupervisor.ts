@@ -4,12 +4,8 @@ import {
   useDeleteSupervisor,
   useRemoveAssignment,
   useUpdateSupervisor,
-} from "./state/mutate";
-import {
-  useSupervisorDashboard,
-  useSupervisorDetail,
-  useSupervisorList,
-} from "./state/query";
+} from './state/mutate';
+import { useSupervisorDashboard, useSupervisorDetail, useSupervisorList } from './state/query';
 
 export const useSupervisor = () => {
   return {
