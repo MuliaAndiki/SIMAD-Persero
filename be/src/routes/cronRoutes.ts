@@ -1,5 +1,6 @@
 import Elysia from "elysia";
 import cronController from "@/controllers/CronController";
+import type { AppContext } from "@/contex";
 
 class CronRouter {
   public cronRouter;
@@ -10,7 +11,7 @@ class CronRouter {
   }
 
   private routes() {
-    this.cronRouter.get("/internship", async (c: any) => {
+    this.cronRouter.get("/internship", async (c: AppContext) => {
       // Typically called by external services like cron-job.org
       return cronController.autoStartInternships(c);
     });

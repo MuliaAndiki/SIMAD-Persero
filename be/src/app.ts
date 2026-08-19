@@ -2,6 +2,7 @@ import cors from "@elysiajs/cors";
 import { helmet } from "elysia-helmet";
 import Elysia from "elysia";
 import apiRoutes from "./routes/apiRoutes";
+import cronRoutes from "./routes/cronRoutes";
 
 class App {
   public app: Elysia;
