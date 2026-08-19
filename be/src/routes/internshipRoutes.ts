@@ -1,5 +1,5 @@
-import type { AppContext } from "@/contex";
-import internshipController from "@/controllers/InternshipController";
+import type { AppContext } from '@/contex';
+import internshipController from '@/controllers/InternshipController';
 import {
   AssignSupervisorDto,
   ChangeDepartmentDto,
@@ -8,10 +8,10 @@ import {
   ExtendInternshipDto,
   InternshipIdParam,
   UpdateSkillDto,
-} from "@/dtos/internship.dto";
-import { requireRole, verifyToken } from "@/middlewares/auth";
-import { idempotency } from "@/middlewares/idempotency";
-import Elysia from "elysia";
+} from '@/dtos/internship.dto';
+import { requireRole, verifyToken } from '@/middlewares/auth';
+import { idempotency } from '@/middlewares/idempotency';
+import Elysia from 'elysia';
 
 const idempotencyMiddleware = idempotency();
 
@@ -24,7 +24,7 @@ class InternshipRouter {
   public internshipRouter;
 
   constructor() {
-    this.internshipRouter = new Elysia({ prefix: "/internships" });
+    this.internshipRouter = new Elysia({ prefix: '/internships' });
     this.routes();
   }
 
@@ -32,26 +32,16 @@ class InternshipRouter {
     // ─── Intern Routes ─────────────────────────────────────────
 
     // 15.1 GET /internships/me — Get my internship (INTERN)
-    this.internshipRouter.get(
-      "/me",
-      (c: AppContext) => internshipController.getMyInternship(c),
-      {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["INTERN"]).beforeHandle,
-        ],
-      },
-    );
+    this.internshipRouter.get('/me', (c: AppContext) => internshipController.getMyInternship(c), {
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+    });
 
     // 15.2 PATCH /internships/:id/onboarding — Complete onboarding (INTERN)
     this.internshipRouter.patch(
-      "/:id/onboarding",
+      '/:id/onboarding',
       (c: AppContext) => internshipController.completeOnboarding(c),
       {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["INTERN"]).beforeHandle,
-        ],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
         params: InternshipIdParam,
       },
     );
@@ -59,81 +49,49 @@ class InternshipRouter {
     // ─── HR / Admin / Supervisor Routes ────────────────────────
 
     // 15.1b GET /internships — List all internships (HR_ADMIN)
-    this.internshipRouter.get(
-      "/",
-      (c: AppContext) => internshipController.list(c),
-      {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN"]).beforeHandle,
-        ],
-      },
-    );
+    this.internshipRouter.get('/', (c: AppContext) => internshipController.list(c), {
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+    });
 
     // 15.2 GET /internships/:id — Internship detail (HR_ADMIN, SUPERVISOR)
-    this.internshipRouter.get(
-      "/:id",
-      (c: AppContext) => internshipController.getById(c),
-      {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN", "SUPERVISOR"]).beforeHandle,
-        ],
-        params: InternshipIdParam,
-      },
-    );
+    this.internshipRouter.get('/:id', (c: AppContext) => internshipController.getById(c), {
+      beforeHandle: [
+        verifyToken().beforeHandle,
+        requireRole(['HR_ADMIN', 'SUPERVISOR']).beforeHandle,
+      ],
+      params: InternshipIdParam,
+    });
 
     // 15.3 PATCH /internships/:id/start — Start internship (HR_ADMIN)
-    this.internshipRouter.patch(
-      "/:id/start",
-      (c: AppContext) => internshipController.start(c),
-      {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN"]).beforeHandle,
-        ],
-        params: InternshipIdParam,
-      },
-    );
+    this.internshipRouter.patch('/:id/start', (c: AppContext) => internshipController.start(c), {
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      params: InternshipIdParam,
+    });
 
     // 15.4 PATCH /internships/:id/finish — Finish internship (HR_ADMIN)
-    this.internshipRouter.patch(
-      "/:id/finish",
-      (c: AppContext) => internshipController.finish(c),
-      {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN"]).beforeHandle,
-          idempotencyMiddleware.beforeHandle,
-        ],
-        afterHandle: [idempotencyMiddleware.afterHandle],
-        params: InternshipIdParam,
-      },
-    );
+    this.internshipRouter.patch('/:id/finish', (c: AppContext) => internshipController.finish(c), {
+      beforeHandle: [
+        verifyToken().beforeHandle,
+        requireRole(['HR_ADMIN']).beforeHandle,
+        idempotencyMiddleware.beforeHandle,
+      ],
+      afterHandle: [idempotencyMiddleware.afterHandle],
+      params: InternshipIdParam,
+    });
 
     // 15.5 PATCH /internships/:id/extend — Extend internship (HR_ADMIN)
-    this.internshipRouter.patch(
-      "/:id/extend",
-      (c: AppContext) => internshipController.extend(c),
-      {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN"]).beforeHandle,
-        ],
-        body: ExtendInternshipDto,
-        params: InternshipIdParam,
-      },
-    );
+    this.internshipRouter.patch('/:id/extend', (c: AppContext) => internshipController.extend(c), {
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      body: ExtendInternshipDto,
+      params: InternshipIdParam,
+    });
 
     // 15.6 PATCH /internships/:id/assign-supervisor — Assign supervisor (HR_ADMIN)
     this.internshipRouter.patch(
-      "/:id/assign-supervisor",
+      '/:id/assign-supervisor',
       (c: AppContext) => internshipController.assignSupervisor(c),
       {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN"]).beforeHandle,
-        ],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
         body: AssignSupervisorDto,
         params: InternshipIdParam,
       },
@@ -141,13 +99,10 @@ class InternshipRouter {
 
     // 15.7 PATCH /internships/:id/change-department — Change department (HR_ADMIN)
     this.internshipRouter.patch(
-      "/:id/change-department",
+      '/:id/change-department',
       (c: AppContext) => internshipController.changeDepartment(c),
       {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN"]).beforeHandle,
-        ],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
         body: ChangeDepartmentDto,
         params: InternshipIdParam,
       },
@@ -155,96 +110,73 @@ class InternshipRouter {
 
     // 15.8 PATCH /internships/:id/archive — Archive internship (HR_ADMIN)
     this.internshipRouter.patch(
-      "/:id/archive",
+      '/:id/archive',
       (c: AppContext) => internshipController.archive(c),
       {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN"]).beforeHandle,
-        ],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
         params: InternshipIdParam,
       },
     );
 
     //
     this.internshipRouter.post(
-      "/profile",
+      '/profile',
       (c: AppContext) => internshipController.internProfile(c),
       {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["INTERN"]).beforeHandle,
-        ],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
         body: CreateProfileInternDto,
       },
     );
     this.internshipRouter.get(
-      "/profile",
+      '/profile',
       (c: AppContext) => internshipController.getInternProfile(c),
       {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["INTERN"]).beforeHandle,
-        ],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
       },
     );
-    this.internshipRouter.get(
-      "/skill",
-      (c: AppContext) => internshipController.getSkillAll(c),
-      {
-        beforeHandle: [verifyToken().beforeHandle],
-      },
-    );
-    this.internshipRouter.post(
-      "/skill",
-      (c: AppContext) => internshipController.createSkill(c),
-      {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN", "SUPERVISOR"]).beforeHandle,
-        ],
-        body: CreateSkillDto,
-      },
-    );
+    this.internshipRouter.get('/skill', (c: AppContext) => internshipController.getSkillAll(c), {
+      beforeHandle: [verifyToken().beforeHandle],
+    });
+    this.internshipRouter.post('/skill', (c: AppContext) => internshipController.createSkill(c), {
+      beforeHandle: [
+        verifyToken().beforeHandle,
+        requireRole(['HR_ADMIN', 'SUPERVISOR']).beforeHandle,
+      ],
+      body: CreateSkillDto,
+    });
     this.internshipRouter.put(
-      "/skill/:id",
+      '/skill/:id',
       (c: AppContext) => internshipController.updateSkill(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN", "SUPERVISOR"]).beforeHandle,
+          requireRole(['HR_ADMIN', 'SUPERVISOR']).beforeHandle,
         ],
         body: UpdateSkillDto,
       },
     );
     this.internshipRouter.delete(
-      "/skill/:id",
+      '/skill/:id',
       (c: AppContext) => internshipController.deleteSkill(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(["HR_ADMIN", "SUPERVISOR"]).beforeHandle,
+          requireRole(['HR_ADMIN', 'SUPERVISOR']).beforeHandle,
         ],
       },
     );
     this.internshipRouter.post(
-      "/add-skills",
+      '/add-skills',
       (c: AppContext) => internshipController.AddSkillInternShip(c),
       {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["INTERN"]).beforeHandle,
-        ],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
       },
     );
     this.internshipRouter.delete(
-      "/remove-skill/:skillId",
+      '/remove-skill/:skillId',
       (c: AppContext) => internshipController.removeSkillInternShip(c),
       {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["INTERN"]).beforeHandle,
-        ],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
       },
     );
   }

@@ -2,7 +2,7 @@ import type { AppContext } from '@/contex';
 import UserController from '@/controllers/UserController';
 import { ChangePasswordDto, UpdateProfileDto, UploadProfilePhotoDto } from '@/dtos/user.dto';
 import { requireRole, verifyToken } from '@/middlewares/auth';
-import { keyByUser, rateLimit, RateLimitRule } from '@/middlewares/rateLimit';
+import { RateLimitRule, keyByUser, rateLimit } from '@/middlewares/rateLimit';
 import Elysia from 'elysia';
 
 /**

@@ -3,6 +3,7 @@ import { HttpResponse } from '@/http';
 import type { AuthUser } from '@/types/auth.types';
 import { DEFAULT_ROLE_CODE, verifyJwtToken } from '@/utils/auth.util';
 import prisma from '../../prisma/client';
+import { getLogger } from '../telemetry/otel.config';
 
 /**
  * Middleware autentikasi. Memvalidasi Bearer Token (Access Token JWT),
@@ -59,7 +60,7 @@ export const verifyToken = () => ({
       if (error?.name === 'JsonWebTokenError') {
         return HttpResponse(c).forbidden('Invalid token.');
       }
-      console.error('JWT verification error:', error);
+      getLogger().error({ err: error }, 'JWT verification error');
       return HttpResponse(c).internalError();
     }
   },

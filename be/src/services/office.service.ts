@@ -1,10 +1,6 @@
-import { AppError } from "@/http/error";
-import type {
-  CreateOfficeBody,
-  OfficeQuery,
-  UpdateOfficeBody,
-} from "@/types/office.types";
-import prisma from "../../prisma/client";
+import { AppError } from '@/http/error';
+import type { CreateOfficeBody, OfficeQuery, UpdateOfficeBody } from '@/types/office.types';
+import prisma from '../../prisma/client';
 
 /**
  * Service layer modul Office (Office Location).
@@ -41,8 +37,8 @@ class OfficeService {
 
     if (query.keyword) {
       where.OR = [
-        { name: { contains: query.keyword, mode: "insensitive" } },
-        { address: { contains: query.keyword, mode: "insensitive" } },
+        { name: { contains: query.keyword, mode: 'insensitive' } },
+        { address: { contains: query.keyword, mode: 'insensitive' } },
       ];
     }
 
@@ -54,7 +50,7 @@ class OfficeService {
     const [items, total] = await prisma.$transaction([
       prisma.officeLocation.findMany({
         where,
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
         include: { departments: this.departmentSelect },
@@ -80,7 +76,7 @@ class OfficeService {
       include: { departments: this.departmentSelect },
     });
     if (!office) {
-      throw new AppError(404, "Office location not found");
+      throw new AppError(404, 'Office location not found');
     }
     return this.serialize(office);
   }
@@ -89,7 +85,7 @@ class OfficeService {
   public async create(input: CreateOfficeBody) {
     const name = input.name?.trim();
     if (!name) {
-      throw new AppError(400, "Office name is required");
+      throw new AppError(400, 'Office name is required');
     }
 
     const departmentIds = input.departmentIds ?? [];
@@ -118,7 +114,7 @@ class OfficeService {
   public async update(id: string, input: UpdateOfficeBody) {
     const office = await prisma.officeLocation.findUnique({ where: { id } });
     if (!office) {
-      throw new AppError(404, "Office location not found");
+      throw new AppError(404, 'Office location not found');
     }
 
     const departmentIds = input.departmentIds;
@@ -133,15 +129,14 @@ class OfficeService {
     if (input.name !== undefined) {
       const name = input.name.trim();
       if (!name) {
-        throw new AppError(400, "Office name is required");
+        throw new AppError(400, 'Office name is required');
       }
       data.name = name;
     }
     if (departmentIds !== undefined) {
       data.departments = { set: departmentIds.map((id) => ({ id })) };
     }
-    if (input.address !== undefined)
-      data.address = input.address.trim() || null;
+    if (input.address !== undefined) data.address = input.address.trim() || null;
     if (input.latitude !== undefined) data.latitude = input.latitude;
     if (input.longitude !== undefined) data.longitude = input.longitude;
     if (input.radiusMeter !== undefined) data.radiusMeter = input.radiusMeter;
@@ -158,16 +153,16 @@ class OfficeService {
   public async remove(id: string) {
     const office = await prisma.officeLocation.findUnique({ where: { id } });
     if (!office) {
-      throw new AppError(404, "Office location not found");
+      throw new AppError(404, 'Office location not found');
     }
 
     try {
       await prisma.officeLocation.delete({ where: { id } });
     } catch (error: any) {
-      if (error.code === "P2003") {
+      if (error.code === 'P2003') {
         throw new AppError(
           409,
-          "Tidak dapat menghapus kantor karena masih digunakan oleh data Absensi atau Penempatan Magang",
+          'Tidak dapat menghapus kantor karena masih digunakan oleh data Absensi atau Penempatan Magang',
         );
       }
       throw error;
@@ -179,10 +174,10 @@ class OfficeService {
       where: { id: departmentId },
     });
     if (!department) {
-      throw new AppError(404, "Department not found");
+      throw new AppError(404, 'Department not found');
     }
     if (!department.isActive) {
-      throw new AppError(409, "Department is inactive");
+      throw new AppError(409, 'Department is inactive');
     }
   }
 }

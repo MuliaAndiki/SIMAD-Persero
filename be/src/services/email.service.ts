@@ -1,4 +1,5 @@
 import { EmailParams, MailerSend, Recipient, Sender } from 'mailersend';
+import { getLogger } from '../telemetry/otel.config';
 
 interface MailOptions {
   to: string;
@@ -22,10 +23,15 @@ function getSender(): Sender {
 
 export async function sendEmail(options: MailOptions): Promise<void> {
   if (!mailersendConfigured || !mailerSend) {
-    console.log('[EMAIL][DEV MODE] To:', options.to);
-    console.log('[EMAIL][DEV MODE] Subject:', options.subject);
-    console.log('[EMAIL][DEV MODE] Body:', options.text);
-    if (options.html) console.log('[EMAIL][DEV MODE] HTML:', options.html);
+    getLogger().info(
+      {
+        to: options.to,
+        subject: options.subject,
+        text: options.text,
+        html: options.html,
+      },
+      '[EMAIL][DEV MODE]',
+    );
     return;
   }
 

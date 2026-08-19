@@ -1,4 +1,5 @@
 import type { AppContext } from '@/contex';
+import { getLogger } from '../telemetry/otel.config';
 import { AppError } from './error';
 import type { ErrorCode } from './error-codes';
 
@@ -96,6 +97,13 @@ export function HttpResponse(c: AppContext) {
 export function handleAppError(c: AppContext, error: unknown) {
   if (error instanceof AppError) {
     const { status, message, code } = error;
+
+    if (status >= 500) {
+      getLogger().error({ err: error, code }, `[AppError] ${status} - ${message}`);
+    } else {
+      getLogger().warn({ code }, `[AppWarn] ${status} - ${message}`);
+    }
+
     switch (status) {
       case 400:
         return HttpResponse(c).badRequest(message, code);
@@ -108,8 +116,6 @@ export function handleAppError(c: AppContext, error: unknown) {
       case 409:
         return HttpResponse(c).conflict(message, code);
       case 410:
-        // 410 "Gone" dipakai saat konten tidak tersedia (file/certificate) —
-        // pemetaan paling sesuai adalah 404 Not Found.
         return HttpResponse(c).notFound(message, code);
       case 422:
         return HttpResponse(c).unprocessable(message, code);
@@ -119,5 +125,8 @@ export function handleAppError(c: AppContext, error: unknown) {
         return HttpResponse(c).internalError(error);
     }
   }
+
+  getLogger().error({ err: error }, '[Unhandled Server Error]');
+
   return HttpResponse(c).internalError(error);
 }

@@ -6,6 +6,7 @@ import type {
   ChangeEmailVerifyBody,
   ChangePasswordBody,
   EmailBody,
+  GoogleLoginBody,
   LoginBody,
   RefreshTokenBody,
   RegisterBody,
@@ -72,6 +73,17 @@ class AuthController {
       const body = c.body as LoginBody;
       const data = await AuthService.login(body.email, body.password);
       return HttpResponse(c).ok(data, undefined, 'Login successful');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/oauth
+  public async googleLogin(c: AppContext) {
+    try {
+      const body = c.body as GoogleLoginBody;
+      const data = await AuthService.googleLoginService(body.credential);
+      return HttpResponse(c).ok(data, undefined, 'Login Google berhasil');
     } catch (error) {
       return this.handleError(c, error);
     }

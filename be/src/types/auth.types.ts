@@ -25,6 +25,11 @@ export type LoginBody = Pick<IUser, 'email'> & {
   password: string;
 };
 
+/** Body untuk login dengan Google (POST /auth/oauth). */
+export type GoogleLoginBody = {
+  credential: string;
+};
+
 export type TokenBody = {
   token: string;
 };

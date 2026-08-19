@@ -2,7 +2,7 @@ import type { AppContext } from '@/contex';
 import FileController from '@/controllers/FileController';
 import { FileParamsDto, UploadFileDto } from '@/dtos/file.dto';
 import { verifyToken } from '@/middlewares/auth';
-import { keyByUser, rateLimit, RateLimitRule } from '@/middlewares/rateLimit';
+import { RateLimitRule, keyByUser, rateLimit } from '@/middlewares/rateLimit';
 import Elysia from 'elysia';
 
 /**

@@ -6,7 +6,7 @@
 // forwards each signal to the appropriate backend:
 //   - Traces  → Grafana Tempo (via OTLP gRPC)
 //   - Logs    → Grafana Loki  (via loki.write)
-//   - Metrics → (placeholder, ready for Prometheus/Mimir when needed)
+//   - Metrics → Prometheus    (via remote write)
 // =============================================================================
 
 // -----------------------------------------------------------------------------
@@ -27,8 +27,7 @@ otelcol.receiver.otlp "default" {
   output {
     traces  = [otelcol.processor.batch.traces.input]
     logs    = [otelcol.processor.batch.logs.input]
-    // Uncomment when Prometheus/Mimir is added:
-    // metrics = [otelcol.processor.batch.metrics.input]
+    metrics = [otelcol.processor.batch.metrics.input]
   }
 }
 
@@ -56,15 +55,15 @@ otelcol.processor.batch "logs" {
   }
 }
 
-// Uncomment when Prometheus/Mimir is added:
-// otelcol.processor.batch "metrics" {
-//   timeout         = "5s"
-//   send_batch_size = 1024
-//
-//   output {
-//     metrics = [otelcol.exporter.prometheusremotewrite.default.input]
-//   }
-// }
+// Batch processor for metrics
+otelcol.processor.batch "metrics" {
+  timeout         = "5s"
+  send_batch_size = 1024
+
+  output {
+    metrics = [otelcol.exporter.prometheusremotewrite.default.input]
+  }
+}
 
 // -----------------------------------------------------------------------------
 // 3. Exporters — send processed telemetry to backends
@@ -94,9 +93,9 @@ loki.write "default" {
   }
 }
 
-// Uncomment when Prometheus remote write is needed:
-// otelcol.exporter.prometheusremotewrite "default" {
-//   endpoint {
-//     url = "http://prometheus:9090/api/v1/write"
-//   }
-// }
+// Export metrics to Prometheus via remote write
+otelcol.exporter.prometheusremotewrite "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}

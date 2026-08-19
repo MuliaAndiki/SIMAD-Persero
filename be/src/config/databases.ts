@@ -1,17 +1,21 @@
 import prisma from 'prisma/client';
+import { getLogger } from '../telemetry/otel.config';
 
 export async function connectWithRetry(retries = 30, delay = 3000): Promise<typeof prisma> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       await prisma.$connect();
       await prisma.$queryRaw`SELECT 1`;
-      console.log(`Database connected successfully! (attempt ${attempt}/${retries})`);
+      getLogger().info(`Database connected successfully! (attempt ${attempt}/${retries})`);
       return prisma;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error(`Failed to connect to database (attempt ${attempt}/${retries}): ${message}`);
+      getLogger().error(
+        { err: error },
+        `Failed to connect to database (attempt ${attempt}/${retries}): ${message}`,
+      );
       if (attempt === retries) {
-        console.error('All retry attempts failed. Giving up.');
+        getLogger().error('All retry attempts failed. Giving up.');
         throw error;
       }
       await new Promise((resolve) => setTimeout(resolve, delay));
@@ -22,7 +26,7 @@ export async function connectWithRetry(retries = 30, delay = 3000): Promise<type
 
 export async function disconnectDatabase(): Promise<void> {
   await prisma.$disconnect();
-  console.log('Database disconnected.');
+  getLogger().info('Database disconnected.');
 }
 
 export async function checkDatabaseHealth(): Promise<boolean> {

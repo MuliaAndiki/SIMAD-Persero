@@ -1,0 +1,19 @@
+# =============================================================================
+# Grafana — Auto-Provisioned Dashboards
+# =============================================================================
+# Semua file *.json di folder ini otomatis diregistrasi sebagai dashboard
+# pada folder "SIMAD" saat Grafana start.
+# =============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: SIMAD
+    orgId: 1
+    folder: SIMAD
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

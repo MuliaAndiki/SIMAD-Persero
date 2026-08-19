@@ -47,3 +47,19 @@ datasources:
           matcherRegex: '"traceId":"(\w+)"'
           url: "$${__value.raw}"
           matcherType: regex
+
+  # --- Prometheus (Metrics) ---
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    uid: prometheus
+    isDefault: false
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: 3.x.x
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: tempo

@@ -1,13 +1,13 @@
-import type { AppContext } from "@/contex";
-import { HttpResponse, handleAppError } from "@/http";
-import applicationService from "@/services/application.service";
+import type { AppContext } from '@/contex';
+import { HttpResponse, handleAppError } from '@/http';
+import applicationService from '@/services/application.service';
 import type {
   ApplicationQuery,
   ApproveApplicationBody,
   CreateApplicationBody,
   RejectApplicationBody,
   UpdateApplicationBody,
-} from "@/types/application.types";
+} from '@/types/application.types';
 
 /**
  * Thin controller for the Internship Application module.
@@ -24,7 +24,7 @@ class ApplicationController {
     try {
       const body = c.body as unknown as CreateApplicationBody;
       const data = await applicationService.create(c.user!.id, body);
-      return HttpResponse(c).created(data, "Application created");
+      return HttpResponse(c).created(data, 'Application created');
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -44,12 +44,8 @@ class ApplicationController {
   public async updateDraft(c: AppContext) {
     try {
       const body = c.body as unknown as UpdateApplicationBody;
-      const data = await applicationService.updateDraft(
-        c.params.id,
-        c.user!.id,
-        body,
-      );
-      return HttpResponse(c).ok(data, undefined, "Application updated");
+      const data = await applicationService.updateDraft(c.params.id, c.user!.id, body);
+      return HttpResponse(c).ok(data, undefined, 'Application updated');
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -59,7 +55,7 @@ class ApplicationController {
   public async submit(c: AppContext) {
     try {
       const data = await applicationService.submit(c.params.id, c.user!.id);
-      return HttpResponse(c).ok(data, undefined, "Application submitted");
+      return HttpResponse(c).ok(data, undefined, 'Application submitted');
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -89,11 +85,7 @@ class ApplicationController {
   // GET /applications/:id
   public async getById(c: AppContext) {
     try {
-      const data = await applicationService.getById(
-        c.params.id,
-        c.user!.id,
-        c.user!.roles,
-      );
+      const data = await applicationService.getById(c.params.id, c.user!.id, c.user!.roles);
       return HttpResponse(c).ok(data);
     } catch (error) {
       return this.handleError(c, error);
@@ -104,12 +96,8 @@ class ApplicationController {
   public async approve(c: AppContext) {
     try {
       const body = c.body as unknown as ApproveApplicationBody;
-      const data = await applicationService.approve(
-        c.params.id,
-        c.user!.id,
-        body,
-      );
-      return HttpResponse(c).ok(data, undefined, "Application approved");
+      const data = await applicationService.approve(c.params.id, c.user!.id, body);
+      return HttpResponse(c).ok(data, undefined, 'Application approved');
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -119,12 +107,8 @@ class ApplicationController {
   public async reject(c: AppContext) {
     try {
       const body = c.body as unknown as RejectApplicationBody;
-      const data = await applicationService.reject(
-        c.params.id,
-        c.user!.id,
-        body,
-      );
-      return HttpResponse(c).ok(data, undefined, "Application rejected");
+      const data = await applicationService.reject(c.params.id, c.user!.id, body);
+      return HttpResponse(c).ok(data, undefined, 'Application rejected');
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -133,10 +117,7 @@ class ApplicationController {
   // DELETE /applications/:id
   public async deleteDraft(c: AppContext) {
     try {
-      const data = await applicationService.deleteDraft(
-        c.params.id,
-        c.user!.id,
-      );
+      const data = await applicationService.deleteDraft(c.params.id, c.user!.id);
       return HttpResponse(c).ok(data);
     } catch (error) {
       return this.handleError(c, error);
