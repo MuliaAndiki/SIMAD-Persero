@@ -6,22 +6,22 @@
  * Role diambil melalui tabel join `UserRole` dan dilampirkan oleh middleware
  * sebagai `AuthUser.roles` (array kode role).
  */
-import type { IUser } from "./models.types";
+import type { IUser } from './models.types';
 
 /** Payload yang disimpan di dalam JWT Access Token. */
-export type JwtPayload = Pick<IUser, "id" | "email" | "fullName">;
+export type JwtPayload = Pick<IUser, 'id' | 'email' | 'fullName'>;
 
 /** User context yang dilampirkan middleware `verifyToken` ke `c.user`. */
 export type AuthUser = JwtPayload &
-  Pick<IUser, "emailVerified" | "isActive"> & {
+  Pick<IUser, 'emailVerified' | 'isActive'> & {
     roles: string[];
   };
 
-export type RegisterBody = Pick<IUser, "fullName" | "email"> & {
+export type RegisterBody = Pick<IUser, 'fullName' | 'email'> & {
   password: string;
 };
 
-export type LoginBody = Pick<IUser, "email"> & {
+export type LoginBody = Pick<IUser, 'email'> & {
   password: string;
 };
 
@@ -34,7 +34,7 @@ export type TokenBody = {
   token: string;
 };
 
-export type EmailBody = Pick<IUser, "email">;
+export type EmailBody = Pick<IUser, 'email'>;
 
 export type ResetPasswordBody = {
   token: string;

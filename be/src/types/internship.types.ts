@@ -3,40 +3,31 @@
 // Source: docs/07-api-specification.md §15, docs/05-state-machine.md §9
 import type {
   IDepartment,
+  IInstitutionMajor,
+  IInternProfile,
+  IInternProfileSkill,
   IOfficeLocation,
   IUser,
-  IInternProfile,
-  IInstitutionMajor,
-  IInternProfileSkill,
-} from "./models.types";
+} from './models.types';
 
 /** Internship status values matching Prisma schema comment & state machine. */
 export const InternshipStatus = {
-  ONBOARDING_PENDING: "ONBOARDING_PENDING",
-  ONBOARDING_COMPLETED: "ONBOARDING_COMPLETED",
-  ACTIVE: "ACTIVE",
-  COMPLETED: "COMPLETED",
-  CERTIFICATE_GENERATED: "CERTIFICATE_GENERATED",
-  ARCHIVED: "ARCHIVED",
+  ONBOARDING_PENDING: 'ONBOARDING_PENDING',
+  ONBOARDING_COMPLETED: 'ONBOARDING_COMPLETED',
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  CERTIFICATE_GENERATED: 'CERTIFICATE_GENERATED',
+  ARCHIVED: 'ARCHIVED',
 } as const;
 
-export type InternshipStatusValue =
-  (typeof InternshipStatus)[keyof typeof InternshipStatus];
+export type InternshipStatusValue = (typeof InternshipStatus)[keyof typeof InternshipStatus];
 
 /** Valid internship status transitions (current → allowed next). */
-export const INTERNSHIP_TRANSITIONS: Record<
-  InternshipStatusValue,
-  InternshipStatusValue[]
-> = {
-  [InternshipStatus.ONBOARDING_PENDING]: [
-    InternshipStatus.ONBOARDING_COMPLETED,
-  ],
+export const INTERNSHIP_TRANSITIONS: Record<InternshipStatusValue, InternshipStatusValue[]> = {
+  [InternshipStatus.ONBOARDING_PENDING]: [InternshipStatus.ONBOARDING_COMPLETED],
   [InternshipStatus.ONBOARDING_COMPLETED]: [InternshipStatus.ACTIVE],
   [InternshipStatus.ACTIVE]: [InternshipStatus.COMPLETED],
-  [InternshipStatus.COMPLETED]: [
-    InternshipStatus.CERTIFICATE_GENERATED,
-    InternshipStatus.ARCHIVED,
-  ],
+  [InternshipStatus.COMPLETED]: [InternshipStatus.CERTIFICATE_GENERATED, InternshipStatus.ARCHIVED],
   [InternshipStatus.CERTIFICATE_GENERATED]: [InternshipStatus.ARCHIVED],
   [InternshipStatus.ARCHIVED]: [],
 };
@@ -50,13 +41,13 @@ export type ExtendInternshipBody = {
 
 /** PATCH /internships/:id/assign-supervisor body */
 export type AssignSupervisorBody = {
-  supervisorId: IUser["id"];
+  supervisorId: IUser['id'];
 };
 
 /** PATCH /internships/:id/change-department body */
 export type ChangeDepartmentBody = {
-  departmentId: IDepartment["id"];
-  officeLocationId?: IOfficeLocation["id"];
+  departmentId: IDepartment['id'];
+  officeLocationId?: IOfficeLocation['id'];
 };
 
 /** GET /internships query (optional, for future list) */
@@ -69,29 +60,25 @@ export type InternshipQuery = Partial<{
 
 export type PickCreateInternshipProfile = Pick<
   IInternProfile,
-  | "address"
-  | "bio"
-  | "birthDate"
-  | "birthPlace"
-  | "emergencyContact"
-  | "gender"
-  | "phone"
-  | "studentNumber"
-  | "userId"
-  | "majorId"
-  | "institutionId"
-  | "id"
+  | 'address'
+  | 'bio'
+  | 'birthDate'
+  | 'birthPlace'
+  | 'emergencyContact'
+  | 'gender'
+  | 'phone'
+  | 'studentNumber'
+  | 'userId'
+  | 'majorId'
+  | 'institutionId'
+  | 'id'
 >;
 
-export type PickCreateInternshipMajor = Pick<
-  IInstitutionMajor,
-  "name" | "institutionId"
->;
+export type PickCreateInternshipMajor = Pick<IInstitutionMajor, 'name' | 'institutionId'>;
 
-export type PickMergeInternship = PickCreateInternshipProfile &
-  PickCreateInternshipMajor;
+export type PickMergeInternship = PickCreateInternshipProfile & PickCreateInternshipMajor;
 
-export type AddSkillItem = Pick<IInternProfileSkill, "skillId" | "proficiency">;
+export type AddSkillItem = Pick<IInternProfileSkill, 'skillId' | 'proficiency'>;
 
 /** Body POST /internships/add-skills — kirim banyak skill sekaligus (bulk). */
 export type AddSkillsBody = {

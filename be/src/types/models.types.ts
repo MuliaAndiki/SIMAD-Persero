@@ -13,7 +13,7 @@
  * - Kolom `BigInt` dipetakan ke `bigint`.
  * - Relasi antar tabel TIDAK disertakan (fokus: kontrak scalar field per tabel).
  */
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from '@prisma/client';
 
 /** Tipe Prisma untuk kolom Decimal. */
 type Decimal = Prisma.Decimal;

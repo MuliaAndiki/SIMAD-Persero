@@ -1,4 +1,4 @@
-import { AppError } from "@/http/error";
+import { AppError } from '@/http/error';
 import type {
   ChartsResponse,
   DashboardStatistics,
@@ -7,8 +7,8 @@ import type {
   RecentActivityQuery,
   RecentActivityResponse,
   SupervisorDashboardData,
-} from "@/types/dashboard.types";
-import prisma from "../../prisma/client";
+} from '@/types/dashboard.types';
+import prisma from '../../prisma/client';
 
 /**
  * Service layer modul Dashboard.
@@ -17,15 +17,13 @@ import prisma from "../../prisma/client";
  */
 class DashboardService {
   private readonly notificationInclude = {
-    notificationReads: { where: { userId: "" }, select: { readAt: true } },
+    notificationReads: { where: { userId: '' }, select: { readAt: true } },
   };
 
   /** Tanggal hari ini dalam zona UTC+7 (pola sama dengan AttendanceService.getTodayRange). */
   private getTodayDate(): Date {
     const now = new Date();
-    const dateStr = new Date(now.getTime() + 7 * 3600 * 1000)
-      .toISOString()
-      .slice(0, 10);
+    const dateStr = new Date(now.getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10);
     return new Date(`${dateStr}T00:00:00.000Z`);
   }
 
@@ -40,18 +38,14 @@ class DashboardService {
     const now = new Date();
     for (let i = months - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      labels.push(
-        `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
-      );
+      labels.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
     }
     return labels;
   }
 
   // ── 19.1 Intern Dashboard ───────────────────────────────────────────
 
-  public async getInternDashboard(
-    userId: string,
-  ): Promise<InternDashboardResponse> {
+  public async getInternDashboard(userId: string): Promise<InternDashboardResponse> {
     const internProfile = await prisma.internProfile.findUnique({
       where: { userId },
       select: { id: true },
@@ -67,7 +61,7 @@ class DashboardService {
               select: { id: true, certificateNumber: true, generatedAt: true },
             },
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: 'desc' },
         })
       : null;
 
@@ -86,15 +80,12 @@ class DashboardService {
         : Promise.resolve(null),
       prisma.notification.findMany({
         where: {
-          OR: [
-            { isBroadcast: true },
-            { notificationReads: { some: { userId } } },
-          ],
+          OR: [{ isBroadcast: true }, { notificationReads: { some: { userId } } }],
         },
         include: {
           notificationReads: { where: { userId }, select: { readAt: true } },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         take: 5,
       }),
     ]);
@@ -145,13 +136,13 @@ class DashboardService {
       totalSupervisors,
     ] = await prisma.$transaction([
       prisma.internshipApplication.count({
-        where: { status: { in: ["SUBMITTED", "UNDER_REVIEW"] } },
+        where: { status: { in: ['SUBMITTED', 'UNDER_REVIEW'] } },
       }),
-      prisma.internship.count({ where: { status: "ACTIVE" } }),
+      prisma.internship.count({ where: { status: 'ACTIVE' } }),
       prisma.attendance.count({ where: { attendanceDate: todayDate } }),
       prisma.certificate.count(),
       prisma.user.count({
-        where: { userRoles: { some: { role: { code: "SUPERVISOR" } } } },
+        where: { userRoles: { some: { role: { code: 'SUPERVISOR' } } } },
       }),
     ]);
 
@@ -166,9 +157,7 @@ class DashboardService {
 
   // ── 19.3 Supervisor Dashboard ───────────────────────────────────────
 
-  public async getSupervisorDashboard(
-    userId: string,
-  ): Promise<SupervisorDashboardData> {
+  public async getSupervisorDashboard(userId: string): Promise<SupervisorDashboardData> {
     const assignments = await prisma.supervisorAssignment.findMany({
       where: { supervisorId: userId, isActive: true },
       select: { internshipId: true },
@@ -194,17 +183,14 @@ class DashboardService {
 
     const present = todayAttendances.filter(
       (a) =>
-        a.attendanceStatus === "PRESENT" ||
-        a.attendanceStatus === "LATE" ||
-        a.attendanceStatus === "COMPLETED",
+        a.attendanceStatus === 'PRESENT' ||
+        a.attendanceStatus === 'LATE' ||
+        a.attendanceStatus === 'COMPLETED',
     ).length;
     const invalidAttendance = todayAttendances.filter(
-      (a) => a.attendanceStatus === "INVALID",
+      (a) => a.attendanceStatus === 'INVALID',
     ).length;
-    const notCheckedIn = Math.max(
-      departmentParticipants - todayAttendances.length,
-      0,
-    );
+    const notCheckedIn = Math.max(departmentParticipants - todayAttendances.length, 0);
 
     return {
       departmentParticipants,
@@ -239,14 +225,14 @@ class DashboardService {
       prisma.department.count(),
       prisma.officeLocation.count(),
       prisma.internshipApplication.count(),
-      prisma.internshipApplication.count({ where: { status: "APPROVED" } }),
+      prisma.internshipApplication.count({ where: { status: 'APPROVED' } }),
       prisma.internshipApplication.count({
-        where: { status: { in: ["SUBMITTED", "UNDER_REVIEW"] } },
+        where: { status: { in: ['SUBMITTED', 'UNDER_REVIEW'] } },
       }),
-      prisma.internship.count({ where: { status: "ACTIVE" } }),
-      prisma.internship.count({ where: { status: "COMPLETED" } }),
+      prisma.internship.count({ where: { status: 'ACTIVE' } }),
+      prisma.internship.count({ where: { status: 'COMPLETED' } }),
       prisma.user.count({
-        where: { userRoles: { some: { role: { code: "SUPERVISOR" } } } },
+        where: { userRoles: { some: { role: { code: 'SUPERVISOR' } } } },
       }),
       prisma.attendance.count(),
       prisma.attendance.count({ where: { attendanceDate: todayDate } }),
@@ -275,11 +261,7 @@ class DashboardService {
   public async getCharts(): Promise<ChartsResponse> {
     const months = 6;
     const labels = this.buildMonthLabels(months);
-    const startMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() - (months - 1),
-      1,
-    );
+    const startMonth = new Date(new Date().getFullYear(), new Date().getMonth() - (months - 1), 1);
 
     const [attendances, internships, grouped] = await Promise.all([
       prisma.attendance.findMany({
@@ -288,15 +270,12 @@ class DashboardService {
       }),
       prisma.internship.findMany({
         where: {
-          OR: [
-            { actualStartDate: { gte: startMonth } },
-            { completedAt: { gte: startMonth } },
-          ],
+          OR: [{ actualStartDate: { gte: startMonth } }, { completedAt: { gte: startMonth } }],
         },
         select: { actualStartDate: true, completedAt: true },
       }),
       prisma.internship.groupBy({
-        by: ["departmentId"],
+        by: ['departmentId'],
         where: { departmentId: { not: null } },
         _count: { _all: true },
       }),
@@ -318,24 +297,19 @@ class DashboardService {
     for (const a of attendances) {
       const bucket = attendanceBuckets[this.monthLabelOf(a.attendanceDate)];
       if (!bucket) continue;
-      if (
-        a.attendanceStatus === "PRESENT" ||
-        a.attendanceStatus === "COMPLETED"
-      ) {
+      if (a.attendanceStatus === 'PRESENT' || a.attendanceStatus === 'COMPLETED') {
         bucket.present += 1;
-      } else if (a.attendanceStatus === "LATE") {
+      } else if (a.attendanceStatus === 'LATE') {
         bucket.late += 1;
-      } else if (a.attendanceStatus === "INVALID") {
+      } else if (a.attendanceStatus === 'INVALID') {
         bucket.invalid += 1;
       }
     }
     const attendanceTrend = labels.map((label) => attendanceBuckets[label]);
 
     // Internship Trend
-    const internshipBuckets: Record<
-      string,
-      { month: string; started: number; completed: number }
-    > = {};
+    const internshipBuckets: Record<string, { month: string; started: number; completed: number }> =
+      {};
     for (const label of labels) {
       internshipBuckets[label] = { month: label, started: 0, completed: 0 };
     }
@@ -361,10 +335,10 @@ class DashboardService {
           select: { id: true, name: true },
         })
       : [];
-    const nameMap = new Map(departments.map((d) => [d.id, d.name ?? "-"]));
+    const nameMap = new Map(departments.map((d) => [d.id, d.name ?? '-']));
     const departmentDistribution = grouped
       .map((g) => ({
-        department: nameMap.get(g.departmentId ?? "") ?? "-",
+        department: nameMap.get(g.departmentId ?? '') ?? '-',
         internCount: g._count._all,
       }))
       .sort((a, b) => b.internCount - a.internCount);
@@ -376,8 +350,7 @@ class DashboardService {
 
   public async getRecentActivities(query: RecentActivityQuery) {
     const page = query.page && query.page > 0 ? query.page : 1;
-    const limit =
-      query.limit && query.limit > 0 ? Math.min(query.limit, 100) : 20;
+    const limit = query.limit && query.limit > 0 ? Math.min(query.limit, 100) : 20;
 
     const [total, activities] = await prisma.$transaction([
       prisma.activityLog.count(),
@@ -385,21 +358,19 @@ class DashboardService {
         include: {
           user: { select: { id: true, fullName: true, email: true } },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
     ]);
 
-    const data: RecentActivityResponse[] = activities.map(
-      (a: (typeof activities)[number]) => ({
-        id: a.id,
-        user: a.user ?? null,
-        activity: a.activity,
-        description: a.description,
-        createdAt: a.createdAt,
-      }),
-    );
+    const data: RecentActivityResponse[] = activities.map((a: (typeof activities)[number]) => ({
+      id: a.id,
+      user: a.user ?? null,
+      activity: a.activity,
+      description: a.description,
+      createdAt: a.createdAt,
+    }));
 
     return {
       data,

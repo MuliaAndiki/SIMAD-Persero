@@ -1,14 +1,15 @@
-import { AppError } from "@/http/error";
+import { AppError } from '@/http/error';
 import {
+  type AddSkillsBody,
   type AssignSupervisorBody,
   type ChangeDepartmentBody,
   type ExtendInternshipBody,
-  type AddSkillsBody,
   InternshipStatus,
   type PickMergeInternship,
-} from "@/types/internship.types";
-import { createAuditLog } from "@/utils/audit.util";
-import prisma from "../../prisma/client";
+} from '@/types/internship.types';
+import { createAuditLog } from '@/utils/audit.util';
+import prisma from '../../prisma/client';
+import { getLogger } from '../telemetry/otel.config';
 
 /**
  * Service layer for the Internship module.
@@ -75,7 +76,7 @@ class InternshipService {
     });
 
     if (!internship) {
-      throw new AppError(404, "Internship not found");
+      throw new AppError(404, 'Internship not found');
     }
 
     return internship;
@@ -115,7 +116,7 @@ class InternshipService {
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -126,12 +127,12 @@ class InternshipService {
     });
 
     if (!profile) {
-      throw new AppError(422, "Intern profile not found");
+      throw new AppError(422, 'Intern profile not found');
     }
 
     const internships = await prisma.internship.findMany({
       where: { internProfileId: profile.id },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       include: {
         department: { select: { id: true, code: true, name: true } },
         officeLocation: { select: { id: true, name: true } },
@@ -178,22 +179,16 @@ class InternshipService {
     });
 
     if (!profile) {
-      throw new AppError(422, "Intern profile not found");
+      throw new AppError(422, 'Intern profile not found');
     }
 
     if (internship.internProfileId !== profile.id) {
-      throw new AppError(
-        403,
-        "You can only complete onboarding for your own internship",
-      );
+      throw new AppError(403, 'You can only complete onboarding for your own internship');
     }
 
     // State machine — hanya boleh dari ONBOARDING_PENDING.
     if (internship.status !== InternshipStatus.ONBOARDING_PENDING) {
-      throw new AppError(
-        400,
-        "Onboarding can only be completed from ONBOARDING_PENDING status",
-      );
+      throw new AppError(400, 'Onboarding can only be completed from ONBOARDING_PENDING status');
     }
 
     return prisma.$transaction(async (tx) => {
@@ -230,15 +225,15 @@ class InternshipService {
         internship.status,
         InternshipStatus.ONBOARDING_COMPLETED,
         userId,
-        "Onboarding completed by intern",
+        'Onboarding completed by intern',
       );
 
       // 4. Audit log (BR-AUDIT-001/003).
       await createAuditLog(tx, {
         userId,
-        module: "INTERNSHIP",
-        action: "COMPLETE_ONBOARDING",
-        tableName: "internships",
+        module: 'INTERNSHIP',
+        action: 'COMPLETE_ONBOARDING',
+        tableName: 'internships',
         recordId: id,
         oldData: {
           status: internship.status,
@@ -267,7 +262,7 @@ class InternshipService {
     ) {
       throw new AppError(
         400,
-        "Internship can only be started from ONBOARDING_PENDING or ONBOARDING_COMPLETED status",
+        'Internship can only be started from ONBOARDING_PENDING or ONBOARDING_COMPLETED status',
       );
     }
 
@@ -277,10 +272,7 @@ class InternshipService {
         where: { internshipId: id, accepted: true },
       });
       if (!onboarding) {
-        throw new AppError(
-          400,
-          "Onboarding must be completed before starting the internship",
-        );
+        throw new AppError(400, 'Onboarding must be completed before starting the internship');
       }
     }
 
@@ -300,7 +292,7 @@ class InternshipService {
         internship.status,
         InternshipStatus.ACTIVE,
         userId,
-        "Internship started",
+        'Internship started',
       );
 
       return updated;
@@ -349,14 +341,14 @@ class InternshipService {
             internship.status,
             InternshipStatus.ACTIVE,
             null,
-            "Auto-started by scheduled job (start date reached)",
+            'Auto-started by scheduled job (start date reached)',
           );
         });
         started += 1;
       } catch (error) {
-        console.error(
-          `[internship-cron] Failed to auto-start internship ${internship.id}:`,
-          error,
+        getLogger().error(
+          { err: error, internshipId: internship.id },
+          '[internship-cron] Failed to auto-start internship',
         );
       }
     }
@@ -370,7 +362,7 @@ class InternshipService {
     const internship = await this.findById(id);
 
     if (internship.status !== InternshipStatus.ACTIVE) {
-      throw new AppError(400, "Only ACTIVE internships can be finished");
+      throw new AppError(400, 'Only ACTIVE internships can be finished');
     }
 
     return prisma.$transaction(async (tx) => {
@@ -388,7 +380,7 @@ class InternshipService {
         InternshipStatus.ACTIVE,
         InternshipStatus.COMPLETED,
         userId,
-        "Internship completed",
+        'Internship completed',
       );
 
       return updated;
@@ -401,19 +393,16 @@ class InternshipService {
     const internship = await this.findById(id);
 
     if (internship.status !== InternshipStatus.ACTIVE) {
-      throw new AppError(400, "Only ACTIVE internships can be extended");
+      throw new AppError(400, 'Only ACTIVE internships can be extended');
     }
 
     const newEndDate = new Date(input.newEndDate);
     if (Number.isNaN(newEndDate.getTime())) {
-      throw new AppError(400, "Invalid date format for newEndDate");
+      throw new AppError(400, 'Invalid date format for newEndDate');
     }
 
     if (internship.actualEndDate && newEndDate <= internship.actualEndDate) {
-      throw new AppError(
-        400,
-        "New end date must be after the current end date",
-      );
+      throw new AppError(400, 'New end date must be after the current end date');
     }
 
     return prisma.$transaction(async (tx) => {
@@ -428,7 +417,7 @@ class InternshipService {
         InternshipStatus.ACTIVE,
         InternshipStatus.ACTIVE,
         userId,
-        `Internship extended to ${input.newEndDate}. ${input.reason || ""}`.trim(),
+        `Internship extended to ${input.newEndDate}. ${input.reason || ''}`.trim(),
       );
 
       return updated;
@@ -437,11 +426,7 @@ class InternshipService {
 
   // ─── 15.6 Assign Supervisor (HR_ADMIN) ──────────────────────
 
-  public async assignSupervisor(
-    id: string,
-    userId: string,
-    input: AssignSupervisorBody,
-  ) {
+  public async assignSupervisor(id: string, userId: string, input: AssignSupervisorBody) {
     const internship = await this.findById(id);
 
     if (
@@ -449,10 +434,7 @@ class InternshipService {
       internship.status === InternshipStatus.ARCHIVED ||
       internship.status === InternshipStatus.CERTIFICATE_GENERATED
     ) {
-      throw new AppError(
-        400,
-        "Cannot assign supervisor to a finalized internship",
-      );
+      throw new AppError(400, 'Cannot assign supervisor to a finalized internship');
     }
 
     // Validate supervisor user
@@ -464,17 +446,12 @@ class InternshipService {
     });
 
     if (!supervisorUser || !supervisorUser.isActive) {
-      throw new AppError(404, "Supervisor user not found or inactive");
+      throw new AppError(404, 'Supervisor user not found or inactive');
     }
 
-    const isSupervisor = supervisorUser.userRoles.some(
-      (ur) => ur.role?.code === "SUPERVISOR",
-    );
+    const isSupervisor = supervisorUser.userRoles.some((ur) => ur.role?.code === 'SUPERVISOR');
     if (!isSupervisor) {
-      throw new AppError(
-        400,
-        "Selected user does not have the SUPERVISOR role",
-      );
+      throw new AppError(400, 'Selected user does not have the SUPERVISOR role');
     }
 
     return prisma.$transaction(async (tx) => {
@@ -510,11 +487,7 @@ class InternshipService {
 
   // ─── 15.7 Change Department (HR_ADMIN) ──────────────────────
 
-  public async changeDepartment(
-    id: string,
-    userId: string,
-    input: ChangeDepartmentBody,
-  ) {
+  public async changeDepartment(id: string, userId: string, input: ChangeDepartmentBody) {
     const internship = await this.findById(id);
 
     if (
@@ -522,10 +495,7 @@ class InternshipService {
       internship.status === InternshipStatus.ARCHIVED ||
       internship.status === InternshipStatus.CERTIFICATE_GENERATED
     ) {
-      throw new AppError(
-        400,
-        "Cannot change department for a finalized internship",
-      );
+      throw new AppError(400, 'Cannot change department for a finalized internship');
     }
 
     // Validate department
@@ -533,7 +503,7 @@ class InternshipService {
       where: { id: input.departmentId },
     });
     if (!department || !department.isActive) {
-      throw new AppError(404, "Department not found or inactive");
+      throw new AppError(404, 'Department not found or inactive');
     }
 
     // Validate office location (optional)
@@ -543,7 +513,7 @@ class InternshipService {
         where: { id: input.officeLocationId },
       });
       if (!office) {
-        throw new AppError(404, "Office location not found");
+        throw new AppError(404, 'Office location not found');
       }
       officeLocationId = office.id;
     }
@@ -581,7 +551,7 @@ class InternshipService {
     ) {
       throw new AppError(
         400,
-        "Only COMPLETED or CERTIFICATE_GENERATED internships can be archived",
+        'Only COMPLETED or CERTIFICATE_GENERATED internships can be archived',
       );
     }
 
@@ -597,7 +567,7 @@ class InternshipService {
         internship.status,
         InternshipStatus.ARCHIVED,
         userId,
-        "Internship archived",
+        'Internship archived',
       );
 
       return updated;
@@ -606,34 +576,33 @@ class InternshipService {
 
   // ----- 15.9  Update InternProfile --------
   public async internProfile(userId: string, payload: PickMergeInternship) {
-    const [queryInstitutionMajor, queryInternProfile] =
-      await prisma.$transaction(async (tx) => {
-        const newMayor = await tx.institutionMajor.create({
-          data: {
-            name: payload.name,
-            institutionId: payload.institutionId,
-          },
-          select: {
-            id: true,
-          },
-        });
-        const newProfile = await tx.internProfile.create({
-          data: {
-            phone: payload.phone,
-            studentNumber: payload.studentNumber,
-            address: payload.address,
-            bio: payload.bio,
-            birthDate: payload.birthDate,
-            birthPlace: payload.birthPlace,
-            emergencyContact: payload.emergencyContact,
-            gender: payload.gender,
-            userId: userId,
-            institutionId: payload.institutionId,
-            majorId: newMayor.id,
-          },
-        });
-        return [newMayor, newProfile];
+    const [queryInstitutionMajor, queryInternProfile] = await prisma.$transaction(async (tx) => {
+      const newMayor = await tx.institutionMajor.create({
+        data: {
+          name: payload.name,
+          institutionId: payload.institutionId,
+        },
+        select: {
+          id: true,
+        },
       });
+      const newProfile = await tx.internProfile.create({
+        data: {
+          phone: payload.phone,
+          studentNumber: payload.studentNumber,
+          address: payload.address,
+          bio: payload.bio,
+          birthDate: payload.birthDate,
+          birthPlace: payload.birthPlace,
+          emergencyContact: payload.emergencyContact,
+          gender: payload.gender,
+          userId: userId,
+          institutionId: payload.institutionId,
+          majorId: newMayor.id,
+        },
+      });
+      return [newMayor, newProfile];
+    });
     return [queryInstitutionMajor, queryInternProfile];
   }
   //
@@ -666,7 +635,7 @@ class InternshipService {
       page?: number;
       limit?: number;
       sortBy?: string;
-      sortOrder?: "asc" | "desc";
+      sortOrder?: 'asc' | 'desc';
     } = {},
   ) {
     const page = query.page ?? 1;
@@ -677,28 +646,23 @@ class InternshipService {
 
     if (query.search) {
       where.OR = [
-        { name: { contains: query.search, mode: "insensitive" } },
-        { category: { contains: query.search, mode: "insensitive" } },
+        { name: { contains: query.search, mode: 'insensitive' } },
+        { category: { contains: query.search, mode: 'insensitive' } },
       ];
     }
 
     if (query.startDate || query.endDate) {
       where.createdAt = {};
       if (query.startDate)
-        (where.createdAt as Record<string, unknown>).gte = new Date(
-          query.startDate,
-        );
-      if (query.endDate)
-        (where.createdAt as Record<string, unknown>).lte = new Date(
-          query.endDate,
-        );
+        (where.createdAt as Record<string, unknown>).gte = new Date(query.startDate);
+      if (query.endDate) (where.createdAt as Record<string, unknown>).lte = new Date(query.endDate);
     }
 
     const orderBy: Record<string, unknown>[] = [];
     if (query.sortBy) {
-      orderBy.push({ [query.sortBy]: query.sortOrder ?? "asc" });
+      orderBy.push({ [query.sortBy]: query.sortOrder ?? 'asc' });
     } else {
-      orderBy.push({ createdAt: "asc" });
+      orderBy.push({ createdAt: 'asc' });
     }
 
     const [totalData, data] = await prisma.$transaction([
@@ -725,32 +689,25 @@ class InternshipService {
 
   public async createSkill(data: { name: string; category: string }) {
     const existing = await prisma.skill.findFirst({
-      where: { name: { equals: data.name, mode: "insensitive" } },
+      where: { name: { equals: data.name, mode: 'insensitive' } },
     });
     if (existing) {
-      throw new AppError(400, "Skill dengan nama tersebut sudah ada");
+      throw new AppError(400, 'Skill dengan nama tersebut sudah ada');
     }
     return await prisma.skill.create({ data });
   }
 
-  public async updateSkill(
-    id: string,
-    data: { name?: string; category?: string },
-  ) {
+  public async updateSkill(id: string, data: { name?: string; category?: string }) {
     const existing = await prisma.skill.findUnique({ where: { id } });
     if (!existing) {
-      throw new AppError(404, "Skill tidak ditemukan");
+      throw new AppError(404, 'Skill tidak ditemukan');
     }
-    if (
-      data.name &&
-      existing.name &&
-      data.name.toLowerCase() !== existing.name.toLowerCase()
-    ) {
+    if (data.name && existing.name && data.name.toLowerCase() !== existing.name.toLowerCase()) {
       const duplicate = await prisma.skill.findFirst({
-        where: { name: { equals: data.name, mode: "insensitive" } },
+        where: { name: { equals: data.name, mode: 'insensitive' } },
       });
       if (duplicate) {
-        throw new AppError(400, "Skill dengan nama tersebut sudah ada");
+        throw new AppError(400, 'Skill dengan nama tersebut sudah ada');
       }
     }
     return await prisma.skill.update({
@@ -762,7 +719,7 @@ class InternshipService {
   public async deleteSkill(id: string) {
     const existing = await prisma.skill.findUnique({ where: { id } });
     if (!existing) {
-      throw new AppError(404, "Skill tidak ditemukan");
+      throw new AppError(404, 'Skill tidak ditemukan');
     }
     await prisma.internProfileSkill.deleteMany({ where: { skillId: id } });
     return await prisma.skill.delete({ where: { id } });
@@ -779,7 +736,7 @@ class InternshipService {
     });
 
     if (!query) {
-      throw new AppError(400, "Service Crashes");
+      throw new AppError(400, 'Service Crashes');
     }
     return query;
   }
@@ -791,7 +748,7 @@ class InternshipService {
     });
 
     if (!profile) {
-      throw new AppError(404, "Intern profile not found");
+      throw new AppError(404, 'Intern profile not found');
     }
 
     const query = await prisma.internProfileSkill.deleteMany({
@@ -802,7 +759,7 @@ class InternshipService {
     });
 
     if (query.count === 0) {
-      throw new AppError(404, "Skill tidak ditemukan di profil magang");
+      throw new AppError(404, 'Skill tidak ditemukan di profil magang');
     }
 
     return query;

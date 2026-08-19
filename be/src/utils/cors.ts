@@ -1,13 +1,10 @@
-import { env } from "../config/env.config";
+import { env } from '../config/env.config';
 
-const DEFAULT_CORS_ORIGINS = [
-  "http://localhost:3000",
-  "https://simad-persero.vercel.app",
-];
+const DEFAULT_CORS_ORIGINS = ['http://localhost:3000', 'https://simad-persero.vercel.app'];
 
 export function resolveCorsOrigins(): string[] {
-  const extras = (env.CORS_ORIGINS ?? "")
-    .split(",")
+  const extras = (env.CORS_ORIGINS ?? '')
+    .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
 

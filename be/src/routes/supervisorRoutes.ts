@@ -3,10 +3,10 @@ import supervisorController from '@/controllers/SupervisorController';
 import {
   AssignInternDto,
   CreateSupervisorDto,
-  UpdateSupervisorDto,
   SupervisorAssignmentParam,
   SupervisorIdParam,
   SupervisorListQuery,
+  UpdateSupervisorDto,
 } from '@/dtos/supervisor.dto';
 import { requireRole, verifyToken } from '@/middlewares/auth';
 import Elysia from 'elysia';
@@ -40,7 +40,6 @@ class SupervisorRouter {
 
     // ─── Dynamic Routes ───────────────────────────────────────────────
 
-    
     // POST /supervisors (HR_ADMIN) - Create Supervisor
     this.supervisorRouter.post('/', (c: AppContext) => supervisorController.createAccount(c), {
       beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
@@ -48,17 +47,25 @@ class SupervisorRouter {
     });
 
     // PATCH /supervisors/:supervisorId (HR_ADMIN) - Update Supervisor
-    this.supervisorRouter.patch('/:supervisorId', (c: AppContext) => supervisorController.updateAccount(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
-      params: SupervisorIdParam,
-      body: UpdateSupervisorDto,
-    });
+    this.supervisorRouter.patch(
+      '/:supervisorId',
+      (c: AppContext) => supervisorController.updateAccount(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        params: SupervisorIdParam,
+        body: UpdateSupervisorDto,
+      },
+    );
 
     // DELETE /supervisors/:supervisorId (HR_ADMIN) - Delete Supervisor
-    this.supervisorRouter.delete('/:supervisorId', (c: AppContext) => supervisorController.deleteAccount(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
-      params: SupervisorIdParam,
-    });
+    this.supervisorRouter.delete(
+      '/:supervisorId',
+      (c: AppContext) => supervisorController.deleteAccount(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        params: SupervisorIdParam,
+      },
+    );
 
     // 24.2 GET /supervisors/:supervisorId (HR_ADMIN)
     this.supervisorRouter.get('/:supervisorId', (c: AppContext) => supervisorController.detail(c), {
