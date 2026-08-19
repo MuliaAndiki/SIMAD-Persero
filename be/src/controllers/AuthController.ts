@@ -1,17 +1,18 @@
-import type { AppContext } from '@/contex';
-import { HttpResponse, handleAppError } from '@/http';
-import AuthService from '@/services/auth.service';
+import type { AppContext } from "@/contex";
+import { HttpResponse, handleAppError } from "@/http";
+import AuthService from "@/services/auth.service";
 import type {
   ChangeEmailBody,
   ChangeEmailVerifyBody,
   ChangePasswordBody,
   EmailBody,
+  GoogleLoginBody,
   LoginBody,
   RefreshTokenBody,
   RegisterBody,
   ResetPasswordBody,
   TokenBody,
-} from '@/types/auth.types';
+} from "@/types/auth.types";
 
 /**
  * Controller modul Auth — tipis.
@@ -34,7 +35,10 @@ class AuthController {
         email: body.email,
         password: body.password,
       });
-      return HttpResponse(c).created(data, 'Registration successful. Please verify your email.');
+      return HttpResponse(c).created(
+        data,
+        "Registration successful. Please verify your email.",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -45,7 +49,11 @@ class AuthController {
     try {
       const body = c.body as EmailBody;
       await AuthService.sendVerifyEmail(body.email);
-      return HttpResponse(c).ok(undefined, undefined, 'Verification email sent');
+      return HttpResponse(c).ok(
+        undefined,
+        undefined,
+        "Verification email sent",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -59,7 +67,9 @@ class AuthController {
       return HttpResponse(c).ok(
         undefined,
         undefined,
-        result.alreadyVerified ? 'Email already verified' : 'Email verified successfully',
+        result.alreadyVerified
+          ? "Email already verified"
+          : "Email verified successfully",
       );
     } catch (error) {
       return this.handleError(c, error);
@@ -71,7 +81,18 @@ class AuthController {
     try {
       const body = c.body as LoginBody;
       const data = await AuthService.login(body.email, body.password);
-      return HttpResponse(c).ok(data, undefined, 'Login successful');
+      return HttpResponse(c).ok(data, undefined, "Login successful");
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /auth/oauth
+  public async googleLogin(c: AppContext) {
+    try {
+      const body = c.body as GoogleLoginBody;
+      const data = await AuthService.googleLoginService(body.credential);
+      return HttpResponse(c).ok(data, undefined, "Login Google berhasil");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -82,7 +103,7 @@ class AuthController {
     try {
       const body = c.body as EmailBody;
       await AuthService.sendMagicLink(body.email);
-      return HttpResponse(c).ok(undefined, undefined, 'Magic link sent');
+      return HttpResponse(c).ok(undefined, undefined, "Magic link sent");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -93,7 +114,7 @@ class AuthController {
     try {
       const body = c.body as TokenBody;
       const data = await AuthService.verifyMagicLink(body.token);
-      return HttpResponse(c).ok(data, undefined, 'Login successful');
+      return HttpResponse(c).ok(data, undefined, "Login successful");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -104,7 +125,11 @@ class AuthController {
     try {
       const body = c.body as EmailBody;
       await AuthService.forgotPassword(body.email);
-      return HttpResponse(c).ok(undefined, undefined, 'Password reset link has been sent');
+      return HttpResponse(c).ok(
+        undefined,
+        undefined,
+        "Password reset link has been sent",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -115,7 +140,11 @@ class AuthController {
     try {
       const body = c.body as ResetPasswordBody;
       await AuthService.resetPassword(body.token, body.password);
-      return HttpResponse(c).ok(undefined, undefined, 'Password updated successfully');
+      return HttpResponse(c).ok(
+        undefined,
+        undefined,
+        "Password updated successfully",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -126,7 +155,7 @@ class AuthController {
     try {
       const body = c.body as RefreshTokenBody;
       const data = await AuthService.refreshToken(body.refreshToken);
-      return HttpResponse(c).ok(data, undefined, 'Token refreshed');
+      return HttpResponse(c).ok(data, undefined, "Token refreshed");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -138,7 +167,7 @@ class AuthController {
       const user = c.user!;
       const body = (c.body ?? {}) as Partial<RefreshTokenBody>;
       await AuthService.logout(user.id, body.refreshToken);
-      return HttpResponse(c).ok(undefined, undefined, 'Logout successful');
+      return HttpResponse(c).ok(undefined, undefined, "Logout successful");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -149,7 +178,7 @@ class AuthController {
     try {
       const user = c.user!;
       await AuthService.logoutAll(user.id);
-      return HttpResponse(c).ok(undefined, undefined, 'All sessions ended');
+      return HttpResponse(c).ok(undefined, undefined, "All sessions ended");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -171,8 +200,16 @@ class AuthController {
     try {
       const user = c.user!;
       const body = c.body as ChangePasswordBody;
-      await AuthService.changePassword(user.id, body.currentPassword, body.newPassword);
-      return HttpResponse(c).ok(undefined, undefined, 'Password changed successfully');
+      await AuthService.changePassword(
+        user.id,
+        body.currentPassword,
+        body.newPassword,
+      );
+      return HttpResponse(c).ok(
+        undefined,
+        undefined,
+        "Password changed successfully",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -184,7 +221,11 @@ class AuthController {
       const user = c.user!;
       const body = c.body as ChangeEmailBody;
       await AuthService.changeEmail(user.id, body.newEmail, body.password);
-      return HttpResponse(c).ok(undefined, undefined, 'Verification email sent to the new address');
+      return HttpResponse(c).ok(
+        undefined,
+        undefined,
+        "Verification email sent to the new address",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -196,7 +237,11 @@ class AuthController {
       const user = c.user!;
       const body = c.body as ChangeEmailVerifyBody;
       await AuthService.changeEmailVerify(user.id, body.token);
-      return HttpResponse(c).ok(undefined, undefined, 'Email updated successfully');
+      return HttpResponse(c).ok(
+        undefined,
+        undefined,
+        "Email updated successfully",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -220,15 +265,15 @@ class AuthController {
       const user = c.user!;
       const sessionId = c.params?.sessionId;
       await AuthService.deleteSession(user.id, sessionId);
-      return HttpResponse(c).ok(undefined, undefined, 'Session ended');
+      return HttpResponse(c).ok(undefined, undefined, "Session ended");
     } catch (error) {
       return this.handleError(c, error);
     }
   }
 
   private getBearerToken(c: AppContext): string | null {
-    const authHeader = c.request.headers.get('authorization');
-    return authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    const authHeader = c.request.headers.get("authorization");
+    return authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
   }
 }
 

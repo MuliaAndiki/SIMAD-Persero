@@ -16,6 +16,7 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_URL: requiredString.url(),
     NEXT_PUBLIC_BACKEND_URL: requiredString.url(),
     NEXT_PUBLIC_BASEPATH: requiredString,
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: requiredString,
   },
 
   // Runtime Environment Variables Configuration
@@ -25,6 +26,7 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
     NEXT_PUBLIC_BASEPATH: process.env.NEXT_PUBLIC_BASEPATH,
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
 
     NEXT_INTERNAL_API_SECRET: process.env.NEXT_INTERNAL_API_SECRET,
   },

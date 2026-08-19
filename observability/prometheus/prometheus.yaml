@@ -1,0 +1,22 @@
+# =============================================================================
+# Prometheus — Metrics Backend
+# =============================================================================
+# Menerima metrics dari Grafana Alloy via remote write
+# (http://prometheus:9090/api/v1/write — diaktifkan lewat flag
+# `--web.enable-remote-write-receiver` di docker-compose).
+# Metrics berasal dari aplikasi SIMAD (OpenTelemetry OTLP → Alloy).
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: docker-compose
+
+rule_files: []
+
+scrape_configs:
+  # Scrape diri sendiri agar panel Prometheus "up" punya data.
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

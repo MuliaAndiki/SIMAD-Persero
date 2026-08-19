@@ -1,6 +1,7 @@
-import { AppError } from '@/http/error';
-import { buildFrontendUrl, sendEmail } from '@/services/email.service';
-import type { AuthUser, JwtPayload } from '@/types/auth.types';
+import { env } from "@/config/env.config";
+import { AppError } from "@/http/error";
+import { buildFrontendUrl, sendEmail } from "@/services/email.service";
+import type { AuthUser, JwtPayload } from "@/types/auth.types";
 import {
   ACCESS_TOKEN_TTL,
   DEFAULT_ROLE_CODE,
@@ -11,9 +12,10 @@ import {
   signRefreshToken,
   validatePasswordPolicy,
   verifyJwtToken,
-} from '@/utils/auth.util';
-import bcryptjs from 'bcryptjs';
-import prisma from '../../prisma/client';
+} from "@/utils/auth.util";
+import bcryptjs from "bcryptjs";
+import { OAuth2Client, type TokenPayload } from "google-auth-library";
+import prisma from "../../prisma/client";
 
 /**
  * Service layer modul Auth.
@@ -24,6 +26,12 @@ import prisma from '../../prisma/client';
  */
 class AuthService {
   // ===== Private helpers =====
+
+  /** Klien OAuth2 untuk verifikasi Google ID Token (POST /auth/oauth). */
+  private readonly googleClient = new OAuth2Client({
+    clientId: env.GOOGLE_CLIENT_ID,
+    clientSecret: env.GOOGLE_CLIENT_SECRET,
+  });
 
   private getRoleCode(userRoles: { role: { code: string } }[]): string {
     return userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE;
@@ -59,10 +67,10 @@ class AuthService {
     try {
       decoded = verifyJwtToken(token);
     } catch {
-      throw new AppError(400, 'Token is invalid or expired');
+      throw new AppError(400, "Token is invalid or expired");
     }
     if (decoded.purpose !== purpose) {
-      throw new AppError(400, 'Token is invalid or expired');
+      throw new AppError(400, "Token is invalid or expired");
     }
     return decoded;
   }
@@ -70,7 +78,7 @@ class AuthService {
   private async findActiveUserById(userId: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.deletedAt) {
-      throw new AppError(401, 'Account not found');
+      throw new AppError(401, "Account not found");
     }
     return user;
   }
@@ -94,7 +102,7 @@ class AuthService {
     const password = input.password;
 
     if (!fullName || !email || !password) {
-      throw new AppError(400, 'All fields are required');
+      throw new AppError(400, "All fields are required");
     }
 
     const policyError = validatePasswordPolicy(password);
@@ -104,7 +112,7 @@ class AuthService {
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      throw new AppError(400, 'Email already registered');
+      throw new AppError(400, "Email already registered");
     }
 
     const hashedPassword = await bcryptjs.hash(password, 10);
@@ -134,12 +142,14 @@ class AuthService {
 
     const token = signEmailToken(
       { id: newUser.id, email: newUser.email, fullName: newUser.fullName },
-      'verify-email',
+      "verify-email",
     );
-    const verifyUrl = buildFrontendUrl(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+    const verifyUrl = buildFrontendUrl(
+      `/auth/verify-email?token=${encodeURIComponent(token)}`,
+    );
     await sendEmail({
       to: newUser.email,
-      subject: 'Verifikasi Email SIMAD',
+      subject: "Verifikasi Email SIMAD",
       text: `Halo ${newUser.fullName},\n\nVerifikasi email kamu melalui link berikut:\n${verifyUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku 24 jam.`,
     });
 
@@ -151,25 +161,27 @@ class AuthService {
   public async sendVerifyEmail(email: string) {
     const normalized = email?.toLowerCase().trim();
     if (!normalized) {
-      throw new AppError(400, 'Email is required');
+      throw new AppError(400, "Email is required");
     }
 
     const user = await prisma.user.findUnique({ where: { email: normalized } });
     if (!user || user.deletedAt) {
-      throw new AppError(404, 'Account not found');
+      throw new AppError(404, "Account not found");
     }
     if (user.emailVerified) {
-      throw new AppError(400, 'Email already verified');
+      throw new AppError(400, "Email already verified");
     }
 
     const token = signEmailToken(
       { id: user.id, email: user.email, fullName: user.fullName },
-      'verify-email',
+      "verify-email",
     );
-    const verifyUrl = buildFrontendUrl(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+    const verifyUrl = buildFrontendUrl(
+      `/auth/verify-email?token=${encodeURIComponent(token)}`,
+    );
     await sendEmail({
       to: user.email,
-      subject: 'Verifikasi Email SIMAD',
+      subject: "Verifikasi Email SIMAD",
       text: `Halo ${user.fullName},\n\nVerifikasi email kamu melalui link berikut:\n${verifyUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku 24 jam.`,
     });
   }
@@ -178,14 +190,14 @@ class AuthService {
 
   public async verifyEmail(token: string) {
     if (!token) {
-      throw new AppError(400, 'Token is required');
+      throw new AppError(400, "Token is required");
     }
 
-    const decoded = this.verifyEmailToken(token, 'verify-email');
+    const decoded = this.verifyEmailToken(token, "verify-email");
 
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
     if (!user || user.deletedAt) {
-      throw new AppError(404, 'Account not found');
+      throw new AppError(404, "Account not found");
     }
     if (user.emailVerified) {
       return { alreadyVerified: true };
@@ -208,23 +220,26 @@ class AuthService {
   public async login(email: string, password: string) {
     const normalized = email?.toLowerCase().trim();
     if (!normalized || !password) {
-      throw new AppError(400, 'All fields are required');
+      throw new AppError(400, "All fields are required");
     }
 
     const user = await this.findLoginUser(normalized);
     if (!user || user.deletedAt || !user.password) {
-      throw new AppError(401, 'Invalid email or password');
+      throw new AppError(401, "Invalid email or password");
     }
     if (!user.isActive) {
-      throw new AppError(403, 'Account is deactivated');
+      throw new AppError(403, "Account is deactivated");
     }
     if (!user.emailVerified) {
-      throw new AppError(403, 'Email not verified. Please verify your email first.');
+      throw new AppError(
+        403,
+        "Email not verified. Please verify your email first.",
+      );
     }
 
     const validPassword = await bcryptjs.compare(password, user.password);
     if (!validPassword) {
-      throw new AppError(401, 'Invalid email or password');
+      throw new AppError(401, "Invalid email or password");
     }
 
     const payload: JwtPayload = {
@@ -247,12 +262,108 @@ class AuthService {
     };
   }
 
+  // ===== POST /auth/oauth =====
+
+  /**
+   * Login dengan Google ID Token (flow Google Identity Services).
+   * Credential diverifikasi langsung ke Google; bila email belum terdaftar,
+   * akun baru dibuat dengan role default (INTERN) dan email langsung terverifikasi.
+   */
+  public async googleLoginService(credential: string) {
+    if (!credential) {
+      throw new AppError(400, "Credential Google wajib dikirim");
+    }
+
+    let payload: TokenPayload | undefined;
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: credential,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new AppError(401, "Google credential is invalid or expired");
+    }
+
+    const googleEmail = payload?.email;
+    if (!googleEmail) {
+      throw new AppError(400, "Google account does not have a valid email");
+    }
+    if (payload?.email_verified === false) {
+      throw new AppError(400, "Google email is not verified");
+    }
+
+    const email = googleEmail.toLowerCase().trim();
+    const googleName =
+      payload?.name?.trim() || email.split("@")[0] || "Pengguna Google";
+
+    let user = await this.findLoginUser(email);
+    if (user && user.deletedAt) {
+      throw new AppError(401, "Account not found");
+    }
+    if (user && !user.isActive) {
+      throw new AppError(403, "Account is deactivated");
+    }
+
+    if (!user) {
+      const role = await prisma.role.findUnique({
+        where: { code: DEFAULT_ROLE_CODE },
+      });
+      if (!role) {
+        throw new AppError(
+          500,
+          `Role '${DEFAULT_ROLE_CODE}' tidak ditemukan. Jalankan prisma seed terlebih dahulu.`,
+        );
+      }
+
+      user = await prisma.user.create({
+        data: {
+          fullName: googleName,
+          email,
+          password: null,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
+          isActive: true,
+          userRoles: { create: [{ roleId: role.id }] },
+        },
+        include: { userRoles: { include: { role: true } } },
+      });
+    } else if (!user.emailVerified) {
+      // Email sudah dipakai akun yang belum terverifikasi — kepemilikan email
+      // sudah dibuktikan oleh Google, jadi langsung tandai terverifikasi.
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerifiedAt: new Date() },
+        include: { userRoles: { include: { role: true } } },
+      });
+    }
+
+    const jwtPayload: JwtPayload = {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+    };
+    const accessToken = signAccessToken(jwtPayload);
+    const { refreshToken } = await this.createSession(user.id, jwtPayload);
+
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn: ACCESS_TOKEN_TTL,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        role: this.getRoleCode(user.userRoles),
+      },
+    };
+  }
+
   // ===== POST /auth/magic-link/send =====
 
   public async sendMagicLink(email: string) {
     const normalized = email?.toLowerCase().trim();
     if (!normalized) {
-      throw new AppError(400, 'Email is required');
+      throw new AppError(400, "Email is required");
     }
 
     // Anti user enumeration: selalu sukses, email hanya dikirim bila akun valid.
@@ -263,12 +374,14 @@ class AuthService {
 
     const token = signEmailToken(
       { id: user.id, email: user.email, fullName: user.fullName },
-      'magic-link',
+      "magic-link",
     );
-    const magicUrl = buildFrontendUrl(`/auth/magic-link?token=${encodeURIComponent(token)}`);
+    const magicUrl = buildFrontendUrl(
+      `/auth/magic-link?token=${encodeURIComponent(token)}`,
+    );
     await sendEmail({
       to: user.email,
-      subject: 'Magic Link Login SIMAD',
+      subject: "Magic Link Login SIMAD",
       text: `Halo ${user.fullName},\n\nGunakan link berikut untuk login:\n${magicUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku satu kali pakai dan kedaluwarsa dalam 24 jam.`,
     });
   }
@@ -277,20 +390,20 @@ class AuthService {
 
   public async verifyMagicLink(token: string) {
     if (!token) {
-      throw new AppError(400, 'Token is required');
+      throw new AppError(400, "Token is required");
     }
 
-    const decoded = this.verifyEmailToken(token, 'magic-link');
+    const decoded = this.verifyEmailToken(token, "magic-link");
 
     const user = await this.findLoginUser(decoded.id);
     if (!user || user.deletedAt) {
-      throw new AppError(401, 'Account not found');
+      throw new AppError(401, "Account not found");
     }
     if (!user.isActive) {
-      throw new AppError(403, 'Account is deactivated');
+      throw new AppError(403, "Account is deactivated");
     }
     if (!user.emailVerified) {
-      throw new AppError(403, 'Email not verified');
+      throw new AppError(403, "Email not verified");
     }
 
     const payload: JwtPayload = {
@@ -309,20 +422,28 @@ class AuthService {
   public async forgotPassword(email: string) {
     const normalized = email?.toLowerCase().trim();
     if (!normalized) {
-      throw new AppError(400, 'Email is required');
+      throw new AppError(400, "Email is required");
     }
 
     // Anti user enumeration: selalu sukses, link hanya dikirim bila akun valid.
     const user = await prisma.user.findUnique({ where: { email: normalized } });
-    if (user && !user.deletedAt && user.isActive && user.emailVerified && user.password) {
+    if (
+      user &&
+      !user.deletedAt &&
+      user.isActive &&
+      user.emailVerified &&
+      user.password
+    ) {
       const token = signEmailToken(
         { id: user.id, email: user.email, fullName: user.fullName },
-        'reset-password',
+        "reset-password",
       );
-      const resetUrl = buildFrontendUrl(`/auth/reset-password?token=${encodeURIComponent(token)}`);
+      const resetUrl = buildFrontendUrl(
+        `/auth/reset-password?token=${encodeURIComponent(token)}`,
+      );
       await sendEmail({
         to: user.email,
-        subject: 'Reset Password SIMAD',
+        subject: "Reset Password SIMAD",
         text: `Halo ${user.fullName},\n\nReset password kamu melalui link berikut:\n${resetUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku 24 jam.`,
       });
     }
@@ -332,7 +453,7 @@ class AuthService {
 
   public async resetPassword(token: string, password: string) {
     if (!token || !password) {
-      throw new AppError(400, 'Token and password are required');
+      throw new AppError(400, "Token and password are required");
     }
 
     const policyError = validatePasswordPolicy(password);
@@ -340,7 +461,7 @@ class AuthService {
       throw new AppError(400, policyError);
     }
 
-    const decoded = this.verifyEmailToken(token, 'reset-password');
+    const decoded = this.verifyEmailToken(token, "reset-password");
 
     const user = await this.findActiveUserById(decoded.id);
 
@@ -361,14 +482,14 @@ class AuthService {
 
   public async refreshToken(refreshToken: string) {
     if (!refreshToken) {
-      throw new AppError(400, 'refreshToken is required');
+      throw new AppError(400, "refreshToken is required");
     }
 
     let decoded: ReturnType<typeof verifyJwtToken>;
     try {
       decoded = verifyJwtToken(refreshToken);
     } catch {
-      throw new AppError(401, 'Refresh token is invalid or expired');
+      throw new AppError(401, "Refresh token is invalid or expired");
     }
 
     const stored = await prisma.refreshToken.findFirst({
@@ -376,17 +497,17 @@ class AuthService {
     });
 
     if (!stored || stored.revokedAt) {
-      throw new AppError(401, 'Refresh token has been revoked');
+      throw new AppError(401, "Refresh token has been revoked");
     }
     if (stored.expiresAt && stored.expiresAt.getTime() < Date.now()) {
-      throw new AppError(401, 'Refresh token has expired');
+      throw new AppError(401, "Refresh token has expired");
     }
 
     const user = await prisma.user.findUnique({
       where: { id: stored.userId ?? decoded.id },
     });
     if (!user || user.deletedAt || !user.isActive) {
-      throw new AppError(401, 'Account is not available');
+      throw new AppError(401, "Account is not available");
     }
 
     const accessToken = signAccessToken({
@@ -436,9 +557,13 @@ class AuthService {
 
   // ===== PATCH /auth/change-password =====
 
-  public async changePassword(userId: string, currentPassword: string, newPassword: string) {
+  public async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     if (!currentPassword || !newPassword) {
-      throw new AppError(400, 'currentPassword and newPassword are required');
+      throw new AppError(400, "currentPassword and newPassword are required");
     }
 
     const policyError = validatePasswordPolicy(newPassword);
@@ -448,12 +573,15 @@ class AuthService {
 
     const dbUser = await prisma.user.findUnique({ where: { id: userId } });
     if (!dbUser || !dbUser.password) {
-      throw new AppError(404, 'Account not found');
+      throw new AppError(404, "Account not found");
     }
 
-    const validPassword = await bcryptjs.compare(currentPassword, dbUser.password);
+    const validPassword = await bcryptjs.compare(
+      currentPassword,
+      dbUser.password,
+    );
     if (!validPassword) {
-      throw new AppError(400, 'Current password is incorrect');
+      throw new AppError(400, "Current password is incorrect");
     }
 
     const hashedPassword = await bcryptjs.hash(newPassword, 10);
@@ -474,33 +602,33 @@ class AuthService {
   public async changeEmail(userId: string, newEmail: string, password: string) {
     const normalized = newEmail?.toLowerCase().trim();
     if (!normalized || !password) {
-      throw new AppError(400, 'newEmail and password are required');
+      throw new AppError(400, "newEmail and password are required");
     }
 
     const dbUser = await prisma.user.findUnique({ where: { id: userId } });
     if (!dbUser || !dbUser.password) {
-      throw new AppError(404, 'Account not found');
+      throw new AppError(404, "Account not found");
     }
 
     const validPassword = await bcryptjs.compare(password, dbUser.password);
     if (!validPassword) {
-      throw new AppError(400, 'Password is incorrect');
+      throw new AppError(400, "Password is incorrect");
     }
 
     if (normalized === dbUser.email) {
-      throw new AppError(400, 'New email is the same as current email');
+      throw new AppError(400, "New email is the same as current email");
     }
 
     const existing = await prisma.user.findUnique({
       where: { email: normalized },
     });
     if (existing) {
-      throw new AppError(400, 'Email already registered');
+      throw new AppError(400, "Email already registered");
     }
 
     const token = signEmailToken(
       { id: dbUser.id, email: dbUser.email, fullName: dbUser.fullName },
-      'change-email',
+      "change-email",
       { newEmail: normalized },
     );
     const verifyUrl = buildFrontendUrl(
@@ -508,7 +636,7 @@ class AuthService {
     );
     await sendEmail({
       to: normalized,
-      subject: 'Konfirmasi Perubahan Email SIMAD',
+      subject: "Konfirmasi Perubahan Email SIMAD",
       text: `Halo ${dbUser.fullName},\n\nKonfirmasi perubahan email kamu menjadi ${normalized} melalui link berikut:\n${verifyUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku 24 jam.`,
     });
   }
@@ -517,24 +645,24 @@ class AuthService {
 
   public async changeEmailVerify(userId: string, token: string) {
     if (!token) {
-      throw new AppError(400, 'Token is required');
+      throw new AppError(400, "Token is required");
     }
 
-    const decoded = this.verifyEmailToken(token, 'change-email');
+    const decoded = this.verifyEmailToken(token, "change-email");
     if (decoded.id !== userId) {
-      throw new AppError(400, 'Token is invalid or expired');
+      throw new AppError(400, "Token is invalid or expired");
     }
 
     const newEmail = decoded.newEmail?.toLowerCase().trim();
     if (!newEmail) {
-      throw new AppError(400, 'Token is invalid or expired');
+      throw new AppError(400, "Token is invalid or expired");
     }
 
     const existing = await prisma.user.findUnique({
       where: { email: newEmail },
     });
     if (existing && existing.id !== userId) {
-      throw new AppError(400, 'Email already registered');
+      throw new AppError(400, "Email already registered");
     }
 
     await prisma.$transaction([
@@ -558,7 +686,7 @@ class AuthService {
   public async sessions(userId: string, currentToken: string | null) {
     const sessions = await prisma.refreshToken.findMany({
       where: { userId, revokedAt: null, expiresAt: { gt: new Date() } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       select: { id: true, createdAt: true, expiresAt: true, token: true },
     });
 
@@ -574,14 +702,14 @@ class AuthService {
 
   public async deleteSession(userId: string, sessionId: string) {
     if (!sessionId) {
-      throw new AppError(400, 'sessionId is required');
+      throw new AppError(400, "sessionId is required");
     }
 
     const session = await prisma.refreshToken.findFirst({
       where: { id: sessionId, userId },
     });
     if (!session) {
-      throw new AppError(404, 'Session not found');
+      throw new AppError(404, "Session not found");
     }
 
     await prisma.refreshToken.update({

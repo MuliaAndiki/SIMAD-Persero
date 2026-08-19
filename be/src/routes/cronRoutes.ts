@@ -6,13 +6,12 @@ class CronRouter {
   public cronRouter;
 
   constructor() {
-    this.cronRouter = new Elysia({ prefix: "/cron" });
+    this.cronRouter = new Elysia({ prefix: "/api/cron" });
     this.routes();
   }
 
   private routes() {
     this.cronRouter.get("/internship", async (c: AppContext) => {
-      // Typically called by external services like cron-job.org
       return cronController.autoStartInternships(c);
     });
   }
