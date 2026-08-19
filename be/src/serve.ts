@@ -1,7 +1,7 @@
-import type { Server } from 'bun';
-import app from './app';
-import { connectWithRetry, disconnectDatabase } from './config/databases';
-import { env } from './config/env.config';
+import type { Server } from "bun";
+import app from "./app";
+import { connectWithRetry, disconnectDatabase } from "./config/databases";
+import { env } from "./config/env.config";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
@@ -12,10 +12,12 @@ async function start(): Promise<void> {
     await connectWithRetry();
 
     app.listen(env.PORT, () => {
-      console.log(`Server is running on http://localhost:${env.PORT} (${env.NODE_ENV})`);
+      console.log(
+        `Server is running on http://localhost:${env.PORT} (${env.NODE_ENV})`,
+      );
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error("Failed to start server:", error);
     await disconnectDatabase().catch(() => {});
     process.exit(1);
   }
@@ -54,34 +56,37 @@ async function shutdown(signal: string, exitCode = 0): Promise<void> {
 
     // 2. Disconnect the database only after all queries have completed.
     await disconnectDatabase();
-    console.log('Database disconnected.');
+    console.log("Database disconnected.");
   } catch (error) {
-    console.error('Error during shutdown:', error instanceof Error ? error.message : error);
+    console.error(
+      "Error during shutdown:",
+      error instanceof Error ? error.message : error,
+    );
   }
 
   process.exit(exitCode);
 }
 
-process.once('SIGINT', () => {
-  void shutdown('SIGINT');
+process.once("SIGINT", () => {
+  void shutdown("SIGINT");
 });
 
-process.once('SIGTERM', () => {
-  void shutdown('SIGTERM');
+process.once("SIGTERM", () => {
+  void shutdown("SIGTERM");
 });
 
-process.once('beforeExit', () => {
+process.once("beforeExit", () => {
   void disconnectDatabase();
 });
 
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught exception:', error);
-  void shutdown('uncaughtException', 1);
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught exception:", error);
+  void shutdown("uncaughtException", 1);
 });
 
-process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled rejection:', reason);
-  void shutdown('unhandledRejection', 1);
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled rejection:", reason);
+  void shutdown("unhandledRejection", 1);
 });
 
 void start();

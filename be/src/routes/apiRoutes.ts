@@ -15,6 +15,7 @@ import officeRoutes from "./officeRoutes";
 import reportingRoutes from "./reportingRoutes";
 import supervisorRoutes from "./supervisorRoutes";
 import userRoutes from "./userRoutes";
+import cronRoutes from "./cronRoutes";
 
 class ApiRouter {
   public apiRouter;
@@ -48,7 +49,8 @@ class ApiRouter {
       .use(supervisorRoutes)
       .use(reportingRoutes)
       .use(auditLogRoutes)
-      .use(dashboardRoutes);
+      .use(dashboardRoutes)
+      .use(cronRoutes);
   }
 }
 
