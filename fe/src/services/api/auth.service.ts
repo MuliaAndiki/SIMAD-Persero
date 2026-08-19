@@ -8,6 +8,7 @@ import type {
   ChangeEmailVerifyBody,
   ChangePasswordBody,
   ForgotPasswordBody,
+  GoogleLoginBody,
   LoginBody,
   LogoutBody,
   RefreshTokenBody,
@@ -78,6 +79,17 @@ class AuthService {
   ): Promise<TResponse<AuthSessionResponse>> {
     const res = await client.PublicPostResponse<AuthSessionResponse>(AUTH_ENDPOINTS.LOGIN, body);
     return toServiceResponse(res, { message: 'Login berhasil' });
+  }
+
+  /**
+   * POST /auth/oauth
+   * Login dengan Google — ID token (credential) diverifikasi oleh backend.
+   */
+  public async GoogleLogin(
+    body: Pick<GoogleLoginBody, 'credential'>,
+  ): Promise<TResponse<AuthSessionResponse>> {
+    const res = await client.PublicPostResponse<AuthSessionResponse>(AUTH_ENDPOINTS.OAUTH, body);
+    return toServiceResponse(res, { message: 'Login Google berhasil' });
   }
 
   /**

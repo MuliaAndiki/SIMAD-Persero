@@ -11,6 +11,7 @@ import type {
   ChangeEmailVerifyBody,
   ChangePasswordBody,
   ForgotPasswordBody,
+  GoogleLoginBody,
   LoginBody,
   LogoutBody,
   RefreshTokenBody,
@@ -135,6 +136,56 @@ export function useLogin() {
     AuthCacheContext
   >({
     mutationFn: (payload: Pick<LoginBody, 'email' | 'password'>) => AuthService.Login(payload),
+    onMutate: async () => {
+      await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
+      const previousData = readAuthSnapshot(ns);
+      return { previousData };
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.message,
+        message: res.message,
+        icon: 'success',
+      });
+
+      const data = res.data;
+      if (data) {
+        // Simpan seluruh token ke cookie — backend hanya mengembalikan token di body.
+        setSessionCookies({
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          role: data.user?.role,
+          expiresIn: data.expiresIn,
+        });
+      }
+
+      // Redirect sesuai role akun — setiap role punya folder dashboard sendiri.
+      const role = res.data?.user?.role;
+      router.push(getRoleDashboardPath(role));
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: err.message,
+        message: err.message,
+        icon: 'error',
+      });
+    },
+  });
+}
+
+/**
+ * POST /auth/oauth
+ */
+export function useGoogleLogin() {
+  const ns = useAppNameSpace();
+  const router = useRouter();
+  return useMutation<
+    TResponse<AuthSessionResponse>,
+    Error,
+    Pick<GoogleLoginBody, 'credential'>,
+    AuthCacheContext
+  >({
+    mutationFn: (payload: Pick<GoogleLoginBody, 'credential'>) => AuthService.GoogleLogin(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);

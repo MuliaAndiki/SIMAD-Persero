@@ -3,7 +3,7 @@
  * Menjaga kontrak data antara controller, service, dan routes.
  * Diturunkan dari base model `IInstitution` (models.types.ts) memakai Utility Types.
  */
-import type { IInstitution } from "./models.types";
+import type { IInstitution } from './models.types';
 
 export type InstitutionQuery = Partial<{
   page: number;
@@ -12,5 +12,5 @@ export type InstitutionQuery = Partial<{
 }>;
 
 export type InstitutionParams = {
-  institutionId: IInstitution["id"];
+  institutionId: IInstitution['id'];
 };

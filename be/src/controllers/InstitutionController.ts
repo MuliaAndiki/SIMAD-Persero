@@ -1,10 +1,7 @@
-import type { AppContext } from "@/contex";
-import { HttpResponse, handleAppError } from "@/http";
-import InstitutionService from "@/services/institution.service";
-import type {
-  InstitutionParams,
-  InstitutionQuery,
-} from "@/types/institution.types";
+import type { AppContext } from '@/contex';
+import { HttpResponse, handleAppError } from '@/http';
+import InstitutionService from '@/services/institution.service';
+import type { InstitutionParams, InstitutionQuery } from '@/types/institution.types';
 
 /**
  * Controller modul Institution — tipis.
@@ -21,11 +18,7 @@ class InstitutionController {
     try {
       const query = c.query as unknown as InstitutionQuery;
       const result = await InstitutionService.list(query);
-      return HttpResponse(c).ok(
-        result.data,
-        result.meta,
-        "Institutions retrieved successfully",
-      );
+      return HttpResponse(c).ok(result.data, result.meta, 'Institutions retrieved successfully');
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -36,11 +29,7 @@ class InstitutionController {
     try {
       const { institutionId } = c.params as unknown as InstitutionParams;
       const data = await InstitutionService.getById(institutionId);
-      return HttpResponse(c).ok(
-        data,
-        undefined,
-        "Institution retrieved successfully",
-      );
+      return HttpResponse(c).ok(data, undefined, 'Institution retrieved successfully');
     } catch (error) {
       return this.handleError(c, error);
     }

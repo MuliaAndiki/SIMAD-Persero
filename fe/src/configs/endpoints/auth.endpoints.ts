@@ -12,6 +12,7 @@ export const AUTH_ENDPOINTS = {
   SEND_VERIFY_EMAIL: '/auth/verify-email/send',
   VERIFY_EMAIL: '/auth/verify-email',
   LOGIN: '/auth/login',
+  OAUTH: '/auth/oauth',
   SEND_MAGIC_LINK: '/auth/magic-link/send',
   VERIFY_MAGIC_LINK: '/auth/magic-link/verify',
   FORGOT_PASSWORD: '/auth/forgot-password',

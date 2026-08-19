@@ -5,6 +5,7 @@ import {
   ChangeEmailVerifyDto,
   ChangePasswordDto,
   ForgotPasswordDto,
+  GoogleLoginDto,
   LoginDto,
   LogoutDto,
   RefreshTokenDto,
@@ -17,7 +18,7 @@ import {
   VerifyMagicLinkDto,
 } from '@/dtos/auth.dto';
 import { verifyToken } from '@/middlewares/auth';
-import { rateLimit, RateLimitRule } from '@/middlewares/rateLimit';
+import { RateLimitRule, rateLimit } from '@/middlewares/rateLimit';
 import Elysia from 'elysia';
 
 class AuthRouter {
@@ -72,6 +73,18 @@ class AuthRouter {
         summary: 'Login pengguna',
         description:
           'Autentikasi dengan email dan password. Mengembalikan accessToken + refreshToken.',
+        tags: ['Auth'],
+      },
+    });
+
+    // POST /auth/oauth
+    this.authRouter.post('/oauth', (c: AppContext) => AuthController.googleLogin(c), {
+      body: GoogleLoginDto,
+      beforeHandle: [rateLimit(RateLimitRule.LOGIN).beforeHandle],
+      detail: {
+        summary: 'Login dengan Google',
+        description:
+          'Menukar Google ID Token (credential) menjadi sesi JWT. Akun baru dibuat otomatis dengan role INTERN bila email belum terdaftar.',
         tags: ['Auth'],
       },
     });

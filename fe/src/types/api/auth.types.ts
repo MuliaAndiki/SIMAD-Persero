@@ -27,6 +27,11 @@ export interface LoginBody {
   password: string;
 }
 
+/** Body untuk login dengan Google (POST /auth/oauth) — berisi Google ID token. */
+export interface GoogleLoginBody {
+  credential: string;
+}
+
 export interface SendMagicLinkBody {
   email: string;
 }

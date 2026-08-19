@@ -62,7 +62,7 @@ export type PropsParams = {
 export const appConfig: AppConfig = {
   name: "App",
   description: "App",
-  logo: "/images/logo.png",
+  logo: "/images/logos.png",
   metadata: {
     title: "App",
     description: "App",

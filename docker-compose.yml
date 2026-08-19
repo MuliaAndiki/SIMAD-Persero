@@ -40,6 +40,24 @@ services:
     depends_on:
       - loki
       - tempo
+      - prometheus
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: simad-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yaml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-remote-write-receiver
+      - --web.enable-lifecycle
+    volumes:
+      - ./observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+      - promdata:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - simad-network
 
   loki:
     image: grafana/loki:latest
@@ -82,9 +100,11 @@ services:
     depends_on:
       - loki
       - tempo
+      - prometheus
 
 volumes:
   pgdata:
+  promdata:
 
 networks:
   simad-network:

@@ -1,6 +1,6 @@
-import { AppError } from "@/http/error";
-import type { InstitutionQuery } from "@/types/institution.types";
-import prisma from "../../prisma/client";
+import { AppError } from '@/http/error';
+import type { InstitutionQuery } from '@/types/institution.types';
+import prisma from '../../prisma/client';
 
 /**
  * Service layer modul Institution.
@@ -18,17 +18,17 @@ class InstitutionService {
 
     if (query.keyword) {
       where.OR = [
-        { name: { contains: query.keyword, mode: "insensitive" } },
-        { shortName: { contains: query.keyword, mode: "insensitive" } },
-        { province: { contains: query.keyword, mode: "insensitive" } },
-        { city: { contains: query.keyword, mode: "insensitive" } },
+        { name: { contains: query.keyword, mode: 'insensitive' } },
+        { shortName: { contains: query.keyword, mode: 'insensitive' } },
+        { province: { contains: query.keyword, mode: 'insensitive' } },
+        { city: { contains: query.keyword, mode: 'insensitive' } },
       ];
     }
 
     const [data, total] = await prisma.$transaction([
       prisma.institution.findMany({
         where,
-        orderBy: { name: "asc" },
+        orderBy: { name: 'asc' },
         skip,
         take: limit,
       }),
@@ -50,7 +50,7 @@ class InstitutionService {
   public async getById(id: string) {
     const institution = await prisma.institution.findUnique({ where: { id } });
     if (!institution) {
-      throw new AppError(404, "Institution not found");
+      throw new AppError(404, 'Institution not found');
     }
     return institution;
   }

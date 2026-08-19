@@ -1,3 +1,4 @@
+import { env } from '@/config/env.config';
 import { AppError } from '@/http/error';
 import { buildFrontendUrl, sendEmail } from '@/services/email.service';
 import type { AuthUser, JwtPayload } from '@/types/auth.types';
@@ -13,6 +14,7 @@ import {
   verifyJwtToken,
 } from '@/utils/auth.util';
 import bcryptjs from 'bcryptjs';
+import { OAuth2Client, type TokenPayload } from 'google-auth-library';
 import prisma from '../../prisma/client';
 
 /**
@@ -24,6 +26,12 @@ import prisma from '../../prisma/client';
  */
 class AuthService {
   // ===== Private helpers =====
+
+  /** Klien OAuth2 untuk verifikasi Google ID Token (POST /auth/oauth). */
+  private readonly googleClient = new OAuth2Client({
+    clientId: env.GOOGLE_CLIENT_ID,
+    clientSecret: env.GOOGLE_CLIENT_SECRET,
+  });
 
   private getRoleCode(userRoles: { role: { code: string } }[]): string {
     return userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE;
@@ -234,6 +242,101 @@ class AuthService {
     };
     const accessToken = signAccessToken(payload);
     const { refreshToken } = await this.createSession(user.id, payload);
+
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn: ACCESS_TOKEN_TTL,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        role: this.getRoleCode(user.userRoles),
+      },
+    };
+  }
+
+  // ===== POST /auth/oauth =====
+
+  /**
+   * Login dengan Google ID Token (flow Google Identity Services).
+   * Credential diverifikasi langsung ke Google; bila email belum terdaftar,
+   * akun baru dibuat dengan role default (INTERN) dan email langsung terverifikasi.
+   */
+  public async googleLoginService(credential: string) {
+    if (!credential) {
+      throw new AppError(400, 'Credential Google wajib dikirim');
+    }
+
+    let payload: TokenPayload | undefined;
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: credential,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new AppError(401, 'Google credential is invalid or expired');
+    }
+
+    const googleEmail = payload?.email;
+    if (!googleEmail) {
+      throw new AppError(400, 'Google account does not have a valid email');
+    }
+    if (payload?.email_verified === false) {
+      throw new AppError(400, 'Google email is not verified');
+    }
+
+    const email = googleEmail.toLowerCase().trim();
+    const googleName = payload?.name?.trim() || email.split('@')[0] || 'Pengguna Google';
+
+    let user = await this.findLoginUser(email);
+    if (user?.deletedAt) {
+      throw new AppError(401, 'Account not found');
+    }
+    if (user && !user.isActive) {
+      throw new AppError(403, 'Account is deactivated');
+    }
+
+    if (!user) {
+      const role = await prisma.role.findUnique({
+        where: { code: DEFAULT_ROLE_CODE },
+      });
+      if (!role) {
+        throw new AppError(
+          500,
+          `Role '${DEFAULT_ROLE_CODE}' tidak ditemukan. Jalankan prisma seed terlebih dahulu.`,
+        );
+      }
+
+      user = await prisma.user.create({
+        data: {
+          fullName: googleName,
+          email,
+          password: null,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
+          isActive: true,
+          userRoles: { create: [{ roleId: role.id }] },
+        },
+        include: { userRoles: { include: { role: true } } },
+      });
+    } else if (!user.emailVerified) {
+      // Email sudah dipakai akun yang belum terverifikasi — kepemilikan email
+      // sudah dibuktikan oleh Google, jadi langsung tandai terverifikasi.
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, emailVerifiedAt: new Date() },
+        include: { userRoles: { include: { role: true } } },
+      });
+    }
+
+    const jwtPayload: JwtPayload = {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+    };
+    const accessToken = signAccessToken(jwtPayload);
+    const { refreshToken } = await this.createSession(user.id, jwtPayload);
 
     return {
       accessToken,

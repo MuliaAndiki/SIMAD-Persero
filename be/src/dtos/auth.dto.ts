@@ -37,6 +37,14 @@ export const LoginDto = t.Object({
   password: t.String({ description: 'Kata sandi' }),
 });
 
+// POST /auth/oauth
+export const GoogleLoginDto = t.Object({
+  credential: t.String({
+    minLength: 10,
+    description: 'Google ID Token (credential) yang dihasilkan oleh Google Identity Services',
+  }),
+});
+
 // POST /auth/magic-link/send
 export const SendMagicLinkDto = t.Object({
   email: t.String({ format: 'email', description: 'Alamat email' }),
