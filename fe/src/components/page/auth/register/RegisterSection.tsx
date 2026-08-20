@@ -1,8 +1,11 @@
-import { RegisterForm } from '@/components/organisms/RegisterForm';
-import type { RegisterBody } from '@/types/api/auth.types';
-import Image from 'next/image';
-import Link from 'next/link';
-import type React from 'react';
+import { RegisterForm } from "@/components/organisms/RegisterForm";
+import type { RegisterBody } from "@/types/api/auth.types";
+import Image from "next/image";
+import Link from "next/link";
+import type React from "react";
+import { Button } from "@/components/atoms";
+import { GoogleLogin } from "@react-oauth/google";
+
 export interface RegisterSectionProps {
   state: {
     formRegister: RegisterBody;
@@ -13,6 +16,8 @@ export interface RegisterSectionProps {
     handleSubmit: (event: React.FormEvent) => void;
     onFormChange: (newForm: Partial<RegisterBody>) => void;
     setShowPassword?: (show: boolean) => void;
+    handleGoogleLogin: (credential: string) => void;
+    handleGoogleError?: () => void;
   };
 }
 
@@ -23,9 +28,16 @@ export function RegisterSection({ state, service }: RegisterSectionProps) {
         <div className="px-8 py-10">
           <div className="text-center mb-10">
             <div className="w-full flex justify-center ">
-              <Image alt="logo" src={'/images/logos.png'} height={86} width={86} />
+              <Image
+                alt="logo"
+                src={"/images/logos.png"}
+                height={86}
+                width={86}
+              />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Daftar Akun</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Daftar Akun
+            </h1>
             <p className="text-sm text-foreground/60">SIMAD PLN Persero</p>
           </div>
 
@@ -37,10 +49,48 @@ export function RegisterSection({ state, service }: RegisterSectionProps) {
           />
 
           <div className="mt-6 text-center text-sm text-foreground/70">
-            Sudah punya akun?{' '}
-            <Link href="/login" className="text-primary hover:underline font-medium">
+            Sudah punya akun?{" "}
+            <Link
+              href="/login"
+              className="text-primary hover:underline font-medium"
+            >
               Masuk
             </Link>
+          </div>
+
+          <div className="relative my-4">
+            <Button
+              variant="outline"
+              type="button"
+              className="w-full h-10 pointer-events-none select-none"
+              tabIndex={-1}
+              aria-hidden="true"
+              disabled={state.isPending}
+            >
+              <svg className="size-4" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.667s3.773-8.667 8.6-8.667c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                />
+              </svg>
+              Login with Google
+            </Button>
+
+            {!state.isPending && (
+              <div className="absolute inset-0 opacity-0" aria-hidden="true">
+                <GoogleLogin
+                  onSuccess={({ credential }) => {
+                    if (credential) service.handleGoogleLogin(credential);
+                  }}
+                  onError={service.handleGoogleError}
+                  theme="outline"
+                  shape="rectangular"
+                  size="large"
+                  text="signin_with"
+                  width="100%"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
