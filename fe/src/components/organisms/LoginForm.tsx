@@ -1,7 +1,8 @@
-import { Button } from '@/components/atoms/button';
-import TextField from '@/core/components/text-field';
-import type { LoginBody } from '@/types/api/auth.types';
-import type React from 'react';
+import { Button } from "@/components/atoms/button";
+import TextField from "@/core/components/text-field";
+import type { LoginBody } from "@/types/api/auth.types";
+import type React from "react";
+import Link from "next/link";
 
 export interface LoginFormProps {
   formLogin: LoginBody;
@@ -10,7 +11,12 @@ export interface LoginFormProps {
   onChange: (newForm: Partial<LoginBody>) => void;
 }
 
-export function LoginForm({ formLogin, isPending, onSubmit, onChange }: LoginFormProps) {
+export function LoginForm({
+  formLogin,
+  isPending,
+  onSubmit,
+  onChange,
+}: LoginFormProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <TextField
@@ -44,7 +50,7 @@ export function LoginForm({ formLogin, isPending, onSubmit, onChange }: LoginFor
         variant="default"
         disabled={isPending}
       >
-        {isPending ? 'Memproses...' : 'Masuk'}
+        {isPending ? "Memproses..." : "Masuk"}
       </Button>
     </form>
   );

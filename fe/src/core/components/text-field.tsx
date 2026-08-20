@@ -1,18 +1,20 @@
-import { cn } from '@/utils/classname';
-import { Icon } from '@iconify/react';
-import Link from 'next/link';
-import type React from 'react';
-import { forwardRef, useState } from 'react';
+import { cn } from "@/utils/classname";
+import { Icon } from "@iconify/react";
+import Link from "next/link";
+import type React from "react";
+import { forwardRef, useState } from "react";
 
 type InputBaseProps = {
   placeholder?: string;
-  type?: 'text' | 'email' | 'password' | 'number' | 'file' | 'textarea';
+  type?: "text" | "email" | "password" | "number" | "file" | "textarea";
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   baseClassName?: string;
   inputClassName?: string;
   labelClassName?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
   disabled?: boolean;
   label?: string;
   id?: string;
@@ -23,13 +25,14 @@ type InputBaseProps = {
   name?: string;
   error?: string;
   forgotPassword?: boolean;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>;
+  register?: boolean;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">;
 
 const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
   (
     {
       placeholder,
-      type = 'text',
+      type = "text",
       startIcon,
       endIcon,
       baseClassName,
@@ -46,6 +49,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
       error,
       name,
       forgotPassword,
+      register,
       ...props
     },
     ref,
@@ -54,27 +58,29 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
     const [showPassword, setShowPassword] = useState(false);
 
     const renderInput = () => {
-      if (type === 'file') {
+      if (type === "file") {
         return (
           <>
             <button
               className={cn(
-                'w-full py-3 pr-4 rounded-lg border-2 transition-colors duration-300 bg-white text-gray-950 max-h-[48px] text-start',
-                !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
-                error ? 'border-destructive' : 'border-gray-100 focus:border-primary',
+                "w-full py-3 pr-4 rounded-lg border-2 transition-colors duration-300 bg-white text-gray-950 max-h-[48px] text-start",
+                !startIcon ? "pl-4" : endIcon && !startIcon ? "pl-4" : "pl-10",
+                error
+                  ? "border-destructive"
+                  : "border-gray-100 focus:border-primary",
                 inputClassName,
-                file ? 'text-gray-950' : 'text-gray-400',
+                file ? "text-gray-950" : "text-gray-400",
               )}
               disabled={disabled}
-              onClick={() => document.getElementById(id || 'file')?.click()}
+              onClick={() => document.getElementById(id || "file")?.click()}
               type="button"
             >
-              {file?.name || placeholder || 'Choose File'}
+              {file?.name || placeholder || "Choose File"}
             </button>
             <input
               type="file"
               className="hidden"
-              id={id || 'file'}
+              id={id || "file"}
               onChange={(e) => {
                 const selectedFile = e.target.files?.[0];
                 if (selectedFile) {
@@ -91,15 +97,17 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
         );
       }
 
-      if (type === 'textarea') {
+      if (type === "textarea") {
         return (
           <textarea
             className={cn(
-              'w-full py-3 pr-4 rounded-lg focus:outline-none border-2 transition-colors duration-300 bg-white text-gray-950',
-              !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
-              error ? 'border-destructive' : 'border-gray-100 focus:border-primary',
+              "w-full py-3 pr-4 rounded-lg focus:outline-none border-2 transition-colors duration-300 bg-white text-gray-950",
+              !startIcon ? "pl-4" : endIcon && !startIcon ? "pl-4" : "pl-10",
+              error
+                ? "border-destructive"
+                : "border-gray-100 focus:border-primary",
               inputClassName,
-              'max-h-none',
+              "max-h-none",
             )}
             placeholder={placeholder}
             onChange={onChange}
@@ -113,16 +121,19 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
         );
       }
 
-      const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
+      const inputType =
+        type === "password" ? (showPassword ? "text" : "password") : type;
 
       return (
         <input
           type={inputType}
           className={cn(
-            'w-full py-3 rounded-lg focus:outline-none border-2 transition-colors duration-300 bg-white text-gray-950 max-h-[48px]',
-            !startIcon ? 'pl-4' : endIcon && !startIcon ? 'pl-4' : 'pl-10',
-            type === 'password' ? 'pr-12' : 'pr-4',
-            error ? 'border-destructive' : 'border-gray-100 focus:border-primary',
+            "w-full py-3 rounded-lg focus:outline-none border-2 transition-colors duration-300 bg-white text-gray-950 max-h-[48px]",
+            !startIcon ? "pl-4" : endIcon && !startIcon ? "pl-4" : "pl-10",
+            type === "password" ? "pr-12" : "pr-4",
+            error
+              ? "border-destructive"
+              : "border-gray-100 focus:border-primary",
             inputClassName,
           )}
           placeholder={placeholder}
@@ -142,44 +153,62 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           {label && (
-            <label className={cn('text-zinc-800 text-sm font-medium', labelClassName)} htmlFor={id}>
+            <label
+              className={cn(
+                "text-foreground text-sm font-medium",
+                labelClassName,
+              )}
+              htmlFor={id}
+            >
               {label}
             </label>
           )}
-          {forgotPassword && type === 'password' && (
-            <Link href="/forgot-password" className="text-blue-500 text-sm font-normal">
+          {forgotPassword && type === "password" && (
+            <Link
+              href="/forgot-password"
+              className="text-blue-500 text-sm font-normal"
+            >
               Forgot Password ?
             </Link>
           )}
         </div>
-        <div className={cn('relative w-full', baseClassName)}>
+        <div className={cn("relative w-full", baseClassName)}>
           {renderInput()}
           {startIcon && (
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               {startIcon}
             </div>
           )}
-          {type === 'password' && (
+          {type === "password" && (
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 hover:text-gray-600"
             >
-              <Icon icon={showPassword ? 'lucide:eye-off' : 'akar-icons:eye'} className="size-5" />
+              <Icon
+                icon={showPassword ? "lucide:eye-off" : "akar-icons:eye"}
+                className="size-5"
+              />
             </button>
           )}
-          {endIcon && type !== 'password' && (
+          {endIcon && type !== "password" && (
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               {endIcon}
             </div>
           )}
         </div>
+        {forgotPassword && type === "password" && (
+          <Link href="/register" className="text-blue-500 text-sm font-normal ">
+            Daftar Peserta Magang ?
+          </Link>
+        )}
+
         {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
     );
   },
 );
 
-TextField.displayName = 'TextField';
+TextField.displayName = "TextField";
 
 export default TextField;
