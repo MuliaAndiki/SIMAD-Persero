@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
@@ -16,7 +16,7 @@ const envSchema = z.object({
   MAILERSEND_API_KEY: z.string(),
   MAILERSEND_FROM_EMAIL: z.string().email().optional(),
   MAILERSEND_FROM_NAME: z.string().optional(),
-  // Observability (OpenTelemetry / logging)
+  GOOGLE_CALENDER_API: z.string(),
   OTEL_ENDPOINT: z.string().url().optional(),
   OTEL_ENABLED: z.string().optional(),
   LOG_LEVEL: z.string().optional(),
@@ -25,7 +25,7 @@ const envSchema = z.object({
 const _env = envSchema.safeParse(process.env);
 
 if (!_env.success) {
-  console.error(' Invalid Env Variables:', _env.error.format());
+  console.error(" Invalid Env Variables:", _env.error.format());
   process.exit(1);
 }
 
