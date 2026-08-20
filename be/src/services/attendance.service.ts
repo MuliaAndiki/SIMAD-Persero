@@ -1,4 +1,5 @@
-import { AppError } from '@/http/error';
+import { AppError } from "@/http/error";
+import calendarService from "./calendar.service";
 import type {
   AttendanceExportQuery,
   AttendanceHistoryQuery,
@@ -6,7 +7,7 @@ import type {
   CheckInBody,
   CheckOutBody,
   OverrideAttendanceBody,
-} from '@/types/attendance.types';
+} from "@/types/attendance.types";
 import {
   AttendanceLogAction,
   AttendanceStatus,
@@ -15,11 +16,11 @@ import {
   OVERRIDE_ALLOWED_STATUSES,
   ViolationSeverity,
   ViolationType,
-} from '@/types/attendance.types';
-import { checkInsideGeofence } from '@/utils/geofence.util';
-import type { Decimal } from '@prisma/client/runtime/library';
-import ExcelJS from 'exceljs';
-import prisma from '../../prisma/client';
+} from "@/types/attendance.types";
+import { checkInsideGeofence } from "@/utils/geofence.util";
+import type { Decimal } from "@prisma/client/runtime/library";
+import ExcelJS from "exceljs";
+import prisma from "../../prisma/client";
 
 /**
  * Attendance service — 10 endpoints.
@@ -42,7 +43,7 @@ class AttendanceService {
     const internship = await prisma.internship.findFirst({
       where: {
         internProfile: { userId },
-        status: 'ACTIVE',
+        status: "ACTIVE",
         onboardingCompleted: true,
       },
       include: {
@@ -53,7 +54,7 @@ class AttendanceService {
     if (!internship) {
       throw new AppError(
         400,
-        'Tidak ada internship aktif. Pastikan status ACTIVE dan onboarding selesai.',
+        "Tidak ada internship aktif. Pastikan status ACTIVE dan onboarding selesai.",
       );
     }
     return internship;
@@ -99,19 +100,20 @@ class AttendanceService {
     const utc7 = new Date(now.getTime() + 7 * 60 * 60 * 1000);
     const currentMinutes = utc7.getUTCHours() * 60 + utc7.getUTCMinutes();
 
-    const startMinutes = windowStart.getUTCHours() * 60 + windowStart.getUTCMinutes();
+    const startMinutes =
+      windowStart.getUTCHours() * 60 + windowStart.getUTCMinutes();
     const endMinutes = windowEnd.getUTCHours() * 60 + windowEnd.getUTCMinutes();
 
     if (currentMinutes < startMinutes) {
       throw new AppError(
         400,
-        `${label} belum dimulai. Waktu mulai: ${String(windowStart.getUTCHours()).padStart(2, '0')}:${String(windowStart.getUTCMinutes()).padStart(2, '0')} WIB.`,
+        `${label} belum dimulai. Waktu mulai: ${String(windowStart.getUTCHours()).padStart(2, "0")}:${String(windowStart.getUTCMinutes()).padStart(2, "0")} WIB.`,
       );
     }
     if (currentMinutes > endMinutes) {
       throw new AppError(
         400,
-        `Waktu ${label} telah berakhir. Batas akhir: ${String(windowEnd.getUTCHours()).padStart(2, '0')}:${String(windowEnd.getUTCMinutes()).padStart(2, '0')} WIB.`,
+        `Waktu ${label} telah berakhir. Batas akhir: ${String(windowEnd.getUTCHours()).padStart(2, "0")}:${String(windowEnd.getUTCMinutes()).padStart(2, "0")} WIB.`,
       );
     }
   }
@@ -132,9 +134,12 @@ class AttendanceService {
 
     const utc7 = new Date(now.getTime() + 7 * 60 * 60 * 1000);
     const currentMinutes = utc7.getUTCHours() * 60 + utc7.getUTCMinutes();
-    const lateMinutes = lateAfter.getUTCHours() * 60 + lateAfter.getUTCMinutes();
+    const lateMinutes =
+      lateAfter.getUTCHours() * 60 + lateAfter.getUTCMinutes();
 
-    return currentMinutes > lateMinutes ? CheckInStatus.LATE : CheckInStatus.PRESENT;
+    return currentMinutes > lateMinutes
+      ? CheckInStatus.LATE
+      : CheckInStatus.PRESENT;
   }
 
   /**
@@ -191,23 +196,45 @@ class AttendanceService {
       },
     });
     if (existing?.checkInAt) {
-      throw new AppError(400, 'Anda sudah melakukan Check In hari ini.');
+      throw new AppError(400, "Anda sudah melakukan Check In hari ini.");
     }
 
-    // Weekend check
-    const dayOfWeek = todayDate.getDay(); // 0=Sun, 6=Sat
-    const setting = await this.getAttendanceSetting(internship.officeLocationId ?? '');
-    if ((dayOfWeek === 0 || dayOfWeek === 6) && !setting?.allowWeekend) {
-      throw new AppError(400, 'Absensi tidak diperbolehkan pada akhir pekan.');
+    // Check Non-Working Days (Weekend / Holiday)
+    const dateStr = todayDate.toISOString().slice(0, 10);
+    const dayStatus = await calendarService.getDayStatus(dateStr);
+    if (dayStatus.status === "WEEKEND") {
+      throw new AppError(
+        400,
+        "Absensi tidak dapat dilakukan pada hari non-kerja.",
+        "NON_WORKING_DAY",
+      );
+    }
+    if (dayStatus.status === "HOLIDAY") {
+      throw new AppError(
+        400,
+        "Absensi tidak dapat dilakukan pada hari libur.",
+        "HOLIDAY",
+      );
     }
 
+    const setting = await this.getAttendanceSetting(
+      internship.officeLocationId ?? "",
+    );
     // BR-CHECKIN-002/004/005: validate check-in time window
-    this.validateTimeWindow(now, setting?.checkInStart, setting?.checkInEnd, 'Check In');
+    this.validateTimeWindow(
+      now,
+      setting?.checkInStart,
+      setting?.checkInEnd,
+      "Check In",
+    );
 
     // BR-GEO-001/002: geofence validation
     const office = internship.officeLocation;
     if (!office?.latitude || !office?.longitude || !office.radiusMeter) {
-      throw new AppError(400, 'Lokasi kantor belum dikonfigurasi untuk geofence.');
+      throw new AppError(
+        400,
+        "Lokasi kantor belum dikonfigurasi untuk geofence.",
+      );
     }
 
     const geo = checkInsideGeofence(
@@ -238,7 +265,11 @@ class AttendanceService {
     }
 
     const fakeGps = body.fakeGpsDetected ?? false;
-    const checkInStatus = this.determineCheckInStatus(now, setting?.lateAfter, fakeGps);
+    const checkInStatus = this.determineCheckInStatus(
+      now,
+      setting?.lateAfter,
+      fakeGps,
+    );
     const attendanceStatus = this.deriveAttendanceStatus(checkInStatus, null);
 
     // Create or update attendance record
@@ -285,7 +316,7 @@ class AttendanceService {
             attendanceId: att.id,
             violationType: ViolationType.FAKE_GPS,
             severity: ViolationSeverity.HIGH,
-            description: 'Terdeteksi indikasi Fake GPS saat Check In.',
+            description: "Terdeteksi indikasi Fake GPS saat Check In.",
           },
         });
       }
@@ -297,7 +328,7 @@ class AttendanceService {
             attendanceId: att.id,
             violationType: ViolationType.LATE_ATTENDANCE,
             severity: ViolationSeverity.LOW,
-            description: 'Check In melebihi batas waktu yang ditentukan.',
+            description: "Check In melebihi batas waktu yang ditentukan.",
           },
         });
       }
@@ -325,6 +356,24 @@ class AttendanceService {
     const now = new Date();
     const { todayDate } = this.getTodayRange();
 
+    // Check Non-Working Days (Weekend / Holiday)
+    const dateStr = todayDate.toISOString().slice(0, 10);
+    const dayStatus = await calendarService.getDayStatus(dateStr);
+    if (dayStatus.status === "WEEKEND") {
+      throw new AppError(
+        400,
+        "Absensi tidak dapat dilakukan pada hari non-kerja.",
+        "NON_WORKING_DAY",
+      );
+    }
+    if (dayStatus.status === "HOLIDAY") {
+      throw new AppError(
+        400,
+        "Absensi tidak dapat dilakukan pada hari libur.",
+        "HOLIDAY",
+      );
+    }
+
     // BR-ATT-003: must have checked in
     const attendance = await prisma.attendance.findUnique({
       where: {
@@ -335,17 +384,24 @@ class AttendanceService {
       },
     });
     if (!attendance?.checkInAt) {
-      throw new AppError(400, 'Anda belum melakukan Check In hari ini.');
+      throw new AppError(400, "Anda belum melakukan Check In hari ini.");
     }
 
     // BR-ATT-002: only one check-out per day
     if (attendance.checkOutAt) {
-      throw new AppError(400, 'Anda sudah melakukan Check Out hari ini.');
+      throw new AppError(400, "Anda sudah melakukan Check Out hari ini.");
     }
 
     // BR-CHECKOUT-002/003: validate check-out time window
-    const setting = await this.getAttendanceSetting(internship.officeLocationId ?? '');
-    this.validateTimeWindow(now, setting?.checkOutStart, setting?.checkOutEnd, 'Check Out');
+    const setting = await this.getAttendanceSetting(
+      internship.officeLocationId ?? "",
+    );
+    this.validateTimeWindow(
+      now,
+      setting?.checkOutStart,
+      setting?.checkOutEnd,
+      "Check Out",
+    );
 
     // Geofence check for check-out
     const office = internship.officeLocation;
@@ -361,10 +417,15 @@ class AttendanceService {
     }
 
     // BR-CHECKOUT-005: calculate total work minutes
-    const totalWorkMinutes = Math.round((now.getTime() - attendance.checkInAt.getTime()) / 60_000);
+    const totalWorkMinutes = Math.round(
+      (now.getTime() - attendance.checkInAt.getTime()) / 60_000,
+    );
 
     const checkOutStatus = this.determineCheckOutStatus(false);
-    const attendanceStatus = this.deriveAttendanceStatus(attendance.checkInStatus, checkOutStatus);
+    const attendanceStatus = this.deriveAttendanceStatus(
+      attendance.checkInStatus,
+      checkOutStatus,
+    );
 
     const updated = await prisma.$transaction(async (tx) => {
       const att = await tx.attendance.update({
@@ -409,10 +470,11 @@ class AttendanceService {
   public async getMyAttendance(userId: string, query: AttendanceQuery) {
     const internship = await prisma.internship.findFirst({
       where: { internProfile: { userId } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
+
     if (!internship) {
-      throw new AppError(404, 'Internship tidak ditemukan.');
+      throw new AppError(404, "Internship tidak ditemukan.");
     }
 
     const page = query.page ?? 1;
@@ -427,26 +489,30 @@ class AttendanceService {
       const now = new Date();
       const year = query.year ?? now.getFullYear();
       const month = query.month ?? now.getMonth() + 1;
-      const start = new Date(`${year}-${String(month).padStart(2, '0')}-01`);
-      const end = new Date(year, month, 0); // last day of month
+      const start = new Date(
+        `${year}-${String(month).padStart(2, "0")}-01T00:00:00.000Z`,
+      );
+      const end = new Date(year, month, 0, 23, 59, 59, 999);
       where.attendanceDate = { gte: start, lte: end };
     }
 
-    const [data, total] = await Promise.all([
+    const [total, attendances] = await Promise.all([
+      prisma.attendance.count({ where }),
       prisma.attendance.findMany({
         where,
         include: {
-          attendanceLogs: { orderBy: { createdAt: 'asc' } },
+          attendanceLogs: {
+            orderBy: { createdAt: "asc" },
+          },
         },
-        orderBy: { attendanceDate: 'desc' },
+        orderBy: { attendanceDate: "asc" },
         skip,
         take: limit,
       }),
-      prisma.attendance.count({ where }),
     ]);
 
     return {
-      data: data.map((a: (typeof data)[number]) => this.serializeAttendance(a)),
+      data: attendances.map((a) => this.serializeAttendance(a)),
       meta: {
         page,
         limit,
@@ -462,14 +528,14 @@ class AttendanceService {
     const attendance = await prisma.attendance.findUnique({
       where: { id },
       include: {
-        attendanceLogs: { orderBy: { createdAt: 'asc' } },
+        attendanceLogs: { orderBy: { createdAt: "asc" } },
         attendanceOverrides: {
           include: {
             supervisor: { select: { id: true, fullName: true } },
           },
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
         },
-        attendanceViolations: { orderBy: { createdAt: 'desc' } },
+        attendanceViolations: { orderBy: { createdAt: "desc" } },
         internship: {
           include: {
             internProfile: {
@@ -485,11 +551,11 @@ class AttendanceService {
       },
     });
     if (!attendance) {
-      throw new AppError(404, 'Data absensi tidak ditemukan.');
+      throw new AppError(404, "Data absensi tidak ditemukan.");
     }
     // BR-ATT-OWN: INTERN hanya boleh melihat detail absensinya sendiri.
     if (userId && attendance.internship?.internProfile?.userId !== userId) {
-      throw new AppError(403, 'Anda tidak memiliki akses ke data absensi ini.');
+      throw new AppError(403, "Anda tidak memiliki akses ke data absensi ini.");
     }
     return this.serializeAttendanceDetail(attendance);
   }
@@ -499,10 +565,11 @@ class AttendanceService {
   public async getToday(userId: string) {
     const internship = await prisma.internship.findFirst({
       where: { internProfile: { userId } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
+
     if (!internship) {
-      throw new AppError(404, 'Internship tidak ditemukan.');
+      throw new AppError(404, "Internship tidak ditemukan.");
     }
 
     const { todayDate } = this.getTodayRange();
@@ -515,14 +582,11 @@ class AttendanceService {
         },
       },
       include: {
-        attendanceLogs: { orderBy: { createdAt: 'asc' } },
+        attendanceLogs: { orderBy: { createdAt: "asc" } },
       },
     });
 
-    if (!attendance) {
-      return null;
-    }
-    return this.serializeAttendance(attendance);
+    return attendance ? this.serializeAttendance(attendance) : null;
   }
 
   // ── 16.6 Attendance Summary ─────────────────────────────────────────
@@ -530,23 +594,29 @@ class AttendanceService {
   public async getSummary(userId: string, query: AttendanceQuery) {
     const internship = await prisma.internship.findFirst({
       where: { internProfile: { userId } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
+
     if (!internship) {
-      throw new AppError(404, 'Internship tidak ditemukan.');
+      throw new AppError(404, "Internship tidak ditemukan.");
     }
+
+    const where: Record<string, unknown> = {
+      internshipId: internship.id,
+    };
 
     const now = new Date();
     const year = query.year ?? now.getFullYear();
     const month = query.month ?? now.getMonth() + 1;
-    const start = new Date(`${year}-${String(month).padStart(2, '0')}-01`);
-    const end = new Date(year, month, 0);
+    const start = new Date(
+      `${year}-${String(month).padStart(2, "0")}-01T00:00:00.000Z`,
+    );
+    const end = new Date(year, month, 0, 23, 59, 59, 999);
+    where.attendanceDate = { gte: start, lte: end };
 
     const attendances = await prisma.attendance.findMany({
-      where: {
-        internshipId: internship.id,
-        attendanceDate: { gte: start, lte: end },
-      },
+      where,
+      select: { attendanceStatus: true },
     });
 
     const summary = {
@@ -557,6 +627,8 @@ class AttendanceService {
       absent: 0,
       invalid: 0,
       pendingReview: 0,
+      holiday: 0,
+      weekend: 0,
     };
 
     for (const a of attendances) {
@@ -578,6 +650,12 @@ class AttendanceService {
           break;
         case AttendanceStatus.PENDING_REVIEW:
           summary.pendingReview++;
+          break;
+        case "HOLIDAY":
+          summary.holiday++;
+          break;
+        case "WEEKEND":
+          summary.weekend++;
           break;
       }
     }
@@ -622,16 +700,21 @@ class AttendanceService {
         attendanceDate: todayDate,
       },
       include: {
-        attendanceLogs: { orderBy: { createdAt: 'asc' } },
+        attendanceLogs: { orderBy: { createdAt: "asc" } },
       },
     });
 
     const attendanceMap = new Map(
-      todayAttendances.map((a: (typeof todayAttendances)[number]) => [a.internshipId, a]),
+      todayAttendances.map((a: (typeof todayAttendances)[number]) => [
+        a.internshipId,
+        a,
+      ]),
     );
 
     return assignments.map((assignment: (typeof assignments)[number]) => {
-      const att = assignment.internship?.id ? attendanceMap.get(assignment.internship.id) : null;
+      const att = assignment.internship?.id
+        ? attendanceMap.get(assignment.internship.id)
+        : null;
       return {
         internship: {
           id: assignment.internship?.id,
@@ -645,7 +728,11 @@ class AttendanceService {
 
   // ── 16.8 Override Attendance ─────────────────────────────────────────
 
-  public async override(attendanceId: string, userId: string, body: OverrideAttendanceBody) {
+  public async override(
+    attendanceId: string,
+    userId: string,
+    body: OverrideAttendanceBody,
+  ) {
     const attendance = await prisma.attendance.findUnique({
       where: { id: attendanceId },
       include: {
@@ -659,7 +746,7 @@ class AttendanceService {
       },
     });
     if (!attendance) {
-      throw new AppError(404, 'Data absensi tidak ditemukan.');
+      throw new AppError(404, "Data absensi tidak ditemukan.");
     }
 
     // BR-OVERRIDE: supervisor can only override their own department's interns
@@ -668,14 +755,17 @@ class AttendanceService {
         (sa: { supervisorId: string | null }) => sa.supervisorId === userId,
       ) ?? false;
     if (!isSupervisor) {
-      throw new AppError(403, 'Anda hanya dapat override absensi peserta di departemen Anda.');
+      throw new AppError(
+        403,
+        "Anda hanya dapat override absensi peserta di departemen Anda.",
+      );
     }
 
     // BR-OVERRIDE-001: only PRESENT or INVALID
     if (!OVERRIDE_ALLOWED_STATUSES.includes(body.status as AttendanceStatus)) {
       throw new AppError(
         400,
-        `Status override harus salah satu dari: ${OVERRIDE_ALLOWED_STATUSES.join(', ')}.`,
+        `Status override harus salah satu dari: ${OVERRIDE_ALLOWED_STATUSES.join(", ")}.`,
       );
     }
 
@@ -729,7 +819,7 @@ class AttendanceService {
       const now = new Date();
       const year = query.year ?? now.getFullYear();
       const month = query.month ?? now.getMonth() + 1;
-      const start = new Date(`${year}-${String(month).padStart(2, '0')}-01`);
+      const start = new Date(`${year}-${String(month).padStart(2, "0")}-01`);
       const end = new Date(year, month, 0);
       where.attendanceDate = { gte: start, lte: end };
     }
@@ -750,9 +840,9 @@ class AttendanceService {
               department: { select: { id: true, name: true } },
             },
           },
-          attendanceLogs: { orderBy: { createdAt: 'asc' } },
+          attendanceLogs: { orderBy: { createdAt: "asc" } },
         },
-        orderBy: { attendanceDate: 'desc' },
+        orderBy: { attendanceDate: "desc" },
         skip,
         take: limit,
       }),
@@ -760,7 +850,9 @@ class AttendanceService {
     ]);
 
     return {
-      data: data.map((a: (typeof data)[number]) => this.serializeAttendanceWithIntern(a)),
+      data: data.map((a: (typeof data)[number]) =>
+        this.serializeAttendanceWithIntern(a),
+      ),
       meta: {
         page,
         limit,
@@ -780,12 +872,12 @@ class AttendanceService {
 
     // Role-based filtering
     const roles = user.roles ?? [];
-    if (roles.includes('HR_ADMIN')) {
+    if (roles.includes("HR_ADMIN")) {
       // HR_ADMIN can see all, apply optional department filter
       if (query.departmentId) {
         where.internship = { departmentId: query.departmentId };
       }
-    } else if (roles.includes('SUPERVISOR')) {
+    } else if (roles.includes("SUPERVISOR")) {
       // SUPERVISOR can see interns they supervise
       where.internship = {
         supervisorAssignments: {
@@ -795,20 +887,22 @@ class AttendanceService {
       if (query.departmentId) {
         (where.internship as any).departmentId = query.departmentId;
       }
-    } else if (roles.includes('INTERN')) {
+    } else if (roles.includes("INTERN")) {
       // INTERN can only see their own attendance
       where.internship = {
         internProfile: { userId: user.id },
       };
     } else {
-      throw new AppError(403, 'Anda tidak memiliki akses ke fitur ini.');
+      throw new AppError(403, "Anda tidak memiliki akses ke fitur ini.");
     }
 
     if (query.month || query.year) {
       const now = new Date();
       const year = query.year ?? now.getFullYear();
       const month = query.month ?? now.getMonth() + 1;
-      const start = new Date(`${year}-${String(month).padStart(2, '0')}-01T00:00:00.000Z`);
+      const start = new Date(
+        `${year}-${String(month).padStart(2, "0")}-01T00:00:00.000Z`,
+      );
       const end = new Date(year, month, 0, 23, 59, 59, 999);
       where.attendanceDate = { gte: start, lte: end };
     }
@@ -828,54 +922,54 @@ class AttendanceService {
           },
         },
       },
-      orderBy: { attendanceDate: 'desc' },
+      orderBy: { attendanceDate: "desc" },
     });
 
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Attendance History');
+    const worksheet = workbook.addWorksheet("Attendance History");
 
     worksheet.columns = [
-      { header: 'Tanggal', key: 'date', width: 15 },
-      { header: 'Nama Intern', key: 'intern', width: 25 },
-      { header: 'Email', key: 'email', width: 30 },
-      { header: 'Departemen', key: 'department', width: 25 },
-      { header: 'Kantor', key: 'office', width: 25 },
-      { header: 'Check In', key: 'checkIn', width: 20 },
-      { header: 'Check Out', key: 'checkOut', width: 20 },
-      { header: 'Status Check In', key: 'checkInStatus', width: 15 },
-      { header: 'Status Check Out', key: 'checkOutStatus', width: 15 },
-      { header: 'Status Kehadiran', key: 'status', width: 20 },
-      { header: 'Total Menit Kerja', key: 'totalWorkMinutes', width: 15 },
+      { header: "Tanggal", key: "date", width: 15 },
+      { header: "Nama Intern", key: "intern", width: 25 },
+      { header: "Email", key: "email", width: 30 },
+      { header: "Departemen", key: "department", width: 25 },
+      { header: "Kantor", key: "office", width: 25 },
+      { header: "Check In", key: "checkIn", width: 20 },
+      { header: "Check Out", key: "checkOut", width: 20 },
+      { header: "Status Check In", key: "checkInStatus", width: 15 },
+      { header: "Status Check Out", key: "checkOutStatus", width: 15 },
+      { header: "Status Kehadiran", key: "status", width: 20 },
+      { header: "Total Menit Kerja", key: "totalWorkMinutes", width: 15 },
     ];
 
     for (const a of data) {
       worksheet.addRow({
         date: a.attendanceDate.toISOString().slice(0, 10),
-        intern: a.internship?.internProfile?.user?.fullName ?? '-',
-        email: a.internship?.internProfile?.user?.email ?? '-',
-        department: a.internship?.department?.name ?? '-',
-        office: a.internship?.officeLocation?.name ?? '-',
+        intern: a.internship?.internProfile?.user?.fullName ?? "-",
+        email: a.internship?.internProfile?.user?.email ?? "-",
+        department: a.internship?.department?.name ?? "-",
+        office: a.internship?.officeLocation?.name ?? "-",
         checkIn: a.checkInAt
           ? `${new Date(a.checkInAt.getTime() + 7 * 60 * 60 * 1000)
               .toISOString()
               .slice(11, 16)} WIB`
-          : '-',
+          : "-",
         checkOut: a.checkOutAt
           ? `${new Date(a.checkOutAt.getTime() + 7 * 60 * 60 * 1000)
               .toISOString()
               .slice(11, 16)} WIB`
-          : '-',
-        checkInStatus: a.checkInStatus ?? '-',
-        checkOutStatus: a.checkOutStatus ?? '-',
-        status: a.attendanceStatus ?? '-',
+          : "-",
+        checkInStatus: a.checkInStatus ?? "-",
+        checkOutStatus: a.checkOutStatus ?? "-",
+        status: a.attendanceStatus ?? "-",
         totalWorkMinutes: a.totalWorkMinutes ?? 0,
       });
     }
 
     worksheet.getRow(1).font = { bold: true };
     worksheet.getRow(1).alignment = {
-      vertical: 'middle',
-      horizontal: 'center',
+      vertical: "middle",
+      horizontal: "center",
     };
 
     const buffer = await workbook.xlsx.writeBuffer();
@@ -934,6 +1028,56 @@ class AttendanceService {
         createdAt: v.createdAt,
       })),
     };
+  }
+
+  public async generateInitialAttendances(
+    tx: any,
+    internshipId: string,
+    startDate: Date,
+    endDate: Date,
+  ) {
+    let current = new Date(startDate);
+    current.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(0, 0, 0, 0);
+
+    const newAttendances = [];
+
+    while (current <= end) {
+      const dateStr = current.toISOString().slice(0, 10);
+      const dayStatus = await calendarService.getDayStatus(dateStr);
+
+      let status: string = AttendanceStatus.ABSENT;
+      let checkInStatus: string | null = AttendanceStatus.ABSENT;
+      let checkOutStatus: string | null = AttendanceStatus.ABSENT;
+      let notes: string | null = null;
+
+      if (dayStatus.status === "WEEKEND" || dayStatus.status === "HOLIDAY") {
+        status = dayStatus.status;
+        checkInStatus = null;
+        checkOutStatus = null;
+        notes = dayStatus.title;
+      }
+
+      newAttendances.push({
+        internshipId,
+        attendanceDate: new Date(dateStr),
+        checkInStatus,
+        checkOutStatus,
+        attendanceStatus: status,
+        totalWorkMinutes: 0,
+        notes,
+      });
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    if (newAttendances.length > 0) {
+      await tx.attendance.createMany({
+        data: newAttendances,
+        skipDuplicates: true,
+      });
+    }
   }
 
   private serializeAttendanceWithIntern(a: any) {
