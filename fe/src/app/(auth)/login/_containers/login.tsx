@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { LoginSection } from '@/components/page/auth/login/LoginSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import { useApi } from '@/hooks/useService/useApi';
-import type { LoginBody } from '@/types/api/auth.types';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { useState } from 'react';
+import { LoginSection } from "@/components/page/auth/login/LoginSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useApi } from "@/hooks/useService/useApi";
+import type { LoginBody } from "@/types/api/auth.types";
+
+import { useState } from "react";
 
 export default function LoginContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
   const [formLogin, setFormLogin] = useState<LoginBody>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -36,28 +36,27 @@ export default function LoginContainer() {
 
   const handleGoogleError = () => {
     ns.alert.toast({
-      title: 'Gagal login dengan Google',
-      message: 'Tidak dapat menyelesaikan login dengan Google. Silakan coba lagi.',
-      icon: 'error',
+      title: "Gagal login dengan Google",
+      message:
+        "Tidak dapat menyelesaikan login dengan Google. Silakan coba lagi.",
+      icon: "error",
     });
   };
 
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ''}>
-      <LoginSection
-        state={{
-          formLogin,
-          showPassword,
-          isPending: login.isPending || googleLogin.isPending,
-        }}
-        service={{
-          handleSubmit,
-          onFormChange: handleFormChange,
-          setShowPassword,
-          handleGoogleLogin,
-          handleGoogleError,
-        }}
-      />
-    </GoogleOAuthProvider>
+    <LoginSection
+      state={{
+        formLogin,
+        showPassword,
+        isPending: login.isPending || googleLogin.isPending,
+      }}
+      service={{
+        handleSubmit,
+        onFormChange: handleFormChange,
+        setShowPassword,
+        handleGoogleLogin,
+        handleGoogleError,
+      }}
+    />
   );
 }
