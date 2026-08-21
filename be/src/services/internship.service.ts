@@ -646,19 +646,44 @@ class InternshipService {
 
   // ----- 15.9  Update InternProfile --------
   public async internProfile(userId: string, payload: PickMergeInternship) {
+    const existingProfile = await prisma.internProfile.findUnique({
+      where: { userId },
+    });
+
     const [queryInstitutionMajor, queryInternProfile] =
       await prisma.$transaction(async (tx) => {
-        const newMayor = await tx.institutionMajor.create({
-          data: {
+        const major = await tx.institutionMajor.upsert({
+          where: {
+            // Note: Since name+institutionId might not have a UNIQUE constraint,
+            // we will search via first or simply default to creating if we can't find one reliably.
+            // A safer upsert based on existing profile majorId:
+            id: existingProfile?.majorId ?? "",
+          },
+          update: {
             name: payload.name,
             institutionId: payload.institutionId,
           },
-          select: {
-            id: true,
+          create: {
+            name: payload.name,
+            institutionId: payload.institutionId,
           },
         });
-        const newProfile = await tx.internProfile.create({
-          data: {
+
+        const newProfile = await tx.internProfile.upsert({
+          where: { userId },
+          update: {
+            phone: payload.phone,
+            studentNumber: payload.studentNumber,
+            address: payload.address,
+            bio: payload.bio,
+            birthDate: payload.birthDate,
+            birthPlace: payload.birthPlace,
+            emergencyContact: payload.emergencyContact,
+            gender: payload.gender,
+            institutionId: payload.institutionId,
+            majorId: major.id,
+          },
+          create: {
             phone: payload.phone,
             studentNumber: payload.studentNumber,
             address: payload.address,
@@ -669,10 +694,10 @@ class InternshipService {
             gender: payload.gender,
             userId: userId,
             institutionId: payload.institutionId,
-            majorId: newMayor.id,
+            majorId: major.id,
           },
         });
-        return [newMayor, newProfile];
+        return [major, newProfile];
       });
     return [queryInstitutionMajor, queryInternProfile];
   }
