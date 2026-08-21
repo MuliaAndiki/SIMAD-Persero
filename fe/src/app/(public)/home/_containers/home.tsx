@@ -1,20 +1,32 @@
 "use client";
-import { themeConfig } from "@/configs/theme.config";
 import NavLayout from "@/core/layouts/nav.layout";
-import { useTheme } from "@/core/providers/theme.provider";
+import { LandingSection } from "@/components/page/landing/LandingSection";
+import React, { useEffect } from "react";
+import Lenis from "lenis";
 
 export default function ContainerHome() {
-  const { theme } = useTheme();
+  // Setup smooth scrolling with Lenis because we will heavily use GSAP
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   return (
     <NavLayout>
-      <main
-        className={`container  mx-auto bg-[${themeConfig[theme].primary.background}]`}
-      >
-        <div className="flex flex-col items-center justify-center h-screen">
-          <h1 className="text-4xl font-bold">Home</h1>
-        </div>
-      </main>
+      <LandingSection />
     </NavLayout>
   );
 }
