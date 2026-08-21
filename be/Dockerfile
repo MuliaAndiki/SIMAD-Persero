@@ -2,12 +2,13 @@ FROM oven/bun:1.1.45 AS build
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json bun.lock ./
+COPY prisma ./prisma/
 RUN bun install
 
 COPY . .
 
-RUN bunx prisma generate
+RUN bun run prisma:generate
 
 EXPOSE 5000
 
