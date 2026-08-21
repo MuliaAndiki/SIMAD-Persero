@@ -1,12 +1,16 @@
-import { AppError } from '@/http/error';
-import FileService from '@/services/file.service';
-import type { AuthUser } from '@/types/auth.types';
-import type { UploadFileInput } from '@/types/file.types';
-import type { ChangePasswordBody, ProfileResponse, UpdateProfileBody } from '@/types/user.types';
-import { DEFAULT_ROLE_CODE, validatePasswordPolicy } from '@/utils/auth.util';
-import { ALLOWED_PHOTO_MIME_TYPES, MAX_FILE_SIZE } from '@/utils/storage.util';
-import bcryptjs from 'bcryptjs';
-import prisma from '../../prisma/client';
+import { AppError } from "@/http/error";
+import FileService from "@/services/file.service";
+import type { AuthUser } from "@/types/auth.types";
+import type { UploadFileInput } from "@/types/file.types";
+import type {
+  ChangePasswordBody,
+  ProfileResponse,
+  UpdateProfileBody,
+} from "@/types/user.types";
+import { DEFAULT_ROLE_CODE, validatePasswordPolicy } from "@/utils/auth.util";
+import { ALLOWED_PHOTO_MIME_TYPES, MAX_FILE_SIZE } from "@/utils/storage.util";
+import bcryptjs from "bcryptjs";
+import prisma from "../../prisma/client";
 
 /**
  * Service layer modul User.
@@ -26,7 +30,7 @@ class UserService {
     });
 
     if (!dbUser || dbUser.deletedAt) {
-      throw new AppError(404, 'Account not found');
+      throw new AppError(404, "Account not found");
     }
 
     const role = dbUser.userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE;
@@ -50,7 +54,7 @@ class UserService {
   public async updateProfile(userId: string, input: UpdateProfileBody) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.deletedAt) {
-      throw new AppError(404, 'Account not found');
+      throw new AppError(404, "Account not found");
     }
 
     const data: Record<string, unknown> = {};
@@ -58,7 +62,7 @@ class UserService {
     if (input.fullName !== undefined) {
       const fullName = input.fullName.trim();
       if (!fullName) {
-        throw new AppError(400, 'Full name is required');
+        throw new AppError(400, "Full name is required");
       }
       data.fullName = fullName;
     }
@@ -66,7 +70,7 @@ class UserService {
     if (input.phone !== undefined) {
       const phone = input.phone.trim();
       if (!phone) {
-        throw new AppError(400, 'Phone is required');
+        throw new AppError(400, "Phone is required");
       }
 
       // Nomor telepon disimpan di tabel intern_profiles (hanya milik intern).
@@ -74,7 +78,7 @@ class UserService {
         where: { userId },
       });
       if (!profile) {
-        throw new AppError(422, 'User profile not found');
+        throw new AppError(422, "User profile not found");
       }
 
       // Aturan bisnis: nomor telepon harus unik.
@@ -82,7 +86,7 @@ class UserService {
         where: { phone, userId: { not: userId } },
       });
       if (existingPhone) {
-        throw new AppError(409, 'Phone number already used');
+        throw new AppError(409, "Phone number already used");
       }
 
       await prisma.internProfile.update({ where: { userId }, data: { phone } });
@@ -98,12 +102,14 @@ class UserService {
   // POST /users/profile/photo
   public async uploadPhoto(user: AuthUser, file: UploadFileInput) {
     if (
-      !ALLOWED_PHOTO_MIME_TYPES.includes(file.mimeType as (typeof ALLOWED_PHOTO_MIME_TYPES)[number])
+      !ALLOWED_PHOTO_MIME_TYPES.includes(
+        file.mimeType as (typeof ALLOWED_PHOTO_MIME_TYPES)[number],
+      )
     ) {
-      throw new AppError(422, 'Invalid photo type. Allowed: JPG, JPEG, PNG');
+      throw new AppError(422, "Invalid photo type. Allowed: JPG, JPEG, PNG");
     }
     if (file.size > MAX_FILE_SIZE) {
-      throw new AppError(422, 'Photo size exceeds the 5 MB limit');
+      throw new AppError(422, "Photo size exceeds the 5 MB limit");
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -111,7 +117,7 @@ class UserService {
       include: { avatarFile: true },
     });
     if (!dbUser || dbUser.deletedAt) {
-      throw new AppError(404, 'Account not found');
+      throw new AppError(404, "Account not found");
     }
 
     const uploaded = await FileService.upload(user.id, file);
@@ -133,15 +139,18 @@ class UserService {
   public async changePassword(userId: string, body: ChangePasswordBody) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user || user.deletedAt) {
-      throw new AppError(404, 'Account not found');
+      throw new AppError(404, "Account not found");
     }
     if (!user.password) {
-      throw new AppError(400, 'Password is not set for this account');
+      throw new AppError(400, "Password is not set for this account");
     }
 
-    const validPassword = await bcryptjs.compare(body.oldPassword, user.password);
+    const validPassword = await bcryptjs.compare(
+      body.oldPassword,
+      user.password,
+    );
     if (!validPassword) {
-      throw new AppError(400, 'Old password is incorrect');
+      throw new AppError(400, "Old password is incorrect");
     }
 
     const policyError = validatePasswordPolicy(body.newPassword);
@@ -150,7 +159,10 @@ class UserService {
     }
 
     if (body.oldPassword === body.newPassword) {
-      throw new AppError(400, 'New password must be different from the old password');
+      throw new AppError(
+        400,
+        "New password must be different from the old password",
+      );
     }
 
     const hashedPassword = await bcryptjs.hash(body.newPassword, 10);

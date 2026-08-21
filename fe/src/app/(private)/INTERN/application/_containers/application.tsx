@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { ApplicationSection } from '@/components/page/application/ApplicationSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import { useApi } from '@/hooks/useService/useApi';
-import { useEffect, useRef } from 'react';
+import { ApplicationSection } from "@/components/page/application/ApplicationSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useApi } from "@/hooks/useService/useApi";
+import { useEffect, useRef } from "react";
 
 /**
  * Container untuk modul Internship Application (untuk INTERN).
@@ -20,15 +20,18 @@ export default function ApplicationContainer() {
   // Profil intern belum lengkap (422 "Intern profile not found ...") —
   // arahkan ke halaman profil agar user melengkapi data terlebih dahulu.
   useEffect(() => {
-    if (!redirectedRef.current && myApps.error?.message?.includes('Intern profile not found')) {
+    if (
+      !redirectedRef.current &&
+      myApps.error?.message?.includes("Intern profile not found")
+    ) {
       redirectedRef.current = true;
       ns.alert.toast({
-        title: 'Lengkapi Profil Terlebih Dahulu',
+        title: "Lengkapi Profil Terlebih Dahulu",
         message:
-          'Profil intern belum lengkap. Silakan lengkapi profil Anda sebelum mengajukan magang.',
-        icon: 'warning',
+          "Profil intern belum lengkap. Silakan lengkapi profil Anda sebelum mengajukan magang.",
+        icon: "warning",
       });
-      ns.router.replace('/INTERN/dashboard/profile');
+      ns.router.replace("/INTERN/profile");
     }
   }, [myApps.error?.message, ns.alert, ns.router]);
 
@@ -42,7 +45,7 @@ export default function ApplicationContainer() {
   // Handle uploading file first
   const handleUploadFile = async (file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
       const res = await uploadFileMutation.mutateAsync(formData);
@@ -87,11 +90,11 @@ export default function ApplicationContainer() {
 
   const handleSubmitDraft = async (id: string) => {
     const confirmed = await ns.alert.confirm({
-      title: 'Kirim Pengajuan?',
-      icon: 'question',
+      title: "Kirim Pengajuan?",
+      icon: "question",
       deskripsi:
-        'Setelah diajukan, detail pengajuan tidak dapat diubah lagi sampai direview oleh HR.',
-      confirmButtonText: 'Kirim Sekarang',
+        "Setelah diajukan, detail pengajuan tidak dapat diubah lagi sampai direview oleh HR.",
+      confirmButtonText: "Kirim Sekarang",
     });
     if (!confirmed) return;
 
