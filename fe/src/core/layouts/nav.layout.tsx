@@ -1,5 +1,5 @@
-import AppFooter from '../components/app-footer';
-import AppHeader from '../components/app-header';
+import AppFooter from "../components/app-footer";
+import AppHeader from "../components/app-header";
 
 export default function NavLayout({ children }: { children: React.ReactNode }) {
   return (

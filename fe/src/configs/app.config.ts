@@ -60,15 +60,16 @@ export type PropsParams = {
 };
 
 export const appConfig: AppConfig = {
-  name: "App",
-  description: "App",
+  name: "SIMAD",
+  description: "Sistem Informasi Manajemen Magang & Absensi Digital.",
   logo: "/images/logos.png",
   metadata: {
-    title: "App",
-    description: "App",
-    keywords: ["App"],
-    author: "App",
-    image: "App",
+    title: "SIMAD | Sistem Absensi Magang Digital",
+    description:
+      "Sistem Informasi Manajemen Magang & Absensi Digital untuk perusahaan dan institusi.",
+    keywords: ["SIMAD", "Magang", "Absensi", "Digital", "Sistem Informasi"],
+    author: "SIMAD Team",
+    image: "/images/logos.png",
   },
   social_media: {
     twitter: {
@@ -107,14 +108,29 @@ interface NavigationMenuConfig {
 export const navigationMenuConfig: NavigationMenuConfig = {
   items: [
     {
-      title: "Home",
-      href: "/",
-      description: "Home",
+      title: "Tentang",
+      href: "#problem",
+      description: "Tentang masalah dan solusi SIMAD.",
     },
     {
-      title: "masuk",
-      href: "/login",
-      description: "masuk",
+      title: "Cara Kerja",
+      href: "#workflow",
+      description: "Mekanisme pengajuan hingga sertifikasi.",
+    },
+    {
+      title: "Fitur",
+      href: "#features",
+      description: "Fitur-fitur unggulan SIMAD.",
+    },
+    {
+      title: "Absensi",
+      href: "#attendance",
+      description: "Sistem absensi geofencing.",
+    },
+    {
+      title: "Sertifikat",
+      href: "#certificate",
+      description: "Penerbitan e-certificate.",
     },
   ],
 };

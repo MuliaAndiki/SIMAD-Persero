@@ -7,7 +7,8 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/atoms/navigation-menu";
-import { navigationMenuConfig } from "@/configs/app.config";
+import { appConfig, navigationMenuConfig } from "@/configs/app.config";
+import { Button } from "@/components/atoms/button";
 // import UserDropdown from './user.dropdown';
 import NotificationDropdownContainer from "@/core/containers/notification.dropdown.container";
 import { cn } from "@/utils/classname";
@@ -43,31 +44,35 @@ export default function AppHeader() {
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-4">
           {/* Company Logo */}
-          <Link href="/">
-            <Image src="/images/logos.png" alt="Logo" width={40} height={40} />
+          <Link href="/" className="flex items-center gap-2">
+            <Image src={appConfig.logo} alt="Logo" width={40} height={40} />
+            <span className="font-bold text-lg hidden sm:inline-block">
+              {appConfig.name}
+            </span>
           </Link>
-
-          <NavigationMenu>
-            <NavigationMenuList>
-              {navigationMenuConfig?.items?.map((item) => (
-                <NavigationMenuItem key={item.title}>
-                  <NavigationMenuLink
-                    href={item.href}
-                    className={navigationMenuTriggerStyle()}
-                  >
-                    {item.title}
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
         </div>
+        <NavigationMenu className="hidden md:flex">
+          <NavigationMenuList>
+            {navigationMenuConfig?.items?.map((item) => (
+              <NavigationMenuItem key={item.title}>
+                <NavigationMenuLink
+                  href={item.href}
+                  className={navigationMenuTriggerStyle()}
+                >
+                  {item.title}
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
-          <LanguageDropdown />
-          <NotificationDropdownContainer />
-          {/* <UserDropdown /> */}
+          {/* <LanguageDropdown />
+          <NotificationDropdownContainer /> */}
+          <Link href="/login">
+            <Button className="rounded-full px-6">Masuk</Button>
+          </Link>
         </div>
       </div>
     </nav>
