@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { Card } from '@/components/atoms/card';
+import { Card } from "@/components/atoms/card";
 import {
   ApplicationApproveForm,
   type ApproveApplicationFormField,
   type ApproveApplicationFormState,
-} from '@/components/organisms/application/ApplicationApproveForm';
+} from "@/components/organisms/application/ApplicationApproveForm";
 import {
   ApplicationRejectForm,
   type RejectApplicationFormField,
   type RejectApplicationFormState,
-} from '@/components/organisms/application/ApplicationRejectForm';
-import { ApplicationReviewDetail } from '@/components/organisms/application/ApplicationReviewDetail';
-import type { ApplicationResponse } from '@/types/api/application.types';
-import type { DepartmentResponse } from '@/types/api/department.types';
-import type { OfficeResponse } from '@/types/api/office.types';
-import type { SupervisorResponse } from '@/types/api/supervisor.types';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+} from "@/components/organisms/application/ApplicationRejectForm";
+import { ApplicationReviewDetail } from "@/components/organisms/application/ApplicationReviewDetail";
+import type { ApplicationResponse } from "@/types/api/application.types";
+import type { DepartmentResponse } from "@/types/api/department.types";
+import type { OfficeResponse } from "@/types/api/office.types";
+import type { SupervisorResponse } from "@/types/api/supervisor.types";
+import { AlertCircle, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
-export type ApplicationReviewMode = 'view' | 'approve' | 'reject';
+export type ApplicationReviewMode = "view" | "approve" | "reject";
 
 export interface ApplicationReviewSectionState {
   isPending: boolean;
@@ -40,8 +40,14 @@ export interface ApplicationReviewSectionActions {
   onOpenApprove: () => void;
   onOpenReject: () => void;
   onBackToView: () => void;
-  onApproveFieldChange: (field: ApproveApplicationFormField, value: string) => void;
-  onRejectFieldChange: (field: RejectApplicationFormField, value: string) => void;
+  onApproveFieldChange: (
+    field: ApproveApplicationFormField,
+    value: string,
+  ) => void;
+  onRejectFieldChange: (
+    field: RejectApplicationFormField,
+    value: string,
+  ) => void;
   onSubmitApprove: () => void | Promise<void>;
   onSubmitReject: () => void | Promise<void>;
 }
@@ -51,19 +57,24 @@ export interface ApplicationReviewSectionProps {
   actions: ApplicationReviewSectionActions;
 }
 
-export function ApplicationReviewSection({ state, actions }: ApplicationReviewSectionProps) {
+export function ApplicationReviewSection({
+  state,
+  actions,
+}: ApplicationReviewSectionProps) {
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-3">
         <Link
-          href="/HR_ADMIN/dashboard/applications"
+          href="/HR_ADMIN/applications"
           className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="size-4" />
           <span>Kembali ke Daftar Pengajuan</span>
         </Link>
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">Detail Pengajuan Magang</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Detail Pengajuan Magang
+          </h1>
           <p className="text-sm text-muted-foreground">
             Review dan berikan keputusan untuk pengajuan ini.
           </p>
@@ -82,7 +93,7 @@ export function ApplicationReviewSection({ state, actions }: ApplicationReviewSe
         </div>
       ) : state.detail ? (
         <Card className="p-4 sm:p-6 overflow-x-auto">
-          {state.mode === 'approve' ? (
+          {state.mode === "approve" ? (
             <ApplicationApproveForm
               departments={state.departments}
               offices={state.offices}
@@ -93,7 +104,7 @@ export function ApplicationReviewSection({ state, actions }: ApplicationReviewSe
               onBack={actions.onBackToView}
               onSubmit={actions.onSubmitApprove}
             />
-          ) : state.mode === 'reject' ? (
+          ) : state.mode === "reject" ? (
             <ApplicationRejectForm
               form={state.rejectForm}
               isSubmitting={state.isRejecting}
