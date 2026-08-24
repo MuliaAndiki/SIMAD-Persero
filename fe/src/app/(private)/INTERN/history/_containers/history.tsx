@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from "react";
 
-import { HistorySection } from '@/components/page/intern/HistorySection';
-import { useApi } from '@/hooks/useService/useApi';
-import type { AttendanceResponse } from '@/types/api/attendance.types';
-import type { InternshipResponse } from '@/types/api/internship.types';
+import { HistorySection } from "@/components/page/intern/HistorySection";
+import { useApi } from "@/hooks/useService/useApi";
+import type { AttendanceResponse } from "@/types/api/attendance.types";
+import type { InternshipResponse } from "@/types/api/internship.types";
 
 /**
  * Container halaman riwayat absensi intern.
@@ -24,7 +24,9 @@ export default function InternHistoryContainer() {
   const internship = api.internship.query.my();
 
   // Backend GET /internships/me mengembalikan array; tipe FE masih tunggal.
-  const internshipData: InternshipResponse | null = Array.isArray(internship.data)
+  const internshipData: InternshipResponse | null = Array.isArray(
+    internship.data,
+  )
     ? ((internship.data as InternshipResponse[])[0] ?? null)
     : (internship.data ?? null);
 
@@ -72,6 +74,7 @@ export default function InternHistoryContainer() {
         records: myRecords,
         internshipStart: internshipData?.actualStartDate,
         internshipEnd: internshipData?.actualEndDate,
+        internshipStatus: internshipData?.status,
       }}
       service={{
         onPrevMonth: handlePrevMonth,
