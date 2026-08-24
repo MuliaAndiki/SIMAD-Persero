@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-import { Button } from '@/components/atoms/button';
+import { Button } from "@/components/atoms/button";
 import {
   Command,
   CommandEmpty,
@@ -8,10 +8,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/atoms/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/atoms/popover';
-import type { InstitutionResponse } from '@/types/api/institution.types';
-import { Building2, ChevronsUpDown } from 'lucide-react';
+} from "@/components/atoms/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/atoms/popover";
+import type { InstitutionResponse } from "@/types/api/institution.types";
+import { Building2, ChevronsUpDown } from "lucide-react";
 
 export function InstitutionCombobox({
   institutions,
@@ -37,20 +41,25 @@ export function InstitutionCombobox({
           className="h-[42px] w-full justify-start border-2 border-gray-100 rounded-lg px-4 font-normal text-gray-800"
         >
           {selected ? (
-            <span className="flex items-center gap-2">
-              <Building2 className="size-4 shrink-0 text-muted-foreground" />
+            <span className="flex items-center gap-2 text-foreground">
+              <Building2 className="size-4 shrink-0 " />
               {selected.name}
               {selected.city ? (
                 <span className="text-muted-foreground">— {selected.city}</span>
               ) : null}
             </span>
           ) : (
-            <span className="text-muted-foreground">Cari & pilih institusi…</span>
+            <span className="text-muted-foreground">
+              Cari & pilih institusi…
+            </span>
           )}
           <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[min(28rem,calc(100vw-2rem))] p-0">
+      <PopoverContent
+        align="start"
+        className="w-[min(28rem,calc(100vw-2rem))] p-0"
+      >
         <Command>
           <CommandInput placeholder="Cari nama institusi…" />
           <CommandList>
@@ -67,11 +76,11 @@ export function InstitutionCombobox({
                   className="cursor-pointer"
                 >
                   <Building2 className="size-4" />
-                  <span>{institution.name}</span>
+                  <span className="text-foreground">{institution.name}</span>
                   {institution.province ? (
-                    <span className="text-muted-foreground">
+                    <span className="">
                       — {institution.province}
-                      {institution.city ? `, ${institution.city}` : ''}
+                      {institution.city ? `, ${institution.city}` : ""}
                     </span>
                   ) : null}
                 </CommandItem>

@@ -340,6 +340,9 @@ export function useCreateInternProfile() {
         title: res.message,
         message: res.message,
         icon: "success",
+        onVoid: () => {
+          ns.router.replace("/INTERN/profile");
+        },
       });
     },
     onError: (err) => {
