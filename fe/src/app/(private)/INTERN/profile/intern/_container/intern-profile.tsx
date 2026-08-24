@@ -66,15 +66,16 @@ export default function InternProfileContainer() {
 
     const payload = {
       ...formApplication,
-      institutionId,
+      institutionId: institutionId || undefined,
+      majorId: formApplication.majorId || undefined,
       userId: formApplication.userId || userId,
     } as any;
 
     // Filter out empty strings for UUID properties so backend doesn't crash
     if (!payload.id) delete payload.id;
-    if (!payload.majorId) delete payload.majorId;
+    // if (!payload.majorId) delete payload.majorId; // Handled by optional chaining
 
-    console.log("ini adalah payload", payload);
+    // console.log("ini adalah payload", payload);
 
     createProfile.mutate(payload);
   };
