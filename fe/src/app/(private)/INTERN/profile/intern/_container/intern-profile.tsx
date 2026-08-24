@@ -63,11 +63,18 @@ export default function InternProfileContainer() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!userId) return;
-    createProfile.mutate({
+
+    const payload = {
       ...formApplication,
       institutionId,
       userId: formApplication.userId || userId,
-    });
+    } as any;
+
+    // Filter out empty strings for UUID properties so backend doesn't crash
+    if (!payload.id) delete payload.id;
+    if (!payload.majorId) delete payload.majorId;
+
+    createProfile.mutate(payload);
   };
 
   return (
