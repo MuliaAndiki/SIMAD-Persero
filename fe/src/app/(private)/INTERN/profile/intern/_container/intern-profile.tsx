@@ -60,9 +60,14 @@ export default function InternProfileContainer() {
     setInstitutionId(profile.institutionId ?? "");
   }, [myProfile.data]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!userId) return;
-    createProfile.mutate(formApplication);
+    createProfile.mutate({
+      ...formApplication,
+      institutionId,
+      userId: formApplication.userId || userId,
+    });
   };
 
   return (

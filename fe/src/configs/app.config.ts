@@ -1,4 +1,5 @@
 import {
+  Award,
   BarChart3,
   BriefcaseBusiness,
   Building2,
@@ -176,6 +177,13 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
     subMenu: [],
     requiresInternship: true,
   },
+  {
+    name: "Sertifikat",
+    url: "/INTERN/certificate",
+    icon: Award,
+    subMenu: [],
+    requiresInternship: true,
+  },
   { name: "Profil", url: "/INTERN/profile", icon: User, subMenu: [] },
 ];
 
@@ -228,6 +236,12 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
     name: "Keterampilan",
     url: "/HR_ADMIN/skills",
     icon: Sparkles,
+    subMenu: [],
+  },
+  {
+    name: "Sertifikat",
+    url: "/HR_ADMIN/certificate-setting",
+    icon: Award,
     subMenu: [],
   },
   {
