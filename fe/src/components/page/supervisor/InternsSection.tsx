@@ -1,13 +1,23 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card';
-import { AttendanceStatusBadge } from '@/components/organisms/attendance/AttendanceStatusBadge';
-import Api from '@/services/props.service';
-import type { AttendanceSupervisorRow } from '@/types/api/attendance.types';
-import { AlertCircle, CalendarCheck2, Download, UsersRound } from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import { AttendanceStatusBadge } from "@/components/organisms/attendance/AttendanceStatusBadge";
+import Api from "@/services/props.service";
+import type { AttendanceSupervisorRow } from "@/types/api/attendance.types";
+import {
+  AlertCircle,
+  CalendarCheck2,
+  Download,
+  UsersRound,
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 export interface InternsSectionState {
   isPending: boolean;
@@ -38,7 +48,7 @@ export function InternsSection({ state, service }: InternsSectionProps) {
       setIsExporting(true);
       await Api.Attendance.DownloadExcel();
     } catch (error) {
-      console.error('Failed to export:', error);
+      console.error("Failed to export:", error);
     } finally {
       setIsExporting(false);
     }
@@ -48,15 +58,18 @@ export function InternsSection({ state, service }: InternsSectionProps) {
     <section className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">Peserta Bimbingan</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            Peserta Bimbingan
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Daftar peserta magang yang ditugaskan kepada Anda beserta status absensi hari ini.
+            Daftar peserta magang yang ditugaskan kepada Anda beserta status
+            absensi hari ini.
           </p>
         </header>
 
         <Button variant="outline" onClick={handleExport} disabled={isExporting}>
           <Download className="mr-2 size-4" />
-          {isExporting ? 'Mengekspor...' : 'Export Excel'}
+          {isExporting ? "Mengekspor..." : "Export Excel"}
         </Button>
       </div>
 
@@ -69,7 +82,12 @@ export function InternsSection({ state, service }: InternsSectionProps) {
             <p className="font-semibold">Gagal memuat data peserta</p>
             <p className="opacity-90">{state.errorMessage}</p>
             {service.onRetry ? (
-              <Button variant="outline" size="sm" className="mt-2 w-fit" onClick={service.onRetry}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2 w-fit"
+                onClick={service.onRetry}
+              >
                 Coba Lagi
               </Button>
             ) : null}
@@ -84,7 +102,9 @@ export function InternsSection({ state, service }: InternsSectionProps) {
             {state.rows.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center">
                 <UsersRound className="size-10 text-muted-foreground/40" />
-                <p className="text-sm font-medium">Belum ada peserta yang ditugaskan</p>
+                <p className="text-sm font-medium">
+                  Belum ada peserta yang ditugaskan
+                </p>
                 <p className="text-sm text-muted-foreground">
                   Hubungi HR_ADMIN untuk menetapkan peserta magang kepada Anda.
                 </p>
@@ -107,21 +127,27 @@ export function InternsSection({ state, service }: InternsSectionProps) {
                       const today = row.todayAttendance;
                       return (
                         <tr
-                          key={row.internship.id ?? intern?.id ?? 'unknown'}
+                          key={row.internship.id ?? intern?.id ?? "unknown"}
                           className="border-b last:border-0"
                         >
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
-                              <span className="font-medium">{intern?.fullName ?? '-'}</span>
+                              <span className="font-medium">
+                                {intern?.fullName ?? "-"}
+                              </span>
                               <span className="text-xs text-muted-foreground">
-                                {intern?.email ?? '-'}
+                                {intern?.email ?? "-"}
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4">{department?.name ?? '-'}</td>
+                          <td className="px-6 py-4">
+                            {department?.name ?? "-"}
+                          </td>
                           <td className="px-6 py-4">
                             {today ? (
-                              <AttendanceStatusBadge status={today.attendanceStatus} />
+                              <AttendanceStatusBadge
+                                status={today.attendanceStatus}
+                              />
                             ) : (
                               <span className="text-xs text-muted-foreground">
                                 Belum absen hari ini
@@ -131,13 +157,17 @@ export function InternsSection({ state, service }: InternsSectionProps) {
                           <td className="px-6 py-4 text-right">
                             {today ? (
                               <Button asChild variant="outline" size="sm">
-                                <Link href={`/SUPERVISOR/dashboard/attendance/${today.id}`}>
+                                <Link
+                                  href={`/SUPERVISOR/dashboard/attendance/${today.id}`}
+                                >
                                   <CalendarCheck2 className="size-4" />
                                   Lihat Absensi
                                 </Link>
                               </Button>
                             ) : (
-                              <span className="text-xs text-muted-foreground">-</span>
+                              <span className="text-xs text-muted-foreground">
+                                -
+                              </span>
                             )}
                           </td>
                         </tr>

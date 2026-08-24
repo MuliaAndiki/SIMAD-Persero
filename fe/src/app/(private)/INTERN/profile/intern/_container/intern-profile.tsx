@@ -74,6 +74,8 @@ export default function InternProfileContainer() {
     if (!payload.id) delete payload.id;
     if (!payload.majorId) delete payload.majorId;
 
+    console.log("ini adalah payload", payload);
+
     createProfile.mutate(payload);
   };
 
