@@ -1,31 +1,31 @@
-"use client";
-import React, { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+'use client';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
-  FileUp,
-  ShieldCheck,
-  PlayCircle,
-  MapPin,
-  CheckCircle,
   Activity,
   Award,
+  CheckCircle,
+  FileUp,
   Flag,
-} from "lucide-react";
+  MapPin,
+  PlayCircle,
+  ShieldCheck,
+} from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
 
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 const steps = [
-  { id: 1, title: "Pengajuan", icon: FileUp, desc: "Submit berkas" },
-  { id: 2, title: "Verifikasi", icon: ShieldCheck, desc: "Review oleh tim HR" },
-  { id: 3, title: "Onboarding", icon: PlayCircle, desc: "Pengenalan sistem" },
-  { id: 4, title: "Penempatan", icon: MapPin, desc: "Alokasi departemen" },
-  { id: 5, title: "Absensi", icon: CheckCircle, desc: "Check-in harian" },
-  { id: 6, title: "Monitoring", icon: Activity, desc: "Pantau aktivitas" },
-  { id: 7, title: "Selesai", icon: Flag, desc: "Evaluasi akhir" },
-  { id: 8, title: "Sertifikat", icon: Award, desc: "E-certificate" },
+  { id: 1, title: 'Pengajuan', icon: FileUp, desc: 'Submit berkas' },
+  { id: 2, title: 'Verifikasi', icon: ShieldCheck, desc: 'Review oleh tim HR' },
+  { id: 3, title: 'Onboarding', icon: PlayCircle, desc: 'Pengenalan sistem' },
+  { id: 4, title: 'Penempatan', icon: MapPin, desc: 'Alokasi departemen' },
+  { id: 5, title: 'Absensi', icon: CheckCircle, desc: 'Check-in harian' },
+  { id: 6, title: 'Monitoring', icon: Activity, desc: 'Pantau aktivitas' },
+  { id: 7, title: 'Selesai', icon: Flag, desc: 'Evaluasi akhir' },
+  { id: 8, title: 'Sertifikat', icon: Award, desc: 'E-certificate' },
 ];
 
 export function LandingWorkflow() {
@@ -33,28 +33,28 @@ export function LandingWorkflow() {
   const scrollTrack = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
       const isDesktop = window.innerWidth >= 1024;
 
       // Animate workflow header
       gsap.fromTo(
-        ".wf-header",
+        '.wf-header',
         { opacity: 0, y: 30 },
         {
           opacity: 1,
           y: 0,
           duration: 0.8,
           scrollTrigger: {
-            trigger: ".wf-header",
-            start: "top 80%",
-            toggleActions: "play none none reverse",
+            trigger: '.wf-header',
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
           },
         },
       );
 
       // Node stagger animation
       gsap.fromTo(
-        ".wf-node",
+        '.wf-node',
         { opacity: 0, scale: 0.8, y: 20 },
         {
           opacity: 1,
@@ -64,29 +64,29 @@ export function LandingWorkflow() {
           stagger: 0.1,
           scrollTrigger: {
             trigger: scrollTrack.current,
-            start: "top 75%",
-            toggleActions: "play none none reverse",
+            start: 'top 75%',
+            toggleActions: 'play none none reverse',
           },
         },
       );
 
       // Line progress animation
       gsap.fromTo(
-        ".wf-progress-line",
+        '.wf-progress-line',
         {
           scaleX: 0,
-          transformOrigin: isDesktop ? "left center" : "top center",
+          transformOrigin: isDesktop ? 'left center' : 'top center',
           scaleY: isDesktop ? 1 : 0,
         },
         {
           scaleX: 1,
           scaleY: 1,
           duration: 1.5,
-          ease: "power2.out",
+          ease: 'power2.out',
           scrollTrigger: {
             trigger: scrollTrack.current,
-            start: "top 60%",
-            toggleActions: "play none none reverse",
+            start: 'top 60%',
+            toggleActions: 'play none none reverse',
           },
         },
       );
@@ -96,19 +96,13 @@ export function LandingWorkflow() {
   }, []);
 
   return (
-    <section
-      id="workflow"
-      ref={container}
-      className="py-24 bg-background px-4 sm:px-6 lg:px-8"
-    >
+    <section id="workflow" ref={container} className="py-24 bg-background px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16 wf-header">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Alur Kerja SIMAD
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Alur Kerja SIMAD</h2>
           <p className="text-muted-foreground text-lg">
-            Satu platform untuk seluruh siklus lifecycle peserta magang, mulai
-            dari registrasi hingga sertifikat.
+            Satu platform untuk seluruh siklus lifecycle peserta magang, mulai dari registrasi
+            hingga sertifikat.
           </p>
         </div>
 

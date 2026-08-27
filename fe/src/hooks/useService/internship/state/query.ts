@@ -1,11 +1,8 @@
-import { queryKey } from "@/configs/query-key";
-import Api from "@/services/props.service";
+import { queryKey } from '@/configs/query-key';
+import Api from '@/services/props.service';
 
-import type {
-  InternshipParams,
-  SkillQuery,
-} from "@/types/api/internship.types";
-import { useQuery } from "@tanstack/react-query";
+import type { InternshipParams, SkillQuery } from '@/types/api/internship.types';
+import { useQuery } from '@tanstack/react-query';
 
 export function useMyInternship() {
   return useQuery({
@@ -28,7 +25,7 @@ export function useInternshipList() {
 }
 
 export function useInternshipDetail(
-  params: Pick<InternshipParams, "id">,
+  params: Pick<InternshipParams, 'id'>,
   options?: { enabled?: boolean },
 ) {
   return useQuery({

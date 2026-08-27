@@ -33,22 +33,11 @@ class CertificateController {
     }
   }
 
-  // GET /certificates/:certificateId/download
+  // GET /certificates/:certificateId/download — redirect to R2 public URL.
   public async download(c: AppContext) {
     try {
       const result = await certificateService.download(c.params.certificateId, c.user!);
-      const fileName = result.certificate.certificateNumber
-        ? `${result.certificate.certificateNumber}.pdf`
-        : 'certificate.pdf';
-
-      return new Response(result.buffer, {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="${fileName}"`,
-          'Content-Length': String(result.buffer.length),
-        },
-      });
+      return c.redirect(result.url, 302);
     } catch (error) {
       return this.handleError(c, error);
     }

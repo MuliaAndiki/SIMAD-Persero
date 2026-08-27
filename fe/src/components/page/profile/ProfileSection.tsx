@@ -22,6 +22,10 @@ import Link from 'next/link';
 import { useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 
+import { ActiveSessionsCard } from '@/components/organisms/profile/ActiveSessionsCard';
+import { ChangeEmailModal } from '@/components/organisms/profile/ChangeEmailModal';
+import type { AuthSession } from '@/types/api/auth.types';
+
 /** State yang disuplai container — section murni presentasi. */
 export interface ProfileSectionState {
   isPending: boolean;
@@ -31,12 +35,27 @@ export interface ProfileSectionState {
   internProfile: MyInternProfileResponse | null;
   isUploading: boolean;
   alert: AlertContexType;
+  // Active Sessions & Change Email state
+  sessions?: AuthSession[];
+  isSessionsPending?: boolean;
+  isRevokingSession?: boolean;
+  changeEmailModalOpen?: boolean;
+  isChangingEmail?: boolean;
 }
 
 /** Aksi dari container (mutation) — section hanya memanggil. */
 export interface ProfileSectionService {
   onUploadPhoto: (file: File) => void | Promise<void>;
   onLogout: () => void;
+  // Active Sessions & Change Email actions
+  onOpenChangeEmail?: () => void;
+  onCloseChangeEmail?: () => void;
+  onChangeEmailSubmit?: (data: { newEmail: string; password: string }) => Promise<
+    boolean | undefined
+  >;
+  onVerifyTokenSubmit?: (token: string) => Promise<boolean | undefined>;
+  onRevokeSession?: (sessionId: string) => void;
+  onLogoutAll?: () => void;
 }
 
 export interface ProfileSectionProps {
@@ -169,7 +188,16 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
         </CardContent>
       </Card>
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      {/* Card Sesi Aktif */}
+      <ActiveSessionsCard
+        sessions={state.sessions ?? []}
+        isPending={Boolean(state.isSessionsPending)}
+        isRevoking={Boolean(state.isRevokingSession)}
+        onRevokeSession={(id) => service.onRevokeSession?.(id)}
+        onLogoutAll={() => service.onLogoutAll?.()}
+      />
+
+      <div className="flex flex-wrap gap-3">
         {isIntern && (
           <>
             <Button asChild>
@@ -186,6 +214,10 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
             </Button>
           </>
         )}
+        <Button type="button" variant="outline" onClick={service.onOpenChangeEmail}>
+          <Mail className="size-4" />
+          Ubah Email
+        </Button>
         {(profile.role === 'INTERN' || profile.role === 'HR_ADMIN') && (
           <>
             <Button asChild>
@@ -219,6 +251,17 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
           {state.isPending ? 'Loading...' : 'Keluar'}
         </Button>
       </div>
+
+      {/* Modal Change Email */}
+      {service.onChangeEmailSubmit && service.onVerifyTokenSubmit && (
+        <ChangeEmailModal
+          open={Boolean(state.changeEmailModalOpen)}
+          isPending={Boolean(state.isChangingEmail)}
+          onClose={() => service.onCloseChangeEmail?.()}
+          onChangeEmailSubmit={service.onChangeEmailSubmit}
+          onVerifyTokenSubmit={service.onVerifyTokenSubmit}
+        />
+      )}
     </section>
   );
 }

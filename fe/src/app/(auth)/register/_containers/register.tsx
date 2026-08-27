@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { RegisterSection } from "@/components/page/auth/register/RegisterSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
-import type { RegisterBody } from "@/types/api/auth.types";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { RegisterSection } from '@/components/page/auth/register/RegisterSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
+import type { RegisterBody } from '@/types/api/auth.types';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function RegisterContainer() {
   const api = useApi();
@@ -13,9 +13,9 @@ export default function RegisterContainer() {
   const ns = useAppNameSpace();
 
   const [formRegister, setFormRegister] = useState<RegisterBody>({
-    fullName: "",
-    email: "",
-    password: "",
+    fullName: '',
+    email: '',
+    password: '',
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +28,7 @@ export default function RegisterContainer() {
 
     register.mutate(formRegister, {
       onSuccess: () => {
-        router.push("/login");
+        router.push('/login');
       },
     });
   };
@@ -39,10 +39,9 @@ export default function RegisterContainer() {
 
   const handleGoogleError = () => {
     ns.alert.toast({
-      title: "Gagal login dengan Google",
-      message:
-        "Tidak dapat menyelesaikan login dengan Google. Silakan coba lagi.",
-      icon: "error",
+      title: 'Gagal login dengan Google',
+      message: 'Tidak dapat menyelesaikan login dengan Google. Silakan coba lagi.',
+      icon: 'error',
     });
   };
 

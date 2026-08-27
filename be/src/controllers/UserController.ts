@@ -42,10 +42,16 @@ class UserController {
   public async uploadPhoto(c: AppContext) {
     try {
       const user = c.user!;
-      const photo = (c.body as { photo?: File }).photo;
+      const body = (c.body || {}) as { photo?: File; url?: string; originalName?: string };
 
+      if (body.url) {
+        const data = await UserService.savePhotoUrl(user, body.url, body.originalName);
+        return HttpResponse(c).ok(data, undefined, 'Profile photo updated successfully');
+      }
+
+      const photo = body.photo;
       if (!photo) {
-        return HttpResponse(c).unprocessable('Photo is required');
+        return HttpResponse(c).unprocessable('Photo or URL is required');
       }
 
       const buffer = Buffer.from(await photo.arrayBuffer());

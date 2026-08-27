@@ -5,25 +5,26 @@ import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { SupervisorResponse } from '@/types/api/supervisor.types';
 import type { AlertContexType } from '@/types/ui';
-import { Eye, UserCheck } from 'lucide-react';
+import { Eye, History, UserCheck } from 'lucide-react';
 
 export interface SupervisorTableProps {
   supervisors: SupervisorResponse[];
   onSelectSupervisor: (id: string) => void;
   onEditSupervisor?: (id: string) => void;
   onDeleteSupervisor?: (id: string) => void;
+  onViewAuditLog?: (userId: string, userName: string) => void;
   alert: AlertContexType;
 }
 
 /**
  * SupervisorTable — organism tabel daftar supervisor (HR Admin).
- * Presentasi murni; data & handler disuplai container/section.
  */
 export function SupervisorTable({
   supervisors,
   onSelectSupervisor,
   onEditSupervisor,
   onDeleteSupervisor,
+  onViewAuditLog,
   alert,
 }: SupervisorTableProps) {
   return (
@@ -66,7 +67,17 @@ export function SupervisorTable({
                       </Badge>
                     </td>
                     <td className="px-6 py-4">{supervisor.activeAssignmentsCount}</td>
-                    <td className=" text-right space-x-2">
+                    <td className="text-right space-x-2">
+                      {onViewAuditLog && supervisor.id && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onViewAuditLog(supervisor.id!, supervisor.fullName)}
+                          title="Lihat Log Aktivitas"
+                        >
+                          <History className="size-4 text-muted-foreground" />
+                        </Button>
+                      )}
                       {onEditSupervisor && (
                         <Button
                           variant="outline"
@@ -94,8 +105,6 @@ export function SupervisorTable({
                           Hapus
                         </Button>
                       )}
-                    </td>
-                    <td className="text-right space-x-2">
                       <Button
                         variant="outline"
                         size="sm"

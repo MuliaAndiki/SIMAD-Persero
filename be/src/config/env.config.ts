@@ -20,6 +20,11 @@ const envSchema = z.object({
   OTEL_ENDPOINT: z.string().url().optional(),
   OTEL_ENABLED: z.string().optional(),
   LOG_LEVEL: z.string().optional(),
+  CLOUDFLARE_ACCOUNT_ID: z.string(),
+  PUBLIC_R2_URL:z.string().url(),
+  ACCESS_KEY_ID:z.string(),
+  SECRET_ACCESS_KEY:z.string()
+
 });
 
 const _env = envSchema.safeParse(process.env);

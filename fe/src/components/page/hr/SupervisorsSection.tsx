@@ -1,12 +1,14 @@
 'use client';
 
-import { AlertCircle, Plus, Search } from 'lucide-react';
+import { AlertCircle, Bell, Plus, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import { UserAuditLogModal } from '@/components/organisms/auditLog/UserAuditLogModal';
+import { SendNotificationModal } from '@/components/organisms/notification/SendNotificationModal';
 import { SupervisorAssignInternDialog } from '@/components/organisms/supervisor/SupervisorAssignInternDialog';
 import { SupervisorDetailDialog } from '@/components/organisms/supervisor/SupervisorDetailDialog';
 import {
@@ -40,6 +42,7 @@ export interface SupervisorsSectionState {
   editingData: SupervisorDetailResponse | null;
   formData: SupervisorFormType;
   alert: AlertContexType;
+  isNotificationPending?: boolean;
 }
 
 export interface SupervisorsSectionActions {
@@ -58,6 +61,12 @@ export interface SupervisorsSectionActions {
   onChangeForm: (data: Partial<SupervisorFormType>) => void;
   onSubmitForm: () => void | Promise<void>;
   onDeleteSupervisor: (id: string) => void | Promise<void>;
+  onSendNotification?: (data: {
+    title: string;
+    message: string;
+    typeCode?: string;
+    isBroadcast?: boolean;
+  }) => Promise<void>;
 }
 
 export interface SupervisorsSectionProps {
@@ -67,10 +76,12 @@ export interface SupervisorsSectionProps {
 
 /**
  * SupervisorsSection — komposisi halaman Supervisor (HR Admin).
- * Murni presentasi: tanpa fetch API, tanpa state fitur, tanpa komponen besar.
  */
 export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
+  const [auditUserId, setAuditUserId] = useState<string | null>(null);
+  const [auditUserName, setAuditUserName] = useState<string | undefined>();
+  const [sendNotifOpen, setSendNotifOpen] = useState(false);
 
   const handleSubmitSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -83,11 +94,18 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">Supervisor</h1>
-        <p className="text-sm text-muted-foreground">
-          Kelola supervisor pembimbing dan penugasan peserta magang.
-        </p>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold text-foreground">Supervisor</h1>
+          <p className="text-sm text-muted-foreground">
+            Kelola supervisor pembimbing dan penugasan peserta magang.
+          </p>
+        </div>
+        {actions.onSendNotification && (
+          <Button variant="outline" onClick={() => setSendNotifOpen(true)}>
+            <Bell className="mr-2 size-4 text-primary" />+ Kirim Pengumuman
+          </Button>
+        )}
       </header>
 
       {state.isPending ? (
@@ -130,6 +148,10 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
           onSelectSupervisor={actions.onSelectSupervisor}
           onEditSupervisor={actions.onOpenEditForm}
           onDeleteSupervisor={actions.onDeleteSupervisor}
+          onViewAuditLog={(userId, userName) => {
+            setAuditUserId(userId);
+            setAuditUserName(userName);
+          }}
           alert={state.alert}
         />
       )}
@@ -165,6 +187,24 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
         onSubmit={actions.onSubmitForm}
         isPending={state.formIsPending}
       />
+
+      {/* User Audit Log Modal */}
+      <UserAuditLogModal
+        open={Boolean(auditUserId)}
+        userId={auditUserId}
+        userName={auditUserName}
+        onClose={() => setAuditUserId(null)}
+      />
+
+      {/* Broadcast Notification Modal */}
+      {actions.onSendNotification && (
+        <SendNotificationModal
+          open={sendNotifOpen}
+          isPending={Boolean(state.isNotificationPending)}
+          onClose={() => setSendNotifOpen(false)}
+          onSubmit={actions.onSendNotification}
+        />
+      )}
     </section>
   );
 }

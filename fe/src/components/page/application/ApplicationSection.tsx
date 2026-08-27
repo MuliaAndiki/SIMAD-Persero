@@ -41,6 +41,7 @@ export interface ApplicationSectionService {
   ) => Promise<void>;
   onUpdateDraft: (id: string, data: UpdateApplicationBody) => Promise<void>;
   onSubmitDraft: (id: string) => Promise<void>;
+  onDeleteDraft: (id: string) => Promise<void>;
   onCancel: (id: string) => Promise<void>;
   onUploadFile: (file: File) => Promise<{ fileId: string } | null>;
 }
@@ -188,12 +189,12 @@ function ApplicationStatusCard({
                 {isSubmitting ? 'Mengirim…' : 'Kirim Pengajuan'}
               </Button>
               <Button
-                variant="outline"
-                onClick={() => service.onCancel(app.id)}
+                variant="destructive"
+                onClick={() => service.onDeleteDraft(app.id)}
                 disabled={isSubmitting}
               >
                 <Trash2 className="size-4" />
-                Batalkan Draft
+                Hapus Draf
               </Button>
             </>
           )}
@@ -202,6 +203,7 @@ function ApplicationStatusCard({
               variant="outline"
               onClick={() => service.onCancel(app.id)}
               disabled={isSubmitting}
+              className="text-destructive border-destructive/30 hover:bg-destructive/10"
             >
               <XCircle className="size-4" />
               Batalkan Pengajuan

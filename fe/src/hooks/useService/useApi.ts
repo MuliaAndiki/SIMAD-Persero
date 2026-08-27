@@ -1,17 +1,18 @@
-import { useApplication } from "./application/useApplication";
-import { useAttendance } from "./attendance/useAttendance";
-import { useAuditLog } from "./auditLog/useAuditLog";
-import { useAuth } from "./auth/useAuth";
-import { useDashboard } from "./dashboard/useDashboard";
-import { useDepartment } from "./department/useDepartment";
-import { useFile } from "./file/useFile";
-import { useInstitution } from "./institution/useInstitution";
-import { useInternship } from "./internship/useInternship";
-import { useOffice } from "./office/useOffice";
-import { useReporting } from "./reporting/useReporting";
-import { useSupervisor } from "./supervisor/useSupervisor";
-import { useUser } from "./user/useUser";
-import { useCertificate } from "./certificate/useCertificate";
+import { useApplication } from './application/useApplication';
+import { useAttendance } from './attendance/useAttendance';
+import { useAuditLog } from './auditLog/useAuditLog';
+import { useAuth } from './auth/useAuth';
+import { useCertificate } from './certificate/useCertificate';
+import { useDashboard } from './dashboard/useDashboard';
+import { useDepartment } from './department/useDepartment';
+import { useFile } from './file/useFile';
+import { useInstitution } from './institution/useInstitution';
+import { useInternship } from './internship/useInternship';
+import { useNotification } from './notification/useNotification';
+import { useOffice } from './office/useOffice';
+import { useReporting } from './reporting/useReporting';
+import { useSupervisor } from './supervisor/useSupervisor';
+import { useUser } from './user/useUser';
 
 /**
  * Single entry point seluruh endpoint frontend.
@@ -44,5 +45,6 @@ export function useApi() {
     internship: useInternship(),
     user: useUser(),
     certificate: useCertificate(),
+    notification: useNotification(),
   };
 }

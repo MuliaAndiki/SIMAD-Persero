@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import Image from "next/image";
+import Image from 'next/image';
 
 import {
   Dialog,
@@ -8,15 +8,15 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/atoms/dialog";
-import { ModalProps } from "@/types/ui";
+} from '@/components/atoms/dialog';
+import type { ModalProps } from '@/types/ui';
 
 const iconMap = {
-  success: "/images/succes.webp",
-  error: "/images/error.webp",
-  warning: "/images/warning.webp",
-  info: "/images/info.webp",
-  question: "/images/question.webp",
+  success: '/images/succes.webp',
+  error: '/images/error.webp',
+  warning: '/images/warning.webp',
+  info: '/images/info.webp',
+  question: '/images/question.webp',
 } as const;
 
 interface AlertModalInternalProps extends ModalProps {
@@ -31,9 +31,9 @@ export function AlertModal({
   setOpen,
   title,
   deskripsi,
-  icon = "info",
-  confirmButtonText = "OK",
-  confirmButtonColor = "bg-primary",
+  icon = 'info',
+  confirmButtonText = 'OK',
+  confirmButtonColor = 'bg-primary',
   cancelText,
   onConfirm,
   onCancel,
@@ -42,13 +42,7 @@ export function AlertModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-sm text-center [&>button]:hidden">
         <DialogHeader>
-          <Image
-            src={iconMap[icon]}
-            alt={icon}
-            width={100}
-            height={100}
-            className="mx-auto"
-          />
+          <Image src={iconMap[icon]} alt={icon} width={100} height={100} className="mx-auto" />
 
           <DialogTitle className="text-center">{title}</DialogTitle>
           <DialogDescription className="text- dark:text-gray-300 text-center justify-center">

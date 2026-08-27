@@ -10,11 +10,17 @@ import { t } from 'elysia';
 
 // POST /files/upload
 export const UploadFileDto = t.Object({
-  file: t.File({
-    type: ['application/pdf', 'image/jpeg', 'image/png'],
-    maxSize: MAX_FILE_SIZE,
-    description: 'File PDF/JPG/JPEG/PNG maksimal 5 MB',
-  }),
+  file: t.Optional(
+    t.File({
+      type: ['application/pdf', 'image/jpeg', 'image/png'],
+      maxSize: MAX_FILE_SIZE,
+      description: 'File PDF/JPG/JPEG/PNG maksimal 5 MB',
+    }),
+  ),
+  url: t.Optional(t.String({ description: 'Public URL R2 dari file' })),
+  originalName: t.Optional(t.String()),
+  mimeType: t.Optional(t.String()),
+  size: t.Optional(t.Numeric()),
 });
 
 // GET /files/:fileId, GET /files/:fileId/download, DELETE /files/:fileId

@@ -1,11 +1,24 @@
-"use client";
+'use client';
 
-import { CertificateSettingSection } from "@/components/page/hr_admin/CertificateSettingSection";
-import { toast } from "sonner";
-import { useState } from "react";
+import { CertificateSettingSection } from '@/components/page/hr_admin/CertificateSettingSection';
+import { useApi } from '@/hooks/useService/useApi';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function CertificateSettingContainer() {
-  const [isPending, setIsPending] = useState(false);
+  const api = useApi();
+  const [signerName, setSignerName] = useState('Budi Santoso, S.T., M.T.');
+  const [signerRole, setSignerRole] = useState('Manager SDM');
+  const uploadFile = api.file.mutate.upload();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedName = localStorage.getItem('simad_cert_signer_name');
+      const savedRole = localStorage.getItem('simad_cert_signer_role');
+      if (savedName) setSignerName(savedName);
+      if (savedRole) setSignerRole(savedRole);
+    }
+  }, []);
 
   const handleSaveSettings = async (data: {
     signerName: string;
@@ -13,34 +26,39 @@ export default function CertificateSettingContainer() {
     signatureFile?: File;
   }) => {
     try {
-      setIsPending(true);
-      toast.loading("Menyimpan pengaturan sertifikat...", {
-        id: "save-cert-setting",
+      toast.loading('Menyimpan pengaturan sertifikat...', {
+        id: 'save-cert-setting',
       });
 
-      // Simulate API call since there's no backend endpoint yet
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (data.signatureFile) {
+        const formData = new FormData();
+        formData.append('file', data.signatureFile);
+        await uploadFile.mutateAsync(formData);
+      }
 
-      console.log("Saved data:", data);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('simad_cert_signer_name', data.signerName);
+        localStorage.setItem('simad_cert_signer_role', data.signerRole);
+      }
 
-      toast.success("Pengaturan sertifikat berhasil disimpan", {
-        id: "save-cert-setting",
+      setSignerName(data.signerName);
+      setSignerRole(data.signerRole);
+
+      toast.success('Pengaturan sertifikat berhasil disimpan', {
+        id: 'save-cert-setting',
       });
     } catch (error) {
-      console.error("Failed to save settings:", error);
-      toast.error("Gagal menyimpan pengaturan", { id: "save-cert-setting" });
-    } finally {
-      setIsPending(false);
+      console.error('Failed to save settings:', error);
+      toast.error('Gagal menyimpan pengaturan', { id: 'save-cert-setting' });
     }
   };
 
   return (
     <CertificateSettingSection
       state={{
-        isPending,
-        // using mock initial data, later fetch from API
-        signerName: "Budi Santoso, S.T., M.T.",
-        signerRole: "Manager SDM",
+        isPending: uploadFile.isPending,
+        signerName,
+        signerRole,
       }}
       service={{
         onSaveSettings: handleSaveSettings,

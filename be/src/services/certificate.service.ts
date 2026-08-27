@@ -12,6 +12,7 @@ import { createAuditLog } from '@/utils/audit.util';
 import { generateCertificatePdf } from '@/utils/pdf.util';
 import prisma from '../../prisma/client';
 
+
 /**
  * Service layer modul Certificate.
  * Menghasilkan sertifikat PDF secara otomatis untuk internship COMPLETED
@@ -148,7 +149,7 @@ class CertificateService {
     return `${prefix}${String(count + 1).padStart(6, '0')}`;
   }
 
-  /** Upload file PDF sertifikat lewat FileService (storage lokal + metadata). */
+  /** Upload file PDF sertifikat lewat FileService (otomatis ke R2). */
   private async createPdfFile(uploadedById: string, fileName: string, buffer: Buffer) {
     return FileService.upload(uploadedById, {
       originalName: fileName,
@@ -217,7 +218,7 @@ class CertificateService {
     const downloaded = await FileService.download(certificate.fileId);
     return {
       certificate: this.serialize(certificate),
-      buffer: downloaded.buffer,
+      url: downloaded.url,
     };
   }
 

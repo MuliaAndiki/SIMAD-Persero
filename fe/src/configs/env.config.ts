@@ -9,11 +9,15 @@ export const env = createEnv({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     AUTH_SECRET_KEY: requiredString,
     NEXT_INTERNAL_API_SECRET: requiredString,
+    NEXT_CLOUDFLARE_ACCOUNT_ID: requiredString,
+    NEXT_ACCESS_KEY_ID: requiredString,
+    NEXT_SECRET_ACCESS_KEY: requiredString,
   },
 
   // Client Environment Variables Configuration
   client: {
     NEXT_PUBLIC_APP_URL: requiredString.url(),
+    NEXT_PUBLIC_R2_URL: requiredString.url(),
     NEXT_PUBLIC_BACKEND_URL: requiredString.url(),
     NEXT_PUBLIC_BASEPATH: requiredString,
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: requiredString,
@@ -29,6 +33,10 @@ export const env = createEnv({
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
 
     NEXT_INTERNAL_API_SECRET: process.env.NEXT_INTERNAL_API_SECRET,
+    NEXT_CLOUDFLARE_ACCOUNT_ID: process.env.NEXT_CLOUDFLARE_ACCOUNT_ID,
+    NEXT_ACCESS_KEY_ID: process.env.NEXT_ACCESS_KEY_ID,
+    NEXT_PUBLIC_R2_URL: process.env.NEXT_PUBLIC_R2_URL,
+    NEXT_SECRET_ACCESS_KEY: process.env.NEXT_SECRET_ACCESS_KEY,
   },
 
   // Skip Validation for the following Environment Variables
