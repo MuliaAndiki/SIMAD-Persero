@@ -3,6 +3,13 @@ import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/atoms/select';
 import type {
   ApplicationResponse,
   CreateApplicationBody,
@@ -215,6 +222,29 @@ function ApplicationStatusCard({
   );
 }
 
+const DURATION_OPTIONS = [
+  { value: '2', label: '2 Bulan' },
+  { value: '3', label: '3 Bulan' },
+  { value: '4', label: '4 Bulan' },
+  { value: '5', label: '5 Bulan' },
+  { value: '6', label: '6 Bulan' },
+  { value: '7', label: '7 Bulan' },
+  { value: '8', label: '8 Bulan' },
+  { value: '9', label: '9 Bulan' },
+  { value: '10', label: '10 Bulan' },
+  { value: '11', label: '11 Bulan' },
+  { value: '12', label: '12 Bulan' },
+];
+
+function calculateEndDate(startIsoDate: string, monthsStr: string): string {
+  if (!startIsoDate) return '';
+  const d = new Date(startIsoDate);
+  if (Number.isNaN(d.getTime())) return '';
+  const months = parseInt(monthsStr, 10) || 2;
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString().split('T')[0];
+}
+
 function NewApplicationForm({
   service,
   isSubmitting,
@@ -226,9 +256,26 @@ function NewApplicationForm({
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [startDate, setStartDate] = useState('');
+  const [durationMonths, setDurationMonths] = useState('2');
   const [endDate, setEndDate] = useState('');
   const [motivation, setMotivation] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+
+  const handleStartDateChange = (val: string) => {
+    setStartDate(val);
+    if (val) {
+      setEndDate(calculateEndDate(val, durationMonths));
+    } else {
+      setEndDate('');
+    }
+  };
+
+  const handleDurationChange = (val: string) => {
+    setDurationMonths(val);
+    if (startDate) {
+      setEndDate(calculateEndDate(startDate, val));
+    }
+  };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] ?? null;
@@ -251,7 +298,7 @@ function NewApplicationForm({
       return;
     }
     if (!startDate || !endDate) {
-      setLocalError('Tanggal mulai dan tanggal selesai harus diisi.');
+      setLocalError('Tanggal mulai dan durasi magang harus diisi.');
       return;
     }
     if (new Date(startDate) >= new Date(endDate)) {
@@ -288,29 +335,40 @@ function NewApplicationForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 min-w-0 w-full max-w-full overflow-hidden">
               <label htmlFor="startDate" className="text-sm font-medium">
-                Tanggal Mulai
+                Tanggal Mulai *
               </label>
               <Input
                 id="startDate"
                 type="date"
                 required
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => handleStartDateChange(e.target.value)}
+                className="w-full min-w-0 max-w-full overflow-hidden"
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="endDate" className="text-sm font-medium">
-                Tanggal Selesai
+            <div className="flex flex-col gap-2 min-w-0 w-full max-w-full">
+              <label htmlFor="duration" className="text-sm font-medium">
+                Durasi Magang (Minimal 2 Bulan) *
               </label>
-              <Input
-                id="endDate"
-                type="date"
-                required
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+              <Select value={durationMonths} onValueChange={handleDurationChange}>
+                <SelectTrigger id="duration" className="w-full border-input border rounded-md">
+                  <SelectValue placeholder="Pilih durasi magang" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATION_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {endDate && (
+                <span className="text-xs text-muted-foreground">
+                  Estimasi Selesai: <strong className="text-foreground">{formatDate(endDate)}</strong>
+                </span>
+              )}
             </div>
           </div>
 
@@ -367,7 +425,7 @@ function NewApplicationForm({
                 ? 'Mengunggah File…'
                 : isSubmitting
                   ? 'Menyimpan…'
-                  : 'Sumbit Draft Pengajuan'}
+                  : 'Submit Draft Pengajuan'}
             </Button>
           </div>
         </form>

@@ -2,11 +2,11 @@ import { gooeyToast } from '@/components/atoms/GoeyToaster';
 import type { ToastProps } from '@/types/ui';
 
 const iconMap: Record<string, string> = {
-  success: '✅',
-  error: '❌',
-  warning: '⚠️',
-  info: 'ℹ️',
-  question: '❓',
+  success: '',
+  error: '',
+  warning: '',
+  info: '',
+  question: '',
 };
 
 /** Pemetaan tipe toast SIMAD ke tipe goey-toast (question tidak tersedia → info). */

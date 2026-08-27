@@ -7,7 +7,7 @@ import { BottomNav } from '@/core/components/bottom-nav';
 import LanguageDropdown from '@/core/components/language.dropdown';
 import ThemeToggle from '@/core/components/theme-toggle';
 import NotificationDropdownContainer from '@/core/containers/notification.dropdown.container';
-import { Download } from 'lucide-react';
+import { useApi } from '@/hooks/useService/useApi';
 import Image from 'next/image';
 
 interface AppShellProps {
@@ -25,6 +25,15 @@ interface AppShellProps {
  * sidebar dan bottom nav selalu sinkron.
  */
 export function AppShell({ children }: AppShellProps) {
+  const api = useApi()
+
+  const useProfile  = api.user.query.profile()
+  const {data:profile, isLoading} = useProfile
+
+ 
+console.log(profile?.profilePhoto)
+
+
   return (
     <SidebarProvider defaultOpen>
       {/* Sidebar hanya tampil di desktop (md+); mobile memakai BottomNav */}
@@ -66,11 +75,11 @@ export function AppShell({ children }: AppShellProps) {
             <LanguageDropdown />
             <NotificationDropdownContainer />
             <Image
-              src="/avatars/2.png"
+              src={profile?.profilePhoto ? profile.profilePhoto : "/avatars/4.png"}
               alt="Avatar"
               height={38}
               width={38}
-              className="rounded-full border border-border/60"
+              className="rounded-full border border-border/60 size-[38px] object-cover"
             />
           </div>
         </header>
