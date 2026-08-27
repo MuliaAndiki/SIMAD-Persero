@@ -41,11 +41,11 @@ export function AlertModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-sm text-center [&>button]:hidden">
-        <DialogHeader>
+        <DialogHeader className="gap-2">
           <Image src={iconMap[icon]} alt={icon} width={100} height={100} className="mx-auto" />
 
-          <DialogTitle className="text-center">{title}</DialogTitle>
-          <DialogDescription className="text- dark:text-gray-300 text-center justify-center">
+          <DialogTitle className="text-center text-lg font-bold text-foreground">{title}</DialogTitle>
+          <DialogDescription className="text-center justify-center font-semibold text-foreground/90 dark:text-gray-200">
             {deskripsi}
           </DialogDescription>
         </DialogHeader>
