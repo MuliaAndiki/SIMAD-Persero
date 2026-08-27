@@ -9,8 +9,13 @@ import { useMutation } from '@tanstack/react-query';
 
 export function useUploadFile() {
   const ns = useAppNameSpace();
-  return useMutation<TResponse<FileResponse>, Error, FormData, FileCacheContext>({
-    mutationFn: (formData: FormData) => Api.File.Upload(formData),
+  return useMutation<
+    TResponse<FileResponse>,
+    Error,
+    FormData | { url: string; originalName?: string; mimeType?: string; size?: number },
+    FileCacheContext
+  >({
+    mutationFn: (payload) => Api.File.Upload(payload),
     onSettled: async () => {
       await ns.queryClient.invalidateQueries({ queryKey: queryKey.fileRoot() });
     },

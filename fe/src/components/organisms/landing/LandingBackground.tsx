@@ -1,11 +1,8 @@
-import React from "react";
+import React from 'react';
 
 export function LandingBackground() {
   return (
-    <div
-      className="fixed inset-0 overflow-hidden pointer-events-none -z-10"
-      aria-hidden="true"
-    >
+    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden="true">
       {/* Top-right blob */}
       <svg
         className="absolute -top-32 -right-32 w-[600px] h-[600px] text-primary/5"
@@ -38,18 +35,8 @@ export function LandingBackground() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <pattern
-            id="grid"
-            width="60"
-            height="60"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M 60 0 L 0 0 0 60"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1"
-            />
+          <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="currentColor" strokeWidth="1" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#grid)" />

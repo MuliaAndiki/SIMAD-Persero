@@ -1,46 +1,27 @@
-"use client";
-import React, { useEffect, useRef } from "react";
-import gsap from "gsap";
-import Link from "next/link";
-import { ArrowRight, Calendar, CheckCircle2, User } from "lucide-react";
+'use client';
+import gsap from 'gsap';
+import { ArrowRight, Calendar, CheckCircle2, User } from 'lucide-react';
+import Link from 'next/link';
+import React, { useEffect, useRef } from 'react';
 
 export function LandingHero() {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
       const tl = gsap.timeline({
-        defaults: { ease: "power3.out", duration: 1 },
+        defaults: { ease: 'power3.out', duration: 1 },
       });
 
-      tl.fromTo(
-        ".hero-label",
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, delay: 0.2 },
-      )
+      tl.fromTo('.hero-label', { opacity: 0, y: 15 }, { opacity: 1, y: 0, delay: 0.2 })
+        .fromTo('.hero-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0 }, '-=0.7')
+        .fromTo('.hero-desc', { opacity: 0, y: 30 }, { opacity: 1, y: 0 }, '-=0.7')
+        .fromTo('.hero-cta', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: 0.1 }, '-=0.7')
         .fromTo(
-          ".hero-title",
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0 },
-          "-=0.7",
-        )
-        .fromTo(
-          ".hero-desc",
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0 },
-          "-=0.7",
-        )
-        .fromTo(
-          ".hero-cta",
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, stagger: 0.1 },
-          "-=0.7",
-        )
-        .fromTo(
-          ".hero-dashboard",
+          '.hero-dashboard',
           { opacity: 0, y: 50, scale: 0.98 },
           { opacity: 1, y: 0, scale: 1 },
-          "-=0.5",
+          '-=0.5',
         );
     }, container);
 
@@ -55,15 +36,15 @@ export function LandingHero() {
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
         {/* Title */}
         <h1 className="hero-title text-4xl md:text-5xl lg:text-7xl tracking-tight text-foreground font-semibold max-w-4xl mb-6">
-          Kelola Program Magang Lebih{" "}
+          Kelola Program Magang Lebih{' '}
           <span className="text-primary italic font-serif">Terstruktur</span>
         </h1>
 
         {/* Description */}
         <p className="hero-desc text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 leading-relaxed">
-          Tinggalkan proses administrasi manual. SIMAD mendigitalisasi seluruh
-          tahapan magang institusi Anda—mulai dari pengajuan, absensi berbasis
-          lokasi, hingga penerbitan sertifikat digital.
+          Tinggalkan proses administrasi manual. SIMAD mendigitalisasi seluruh tahapan magang
+          institusi Anda—mulai dari pengajuan, absensi berbasis lokasi, hingga penerbitan sertifikat
+          digital.
         </p>
 
         {/* CTAs */}
@@ -88,11 +69,11 @@ export function LandingHero() {
           {/* Top Bar */}
           <div className="w-full h-12 border-b border-border flex items-center justify-between pb-4 mb-6">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-destructive/80"></div>
-              <div className="w-3 h-3 rounded-full bg-warning/80"></div>
-              <div className="w-3 h-3 rounded-full bg-success/80"></div>
+              <div className="w-3 h-3 rounded-full bg-destructive/80" />
+              <div className="w-3 h-3 rounded-full bg-warning/80" />
+              <div className="w-3 h-3 rounded-full bg-success/80" />
             </div>
-            <div className="h-4 w-32 bg-muted rounded-full"></div>
+            <div className="h-4 w-32 bg-muted rounded-full" />
           </div>
 
           {/* Main Dashboard Layout */}
@@ -102,8 +83,8 @@ export function LandingHero() {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className={`h-8 rounded-md w-full ${i === 1 ? "bg-primary/10" : "bg-muted"}`}
-                ></div>
+                  className={`h-8 rounded-md w-full ${i === 1 ? 'bg-primary/10' : 'bg-muted'}`}
+                />
               ))}
             </div>
             {/* Content */}
@@ -111,37 +92,37 @@ export function LandingHero() {
               <div className="flex gap-4">
                 <div className="flex-1 h-24 bg-secondary/50 rounded-xl border border-border flex flex-col justify-center px-4">
                   <User className="w-5 h-5 text-primary mb-2" />
-                  <div className="w-20 h-3 bg-foreground/20 rounded mb-2"></div>
-                  <div className="w-12 h-5 bg-foreground rounded"></div>
+                  <div className="w-20 h-3 bg-foreground/20 rounded mb-2" />
+                  <div className="w-12 h-5 bg-foreground rounded" />
                 </div>
                 <div className="flex-1 h-24 bg-success/10 rounded-xl border border-success/20 flex flex-col justify-center px-4">
                   <CheckCircle2 className="w-5 h-5 text-success mb-2" />
-                  <div className="w-24 h-3 bg-success/40 rounded mb-2"></div>
-                  <div className="w-16 h-5 bg-foreground rounded"></div>
+                  <div className="w-24 h-3 bg-success/40 rounded mb-2" />
+                  <div className="w-16 h-5 bg-foreground rounded" />
                 </div>
                 <div className="hidden sm:flex flex-1 h-24 bg-warning/10 rounded-xl border border-warning/20 flex-col justify-center px-4">
                   <Calendar className="w-5 h-5 text-warning mb-2" />
-                  <div className="w-16 h-3 bg-warning/40 rounded mb-2"></div>
-                  <div className="w-12 h-5 bg-foreground rounded"></div>
+                  <div className="w-16 h-3 bg-warning/40 rounded mb-2" />
+                  <div className="w-12 h-5 bg-foreground rounded" />
                 </div>
               </div>
               <div className="flex-1 bg-muted/30 rounded-xl border border-border p-4">
-                <div className="w-1/3 h-5 bg-foreground/20 rounded mb-6"></div>
+                <div className="w-1/3 h-5 bg-foreground/20 rounded mb-6" />
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
                     className="w-full h-12 bg-card rounded-lg border border-border mb-3 flex items-center px-4"
                   >
-                    <div className="w-8 h-8 rounded-full bg-muted mr-4"></div>
-                    <div className="w-1/4 h-3 bg-foreground/30 rounded mr-auto"></div>
-                    <div className="w-20 h-4 rounded-full bg-success/20"></div>
+                    <div className="w-8 h-8 rounded-full bg-muted mr-4" />
+                    <div className="w-1/4 h-3 bg-foreground/30 rounded mr-auto" />
+                    <div className="w-20 h-4 rounded-full bg-success/20" />
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent pointer-events-none" />
         </div>
       </div>
     </section>

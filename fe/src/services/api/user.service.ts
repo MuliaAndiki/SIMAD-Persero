@@ -37,13 +37,19 @@ class UserService {
 
   /**
    * POST /users/profile/photo
-   * Mengunggah foto profil (FormData dengan field 'photo').
+   * Mengunggah foto profil (FormData dengan field 'photo' atau JSON dengan 'url').
    */
-  public async UploadPhoto(formData: FormData): Promise<TResponse<ProfileResponse>> {
-    const res = await client.PostFormDataResponse<ProfileResponse>(
-      USER_ENDPOINTS.UPLOAD_PHOTO,
-      formData,
-    );
+  public async UploadPhoto(
+    payload: FormData | { url: string; originalName?: string },
+  ): Promise<TResponse<ProfileResponse>> {
+    if (payload instanceof FormData) {
+      const res = await client.PostFormDataResponse<ProfileResponse>(
+        USER_ENDPOINTS.UPLOAD_PHOTO,
+        payload,
+      );
+      return toServiceResponse(res, { message: 'Foto profil berhasil diunggah' });
+    }
+    const res = await client.PostResponse<ProfileResponse>(USER_ENDPOINTS.UPLOAD_PHOTO, payload);
     return toServiceResponse(res, { message: 'Foto profil berhasil diunggah' });
   }
 

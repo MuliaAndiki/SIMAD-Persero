@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { ChangePasswordSection } from "@/components/page/profile/ChangePasswordSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
+import { ChangePasswordSection } from '@/components/page/profile/ChangePasswordSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
 
 /**
  * Container halaman ganti password (PATCH /users/change-password).
@@ -21,7 +21,7 @@ export default function ChangePasswordContainer() {
     newPassword: string;
   }) => {
     changePassword.mutate(data, {
-      onSuccess: () => ns.router.replace("/INTERN/profile"),
+      onSuccess: () => ns.router.replace('/INTERN/profile'),
     });
   };
 

@@ -18,6 +18,7 @@
     "seed": "bun run prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1119.0",
     "@elysia/opentelemetry": "^1.4.12",
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/cron": "^1.4.1",

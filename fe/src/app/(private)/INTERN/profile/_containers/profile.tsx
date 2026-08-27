@@ -1,46 +1,56 @@
 'use client';
 
 import { ProfileSection } from '@/components/page/profile/ProfileSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useProfileLogic } from '@/hooks/useProfileLogic';
 import { useApi } from '@/hooks/useService/useApi';
 
 /**
- * Container halaman profil (GET /users/profile; POST /users/profile/photo).
+ * Container halaman profil Intern (GET /users/profile; POST /users/profile/photo; GET /auth/sessions).
  *
- * Logika, state, & API ada di sini; ProfileSection hanya presentasi.
- * Halaman ubah profil & ganti password terpisah (edit & password).
+ * Logika profil umum, sesi, & ubah email di-handle useProfileLogic; internProfile diambil spesifik.
  */
 export default function ProfileContainer() {
   const api = useApi();
-  const ns = useAppNameSpace();
+  const {
+    profile,
+    sessions,
+    changeEmailModalOpen,
+    isUploading,
+    isChangingEmail,
+    isRevokingSession,
+    isLogoutPending,
+    alert,
+    actions,
+  } = useProfileLogic();
 
-  const profile = api.user.query.profile();
   const internProfile = api.internship.query.myProfile();
-  const logout = api.auth.mutate.logout();
-  const uploadPhoto = api.user.mutate.uploadPhoto();
-
-  const handleUploadPhoto = (file: File) => {
-    const formData = new FormData();
-    formData.append('photo', file);
-    uploadPhoto.mutate(formData);
-  };
-
-  const handleLogout = () => {
-    logout.mutate({});
-  };
 
   return (
     <ProfileSection
       state={{
-        isPending: profile.isPending || logout.isPending || internProfile.isLoading,
+        isPending: profile.isPending || isLogoutPending || internProfile.isLoading,
         isError: profile.isError,
         errorMessage: profile.error?.message,
         profile: profile.data ?? null,
         internProfile: internProfile.data ?? null,
-        isUploading: uploadPhoto.isPending,
-        alert: ns.alert,
+        isUploading,
+        alert,
+        sessions: sessions.data ?? [],
+        isSessionsPending: sessions.isPending,
+        isRevokingSession,
+        changeEmailModalOpen,
+        isChangingEmail,
       }}
-      service={{ onUploadPhoto: handleUploadPhoto, onLogout: handleLogout }}
+      service={{
+        onUploadPhoto: actions.handleUploadPhoto,
+        onLogout: actions.handleLogout,
+        onOpenChangeEmail: actions.handleOpenChangeEmail,
+        onCloseChangeEmail: actions.handleCloseChangeEmail,
+        onChangeEmailSubmit: actions.handleChangeEmailSubmit,
+        onVerifyTokenSubmit: actions.handleVerifyTokenSubmit,
+        onRevokeSession: actions.handleRevokeSession,
+        onLogoutAll: actions.handleLogoutAll,
+      }}
     />
   );
 }

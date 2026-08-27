@@ -1,28 +1,22 @@
-import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import type { PickMergeInternship } from "@/types/api/internship.types";
+import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import type { PickMergeInternship } from '@/types/api/internship.types';
 
-import { Input } from "@/components/atoms/input";
+import { Input } from '@/components/atoms/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/atoms/select";
+} from '@/components/atoms/select';
 
-import { InstitutionCombobox } from "@/components/organisms/institution/InstitutionCombobox";
-import type { InstitutionResponse } from "@/types/api/institution.types";
-import { GraduationCap, Loader2, Save } from "lucide-react";
-import Link from "next/link";
-import type { FormEvent } from "react";
+import { InstitutionCombobox } from '@/components/organisms/institution/InstitutionCombobox';
+import type { InstitutionResponse } from '@/types/api/institution.types';
+import { GraduationCap, Loader2, Save } from 'lucide-react';
+import Link from 'next/link';
+import type { FormEvent } from 'react';
 
 interface InternProfileFormProps {
   formApplication: PickMergeInternship;
@@ -35,8 +29,8 @@ interface InternProfileFormProps {
 }
 
 const GENDER_OPTIONS = [
-  { value: "MALE", label: "Laki-laki" },
-  { value: "FEMALE", label: "Perempuan" },
+  { value: 'MALE', label: 'Laki-laki' },
+  { value: 'FEMALE', label: 'Perempuan' },
 ] as const;
 const InternProfileForm: React.FC<InternProfileFormProps> = ({
   formApplication,
@@ -55,8 +49,7 @@ const InternProfileForm: React.FC<InternProfileFormProps> = ({
           Data Magang
         </CardTitle>
         <CardDescription>
-          Informasi institusi pendidikan dan data diri yang digunakan selama
-          magang.
+          Informasi institusi pendidikan dan data diri yang digunakan selama magang.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -247,7 +240,7 @@ const InternProfileForm: React.FC<InternProfileFormProps> = ({
               ) : (
                 <Save className="size-4" />
               )}
-              {isPending ? "Menyimpan…" : "Simpan Profil Magang"}
+              {isPending ? 'Menyimpan…' : 'Simpan Profil Magang'}
             </Button>
           </div>
         </form>

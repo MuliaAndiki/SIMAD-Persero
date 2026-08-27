@@ -1,46 +1,30 @@
-import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
-import { Badge } from "@/components/atoms/badge";
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
+import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/atoms/select";
-import type { SkillResponse } from "@/types/api/internship.types";
-import {
-  AlertCircle,
-  Check,
-  Loader2,
-  Plus,
-  Save,
-  Search,
-  Sparkles,
-  Trash2,
-  X,
-} from "lucide-react";
+} from '@/components/atoms/select';
+import type { SkillResponse } from '@/types/api/internship.types';
+import { AlertCircle, Check, Loader2, Plus, Save, Search, Sparkles, Trash2, X } from 'lucide-react';
 
-export type ProficiencyValue = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+export type ProficiencyValue = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 
 const PROFICIENCY_OPTIONS = [
-  { value: "BEGINNER", label: "Pemula" },
-  { value: "INTERMEDIATE", label: "Menengah" },
-  { value: "ADVANCED", label: "Mahir" },
+  { value: 'BEGINNER', label: 'Pemula' },
+  { value: 'INTERMEDIATE', label: 'Menengah' },
+  { value: 'ADVANCED', label: 'Mahir' },
 ] as const;
 
 const PROFICIENCY_LABEL: Record<ProficiencyValue, string> = {
-  BEGINNER: "Pemula",
-  INTERMEDIATE: "Menengah",
-  ADVANCED: "Mahir",
+  BEGINNER: 'Pemula',
+  INTERMEDIATE: 'Menengah',
+  ADVANCED: 'Mahir',
 };
 
 /** Satu skill yang dipilih user (belum dikirim ke server). */
@@ -82,10 +66,7 @@ export interface ProfileSkillsSectionProps {
  * "Simpan" ditekan. Skill yang sudah tersimpan bisa dihapus lewat
  * DELETE /internships/remove-skill/:skillId. Section murni presentasi.
  */
-export function ProfileSkillsSection({
-  state,
-  service,
-}: ProfileSkillsSectionProps) {
+export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionProps) {
   if (state.isProfileLoading || state.isLoading) {
     return (
       <PhantomSkeleton loading>
@@ -113,9 +94,7 @@ export function ProfileSkillsSection({
         <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-500" />
           <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-foreground">
-              Profil magang belum lengkap
-            </span>
+            <span className="font-medium text-foreground">Profil magang belum lengkap</span>
             <span className="text-muted-foreground">
               Lengkapi profil magang terlebih dahulu sebelum menambahkan skill.
             </span>
@@ -143,9 +122,7 @@ export function ProfileSkillsSection({
             />
             <Select
               value={state.proficiency}
-              onValueChange={(value) =>
-                service.onProficiencyChange(value as ProficiencyValue)
-              }
+              onValueChange={(value) => service.onProficiencyChange(value as ProficiencyValue)}
             >
               <SelectTrigger className="w-full sm:w-56">
                 <SelectValue placeholder="Tingkat keahlian" />
@@ -164,12 +141,10 @@ export function ProfileSkillsSection({
             <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
               <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
               <div className="flex flex-col gap-0.5">
-                <span className="font-medium text-foreground">
-                  Gagal memuat daftar skill
-                </span>
+                <span className="font-medium text-foreground">Gagal memuat daftar skill</span>
                 <span className="text-muted-foreground">
                   {state.errorMessage ||
-                    "Terjadi kesalahan saat mengambil data. Silakan coba lagi."}
+                    'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}
                 </span>
               </div>
             </div>
@@ -184,17 +159,12 @@ export function ProfileSkillsSection({
                 const selected = isSelected(skill.id);
                 const isRemoving = state.removingSkillIds.has(skill.id);
                 return (
-                  <li
-                    key={skill.id}
-                    className="flex items-center justify-between gap-4 py-3"
-                  >
+                  <li key={skill.id} className="flex items-center justify-between gap-4 py-3">
                     <div className="flex flex-col items-start gap-1.5">
                       <span className="text-sm font-medium text-foreground">
-                        {skill.name || "Tanpa nama"}
+                        {skill.name || 'Tanpa nama'}
                       </span>
-                      {skill.category ? (
-                        <Badge variant="secondary">{skill.category}</Badge>
-                      ) : null}
+                      {skill.category ? <Badge variant="secondary">{skill.category}</Badge> : null}
                     </div>
                     {isAdded ? (
                       <div className="flex items-center gap-1.5">
@@ -206,7 +176,7 @@ export function ProfileSkillsSection({
                           type="button"
                           size="icon"
                           variant="ghost"
-                          aria-label={`Hapus ${skill.name || "skill"} dari profil`}
+                          aria-label={`Hapus ${skill.name || 'skill'} dari profil`}
                           disabled={isRemoving}
                           onClick={() => service.onRemoveSkill(skill.id)}
                         >
@@ -221,16 +191,12 @@ export function ProfileSkillsSection({
                       <Button
                         type="button"
                         size="sm"
-                        variant={selected ? "default" : "outline"}
+                        variant={selected ? 'default' : 'outline'}
                         disabled={!state.hasProfile}
                         onClick={() => service.onToggleSelect(skill)}
                       >
-                        {selected ? (
-                          <Check className="size-4" />
-                        ) : (
-                          <Plus className="size-4" />
-                        )}
-                        {selected ? "Dipilih" : "Pilih"}
+                        {selected ? <Check className="size-4" /> : <Plus className="size-4" />}
+                        {selected ? 'Dipilih' : 'Pilih'}
                       </Button>
                     )}
                   </li>
@@ -247,9 +213,7 @@ export function ProfileSkillsSection({
             <Save className="size-4 text-primary" />
             Skill Dipilih ({state.selectedSkills.length})
           </CardTitle>
-          <CardDescription>
-            Tinjau kembali pilihan Anda sebelum disimpan ke profil.
-          </CardDescription>
+          <CardDescription>Tinjau kembali pilihan Anda sebelum disimpan ke profil.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {state.selectedSkills.length === 0 ? (
@@ -259,18 +223,13 @@ export function ProfileSkillsSection({
           ) : (
             <ul className="divide-y">
               {state.selectedSkills.map(({ skill, proficiency }) => (
-                <li
-                  key={skill.id}
-                  className="flex items-center justify-between gap-4 py-3"
-                >
+                <li key={skill.id} className="flex items-center justify-between gap-4 py-3">
                   <div className="flex flex-col items-start gap-1.5">
                     <span className="text-sm font-medium text-foreground">
-                      {skill.name || "Tanpa nama"}
+                      {skill.name || 'Tanpa nama'}
                     </span>
                     <div className="flex flex-wrap items-center gap-1.5">
-                      {skill.category ? (
-                        <Badge variant="secondary">{skill.category}</Badge>
-                      ) : null}
+                      {skill.category ? <Badge variant="secondary">{skill.category}</Badge> : null}
                       <Badge>{PROFICIENCY_LABEL[proficiency]}</Badge>
                     </div>
                   </div>
@@ -278,7 +237,7 @@ export function ProfileSkillsSection({
                     type="button"
                     size="icon"
                     variant="ghost"
-                    aria-label={`Hapus ${skill.name || "skill"}`}
+                    aria-label={`Hapus ${skill.name || 'skill'}`}
                     onClick={() => service.onRemoveSelected(skill.id)}
                   >
                     <X className="size-4" />
@@ -291,11 +250,7 @@ export function ProfileSkillsSection({
           <Button
             type="button"
             className="sm:self-end"
-            disabled={
-              state.selectedSkills.length === 0 ||
-              !state.hasProfile ||
-              state.isSubmitting
-            }
+            disabled={state.selectedSkills.length === 0 || !state.hasProfile || state.isSubmitting}
             onClick={service.onSubmit}
           >
             {state.isSubmitting ? (
@@ -303,9 +258,7 @@ export function ProfileSkillsSection({
             ) : (
               <Save className="size-4" />
             )}
-            {state.isSubmitting
-              ? "Menyimpan…"
-              : `Simpan ${state.selectedSkills.length} Skill`}
+            {state.isSubmitting ? 'Menyimpan…' : `Simpan ${state.selectedSkills.length} Skill`}
           </Button>
         </CardContent>
       </Card>

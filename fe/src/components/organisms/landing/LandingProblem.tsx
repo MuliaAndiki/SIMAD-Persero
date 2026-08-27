@@ -1,19 +1,19 @@
-"use client";
-import React, { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+'use client';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
-  FileStack,
-  ShieldAlert,
-  Clock,
   ArrowRight,
-  ShieldCheck,
+  CheckCircle,
+  Clock,
+  FileStack,
   MapPin,
   Search,
-  CheckCircle,
-} from "lucide-react";
+  ShieldAlert,
+  ShieldCheck,
+} from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
 
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -21,43 +21,43 @@ export function LandingProblem() {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
       const isMobile = window.innerWidth < 768;
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: container.current,
-          start: isMobile ? "top 80%" : "top 70%",
-          end: "bottom center",
-          toggleActions: "play none none reverse",
+          start: isMobile ? 'top 80%' : 'top 70%',
+          end: 'bottom center',
+          toggleActions: 'play none none reverse',
         },
       });
 
       tl.fromTo(
-        ".problem-title",
+        '.problem-title',
         { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' },
       )
         .fromTo(
-          ".problem-card-left",
+          '.problem-card-left',
           { opacity: 0, x: -30 },
-          { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
-          "-=0.4",
+          { opacity: 1, x: 0, duration: 0.6, ease: 'power3.out' },
+          '-=0.4',
         )
         .fromTo(
-          ".problem-arrow",
+          '.problem-arrow',
           { opacity: 0, scale: 0.5 },
-          { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" },
-          "-=0.2",
+          { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.7)' },
+          '-=0.2',
         )
         .fromTo(
-          ".problem-card-right",
+          '.problem-card-right',
           { opacity: 0, x: 30 },
-          { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
-          "-=0.2",
+          { opacity: 1, x: 0, duration: 0.6, ease: 'power3.out' },
+          '-=0.2',
         );
 
-      gsap.utils.toArray(".problem-stagger").forEach((el, index) => {
+      gsap.utils.toArray('.problem-stagger').forEach((el, _index) => {
         gsap.fromTo(
           el as Element,
           { opacity: 0, y: 15 },
@@ -65,10 +65,10 @@ export function LandingProblem() {
             opacity: 1,
             y: 0,
             duration: 0.4,
-            ease: "power2.out",
+            ease: 'power2.out',
             scrollTrigger: {
               trigger: el as Element,
-              start: "top 90%",
+              start: 'top 90%',
             },
           },
         );
@@ -90,9 +90,8 @@ export function LandingProblem() {
             Mengapa Beralih ke SIMAD?
           </h2>
           <p className="text-muted-foreground text-lg">
-            Proses manual yang memakan waktu dan berisiko kehilangan data kini
-            tidak lagi menjadi kendala. Transformasi digital membuat segalanya
-            lebih mudah dilacak.
+            Proses manual yang memakan waktu dan berisiko kehilangan data kini tidak lagi menjadi
+            kendala. Transformasi digital membuat segalanya lebih mudah dilacak.
           </p>
         </div>
 
@@ -116,15 +115,13 @@ export function LandingProblem() {
               <li className="problem-stagger flex items-start gap-3">
                 <ShieldAlert className="w-5 h-5 text-destructive/70 shrink-0 mt-0.5" />
                 <span className="text-foreground/80">
-                  Rekapitulasi absensi dilakukan secara manual setiap akhir
-                  bulan.
+                  Rekapitulasi absensi dilakukan secara manual setiap akhir bulan.
                 </span>
               </li>
               <li className="problem-stagger flex items-start gap-3">
                 <ShieldAlert className="w-5 h-5 text-destructive/70 shrink-0 mt-0.5" />
                 <span className="text-foreground/80">
-                  Sertifikat diketik dan dicetak satu per satu per
-                  siswa/mahasiswa.
+                  Sertifikat diketik dan dicetak satu per satu per siswa/mahasiswa.
                 </span>
               </li>
               <li className="problem-stagger flex items-start gap-3">
@@ -157,36 +154,28 @@ export function LandingProblem() {
             <ul className="space-y-4">
               <li className="problem-stagger flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-foreground/80 font-medium">
-                  Paperless
-                </span>
+                <span className="text-foreground/80 font-medium">Paperless</span>
                 <span className="text-muted-foreground hidden sm:inline">
                   - Pengajuan & dokumen terpusat.
                 </span>
               </li>
               <li className="problem-stagger flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-foreground/80 font-medium">
-                  Validasi Lokasi
-                </span>
+                <span className="text-foreground/80 font-medium">Validasi Lokasi</span>
                 <span className="text-muted-foreground hidden sm:inline">
                   - Absensi tercatat real-time.
                 </span>
               </li>
               <li className="problem-stagger flex items-start gap-3">
                 <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-foreground/80 font-medium">
-                  E-Certificate
-                </span>
+                <span className="text-foreground/80 font-medium">E-Certificate</span>
                 <span className="text-muted-foreground hidden sm:inline">
                   - Dihasilkan otomatis via sistem.
                 </span>
               </li>
               <li className="problem-stagger flex items-start gap-3">
                 <Search className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-foreground/80 font-medium">
-                  Monitoring
-                </span>
+                <span className="text-foreground/80 font-medium">Monitoring</span>
                 <span className="text-muted-foreground hidden sm:inline">
                   - Pelacakan aktivitas oleh supervisor transparan.
                 </span>

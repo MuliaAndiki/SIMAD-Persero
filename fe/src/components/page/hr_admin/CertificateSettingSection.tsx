@@ -1,17 +1,17 @@
-import { Button } from "@/components/atoms/button";
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
-} from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
-import { Badge } from "@/components/atoms/badge";
-import { Award, Image as ImageIcon, Save, UploadCloud } from "lucide-react";
-import { useState } from "react";
-import type { FormEvent } from "react";
+} from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
+import { Award, Image as ImageIcon, Save, UploadCloud } from 'lucide-react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 
 export interface CertificateSettingSectionState {
   isPending: boolean;
@@ -32,10 +32,7 @@ export interface CertificateSettingSectionProps {
   service: CertificateSettingSectionService;
 }
 
-export function CertificateSettingSection({
-  state,
-  service,
-}: CertificateSettingSectionProps) {
+export function CertificateSettingSection({ state, service }: CertificateSettingSectionProps) {
   const [signerName, setSignerName] = useState(state.signerName);
   const [signerRole, setSignerRole] = useState(state.signerRole);
   const [signatureFile, setSignatureFile] = useState<File | undefined>();
@@ -57,12 +54,9 @@ export function CertificateSettingSection({
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Pengaturan Sertifikat
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Pengaturan Sertifikat</h1>
         <p className="text-sm text-muted-foreground">
-          Konfigurasi informasi penandatangan dan template sertifikat untuk
-          peserta magang.
+          Konfigurasi informasi penandatangan dan template sertifikat untuk peserta magang.
         </p>
       </header>
 
@@ -74,8 +68,8 @@ export function CertificateSettingSection({
               <CardHeader>
                 <CardTitle>Identitas Penandatangan</CardTitle>
                 <CardDescription>
-                  Informasi ini akan tercetak pada bagian tanda tangan di semua
-                  sertifikat magang yang diterbitkan.
+                  Informasi ini akan tercetak pada bagian tanda tangan di semua sertifikat magang
+                  yang diterbitkan.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -144,8 +138,7 @@ export function CertificateSettingSection({
                           />
                         </label>
                         <p className="text-xs text-muted-foreground mt-1">
-                          PNG atau JPG (Maks. 2MB). Disarankan berlatar
-                          transparan.
+                          PNG atau JPG (Maks. 2MB). Disarankan berlatar transparan.
                         </p>
                       </div>
 
@@ -164,13 +157,9 @@ export function CertificateSettingSection({
                 </div>
               </CardContent>
               <CardFooter className="bg-muted/50 py-4 px-6">
-                <Button
-                  type="submit"
-                  disabled={state.isPending || isSaving}
-                  className="ml-auto"
-                >
+                <Button type="submit" disabled={state.isPending || isSaving} className="ml-auto">
                   <Save className="mr-2 size-4" />
-                  {isSaving ? "Menyimpan..." : "Simpan Pengaturan"}
+                  {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}
                 </Button>
               </CardFooter>
             </Card>

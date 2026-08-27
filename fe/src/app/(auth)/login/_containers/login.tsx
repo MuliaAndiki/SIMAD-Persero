@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { LoginSection } from "@/components/page/auth/login/LoginSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
-import type { LoginBody } from "@/types/api/auth.types";
+import { LoginSection } from '@/components/page/auth/login/LoginSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
+import type { LoginBody } from '@/types/api/auth.types';
 
-import { useState } from "react";
+import { useState } from 'react';
 
 export default function LoginContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
   const [formLogin, setFormLogin] = useState<LoginBody>({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -36,10 +36,9 @@ export default function LoginContainer() {
 
   const handleGoogleError = () => {
     ns.alert.toast({
-      title: "Gagal login dengan Google",
-      message:
-        "Tidak dapat menyelesaikan login dengan Google. Silakan coba lagi.",
-      icon: "error",
+      title: 'Gagal login dengan Google',
+      message: 'Tidak dapat menyelesaikan login dengan Google. Silakan coba lagi.',
+      icon: 'error',
     });
   };
 

@@ -1,12 +1,12 @@
-import { LandingBackground } from "../../organisms/landing/LandingBackground";
-import { LandingHero } from "../../organisms/landing/LandingHero";
-import { LandingProblem } from "../../organisms/landing/LandingProblem";
-import { LandingWorkflow } from "../../organisms/landing/LandingWorkflow";
-import { LandingFeatures } from "../../organisms/landing/LandingFeatures";
-import { LandingAttendance } from "../../organisms/landing/LandingAttendance";
-import { LandingCertificate } from "../../organisms/landing/LandingCertificate";
-import { LandingBenefits } from "../../organisms/landing/LandingBenefits";
-import { LandingCTA } from "../../organisms/landing/LandingCTA";
+import { LandingAttendance } from '../../organisms/landing/LandingAttendance';
+import { LandingBackground } from '../../organisms/landing/LandingBackground';
+import { LandingBenefits } from '../../organisms/landing/LandingBenefits';
+import { LandingCTA } from '../../organisms/landing/LandingCTA';
+import { LandingCertificate } from '../../organisms/landing/LandingCertificate';
+import { LandingFeatures } from '../../organisms/landing/LandingFeatures';
+import { LandingHero } from '../../organisms/landing/LandingHero';
+import { LandingProblem } from '../../organisms/landing/LandingProblem';
+import { LandingWorkflow } from '../../organisms/landing/LandingWorkflow';
 
 export function LandingSection() {
   return (
