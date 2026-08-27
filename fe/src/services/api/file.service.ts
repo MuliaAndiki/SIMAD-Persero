@@ -15,12 +15,21 @@ const { client } = Api();
 class FileService {
   /**
    * POST /files/upload
-   * Mengunggah file (FormData dengan field 'file').
+   * Mengunggah file (FormData dengan field 'file' atau JSON dengan 'url').
    */
-  public async Upload(formData: FormData): Promise<TResponse<FileResponse>> {
-    const res = await client.PostFormDataResponse<FileResponse>(FILE_ENDPOINTS.UPLOAD, formData);
+  public async Upload(
+    payload: FormData | { url: string; originalName?: string; mimeType?: string; size?: number },
+  ): Promise<TResponse<FileResponse>> {
+    if (payload instanceof FormData) {
+      const res = await client.PostFormDataResponse<FileResponse>(FILE_ENDPOINTS.UPLOAD, payload);
+      return toServiceResponse(res, {
+        message: 'File berhasil diunggah',
+        statusCode: 201,
+      });
+    }
+    const res = await client.PostResponse<FileResponse>(FILE_ENDPOINTS.UPLOAD, payload);
     return toServiceResponse(res, {
-      message: 'File berhasil diunggah',
+      message: 'File berhasil didaftarkan',
       statusCode: 201,
     });
   }

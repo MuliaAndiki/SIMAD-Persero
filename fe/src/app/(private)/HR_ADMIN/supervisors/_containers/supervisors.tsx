@@ -10,10 +10,6 @@ import type { CreateSupervisorBody, UpdateSupervisorBody } from '@/types/api/sup
 
 /**
  * Container halaman Supervisor (HR Admin) — orchestration layer.
- *
- * Mengelola list supervisor (GET /supervisors), detail + assignment
- * (GET /supervisors/:id), assign intern (POST /supervisors/:id/assign),
- * dan lepas assignment (DELETE /supervisors/:id/assignments/:assignmentId).
  */
 export default function HrSupervisorsContainer() {
   const api = useApi();
@@ -62,6 +58,7 @@ export default function HrSupervisorsContainer() {
   const createSupervisor = api.supervisor.mutate.create();
   const updateSupervisor = api.supervisor.mutate.update();
   const deleteSupervisor = api.supervisor.mutate.delete();
+  const sendNotification = api.notification.mutate.send();
 
   useEffect(() => {
     if (editingId && editingDetail.data) {
@@ -146,8 +143,6 @@ export default function HrSupervisorsContainer() {
   }, []);
 
   const handleSubmitForm = useCallback(async () => {
-    // Hanya field CreateSupervisorBody yang dikirim — officeId hanya dipakai
-    // untuk memfilter departemen di UI, bukan sebagai payload.
     const createBody: CreateSupervisorBody = {
       fullName: formData.fullName,
       email: formData.email,
@@ -192,6 +187,18 @@ export default function HrSupervisorsContainer() {
     [deleteSupervisor, ns.alert],
   );
 
+  const handleSendNotification = useCallback(
+    async (data: {
+      title: string;
+      message: string;
+      typeCode?: string;
+      isBroadcast?: boolean;
+    }) => {
+      await sendNotification.mutateAsync(data);
+    },
+    [sendNotification],
+  );
+
   return (
     <SupervisorsSection
       state={{
@@ -217,6 +224,7 @@ export default function HrSupervisorsContainer() {
           (Boolean(editingId) && editingDetail.isPending),
         editingData: editingId && editingDetail.data ? editingDetail.data : null,
         formData,
+        isNotificationPending: sendNotification.isPending,
       }}
       actions={{
         onKeywordChange: setKeyword,
@@ -234,6 +242,7 @@ export default function HrSupervisorsContainer() {
         onChangeForm: handleChangeForm,
         onSubmitForm: handleSubmitForm,
         onDeleteSupervisor: handleDeleteSupervisor,
+        onSendNotification: handleSendNotification,
       }}
     />
   );

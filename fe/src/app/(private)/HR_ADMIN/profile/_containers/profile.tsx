@@ -1,45 +1,53 @@
 'use client';
 
 import { ProfileSection } from '@/components/page/profile/ProfileSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import { useApi } from '@/hooks/useService/useApi';
+import { useProfileLogic } from '@/hooks/useProfileLogic';
 
 /**
- * Container halaman profil HR Admin (GET /users/profile; POST /users/profile/photo).
+ * Container halaman profil HR Admin (GET /users/profile; POST /users/profile/photo; GET /auth/sessions).
  *
- * Logika, state, & API ada di sini; ProfileSection hanya presentasi.
+ * Logika, state, & API ada di useProfileLogic; ProfileSection hanya presentasi.
  * Data magang (internProfile) tidak relevan untuk role HR — dikosongkan.
  */
 export default function HrProfileContainer() {
-  const api = useApi();
-  const ns = useAppNameSpace();
-
-  const profile = api.user.query.profile();
-  const logout = api.auth.mutate.logout();
-  const uploadPhoto = api.user.mutate.uploadPhoto();
-
-  const handleUploadPhoto = (file: File) => {
-    const formData = new FormData();
-    formData.append('photo', file);
-    uploadPhoto.mutate(formData);
-  };
-
-  const handleLogout = () => {
-    logout.mutate({});
-  };
+  const {
+    profile,
+    sessions,
+    changeEmailModalOpen,
+    isUploading,
+    isChangingEmail,
+    isRevokingSession,
+    isLogoutPending,
+    alert,
+    actions,
+  } = useProfileLogic();
 
   return (
     <ProfileSection
       state={{
-        isPending: profile.isPending || logout.isPending,
+        isPending: profile.isPending || isLogoutPending,
         isError: profile.isError,
         errorMessage: profile.error?.message,
         profile: profile.data ?? null,
         internProfile: null,
-        isUploading: uploadPhoto.isPending,
-        alert: ns.alert,
+        isUploading,
+        alert,
+        sessions: sessions.data ?? [],
+        isSessionsPending: sessions.isPending,
+        isRevokingSession,
+        changeEmailModalOpen,
+        isChangingEmail,
       }}
-      service={{ onUploadPhoto: handleUploadPhoto, onLogout: handleLogout }}
+      service={{
+        onUploadPhoto: actions.handleUploadPhoto,
+        onLogout: actions.handleLogout,
+        onOpenChangeEmail: actions.handleOpenChangeEmail,
+        onCloseChangeEmail: actions.handleCloseChangeEmail,
+        onChangeEmailSubmit: actions.handleChangeEmailSubmit,
+        onVerifyTokenSubmit: actions.handleVerifyTokenSubmit,
+        onRevokeSession: actions.handleRevokeSession,
+        onLogoutAll: actions.handleLogoutAll,
+      }}
     />
   );
 }

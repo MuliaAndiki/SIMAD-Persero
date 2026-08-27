@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { InternsSection } from "@/components/page/supervisor/InternsSection";
-import { useApi } from "@/hooks/useService/useApi";
+import { InternsSection } from '@/components/page/supervisor/InternsSection';
+import { useApi } from '@/hooks/useService/useApi';
 
 /**
  * Container halaman peserta bimbingan supervisor (GET /attendance/supervisor).

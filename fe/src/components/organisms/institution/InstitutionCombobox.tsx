@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { Button } from "@/components/atoms/button";
+import { Button } from '@/components/atoms/button';
 import {
   Command,
   CommandEmpty,
@@ -8,14 +8,10 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/atoms/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/atoms/popover";
-import type { InstitutionResponse } from "@/types/api/institution.types";
-import { Building2, ChevronsUpDown } from "lucide-react";
+} from '@/components/atoms/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/atoms/popover';
+import type { InstitutionResponse } from '@/types/api/institution.types';
+import { Building2, ChevronsUpDown } from 'lucide-react';
 
 export function InstitutionCombobox({
   institutions,
@@ -49,17 +45,12 @@ export function InstitutionCombobox({
               ) : null}
             </span>
           ) : (
-            <span className="text-muted-foreground">
-              Cari & pilih institusi…
-            </span>
+            <span className="text-muted-foreground">Cari & pilih institusi…</span>
           )}
           <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className="w-[min(28rem,calc(100vw-2rem))] p-0"
-      >
+      <PopoverContent align="start" className="w-[min(28rem,calc(100vw-2rem))] p-0">
         <Command>
           <CommandInput placeholder="Cari nama institusi…" />
           <CommandList>
@@ -80,7 +71,7 @@ export function InstitutionCombobox({
                   {institution.province ? (
                     <span className="">
                       — {institution.province}
-                      {institution.city ? `, ${institution.city}` : ""}
+                      {institution.city ? `, ${institution.city}` : ''}
                     </span>
                   ) : null}
                 </CommandItem>

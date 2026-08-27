@@ -14,13 +14,18 @@ export function useAuditLogList(query?: AuditLogQuery) {
   });
 }
 
-export function useUserActivity(params: Pick<AuditLogUserParams, 'userId'>, query?: AuditLogQuery) {
+export function useUserActivity(
+  params: Pick<AuditLogUserParams, 'userId'>,
+  query?: AuditLogQuery,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: queryKey.auditLog.userActivity(params.userId, query),
     queryFn: async () => {
       const res = await Api.AuditLog.UserActivity(params, query);
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }
 

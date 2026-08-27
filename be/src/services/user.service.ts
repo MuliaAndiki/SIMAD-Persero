@@ -135,6 +135,34 @@ class UserService {
     return this.loadProfile(user.id);
   }
 
+  // Register avatar photo using R2 URL uploaded directly from FE
+  public async savePhotoUrl(user: AuthUser, url: string, originalName?: string) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { avatarFile: true },
+    });
+    if (!dbUser || dbUser.deletedAt) {
+      throw new AppError(404, "Account not found");
+    }
+
+    const file = await FileService.saveUrl(user.id, {
+      url,
+      originalName: originalName || "avatar.jpg",
+      mimeType: "image/jpeg",
+    });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { avatarFileId: file.id },
+    });
+
+    if (dbUser.avatarFileId && dbUser.avatarFileId !== file.id) {
+      await FileService.remove(dbUser.avatarFileId, user).catch(() => {});
+    }
+
+    return this.loadProfile(user.id);
+  }
+
   // PATCH /users/change-password
   public async changePassword(userId: string, body: ChangePasswordBody) {
     const user = await prisma.user.findUnique({ where: { id: userId } });

@@ -43,8 +43,13 @@ export function useUpdateProfile() {
 
 export function useUploadPhoto() {
   const ns = useAppNameSpace();
-  return useMutation<TResponse<ProfileResponse>, Error, FormData, UserCacheContext>({
-    mutationFn: (formData: FormData) => Api.User.UploadPhoto(formData),
+  return useMutation<
+    TResponse<ProfileResponse>,
+    Error,
+    FormData | { url: string; originalName?: string },
+    UserCacheContext
+  >({
+    mutationFn: (payload) => Api.User.UploadPhoto(payload),
     onSettled: async () => {
       await ns.queryClient.invalidateQueries({ queryKey: queryKey.userRoot() });
       await ns.queryClient.invalidateQueries({ queryKey: queryKey.authRoot() });

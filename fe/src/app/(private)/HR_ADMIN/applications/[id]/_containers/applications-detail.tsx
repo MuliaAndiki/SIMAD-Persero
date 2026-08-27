@@ -1,38 +1,36 @@
-"use client";
+'use client';
 
 import type {
   ApproveApplicationFormField,
   ApproveApplicationFormState,
-} from "@/components/organisms/application/ApplicationApproveForm";
+} from '@/components/organisms/application/ApplicationApproveForm';
 import type {
   RejectApplicationFormField,
   RejectApplicationFormState,
-} from "@/components/organisms/application/ApplicationRejectForm";
-import { ApplicationReviewSection } from "@/components/page/hr/ApplicationReviewSection";
-import { useApi } from "@/hooks/useService/useApi";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+} from '@/components/organisms/application/ApplicationRejectForm';
+import { ApplicationReviewSection } from '@/components/page/hr/ApplicationReviewSection';
+import { useApi } from '@/hooks/useService/useApi';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 
 const EMPTY_APPROVE_FORM: ApproveApplicationFormState = {
-  departmentId: "",
-  officeLocationId: "",
-  supervisorId: "",
-  notes: "",
+  departmentId: '',
+  officeLocationId: '',
+  supervisorId: '',
+  notes: '',
 };
 
 const EMPTY_REJECT_FORM: RejectApplicationFormState = {
-  reason: "",
+  reason: '',
 };
 
 export default function HrApplicationDetailContainer({ id }: { id: string }) {
   const api = useApi();
   const router = useRouter();
 
-  const [mode, setMode] = useState<"view" | "approve" | "reject">("view");
-  const [approveForm, setApproveForm] =
-    useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
-  const [rejectForm, setRejectForm] =
-    useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
+  const [mode, setMode] = useState<'view' | 'approve' | 'reject'>('view');
+  const [approveForm, setApproveForm] = useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
+  const [rejectForm, setRejectForm] = useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
 
   const detail = api.application.query.detail({ id }, { enabled: Boolean(id) });
 
@@ -59,16 +57,16 @@ export default function HrApplicationDetailContainer({ id }: { id: string }) {
 
   const handleOpenApprove = useCallback(() => {
     setApproveForm(EMPTY_APPROVE_FORM);
-    setMode("approve");
+    setMode('approve');
   }, []);
 
   const handleOpenReject = useCallback(() => {
     setRejectForm(EMPTY_REJECT_FORM);
-    setMode("reject");
+    setMode('reject');
   }, []);
 
   const handleBackToView = useCallback(() => {
-    setMode("view");
+    setMode('view');
   }, []);
 
   const handleSubmitApprove = useCallback(async () => {
@@ -82,10 +80,10 @@ export default function HrApplicationDetailContainer({ id }: { id: string }) {
         notes: approveForm.notes || undefined,
       },
     });
-    setMode("view");
+    setMode('view');
     setApproveForm(EMPTY_APPROVE_FORM);
     setRejectForm(EMPTY_REJECT_FORM);
-    router.push("/HR_ADMIN/applications");
+    router.push('/HR_ADMIN/applications');
   }, [approve, approveForm, id, router]);
 
   const handleSubmitReject = useCallback(async () => {
@@ -94,10 +92,10 @@ export default function HrApplicationDetailContainer({ id }: { id: string }) {
       params: { id },
       body: { reason: rejectForm.reason.trim() },
     });
-    setMode("view");
+    setMode('view');
     setApproveForm(EMPTY_APPROVE_FORM);
     setRejectForm(EMPTY_REJECT_FORM);
-    router.push("/HR_ADMIN/applications");
+    router.push('/HR_ADMIN/applications');
   }, [reject, rejectForm, id, router]);
 
   return (

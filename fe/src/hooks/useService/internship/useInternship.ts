@@ -12,14 +12,14 @@ import {
   useRemoveSkillFromIntern,
   useStartInternship,
   useUpdateSkill,
-} from "./state/mutate";
+} from './state/mutate';
 import {
   useInternshipDetail,
   useInternshipList,
   useMyInternProfile,
   useMyInternship,
   useSkills,
-} from "./state/query";
+} from './state/query';
 
 export const useInternship = () => {
   return {

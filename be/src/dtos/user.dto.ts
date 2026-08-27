@@ -26,11 +26,15 @@ export const UpdateProfileDto = t.Partial(
 
 // POST /users/profile/photo
 export const UploadProfilePhotoDto = t.Object({
-  photo: t.File({
-    type: ['image/jpeg', 'image/png'],
-    maxSize: MAX_FILE_SIZE,
-    description: 'Foto profil JPG/JPEG/PNG maksimal 5 MB',
-  }),
+  photo: t.Optional(
+    t.File({
+      type: ['image/jpeg', 'image/png'],
+      maxSize: MAX_FILE_SIZE,
+      description: 'Foto profil JPG/JPEG/PNG maksimal 5 MB',
+    }),
+  ),
+  url: t.Optional(t.String({ description: 'Public URL R2 dari foto profil' })),
+  originalName: t.Optional(t.String()),
 });
 
 // PATCH /users/change-password

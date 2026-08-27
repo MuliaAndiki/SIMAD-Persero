@@ -5,7 +5,16 @@ import { ApplicationDetailField } from '@/components/organisms/application/Appli
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
 import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
 import { formatDate } from '@/utils/string.format';
-import { CalendarCheck, CalendarClock, CheckCircle2, FileText, XCircle } from 'lucide-react';
+import {
+  CalendarCheck,
+  CalendarClock,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  FileText,
+  XCircle,
+} from 'lucide-react';
+import { useState } from 'react';
 
 // Hanya SUBMITTED / UNDER_REVIEW yang bisa diapprove/direject —
 // diselaraskan dengan gate backend (application.service.ts approve/reject).
@@ -20,12 +29,15 @@ export interface ApplicationReviewDetailProps {
 /**
  * ApplicationReviewDetail — organism isi dialog review pengajuan.
  * Presentasi murni; status yang bisa direview didefinisikan di sini.
+ * Menyediakan preview embed PDF langsung untuk Surat Pengantar Univ.
  */
 export function ApplicationReviewDetail({
   app,
   onApprove,
   onReject,
 }: ApplicationReviewDetailProps) {
+  const [showPdfPreview, setShowPdfPreview] = useState(true);
+
   if (!app) return null;
 
   const reviewable = REVIEWABLE_STATUSES.includes(app.status as ApplicationStatusValue);
@@ -96,19 +108,45 @@ export function ApplicationReviewDetail({
       )}
 
       {app.introductionLetterFile && (
-        <div className="flex items-center gap-3 rounded-lg border p-3">
-          <FileText className="size-4 shrink-0 text-primary" />
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="truncate text-sm font-medium">
-              {app.introductionLetterFile.originalName}
-            </span>
-            <span className="text-xs text-muted-foreground">Surat pengantar</span>
+        <div className="flex flex-col gap-3 rounded-lg border p-4 bg-card">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <FileText className="size-5 shrink-0 text-primary" />
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="truncate text-sm font-semibold">
+                  {app.introductionLetterFile.originalName}
+                </span>
+                <span className="text-xs text-muted-foreground">Surat Pengantar Universitas</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPdfPreview((prev) => !prev)}
+              >
+                {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
+              </Button>
+              {app.introductionLetterFile.url && (
+                <Button asChild variant="outline" size="sm">
+                  <a href={app.introductionLetterFile.url} target="_blank" rel="noreferrer">
+                    Buka di Tab Baru
+                  </a>
+                </Button>
+              )}
+            </div>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <a href={app.introductionLetterFile.url} target="_blank" rel="noreferrer">
-              Lihat
-            </a>
-          </Button>
+
+          {showPdfPreview && app.introductionLetterFile.url && (
+            <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
+              <iframe
+                src={app.introductionLetterFile.url}
+                className="h-[520px] w-full border-0"
+                title={`Preview ${app.introductionLetterFile.originalName}`}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -130,7 +168,7 @@ export function ApplicationReviewDetail({
       )}
 
       {reviewable && (
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between pt-2 border-t">
           <Button variant="destructive" onClick={onReject}>
             <XCircle className="size-4" />
             Tolak

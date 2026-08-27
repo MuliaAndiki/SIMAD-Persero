@@ -1,20 +1,16 @@
-"use client";
+'use client';
 
-import {
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/atoms";
-import { ApplicationCompactList } from "@/components/organisms/application/ApplicationCompactList";
-import { ApplicationHistoryList } from "@/components/organisms/application/ApplicationHistoryList";
-import type { ApplicationResponse } from "@/types/api/application.types";
-import type { NotificationResponse } from "@/types/api/notification.types";
-import { FileText } from "lucide-react";
-import Link from "next/link";
-import { NotificationDropdownFooter } from "./NotificationDropdownFooter";
-import { NotificationDropdownHeader } from "./NotificationDropdownHeader";
-import { NotificationList } from "./NotificationList";
-import { NotificationListSkeleton } from "./NotificationListSkeleton";
+import { DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/atoms';
+import { ApplicationCompactList } from '@/components/organisms/application/ApplicationCompactList';
+import { ApplicationHistoryList } from '@/components/organisms/application/ApplicationHistoryList';
+import type { ApplicationResponse } from '@/types/api/application.types';
+import type { NotificationResponse } from '@/types/api/notification.types';
+import { FileText } from 'lucide-react';
+import Link from 'next/link';
+import { NotificationDropdownFooter } from './NotificationDropdownFooter';
+import { NotificationDropdownHeader } from './NotificationDropdownHeader';
+import { NotificationList } from './NotificationList';
+import { NotificationListSkeleton } from './NotificationListSkeleton';
 
 export interface NotificationDropdownContentProps {
   role?: string;
@@ -52,15 +48,12 @@ export function NotificationDropdownContent({
   onMarkAllAsRead,
   onMarkAsRead,
 }: NotificationDropdownContentProps) {
-  const isIntern = role === "INTERN";
-  const isHr = role === "HR_ADMIN";
+  const isIntern = role === 'INTERN';
+  const isHr = role === 'HR_ADMIN';
 
   return (
     <DropdownMenuContent align="end" className="w-80">
-      <NotificationDropdownHeader
-        unreadCount={unreadCount}
-        onMarkAllAsRead={onMarkAllAsRead}
-      />
+      <NotificationDropdownHeader unreadCount={unreadCount} onMarkAllAsRead={onMarkAllAsRead} />
       <DropdownMenuSeparator />
 
       {/* Riwayat Pengajuan — khusus INTERN */}
@@ -71,10 +64,7 @@ export function NotificationDropdownContent({
               <FileText className="size-3.5" />
               Riwayat Pengajuan
             </span>
-            <Link
-              href="/INTERN/application"
-              className="text-primary hover:underline"
-            >
+            <Link href="/INTERN/application" className="text-primary hover:underline">
               Lihat semua
             </Link>
           </DropdownMenuLabel>
@@ -114,17 +104,11 @@ export function NotificationDropdownContent({
       {notificationsPending ? (
         <NotificationListSkeleton />
       ) : (
-        <NotificationList
-          notifications={notifications}
-          onMarkAsRead={onMarkAsRead}
-        />
+        <NotificationList notifications={notifications} onMarkAsRead={onMarkAsRead} />
       )}
 
       <DropdownMenuSeparator />
-      <NotificationDropdownFooter
-        href={rolePath}
-        description="Buka halaman sesuai role Anda"
-      />
+      <NotificationDropdownFooter href={rolePath} description="Buka halaman sesuai role Anda" />
     </DropdownMenuContent>
   );
 }

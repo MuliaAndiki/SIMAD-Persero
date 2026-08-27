@@ -3,7 +3,7 @@ import SupervisorProfileContainer from './_containers/profile';
 
 export const metadata: Metadata = {
   title: 'Profil - SIMAD',
-  description: 'Profil HR Admin PLN Persero',
+  description: 'Profil Supervisor PLN Persero',
 };
 
 export default function SupervisorAdminProfilePage() {

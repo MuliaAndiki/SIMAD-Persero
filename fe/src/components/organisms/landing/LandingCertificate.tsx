@@ -1,16 +1,10 @@
-"use client";
-import React, { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import {
-  Download,
-  CheckCircle,
-  FileSignature,
-  ArrowRight,
-  Award,
-} from "lucide-react";
+'use client';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ArrowRight, Award, CheckCircle, Download, FileSignature } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
 
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -18,33 +12,33 @@ export function LandingCertificate() {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: ".cert-container",
-          start: "top 75%",
-          toggleActions: "play none none reverse",
+          trigger: '.cert-container',
+          start: 'top 75%',
+          toggleActions: 'play none none reverse',
         },
       });
 
       tl.fromTo(
-        ".cert-document",
+        '.cert-document',
         { opacity: 0, y: 50, rotateX: 20 },
         {
           opacity: 1,
           y: 0,
           rotateX: 0,
           duration: 1,
-          ease: "power3.out",
+          ease: 'power3.out',
           transformPerspective: 1000,
         },
       );
 
       tl.fromTo(
-        ".cert-step",
+        '.cert-step',
         { opacity: 0, x: -20 },
-        { opacity: 1, x: 0, duration: 0.5, stagger: 0.2, ease: "power2.out" },
-        "-=0.5",
+        { opacity: 1, x: 0, duration: 0.5, stagger: 0.2, ease: 'power2.out' },
+        '-=0.5',
       );
     }, container);
     return () => ctx.revert();
@@ -63,9 +57,8 @@ export function LandingCertificate() {
             Penerbitan Sertifikat Otomatis
           </h2>
           <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
-            SIMAD meniadakan rekapitulasi data akhir secara manual. Sertifikat
-            digital dihasilkan otomatis setelah seluruh persyaratan magang
-            terpenuhi.
+            SIMAD meniadakan rekapitulasi data akhir secara manual. Sertifikat digital dihasilkan
+            otomatis setelah seluruh persyaratan magang terpenuhi.
           </p>
 
           <div className="space-y-6">
@@ -74,9 +67,7 @@ export function LandingCertificate() {
                 <CheckCircle className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-foreground text-lg">
-                  Magang Selesai
-                </h4>
+                <h4 className="font-semibold text-foreground text-lg">Magang Selesai</h4>
                 <p className="text-muted-foreground text-sm">
                   Peserta mencapai akhir durasi magang.
                 </p>
@@ -88,9 +79,7 @@ export function LandingCertificate() {
                 <FileSignature className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-foreground text-lg">
-                  Persyaratan Diverifikasi
-                </h4>
+                <h4 className="font-semibold text-foreground text-lg">Persyaratan Diverifikasi</h4>
                 <p className="text-muted-foreground text-sm">
                   Validasi kehadiran minimal & evaluasi disetujui.
                 </p>
@@ -102,9 +91,7 @@ export function LandingCertificate() {
                 <Download className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-foreground text-lg">
-                  Sertifikat Diterbitkan
-                </h4>
+                <h4 className="font-semibold text-foreground text-lg">Sertifikat Diterbitkan</h4>
                 <p className="text-muted-foreground text-sm">
                   E-certificate dapat diunduh kapan saja.
                 </p>
@@ -117,13 +104,13 @@ export function LandingCertificate() {
         <div className="w-full lg:w-7/12 perspective-1000">
           <div className="cert-document relative aspect-[1.414/1] bg-card border-[3px] border-border rounded-xl shadow-2xl p-6 md:p-10 flex flex-col justify-center items-center overflow-hidden">
             {/* Watermark / Background Texture */}
-            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent"></div>
+            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
 
             {/* Corner decorations */}
-            <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-primary/30"></div>
-            <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-primary/30"></div>
-            <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-primary/30"></div>
-            <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-primary/30"></div>
+            <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-primary/30" />
+            <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-primary/30" />
+            <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-primary/30" />
+            <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-primary/30" />
 
             <div className="w-16 h-16 bg-primary/10 rounded-full mb-6 border border-primary/20 flex items-center justify-center">
               <Award className="w-8 h-8 text-primary" />
@@ -136,12 +123,12 @@ export function LandingCertificate() {
             </p>
 
             <div className="w-full max-w-sm flex flex-col items-center gap-4">
-              <div className="w-3/4 h-2 bg-muted rounded-full"></div>
+              <div className="w-3/4 h-2 bg-muted rounded-full" />
               <div className="w-full h-8 bg-foreground/5 rounded flex justify-center items-center">
-                <div className="w-1/2 h-2 bg-foreground/20 rounded-full"></div>
+                <div className="w-1/2 h-2 bg-foreground/20 rounded-full" />
               </div>
-              <div className="w-5/6 h-2 bg-muted rounded-full mt-4"></div>
-              <div className="w-4/6 h-2 bg-muted rounded-full"></div>
+              <div className="w-5/6 h-2 bg-muted rounded-full mt-4" />
+              <div className="w-4/6 h-2 bg-muted rounded-full" />
             </div>
 
             <div className="absolute bottom-10 left-10 w-24 h-24 border-2 border-primary/20 rounded-full flex flex-col items-center justify-center opacity-60">
@@ -153,7 +140,7 @@ export function LandingCertificate() {
             </div>
 
             <div className="absolute bottom-12 right-12 flex flex-col items-center">
-              <div className="w-32 h-6 border-b border-border/60 mb-2"></div>
+              <div className="w-32 h-6 border-b border-border/60 mb-2" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
                 Authorized Signature
               </span>

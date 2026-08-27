@@ -19,10 +19,27 @@ class FileController {
   public async upload(c: AppContext) {
     try {
       const user = c.user!;
-      const file = (c.body as { file?: File }).file;
+      const body = (c.body || {}) as {
+        file?: File;
+        url?: string;
+        originalName?: string;
+        mimeType?: string;
+        size?: number;
+      };
 
+      if (body.url) {
+        const data = await FileService.saveUrl(user.id, {
+          url: body.url,
+          originalName: body.originalName || 'file',
+          mimeType: body.mimeType || 'application/octet-stream',
+          size: body.size,
+        });
+        return HttpResponse(c).created(data, 'File registered successfully');
+      }
+
+      const file = body.file;
       if (!file) {
-        return HttpResponse(c).unprocessable('File is required');
+        return HttpResponse(c).unprocessable('File or URL is required');
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -50,20 +67,14 @@ class FileController {
     }
   }
 
-  // GET /files/:fileId/download
+  // GET /files/:fileId/download — redirect to R2 public URL.
   public async download(c: AppContext) {
     try {
       const { fileId } = c.params as unknown as FileParams;
-      const { file, buffer } = await FileService.download(fileId);
+      const { url } = await FileService.download(fileId);
 
-      return new Response(new Uint8Array(buffer), {
-        status: 200,
-        headers: {
-          'Content-Type': file.mimeType ?? 'application/octet-stream',
-          'Content-Disposition': `attachment; filename="${file.fileName ?? 'download'}"`,
-          'Content-Length': String(buffer.byteLength),
-        },
-      });
+      // Redirect client directly to R2 public URL (CDN-served).
+      return c.redirect(url, 302);
     } catch (error) {
       return this.handleError(c, error);
     }

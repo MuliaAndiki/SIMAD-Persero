@@ -5,18 +5,15 @@ import {
   ALLOWED_UPLOAD_MIME_TYPES,
   MAX_FILE_SIZE,
   buildPublicId,
-  deleteUpload,
   getExtensionFromMime,
-  readUpload,
-  saveUpload,
 } from '@/utils/storage.util';
+import { deleteFromR2, uploadFile } from '@/utils/r2-utils';
 import prisma from '../../prisma/client';
 
 /**
  * Service layer modul File.
- * Mengelola metadata file di tabel `files` dan penyimpanan fisik
- * (storage lokal via `@/utils/storage.util`).
- * Kegagalan bisnis dilempar sebagai `AppError(status, message)`.
+ * File diunggah langsung ke Cloudflare R2; hanya URL publik yang disimpan
+ * di tabel `files` (storage_provider = 'r2'). Tidak ada penyimpanan lokal.
  * Sumber aturan: docs/07-api-specification.md §25.
  */
 class FileService {
@@ -65,32 +62,54 @@ class FileService {
     const extension = getExtensionFromMime(mimeType);
     const publicId = buildPublicId(input.originalName, mimeType);
 
-    await saveUpload(input.buffer, publicId);
+    // Upload to Cloudflare R2 — returns public URL.
+    const r2Url = await uploadFile(input.buffer, publicId, mimeType);
 
-    try {
-      const file = await prisma.file.create({
-        data: {
-          originalName: input.originalName,
-          fileName: publicId,
-          mimeType,
-          extension,
-          size: BigInt(input.size),
-          storageProvider: 'local',
-          publicId,
-          url: null,
-          uploadedById,
-        },
-      });
+    const file = await prisma.file.create({
+      data: {
+        originalName: input.originalName,
+        fileName: publicId,
+        mimeType,
+        extension,
+        size: BigInt(input.size),
+        storageProvider: 'r2',
+        publicId,
+        url: r2Url,
+        uploadedById,
+      },
+    });
 
-      const url = `/api/v1/files/${file.id}/download`;
-      await prisma.file.update({ where: { id: file.id }, data: { url } });
+    return this.serialize(file);
+  }
 
-      return this.serialize({ ...file, url });
-    } catch (error) {
-      // Gagal menyimpan metadata — bersihkan file fisik yang baru saja ditulis.
-      await deleteUpload(publicId).catch(() => {});
-      throw error;
-    }
+  // Register file metadata using an R2 URL uploaded directly from FE
+  public async saveUrl(
+    uploadedById: string,
+    input: {
+      url: string;
+      originalName: string;
+      mimeType: string;
+      size?: number;
+    },
+  ) {
+    const extension = getExtensionFromMime(input.mimeType);
+    const publicId = buildPublicId(input.originalName, input.mimeType);
+
+    const file = await prisma.file.create({
+      data: {
+        originalName: input.originalName,
+        fileName: publicId,
+        mimeType: input.mimeType,
+        extension,
+        size: input.size ? BigInt(input.size) : null,
+        storageProvider: 'r2',
+        publicId,
+        url: input.url,
+        uploadedById,
+      },
+    });
+
+    return this.serialize(file);
   }
 
   // GET /files/:fileId
@@ -102,25 +121,21 @@ class FileService {
     return this.serialize(file);
   }
 
-  // GET /files/:fileId/download
+  // GET /files/:fileId/download — redirect ke URL R2 publik.
   public async download(id: string) {
     const file = await prisma.file.findUnique({ where: { id } });
     if (!file || file.deletedAt) {
       throw new AppError(404, 'File not found');
     }
-    if (!file.publicId) {
+    if (!file.url) {
       throw new AppError(410, 'File content is unavailable');
     }
 
-    try {
-      const buffer = await readUpload(file.publicId);
-      return { file: this.serialize(file), buffer };
-    } catch {
-      throw new AppError(410, 'File content is unavailable');
-    }
+    // Kembalikan URL R2; controller akan redirect atau proxy sesuai kebutuhan.
+    return { file: this.serialize(file), url: file.url };
   }
 
-  // DELETE /files/:fileId — soft delete (deleted_at) + hapus file fisik.
+  // DELETE /files/:fileId — soft delete + hapus dari R2.
   public async remove(id: string, user: AuthUser) {
     const file = await prisma.file.findUnique({ where: { id } });
     if (!file || file.deletedAt) {
@@ -136,8 +151,8 @@ class FileService {
       data: { deletedAt: new Date() },
     });
 
-    if (file.publicId) {
-      await deleteUpload(file.publicId);
+    if (file.url && file.storageProvider === 'r2') {
+      await deleteFromR2(file.url).catch(() => {});
     }
   }
 }

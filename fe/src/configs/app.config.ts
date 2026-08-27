@@ -15,10 +15,10 @@ import {
   User,
   UserCheck,
   Users,
-} from "lucide-react";
-import type React from "react";
+} from 'lucide-react';
+import type React from 'react';
 
-import type { DashboardRole } from "@/types/api/dashboard.types";
+import type { DashboardRole } from '@/types/api/dashboard.types';
 
 interface AppConfig {
   name: string;
@@ -61,37 +61,37 @@ export type PropsParams = {
 };
 
 export const appConfig: AppConfig = {
-  name: "SIMAD",
-  description: "Sistem Informasi Manajemen Magang & Absensi Digital.",
-  logo: "/images/logos.png",
+  name: 'SIMAD',
+  description: 'Sistem Informasi Manajemen Magang & Absensi Digital.',
+  logo: '/images/logos.png',
   metadata: {
-    title: "SIMAD | Sistem Absensi Magang Digital",
+    title: 'SIMAD | Sistem Absensi Magang Digital',
     description:
-      "Sistem Informasi Manajemen Magang & Absensi Digital untuk perusahaan dan institusi.",
-    keywords: ["SIMAD", "Magang", "Absensi", "Digital", "Sistem Informasi"],
-    author: "SIMAD Team",
-    image: "/images/logos.png",
+      'Sistem Informasi Manajemen Magang & Absensi Digital untuk perusahaan dan institusi.',
+    keywords: ['SIMAD', 'Magang', 'Absensi', 'Digital', 'Sistem Informasi'],
+    author: 'SIMAD Team',
+    image: '/images/logos.png',
   },
   social_media: {
     twitter: {
-      url: "https://twitter.com/app",
-      icon: "hugeicons:new-twitter-rectangle",
+      url: 'https://twitter.com/app',
+      icon: 'hugeicons:new-twitter-rectangle',
     },
     instagram: {
-      url: "https://instagram.com/app",
-      icon: "basil:instagram-outline",
+      url: 'https://instagram.com/app',
+      icon: 'basil:instagram-outline',
     },
     linkedin: {
-      url: "https://linkedin.com/app",
-      icon: "tabler:brand-linkedin",
+      url: 'https://linkedin.com/app',
+      icon: 'tabler:brand-linkedin',
     },
     youtube: {
-      url: "https://youtube.com/app",
-      icon: "mingcute:youtube-line",
+      url: 'https://youtube.com/app',
+      icon: 'mingcute:youtube-line',
     },
     tiktok: {
-      url: "https://tiktok.com/app",
-      icon: "hugeicons:tiktok",
+      url: 'https://tiktok.com/app',
+      icon: 'hugeicons:tiktok',
     },
   },
 };
@@ -102,36 +102,36 @@ interface NavigationMenuConfig {
     href: string;
     icon?: React.ReactNode;
     description?: string;
-    children?: NavigationMenuConfig["items"];
+    children?: NavigationMenuConfig['items'];
   }[];
 }
 
 export const navigationMenuConfig: NavigationMenuConfig = {
   items: [
     {
-      title: "Tentang",
-      href: "#problem",
-      description: "Tentang masalah dan solusi SIMAD.",
+      title: 'Tentang',
+      href: '#problem',
+      description: 'Tentang masalah dan solusi SIMAD.',
     },
     {
-      title: "Cara Kerja",
-      href: "#workflow",
-      description: "Mekanisme pengajuan hingga sertifikasi.",
+      title: 'Cara Kerja',
+      href: '#workflow',
+      description: 'Mekanisme pengajuan hingga sertifikasi.',
     },
     {
-      title: "Fitur",
-      href: "#features",
-      description: "Fitur-fitur unggulan SIMAD.",
+      title: 'Fitur',
+      href: '#features',
+      description: 'Fitur-fitur unggulan SIMAD.',
     },
     {
-      title: "Absensi",
-      href: "#attendance",
-      description: "Sistem absensi geofencing.",
+      title: 'Absensi',
+      href: '#attendance',
+      description: 'Sistem absensi geofencing.',
     },
     {
-      title: "Sertifikat",
-      href: "#certificate",
-      description: "Penerbitan e-certificate.",
+      title: 'Sertifikat',
+      href: '#certificate',
+      description: 'Penerbitan e-certificate.',
     },
   ],
 };
@@ -149,104 +149,104 @@ export interface SidebarMenuItem {
 }
 
 export const SIDEBAR_MENU: SidebarMenuItem[] = [
-  { name: "Beranda", url: "/INTERN/dashboard", icon: Home, subMenu: [] },
+  { name: 'Beranda', url: '/INTERN/dashboard', icon: Home, subMenu: [] },
   {
-    name: "Pengajuan",
-    url: "/INTERN/application",
+    name: 'Pengajuan',
+    url: '/INTERN/application',
     icon: FileText,
     subMenu: [],
   },
   {
-    name: "Onboarding",
-    url: "/INTERN/onboarding",
+    name: 'Onboarding',
+    url: '/INTERN/onboarding',
     icon: ClipboardCheck,
     subMenu: [],
     requiresInternship: true,
   },
   {
-    name: "Absensi",
-    url: "/INTERN/attendance",
+    name: 'Absensi',
+    url: '/INTERN/attendance',
     icon: Clock,
     subMenu: [],
     requiresInternship: true,
   },
   {
-    name: "Riwayat",
-    url: "/INTERN/history",
+    name: 'Riwayat',
+    url: '/INTERN/history',
     icon: History,
     subMenu: [],
     requiresInternship: true,
   },
   {
-    name: "Sertifikat",
-    url: "/INTERN/certificate",
+    name: 'Sertifikat',
+    url: '/INTERN/certificate',
     icon: Award,
     subMenu: [],
     requiresInternship: true,
   },
-  { name: "Profil", url: "/INTERN/profile", icon: User, subMenu: [] },
+  { name: 'Profil', url: '/INTERN/profile', icon: User, subMenu: [] },
 ];
 
 /** Menu sidebar khusus HR_ADMIN. */
 export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
-  { name: "Beranda", url: "/HR_ADMIN/dashboard", icon: Home, subMenu: [] },
+  { name: 'Beranda', url: '/HR_ADMIN/dashboard', icon: Home, subMenu: [] },
   {
-    name: "Pengajuan",
-    url: "/HR_ADMIN/applications",
+    name: 'Pengajuan',
+    url: '/HR_ADMIN/applications',
     icon: FileText,
     subMenu: [],
   },
   {
-    name: "Magang",
-    url: "/HR_ADMIN/internships",
+    name: 'Magang',
+    url: '/HR_ADMIN/internships',
     icon: BriefcaseBusiness,
     subMenu: [],
   },
   {
-    name: "Departemen",
-    url: "/HR_ADMIN/departments",
+    name: 'Departemen',
+    url: '/HR_ADMIN/departments',
     icon: Building2,
     subMenu: [],
   },
   {
-    name: "Kantor",
-    url: "/HR_ADMIN/offices",
+    name: 'Kantor',
+    url: '/HR_ADMIN/offices',
     icon: MapPin,
     subMenu: [],
   },
   {
-    name: "Supervisor",
-    url: "/HR_ADMIN/supervisors",
+    name: 'Supervisor',
+    url: '/HR_ADMIN/supervisors',
     icon: UserCheck,
     subMenu: [],
   },
   {
-    name: "Laporan",
-    url: "/HR_ADMIN/reports",
+    name: 'Laporan',
+    url: '/HR_ADMIN/reports',
     icon: BarChart3,
     subMenu: [],
   },
   {
-    name: "Audit Log",
-    url: "/HR_ADMIN/audit-logs",
+    name: 'Audit Log',
+    url: '/HR_ADMIN/audit-logs',
     icon: ScrollText,
     subMenu: [],
   },
   {
-    name: "Keterampilan",
-    url: "/HR_ADMIN/skills",
+    name: 'Keterampilan',
+    url: '/HR_ADMIN/skills',
     icon: Sparkles,
     subMenu: [],
   },
   {
-    name: "Sertifikat",
-    url: "/HR_ADMIN/certificate-setting",
+    name: 'Sertifikat',
+    url: '/HR_ADMIN/certificate-setting',
     icon: Award,
     subMenu: [],
   },
   {
-    name: "Profil",
-    url: "/HR_ADMIN/profile",
+    name: 'Profil',
+    url: '/HR_ADMIN/profile',
     icon: User,
     subMenu: [],
   },
@@ -254,17 +254,23 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
 
 /** Menu sidebar khusus SUPERVISOR. */
 export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
-  { name: "Beranda", url: "/SUPERVISOR/dashboard", icon: Home, subMenu: [] },
+  { name: 'Beranda', url: '/SUPERVISOR/dashboard', icon: Home, subMenu: [] },
   {
-    name: "Intern Bimbingan",
-    url: "/SUPERVISOR/interns",
+    name: 'Intern Bimbingan',
+    url: '/SUPERVISOR/interns',
     icon: Users,
     subMenu: [],
   },
   {
-    name: "Absensi",
-    url: "/SUPERVISOR/attendance",
+    name: 'Absensi',
+    url: '/SUPERVISOR/attendance',
     icon: Clock,
+    subMenu: [],
+  },
+  {
+    name: 'Profil',
+    url: '/SUPERVISOR/profile',
+    icon: User,
     subMenu: [],
   },
 ];
@@ -278,9 +284,9 @@ export const ROLE_SIDEBAR_MENU: Record<DashboardRole, SidebarMenuItem[]> = {
 
 /** Label role untuk UI (header dashboard, badge, dll). */
 export const DASHBOARD_ROLE_LABELS: Record<DashboardRole, string> = {
-  INTERN: "Peserta Magang",
-  HR_ADMIN: "HR Admin",
-  SUPERVISOR: "Supervisor",
+  INTERN: 'Peserta Magang',
+  HR_ADMIN: 'HR Admin',
+  SUPERVISOR: 'Supervisor',
 };
 
 /**
@@ -291,9 +297,9 @@ export const DASHBOARD_ROLE_LABELS: Record<DashboardRole, string> = {
  * cukup dibuat di dalam folder role tersebut (scalable).
  */
 export const ROLE_DASHBOARD_PATH: Record<DashboardRole, string> = {
-  INTERN: "/INTERN/dashboard",
-  HR_ADMIN: "/HR_ADMIN/dashboard",
-  SUPERVISOR: "/SUPERVISOR/dashboard",
+  INTERN: '/INTERN/dashboard',
+  HR_ADMIN: '/HR_ADMIN/dashboard',
+  SUPERVISOR: '/SUPERVISOR/dashboard',
 };
 
 /**
@@ -305,14 +311,14 @@ export const ROLE_DASHBOARD_PATH: Record<DashboardRole, string> = {
  */
 export function getRoleDashboardPath(role?: string | null): string {
   switch (role) {
-    case "INTERN":
-    case "HR_ADMIN":
-    case "SUPERVISOR":
+    case 'INTERN':
+    case 'HR_ADMIN':
+    case 'SUPERVISOR':
       return ROLE_DASHBOARD_PATH[role];
-    case "HR":
+    case 'HR':
       return ROLE_DASHBOARD_PATH.HR_ADMIN;
     default:
-      return "/dashboard";
+      return '/dashboard';
   }
 }
 
@@ -323,15 +329,14 @@ export function getRoleDashboardPath(role?: string | null): string {
  * /INTERN/dashboard, /HR_ADMIN/dashboard, atau /SUPERVISOR/dashboard.
  */
 export function isMenuActive(menuUrl: string, pathname: string): boolean {
-  const isDashboardPath = (url: string) =>
-    url === "/dashboard" || url.endsWith("/dashboard");
+  const isDashboardPath = (url: string) => url === '/dashboard' || url.endsWith('/dashboard');
 
   // Menu Beranda aktif saat berada di area dashboard role manapun.
   if (isDashboardPath(menuUrl)) {
     return (
       pathname === menuUrl ||
       pathname.startsWith(`${menuUrl}/`) ||
-      (menuUrl === "/INTERN/dashboard" && pathname === "/dashboard")
+      (menuUrl === '/INTERN/dashboard' && pathname === '/dashboard')
     );
   }
   return pathname === menuUrl || pathname.startsWith(`${menuUrl}/`);
