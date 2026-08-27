@@ -652,22 +652,51 @@ class InternshipService {
 
     const [queryInstitutionMajor, queryInternProfile] =
       await prisma.$transaction(async (tx) => {
-        const major = await tx.institutionMajor.upsert({
-          where: {
-            // Note: Since name+institutionId might not have a UNIQUE constraint,
-            // we will search via first or simply default to creating if we can't find one reliably.
-            // A safer upsert based on existing profile majorId:
-            id: existingProfile?.majorId ?? "",
-          },
-          update: {
-            name: payload.name,
-            institutionId: payload.institutionId,
-          },
-          create: {
-            name: payload.name,
-            institutionId: payload.institutionId,
-          },
-        });
+        let major = null;
+        const targetMajorId = payload.majorId || existingProfile?.majorId;
+
+        if (targetMajorId) {
+          major = await tx.institutionMajor.findUnique({
+            where: { id: targetMajorId },
+          });
+        }
+
+        if (!major && payload.name && payload.institutionId) {
+          major = await tx.institutionMajor.findFirst({
+            where: {
+              institutionId: payload.institutionId,
+              name: { equals: payload.name, mode: "insensitive" },
+            },
+          });
+
+          if (!major) {
+            major = await tx.institutionMajor.create({
+              data: {
+                name: payload.name,
+                institutionId: payload.institutionId,
+              },
+            });
+          }
+        }
+
+        if (major && payload.name && major.name !== payload.name) {
+          major = await tx.institutionMajor.update({
+            where: { id: major.id },
+            data: { name: payload.name },
+          });
+        }
+
+        if (!major) {
+          throw new AppError(400, "Informasi jurusan (major) wajib diisi");
+        }
+
+        let birthDate: Date | null = null;
+        if (payload.birthDate) {
+          const parsed = new Date(payload.birthDate);
+          if (!Number.isNaN(parsed.getTime())) {
+            birthDate = parsed;
+          }
+        }
 
         const newProfile = await tx.internProfile.upsert({
           where: { userId },
@@ -676,7 +705,7 @@ class InternshipService {
             studentNumber: payload.studentNumber,
             address: payload.address,
             bio: payload.bio,
-            birthDate: payload.birthDate,
+            birthDate,
             birthPlace: payload.birthPlace,
             emergencyContact: payload.emergencyContact,
             gender: payload.gender,
@@ -688,7 +717,7 @@ class InternshipService {
             studentNumber: payload.studentNumber,
             address: payload.address,
             bio: payload.bio,
-            birthDate: payload.birthDate,
+            birthDate,
             birthPlace: payload.birthPlace,
             emergencyContact: payload.emergencyContact,
             gender: payload.gender,
