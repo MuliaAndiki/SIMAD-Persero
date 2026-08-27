@@ -1,28 +1,22 @@
-import { EmailParams, MailerSend, Recipient, Sender } from 'mailersend';
+import { Resend } from 'resend';
+import { env } from '@/config/env.config';
 import { getLogger } from '../telemetry/otel.config';
 
 interface MailOptions {
   to: string;
   subject: string;
-  text: string;
+  text?: string;
   html?: string;
 }
 
-const MAILERSEND_API_KEY = process.env.MAILERSEND_API_KEY ?? '';
-const mailersendConfigured = MAILERSEND_API_KEY !== '' && MAILERSEND_API_KEY !== 'xxxx';
+const resendApiKey = env.RESEND_API_KEY ?? process.env.RESEND_API_KEY ?? '';
+const isConfigured = resendApiKey !== '' && !resendApiKey.startsWith('xxxx');
 
-const mailerSend = mailersendConfigured ? new MailerSend({ apiKey: MAILERSEND_API_KEY }) : null;
-
-/** Sender dari email/domain yang sudah diverifikasi di akun MailerSend. */
-function getSender(): Sender {
-  return new Sender(
-    process.env.MAILERSEND_FROM_EMAIL ?? 'no-reply@simad.app',
-    process.env.MAILERSEND_FROM_NAME ?? 'SIMAD',
-  );
-}
+const resend = isConfigured ? new Resend(resendApiKey) : null;
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
 export async function sendEmail(options: MailOptions): Promise<void> {
-  if (!mailersendConfigured || !mailerSend) {
+  if (!isConfigured || !resend) {
     getLogger().info(
       {
         to: options.to,
@@ -30,46 +24,36 @@ export async function sendEmail(options: MailOptions): Promise<void> {
         text: options.text,
         html: options.html,
       },
-      '[EMAIL][DEV MODE]',
+      '[EMAIL][DEV MODE - RESEND NOT CONFIGURED]',
     );
     return;
   }
 
-  const sentFrom = getSender();
-  const recipients = [new Recipient(options.to)];
-
-  const emailParams = new EmailParams()
-    .setFrom(sentFrom)
-    .setTo(recipients)
-    .setReplyTo(sentFrom)
-    .setSubject(options.subject)
-    .setText(options.text);
-
-  if (options.html) {
-    emailParams.setHtml(options.html);
-  }
-
   try {
-    const response = await mailerSend.email.send(emailParams);
-    if (response.statusCode >= 400) {
-      throw new Error(
-        `[EMAIL][MAILERSEND] Gagal mengirim email (${response.statusCode}): ${JSON.stringify(response.body)}`,
-      );
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html || options.text || '<p></p>',
+    });
+
+    if (error) {
+      throw new Error(`[EMAIL][RESEND] Gagal mengirim email: ${error.message}`);
     }
-  } catch (error: unknown) {
-    // SDK melempar objek { headers, body, statusCode } saat respons bukan 2xx.
-    if (error && typeof error === 'object' && 'statusCode' in error) {
-      const apiError = error as { statusCode: number; body: unknown };
-      throw new Error(
-        `[EMAIL][MAILERSEND] Gagal mengirim email (${apiError.statusCode}): ${JSON.stringify(apiError.body)}`,
-      );
-    }
+
+    getLogger().info({ id: data?.id, to: options.to }, '[EMAIL][RESEND] Email sent successfully');
+  } catch (error) {
+    console.error('Failed to send email via Resend:', error);
     throw error;
   }
 }
 
 /** Membangun URL frontend (default http://localhost:3000). */
 export function buildFrontendUrl(path: string): string {
-  const base = (process.env.FRONTEND_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+  const base = (env.FRONTEND_URL ?? process.env.FRONTEND_URL ?? 'http://localhost:3000').replace(
+    /\/$/,
+    '',
+  );
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 }
