@@ -157,7 +157,7 @@ const InternProfileForm: React.FC<InternProfileFormProps> = ({
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 min-w-0 w-full max-w-full overflow-hidden">
               <label htmlFor="birthDate" className="text-sm font-medium">
                 Tanggal Lahir *
               </label>
@@ -171,6 +171,7 @@ const InternProfileForm: React.FC<InternProfileFormProps> = ({
                     birthDate: e.target.value,
                   }))
                 }
+                className="w-full min-w-0 max-w-full overflow-hidden"
               />
             </div>
 
