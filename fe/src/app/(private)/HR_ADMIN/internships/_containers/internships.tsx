@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import { InternshipsSection } from '@/components/page/hr/InternshipsSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import { useApi } from '@/hooks/useService/useApi';
+import { InternshipsSection } from "@/components/page/hr/InternshipsSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useApi } from "@/hooks/useService/useApi";
 
 /**
  * Container halaman Magang (HR Admin) — Pusat Kontrol Magang.
@@ -13,8 +13,8 @@ export default function HrInternshipsContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
-  const [keyword, setKeyword] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [keyword, setKeyword] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   // Queries
   const list = api.internship.query.list();
@@ -46,11 +46,13 @@ export default function HrInternshipsContainer() {
       if (statusFilter && internship.status !== statusFilter) return false;
       if (!keywordLower) return true;
 
-      const name = internship.internProfile?.user.fullName?.toLowerCase() ?? '';
-      const email = internship.internProfile?.user.email?.toLowerCase() ?? '';
-      const nim = internship.internProfile?.studentNumber?.toLowerCase() ?? '';
+      const name = internship.internProfile?.user.fullName?.toLowerCase() ?? "";
+      const email = internship.internProfile?.user.email?.toLowerCase() ?? "";
+      const nim = internship.internProfile?.studentNumber?.toLowerCase() ?? "";
       return (
-        name.includes(keywordLower) || email.includes(keywordLower) || nim.includes(keywordLower)
+        name.includes(keywordLower) ||
+        email.includes(keywordLower) ||
+        nim.includes(keywordLower)
       );
     });
   }, [list.data, keyword, statusFilter]);
@@ -58,31 +60,37 @@ export default function HrInternshipsContainer() {
   // Handlers
   const handleStart = async (id: string) => {
     const confirmed = await ns.alert.confirm({
-      title: 'Mulai Magang?',
-      deskripsi: 'Status magang akan diubah menjadi Aktif.',
-      icon: 'question',
-      confirmButtonText: 'Ya, Mulai',
+      title: "Mulai Magang?",
+      deskripsi: "Status magang akan diubah menjadi Aktif.",
+      icon: "question",
+      confirmButtonText: "Ya, Mulai",
     });
     if (!confirmed) return;
-    await startMutation.mutateAsync({ internshipId: id });
+    await startMutation.mutateAsync({ id });
   };
 
   const handleFinish = async (id: string) => {
     const confirmed = await ns.alert.confirm({
-      title: 'Selesaikan Magang?',
-      deskripsi: 'Magang peserta ini akan ditandai Selesai dan dapat diterbitkan sertifikat.',
-      icon: 'question',
-      confirmButtonText: 'Ya, Selesaikan',
+      title: "Selesaikan Magang?",
+      deskripsi:
+        "Magang peserta ini akan ditandai Selesai dan dapat diterbitkan sertifikat.",
+      icon: "question",
+      confirmButtonText: "Ya, Selesaikan",
     });
     if (!confirmed) return;
-    await finishMutation.mutateAsync({ internshipId: id });
+    await finishMutation.mutateAsync({ id });
   };
 
-  const handleExtendSubmit = async (id: string, data: { newEndDate: string; reason: string }) => {
+  const handleExtendSubmit = async (
+    id: string,
+    data: { newEndDate: string; reason: string },
+  ) => {
     await extendMutation.mutateAsync({
-      internshipId: id,
-      newEndDate: data.newEndDate,
-      reason: data.reason,
+      params: { id },
+      body: {
+        newEndDate: data.newEndDate,
+        reason: data.reason,
+      },
     });
   };
 
@@ -91,16 +99,23 @@ export default function HrInternshipsContainer() {
     data: { departmentId: string; officeLocationId: string },
   ) => {
     await changeDeptMutation.mutateAsync({
-      internshipId: id,
-      departmentId: data.departmentId,
-      officeLocationId: data.officeLocationId,
+      params: { id },
+      body: {
+        departmentId: data.departmentId,
+        officeLocationId: data.officeLocationId,
+      },
     });
   };
 
-  const handleAssignSupervisorSubmit = async (id: string, data: { supervisorId: string }) => {
+  const handleAssignSupervisorSubmit = async (
+    id: string,
+    data: { supervisorId: string },
+  ) => {
     await assignSuperMutation.mutateAsync({
-      internshipId: id,
-      supervisorId: data.supervisorId,
+      params: { id },
+      body: {
+        supervisorId: data.supervisorId,
+      },
     });
   };
 
@@ -110,13 +125,13 @@ export default function HrInternshipsContainer() {
 
   const handleArchive = async (id: string) => {
     const confirmed = await ns.alert.confirm({
-      title: 'Arsipkan Magang?',
-      deskripsi: 'Data magang peserta ini akan diarsipkan.',
-      icon: 'warning',
-      confirmButtonText: 'Ya, Arsipkan',
+      title: "Arsipkan Magang?",
+      deskripsi: "Data magang peserta ini akan diarsipkan.",
+      icon: "warning",
+      confirmButtonText: "Ya, Arsipkan",
     });
     if (!confirmed) return;
-    await archiveMutation.mutateAsync({ internshipId: id });
+    await archiveMutation.mutateAsync({ id });
   };
 
   return (

@@ -141,10 +141,10 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
                           </td>
                           <td className="px-6 py-4">{row.internship.department?.name ?? '-'}</td>
                           <td className="px-6 py-4">
-                            {att?.checkInTime ? formatDate(att.checkInTime) : '-'}
+                            {att?.checkInAt ? formatDate(att.checkInAt) : '-'}
                           </td>
                           <td className="px-6 py-4">
-                            {att?.checkOutTime ? formatDate(att.checkOutTime) : '-'}
+                            {att?.checkOutAt ? formatDate(att.checkOutAt) : '-'}
                           </td>
                           <td className="px-6 py-4">
                             <AttendanceStatusBadge status={att?.attendanceStatus ?? null} />

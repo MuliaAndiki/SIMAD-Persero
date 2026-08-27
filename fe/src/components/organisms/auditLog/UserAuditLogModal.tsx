@@ -23,6 +23,7 @@ export function UserAuditLogModal({ open, userId, userName, onClose }: UserAudit
   const api = useApi();
   const userActivity = api.auditLog.query.userActivity(
     { userId: userId ?? '' },
+    undefined,
     { enabled: Boolean(open && userId) },
   );
 
