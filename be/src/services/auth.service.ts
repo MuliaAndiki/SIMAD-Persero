@@ -34,7 +34,7 @@ class AuthService {
   });
 
   private getRoleCode(userRoles: { role: { code: string } }[]): string {
-    return userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE;
+    return (userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE).toLowerCase();
   }
 
   /**
@@ -533,7 +533,7 @@ class AuthService {
       id: user.id,
       fullName: user.fullName,
       email: user.email,
-      role: user.roles[0] ?? DEFAULT_ROLE_CODE,
+      role: (user.roles[0] ?? DEFAULT_ROLE_CODE).toLowerCase(),
     };
   }
 

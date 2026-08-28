@@ -32,13 +32,13 @@ export interface EditProfileSectionProps {
 
 /** Base path halaman profil sesuai role — dipakai untuk link kembali. */
 function profileBasePath(role: string | null): string {
-  switch (role) {
+  switch (role?.toUpperCase()) {
     case 'HR_ADMIN':
-      return '/HR_ADMIN/profile';
+      return '/hr_admin/profile';
     case 'SUPERVISOR':
-      return '/SUPERVISOR/profile';
+      return '/supervisor/profile';
     default:
-      return '/INTERN/profile';
+      return '/intern/profile';
   }
 }
 

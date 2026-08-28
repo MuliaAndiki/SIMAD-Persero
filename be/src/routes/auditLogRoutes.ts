@@ -20,7 +20,7 @@ class AuditLogRouter {
   private routes() {
     // 27.1 GET /audit-logs (HR_ADMIN)
     this.auditLogRouter.get('/', (c: AppContext) => auditLogController.list(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       query: AuditLogQuery,
     });
 
@@ -31,7 +31,7 @@ class AuditLogRouter {
       '/users/:userId',
       (c: AppContext) => auditLogController.getUserActivity(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         params: AuditLogUserIdParam,
         query: AuditLogQuery,
       },
@@ -39,7 +39,7 @@ class AuditLogRouter {
 
     // 27.2 GET /audit-logs/:auditId (HR_ADMIN)
     this.auditLogRouter.get('/:auditId', (c: AppContext) => auditLogController.getById(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       params: AuditLogIdParam,
     });
   }

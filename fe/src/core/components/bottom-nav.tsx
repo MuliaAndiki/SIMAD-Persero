@@ -18,7 +18,7 @@ export function BottomNav() {
   const api = useApi();
   const { hasActiveInternship } = useInternAccess();
 
-  const role = api.auth.query.me().data?.role;
+  const role = api.auth.query.me().data?.role?.toUpperCase();
   const roleMenus =
     (role === 'INTERN' || role === 'HR_ADMIN' || role === 'SUPERVISOR'
       ? ROLE_SIDEBAR_MENU[role]

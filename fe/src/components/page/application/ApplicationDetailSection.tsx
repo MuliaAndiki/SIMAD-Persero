@@ -60,7 +60,7 @@ export function ApplicationDetailSection({ state }: ApplicationDetailSectionProp
           size="sm"
           className="w-fit gap-1.5 px-0 text-muted-foreground"
         >
-          <Link href="/INTERN/application">
+          <Link href="/intern/application">
             <ArrowLeft className="size-4" />
             Kembali ke Pengajuan
           </Link>

@@ -26,27 +26,27 @@ class DashboardRouter {
 
     // 19.1 GET /intern/dashboard (INTERN)
     internRouter.get('/', (c: AppContext) => dashboardController.internDashboard(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
     });
 
     // 19.2 GET /hr-admin/dashboard (HR_ADMIN)
     hrAdminRouter.get('/', (c: AppContext) => dashboardController.hrDashboard(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
     });
 
     // 19.3 GET /supervisor/dashboard (SUPERVISOR)
     supervisorRouter.get('/', (c: AppContext) => dashboardController.supervisorDashboard(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['SUPERVISOR']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
     });
 
     // 19.4 GET /hr-admin/dashboard/statistics (HR_ADMIN)
     hrAdminRouter.get('/statistics', (c: AppContext) => dashboardController.statistics(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
     });
 
     // 19.5 GET /hr-admin/dashboard/charts (HR_ADMIN)
     hrAdminRouter.get('/charts', (c: AppContext) => dashboardController.charts(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
     });
 
     // 19.6 GET /hr-admin/dashboard/recent-activities (HR_ADMIN)
@@ -54,7 +54,7 @@ class DashboardRouter {
       '/recent-activities',
       (c: AppContext) => dashboardController.recentActivities(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         query: RecentActivityQuery,
       },
     );

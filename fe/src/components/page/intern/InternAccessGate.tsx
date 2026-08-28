@@ -53,7 +53,7 @@ export function InternAccessGate({ children }: { children: React.ReactNode }) {
               dahulu melalui menu Pengajuan.
             </p>
             <Button asChild size="sm">
-              <Link href="/INTERN/application">Ajukan Magang</Link>
+              <Link href="/intern/application">Ajukan Magang</Link>
             </Button>
           </CardContent>
         </Card>

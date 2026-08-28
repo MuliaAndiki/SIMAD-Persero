@@ -30,7 +30,7 @@ class DepartmentRouter {
       query: DepartmentQueryDto,
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['HR_ADMIN', 'SUPERVISOR']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor']).beforeHandle,
       ],
       detail: {
         summary: 'Daftar departemen',
@@ -45,7 +45,7 @@ class DepartmentRouter {
       params: DepartmentParamsDto,
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['HR_ADMIN', 'SUPERVISOR']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor']).beforeHandle,
       ],
       detail: {
         summary: 'Detail departemen',
@@ -57,7 +57,7 @@ class DepartmentRouter {
     // POST /departments
     this.departmentRouter.post('/', (c: AppContext) => DepartmentController.create(c), {
       body: CreateDepartmentDto,
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       detail: {
         summary: 'Buat departemen',
         description: 'Membuat departemen baru. Kode departemen harus unik.',
@@ -72,7 +72,7 @@ class DepartmentRouter {
       {
         params: DepartmentParamsDto,
         body: UpdateDepartmentDto,
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         detail: {
           summary: 'Ubah departemen',
           description: 'Memperbarui data departemen berdasarkan ID.',
@@ -87,7 +87,7 @@ class DepartmentRouter {
       (c: AppContext) => DepartmentController.remove(c),
       {
         params: DepartmentParamsDto,
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         detail: {
           summary: 'Hapus departemen',
           description: 'Menonaktifkan departemen (soft delete via is_active = false).',

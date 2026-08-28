@@ -23,7 +23,7 @@ class ReportingRouter {
       '/attendance',
       (c: AppContext) => reportingController.attendanceReport(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         query: ReportingQuery,
       },
     );
@@ -33,7 +33,7 @@ class ReportingRouter {
       '/internships',
       (c: AppContext) => reportingController.internshipReport(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       },
     );
 
@@ -42,7 +42,7 @@ class ReportingRouter {
       '/certificates',
       (c: AppContext) => reportingController.certificateReport(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       },
     );
 
@@ -51,7 +51,7 @@ class ReportingRouter {
       '/dashboard',
       (c: AppContext) => reportingController.dashboardReport(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       },
     );
   }

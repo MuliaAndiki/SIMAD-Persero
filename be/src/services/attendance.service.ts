@@ -871,13 +871,13 @@ class AttendanceService {
     const where: Record<string, unknown> = {};
 
     // Role-based filtering
-    const roles = user.roles ?? [];
-    if (roles.includes("HR_ADMIN")) {
+    const roles = (user.roles ?? []).map((r) => r.toLowerCase());
+    if (roles.includes("hr_admin")) {
       // HR_ADMIN can see all, apply optional department filter
       if (query.departmentId) {
         where.internship = { departmentId: query.departmentId };
       }
-    } else if (roles.includes("SUPERVISOR")) {
+    } else if (roles.includes("supervisor")) {
       // SUPERVISOR can see interns they supervise
       where.internship = {
         supervisorAssignments: {
@@ -887,7 +887,7 @@ class AttendanceService {
       if (query.departmentId) {
         (where.internship as any).departmentId = query.departmentId;
       }
-    } else if (roles.includes("INTERN")) {
+    } else if (roles.includes("intern")) {
       // INTERN can only see their own attendance
       where.internship = {
         internProfile: { userId: user.id },

@@ -78,7 +78,7 @@ function getInitials(name: string): string {
 
 /** Label role dalam Bahasa Indonesia. */
 function roleLabel(role: string | null): string {
-  switch (role) {
+  switch (role?.toUpperCase()) {
     case 'INTERN':
       return 'Peserta Magang';
     case 'HR_ADMIN':
@@ -92,13 +92,13 @@ function roleLabel(role: string | null): string {
 
 /** Base path halaman profil sesuai role — dipakai untuk link aksi terkait. */
 function profileBasePath(role: string | null): string {
-  switch (role) {
+  switch (role?.toUpperCase()) {
     case 'HR_ADMIN':
-      return '/HR_ADMIN/profile';
+      return '/hr_admin/profile';
     case 'SUPERVISOR':
-      return '/SUPERVISOR/profile';
+      return '/supervisor/profile';
     default:
-      return '/INTERN/profile';
+      return '/intern/profile';
   }
 }
 
@@ -131,9 +131,8 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
   const profile = state.profile;
   if (!profile) return null;
 
-  // Role dari GET /users/profile menjadi dasar render kondisional:
-  // menu khusus intern (Profil Magang / Kelola Skill) hanya muncul untuk INTERN.
-  const isIntern = profile.role === 'INTERN';
+  const roleUpper = profile.role?.toUpperCase();
+  const isIntern = roleUpper === 'INTERN';
   const basePath = profileBasePath(profile.role);
 
   return (
@@ -218,7 +217,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
           <Mail className="size-4" />
           Ubah Email
         </Button>
-        {(profile.role === 'INTERN' || profile.role === 'HR_ADMIN') && (
+        {(roleUpper === 'INTERN' || roleUpper === 'HR_ADMIN') && (
           <>
             <Button asChild>
               <Link href={`${basePath}/edit`}>

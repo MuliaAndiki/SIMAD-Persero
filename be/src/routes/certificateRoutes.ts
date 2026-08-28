@@ -43,7 +43,7 @@ class CertificateRouter {
       '/me',
       (c: AppContext) => certificateController.getMyCertificate(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       },
     );
 
@@ -53,7 +53,7 @@ class CertificateRouter {
     this.certificateRouter.post('/generate', (c: AppContext) => certificateController.generate(c), {
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['HR_ADMIN']).beforeHandle,
+        requireRole(['hr_admin']).beforeHandle,
         idempotencyMiddleware.beforeHandle,
       ],
       afterHandle: [idempotencyMiddleware.afterHandle],
@@ -69,7 +69,7 @@ class CertificateRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['INTERN', 'HR_ADMIN', 'SUPERVISOR']).beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor']).beforeHandle,
         ],
         params: CertificateIdParam,
       },
@@ -82,7 +82,7 @@ class CertificateRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['INTERN', 'HR_ADMIN', 'SUPERVISOR']).beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor']).beforeHandle,
         ],
         params: CertificateIdParam,
       },
@@ -93,7 +93,7 @@ class CertificateRouter {
       '/:certificateId/regenerate',
       (c: AppContext) => certificateController.regenerate(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         params: CertificateIdParam,
       },
     );

@@ -196,7 +196,7 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild aria-label="Kembali ke riwayat">
-            <Link href="/INTERN/history">
+            <Link href="/intern/history">
               <ArrowLeft />
             </Link>
           </Button>
