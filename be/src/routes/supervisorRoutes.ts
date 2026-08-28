@@ -29,12 +29,12 @@ class SupervisorRouter {
 
     // 24.5 GET /supervisors/dashboard (SUPERVISOR)
     this.supervisorRouter.get('/dashboard', (c: AppContext) => supervisorController.dashboard(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['SUPERVISOR']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
     });
 
     // 24.1 GET /supervisors (HR_ADMIN)
     this.supervisorRouter.get('/', (c: AppContext) => supervisorController.list(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       query: SupervisorListQuery,
     });
 
@@ -42,7 +42,7 @@ class SupervisorRouter {
 
     // POST /supervisors (HR_ADMIN) - Create Supervisor
     this.supervisorRouter.post('/', (c: AppContext) => supervisorController.createAccount(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       body: CreateSupervisorDto,
     });
 
@@ -51,7 +51,7 @@ class SupervisorRouter {
       '/:supervisorId',
       (c: AppContext) => supervisorController.updateAccount(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         params: SupervisorIdParam,
         body: UpdateSupervisorDto,
       },
@@ -62,14 +62,14 @@ class SupervisorRouter {
       '/:supervisorId',
       (c: AppContext) => supervisorController.deleteAccount(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         params: SupervisorIdParam,
       },
     );
 
     // 24.2 GET /supervisors/:supervisorId (HR_ADMIN)
     this.supervisorRouter.get('/:supervisorId', (c: AppContext) => supervisorController.detail(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       params: SupervisorIdParam,
     });
 
@@ -78,7 +78,7 @@ class SupervisorRouter {
       '/:supervisorId/assign',
       (c: AppContext) => supervisorController.assign(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         params: SupervisorIdParam,
         body: AssignInternDto,
       },
@@ -89,7 +89,7 @@ class SupervisorRouter {
       '/:supervisorId/assignments/:assignmentId',
       (c: AppContext) => supervisorController.removeAssignment(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         params: SupervisorAssignmentParam,
       },
     );

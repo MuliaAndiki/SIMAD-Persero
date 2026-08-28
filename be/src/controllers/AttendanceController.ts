@@ -76,7 +76,7 @@ class AttendanceController {
   public async getById(c: AppContext) {
     try {
       // INTERN hanya boleh melihat detail absensinya sendiri (ownership check).
-      const userId = c.user!.roles?.includes("INTERN") ? c.user!.id : undefined;
+      const userId = c.user!.roles?.some((r) => r.toLowerCase() === "intern") ? c.user!.id : undefined;
       const data = await attendanceService.getById(
         c.params.attendanceId,
         userId,

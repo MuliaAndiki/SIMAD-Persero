@@ -36,7 +36,7 @@ class AttendanceRouter {
     this.attendanceRouter.post('/check-in', (c: AppContext) => attendanceController.checkIn(c), {
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['INTERN']).beforeHandle,
+        requireRole(['intern']).beforeHandle,
         rateLimit({ ...RateLimitRule.ATTENDANCE, keyGenerator: keyByUser }).beforeHandle,
         idempotencyMiddleware.beforeHandle,
       ],
@@ -48,7 +48,7 @@ class AttendanceRouter {
     this.attendanceRouter.post('/check-out', (c: AppContext) => attendanceController.checkOut(c), {
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['INTERN']).beforeHandle,
+        requireRole(['intern']).beforeHandle,
         rateLimit({ ...RateLimitRule.ATTENDANCE, keyGenerator: keyByUser }).beforeHandle,
         idempotencyMiddleware.beforeHandle,
       ],
@@ -58,18 +58,18 @@ class AttendanceRouter {
 
     // 16.3 GET /attendance/me (INTERN)
     this.attendanceRouter.get('/me', (c: AppContext) => attendanceController.getMyAttendance(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       query: AttendanceListQuery,
     });
 
     // 16.5 GET /attendance/today (INTERN)
     this.attendanceRouter.get('/today', (c: AppContext) => attendanceController.getToday(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
     });
 
     // 16.6 GET /attendance/summary (INTERN)
     this.attendanceRouter.get('/summary', (c: AppContext) => attendanceController.getSummary(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       query: AttendanceListQuery,
     });
 
@@ -80,7 +80,7 @@ class AttendanceRouter {
       '/supervisor',
       (c: AppContext) => attendanceController.getSupervisorDashboard(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['SUPERVISOR']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
       },
     );
 
@@ -88,7 +88,7 @@ class AttendanceRouter {
 
     // 16.9 GET /attendance/history (HR_ADMIN)
     this.attendanceRouter.get('/history', (c: AppContext) => attendanceController.getHistory(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       query: AttendanceHistoryQuery,
     });
 
@@ -99,7 +99,7 @@ class AttendanceRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['HR_ADMIN', 'SUPERVISOR', 'INTERN']).beforeHandle,
+          requireRole(['hr_admin', 'supervisor', 'intern']).beforeHandle,
         ],
         query: AttendanceExportQuery,
       },
@@ -114,7 +114,7 @@ class AttendanceRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['HR_ADMIN', 'SUPERVISOR', 'INTERN']).beforeHandle,
+          requireRole(['hr_admin', 'supervisor', 'intern']).beforeHandle,
         ],
         params: AttendanceIdParam,
       },
@@ -125,7 +125,7 @@ class AttendanceRouter {
       '/:attendanceId/override',
       (c: AppContext) => attendanceController.override(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['SUPERVISOR']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
         params: AttendanceIdParam,
         body: OverrideAttendanceDto,
       },

@@ -233,7 +233,7 @@ const InternProfileForm: React.FC<InternProfileFormProps> = ({
 
           <div className="flex justify-end gap-3 border-t pt-4">
             <Button asChild type="button" variant="outline">
-              <Link href="/INTERN/profile">Batal</Link>
+              <Link href="/intern/profile">Batal</Link>
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? (

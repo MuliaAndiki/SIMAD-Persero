@@ -34,7 +34,7 @@ export function AppSidebar() {
   const { hasActiveInternship } = useInternAccess();
   const isCollapsed = state === 'collapsed';
 
-  const role = api.auth.query.me().data?.role;
+  const role = api.auth.query.me().data?.role?.toUpperCase();
   const roleMenus =
     (role === 'INTERN' || role === 'HR_ADMIN' || role === 'SUPERVISOR'
       ? ROLE_SIDEBAR_MENU[role]

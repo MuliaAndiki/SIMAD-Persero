@@ -9,8 +9,8 @@ import { useEffect, useRef } from 'react';
  * Halaman `/dashboard` — dispatcher berbasis role.
  *
  * Setelah role akun diketahui (GET /auth/me), pengguna diarahkan ke dashboard
- * sesuai role-nya: /INTERN/dashboard, /HR_ADMIN/dashboard, atau
- * /SUPERVISOR/dashboard. Halaman khusus role dibuat di folder role masing-masing
+ * sesuai role-nya: /intern/dashboard, /hr_admin/dashboard, atau
+ * /supervisor/dashboard. Halaman khusus role dibuat di folder role masing-masing
  * (scalable — tiap role bisa punya halaman yang tidak dimiliki role lain).
  */
 export default function DashboardDispatcher() {
@@ -21,11 +21,13 @@ export default function DashboardDispatcher() {
   const didRedirect = useRef(false);
 
   useEffect(() => {
-    if (didRedirect.current || me.isPending) return;
-    didRedirect.current = true;
+    if (didRedirect.current || me.isPending || !me.data?.role) return;
 
-    const target = getRoleDashboardPath(me.data?.role);
-    if (target !== '/dashboard') router.replace(target);
+    const target = getRoleDashboardPath(me.data.role);
+    if (target !== '/dashboard') {
+      didRedirect.current = true;
+      router.replace(target);
+    }
   }, [me.isPending, me.data?.role, router]);
 
   if (me.isError) {

@@ -30,7 +30,7 @@ class OfficeRouter {
       query: OfficeQueryDto,
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['HR_ADMIN', 'SUPERVISOR']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor']).beforeHandle,
       ],
       detail: {
         summary: 'Daftar lokasi kantor',
@@ -45,7 +45,7 @@ class OfficeRouter {
       params: OfficeParamsDto,
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['HR_ADMIN', 'SUPERVISOR']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor']).beforeHandle,
       ],
       detail: {
         summary: 'Detail lokasi kantor',
@@ -57,7 +57,7 @@ class OfficeRouter {
     // POST /offices
     this.officeRouter.post('/', (c: AppContext) => OfficeController.create(c), {
       body: CreateOfficeDto,
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       detail: {
         summary: 'Buat lokasi kantor',
         description:
@@ -70,7 +70,7 @@ class OfficeRouter {
     this.officeRouter.patch('/:officeId', (c: AppContext) => OfficeController.update(c), {
       params: OfficeParamsDto,
       body: UpdateOfficeDto,
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       detail: {
         summary: 'Ubah lokasi kantor',
         description: 'Memperbarui data lokasi kantor berdasarkan ID.',
@@ -81,7 +81,7 @@ class OfficeRouter {
     // DELETE /offices/:officeId
     this.officeRouter.delete('/:officeId', (c: AppContext) => OfficeController.remove(c), {
       params: OfficeParamsDto,
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       detail: {
         summary: 'Hapus lokasi kantor',
         description: 'Menghapus lokasi kantor berdasarkan ID.',

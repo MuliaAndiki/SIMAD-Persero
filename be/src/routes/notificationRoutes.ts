@@ -31,7 +31,7 @@ class NotificationRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['INTERN', 'HR_ADMIN', 'SUPERVISOR', 'RECEPTIONIST']).beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
         ],
         query: NotificationListQuery,
       },
@@ -44,7 +44,7 @@ class NotificationRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['INTERN', 'HR_ADMIN', 'SUPERVISOR', 'RECEPTIONIST']).beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
         ],
       },
     );
@@ -56,14 +56,14 @@ class NotificationRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['INTERN', 'HR_ADMIN', 'SUPERVISOR', 'RECEPTIONIST']).beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
         ],
       },
     );
 
     // 18.7 POST /notifications/send (HR_ADMIN)
     this.notificationRouter.post('/send', (c: AppContext) => notificationController.send(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       body: SendNotificationDto,
     });
 
@@ -76,7 +76,7 @@ class NotificationRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['INTERN', 'HR_ADMIN', 'SUPERVISOR', 'RECEPTIONIST']).beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
         ],
         params: NotificationIdParam,
       },
@@ -89,7 +89,7 @@ class NotificationRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['INTERN', 'HR_ADMIN', 'SUPERVISOR', 'RECEPTIONIST']).beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
         ],
         params: NotificationIdParam,
       },
@@ -102,7 +102,7 @@ class NotificationRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['INTERN', 'HR_ADMIN', 'SUPERVISOR', 'RECEPTIONIST']).beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
         ],
         params: NotificationIdParam,
       },

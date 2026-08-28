@@ -17,7 +17,7 @@ export function useInternAccess() {
   const api = useApi();
 
   const me = api.auth.query.me();
-  const isIntern = me.data?.role === 'INTERN';
+  const isIntern = me.data?.role?.toUpperCase() === 'INTERN';
   const intern = api.dashboard.query.intern({ enabled: isIntern });
 
   const hasActiveInternship = Boolean(isIntern && intern.data?.internship);

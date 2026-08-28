@@ -204,7 +204,7 @@ class CertificateService {
     const certificate = await this.findById(id);
 
     // Intern hanya dapat mengunduh sertifikat miliknya sendiri.
-    if (user.roles.includes('INTERN')) {
+    if (user.roles.some((r) => r.toLowerCase() === 'intern')) {
       const ownerId = certificate.internship?.internProfile?.user?.id ?? null;
       if (ownerId !== user.id) {
         throw new AppError(403, 'Access denied. You can only download your own certificate');
