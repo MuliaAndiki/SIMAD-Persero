@@ -15,6 +15,7 @@ import {
   Mail,
   PenLine,
   Phone,
+  ShieldCheck,
   Sparkles,
   UserRound,
 } from 'lucide-react';
@@ -187,15 +188,6 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
         </CardContent>
       </Card>
 
-      {/* Card Sesi Aktif */}
-      <ActiveSessionsCard
-        sessions={state.sessions ?? []}
-        isPending={Boolean(state.isSessionsPending)}
-        isRevoking={Boolean(state.isRevokingSession)}
-        onRevokeSession={(id) => service.onRevokeSession?.(id)}
-        onLogoutAll={() => service.onLogoutAll?.()}
-      />
-
       <div className="flex flex-wrap gap-3">
         {isIntern && (
           <>
@@ -213,6 +205,12 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
             </Button>
           </>
         )}
+        <Button asChild variant="outline">
+          <Link href={`${basePath}/sessions`}>
+            <ShieldCheck className="size-4 text-primary" />
+            Keamanan & Sesi
+          </Link>
+        </Button>
         <Button type="button" variant="outline" onClick={service.onOpenChangeEmail}>
           <Mail className="size-4" />
           Ubah Email

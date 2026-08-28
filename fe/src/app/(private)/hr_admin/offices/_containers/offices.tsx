@@ -8,6 +8,7 @@ import type {
 } from "@/components/organisms/office/OfficeFormDialog";
 import { OfficesSection } from "@/components/page/hr/OfficesSection";
 import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useApi } from "@/hooks/useService/useApi";
 import type { OfficeResponse } from "@/types/api/office.types";
 
@@ -39,8 +40,10 @@ export default function HrOfficesContainer() {
   const [deptTarget, setDeptTarget] = useState<OfficeResponse | null>(null);
   const [selectedDeptIds, setSelectedDeptIds] = useState<string[]>([]);
 
+  const debouncedKeyword = useDebounce(keyword, 400);
+
   const list = api.office.query.list({
-    keyword: keyword || undefined,
+    keyword: debouncedKeyword || undefined,
     limit: 100,
   });
   const departments = api.department.query.list({ limit: 100 });
@@ -133,6 +136,7 @@ export default function HrOfficesContainer() {
     <OfficesSection
       state={{
         isPending: list.isPending,
+        isFetching: list.isFetching,
         isError: list.isError,
         errorMessage: list.error?.message,
         offices: list.data ?? [],

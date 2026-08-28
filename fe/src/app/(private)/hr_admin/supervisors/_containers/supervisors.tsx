@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { SupervisorFormType } from '@/components/organisms/supervisor/SupervisorFormDialog';
 import { SupervisorsSection } from '@/components/page/hr/SupervisorsSection';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useApi } from '@/hooks/useService/useApi';
 import type { CreateSupervisorBody, UpdateSupervisorBody } from '@/types/api/supervisor.types';
 
@@ -30,8 +31,10 @@ export default function HrSupervisorsContainer() {
     isActive: true,
   });
 
+  const debouncedKeyword = useDebounce(keyword, 400);
+
   const list = api.supervisor.query.list({
-    keyword: keyword || undefined,
+    keyword: debouncedKeyword || undefined,
     limit: 100,
   });
 
@@ -175,16 +178,9 @@ export default function HrSupervisorsContainer() {
 
   const handleDeleteSupervisor = useCallback(
     async (id: string) => {
-      const confirmed = await ns.alert.confirm({
-        title: 'Hapus Supervisor?',
-        icon: 'warning',
-        deskripsi: 'Akun supervisor ini akan dinonaktifkan secara permanen.',
-        confirmButtonText: 'Hapus',
-      });
-      if (!confirmed) return;
       await deleteSupervisor.mutateAsync({ supervisorId: id });
     },
-    [deleteSupervisor, ns.alert],
+    [deleteSupervisor],
   );
 
   const handleSendNotification = useCallback(
@@ -203,6 +199,7 @@ export default function HrSupervisorsContainer() {
     <SupervisorsSection
       state={{
         isPending: list.isPending,
+        isFetching: list.isFetching,
         isError: list.isError,
         errorMessage: list.error?.message,
         supervisors: list.data ?? [],

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { InternshipsSection } from "@/components/page/hr/InternshipsSection";
 import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useApi } from "@/hooks/useService/useApi";
 
 /**
@@ -40,8 +41,10 @@ export default function HrInternshipsContainer() {
     archiveMutation.isPending ||
     generateCertMutation.isPending;
 
+  const debouncedKeyword = useDebounce(keyword, 400);
+
   const filteredInternships = useMemo(() => {
-    const keywordLower = keyword.trim().toLowerCase();
+    const keywordLower = debouncedKeyword.trim().toLowerCase();
     return (list.data ?? []).filter((internship) => {
       if (statusFilter && internship.status !== statusFilter) return false;
       if (!keywordLower) return true;
@@ -55,7 +58,7 @@ export default function HrInternshipsContainer() {
         nim.includes(keywordLower)
       );
     });
-  }, [list.data, keyword, statusFilter]);
+  }, [list.data, debouncedKeyword, statusFilter]);
 
   // Handlers
   const handleStart = async (id: string) => {
@@ -138,6 +141,7 @@ export default function HrInternshipsContainer() {
     <InternshipsSection
       state={{
         isPending: list.isPending,
+        isFetching: list.isFetching,
         isActionPending,
         isError: list.isError,
         errorMessage: list.error?.message,

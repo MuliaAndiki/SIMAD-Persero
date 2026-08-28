@@ -6,6 +6,7 @@ import type {
   InternDashboardResponse,
   RecentActivityQuery,
   RecentActivityResponse,
+  ReceptionistDashboardData,
   SupervisorDashboardData,
 } from '@/types/dashboard.types';
 import prisma from '../../prisma/client';
@@ -197,6 +198,60 @@ class DashboardService {
       notCheckedIn,
       present,
       invalidAttendance,
+    };
+  }
+
+  // ── Receptionist Dashboard ─────────────────────────────────────────
+
+  public async getReceptionistDashboard(): Promise<ReceptionistDashboardData> {
+    const todayDate = this.getTodayDate();
+
+    const [activeInternsCount, attendancesToday] = await Promise.all([
+      prisma.internship.count({ where: { status: 'ACTIVE' } }),
+      prisma.attendance.findMany({
+        where: { attendanceDate: todayDate },
+        include: {
+          internship: {
+            include: {
+              internProfile: {
+                include: {
+                  user: { select: { fullName: true, email: true } },
+                },
+              },
+              department: { select: { name: true } },
+              officeLocation: { select: { name: true } },
+            },
+          },
+        },
+        orderBy: { checkInAt: 'desc' },
+        take: 20,
+      }),
+    ]);
+
+    const presentTodayCount = attendancesToday.filter(
+      (a) =>
+        a.attendanceStatus === 'PRESENT' ||
+        a.attendanceStatus === 'LATE' ||
+        a.attendanceStatus === 'COMPLETED',
+    ).length;
+    const pendingCheckInCount = Math.max(activeInternsCount - presentTodayCount, 0);
+
+    const recentAttendances = attendancesToday.map((a) => ({
+      id: a.id,
+      internName: a.internship?.internProfile?.user?.fullName ?? 'Peserta Magang',
+      internEmail: a.internship?.internProfile?.user?.email ?? '',
+      departmentName: a.internship?.department?.name ?? null,
+      officeName: a.internship?.officeLocation?.name ?? null,
+      checkInAt: a.checkInAt,
+      checkInStatus: a.checkInStatus,
+      attendanceStatus: a.attendanceStatus,
+    }));
+
+    return {
+      activeInternsCount,
+      presentTodayCount,
+      pendingCheckInCount,
+      recentAttendances,
     };
   }
 

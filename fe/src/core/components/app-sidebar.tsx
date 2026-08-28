@@ -1,6 +1,9 @@
 'use client';
 
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -10,22 +13,33 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from '@/components/atoms';
-import { ROLE_SIDEBAR_MENU, SIDEBAR_MENU, isMenuActive } from '@/configs/app.config';
+import {
+  ROLE_SIDEBAR_MENU,
+  SIDEBAR_MENU,
+  isItemActive,
+  isMenuActive,
+} from '@/configs/app.config';
 import { useInternAccess } from '@/hooks/useInternAccess';
 import { useApi } from '@/hooks/useService/useApi';
 import { cn } from '@/utils/classname';
+import { ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 /**
- * Sidebar desktop (md+) — menampilkan navigasi modul SIMAD.
+ * Sidebar desktop (md+) & mobile — menampilkan navigasi modul SIMAD.
  *
  * Menu dipilih berdasarkan role akun yang sedang login
  * (`ROLE_SIDEBAR_MENU` di app.config) sehingga INTERN, HR_ADMIN,
  * dan SUPERVISOR mendapat navigasi yang sesuai perannya.
+ *
+ * Mendukung expandable dropdown (subMenu) dengan auto-expand & active state tracking.
  */
 export function AppSidebar() {
   const pathname = usePathname();
@@ -67,22 +81,83 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menus.map((item) => {
-                const isActive = isMenuActive(item.url, pathname);
+                const hasSubMenu = Boolean(item.subMenu && item.subMenu.length > 0);
+                const isGroupActive = isItemActive(item, pathname);
                 const Icon = item.icon;
 
+                // Item dengan SubMenu (Dropdown Group)
+                if (hasSubMenu && item.subMenu) {
+                  return (
+                    <Collapsible
+                      key={item.name}
+                      asChild
+                      defaultOpen={isGroupActive}
+                      className="group/collapsible"
+                    >
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton
+                            tooltip={isCollapsed ? item.name : undefined}
+                            isActive={isGroupActive}
+                            className="h-10 px-3 cursor-pointer"
+                          >
+                            <Icon className="size-5 shrink-0 text-sidebar-foreground/80" />
+                            <span className="text-sm font-medium text-sidebar-foreground">
+                              {!isCollapsed && item.name}
+                            </span>
+                            {!isCollapsed && (
+                              <ChevronRight className="ml-auto size-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-sidebar-foreground/60" />
+                            )}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub className="my-1 flex flex-col gap-0.5 border-l border-sidebar-border/70 pl-3">
+                            {item.subMenu.map((subItem) => {
+                              const isSubActive = isMenuActive(subItem.url, pathname);
+                              const SubIcon = subItem.icon;
+
+                              return (
+                                <SidebarMenuSubItem key={subItem.url}>
+                                  <SidebarMenuSubButton asChild isActive={isSubActive}>
+                                    <Link
+                                      href={subItem.url}
+                                      className={cn(
+                                        'flex h-9 items-center gap-2.5 rounded-lg px-3 text-xs transition-colors',
+                                        isSubActive
+                                          ? 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground'
+                                          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
+                                      )}
+                                    >
+                                      {SubIcon && <SubIcon className="size-4 shrink-0" />}
+                                      <span>{subItem.name}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+
+                // Item Tunggal (Top-level Single Item)
+                const isActive = isMenuActive(item.url, pathname);
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton
                       asChild
                       tooltip={isCollapsed ? item.name : undefined}
                       isActive={isActive}
+                      className="h-10 px-3"
                     >
                       <Link
                         href={item.url}
                         className={cn(
                           'flex h-10 items-center gap-3 rounded-lg px-3 transition-colors',
                           isActive
-                            ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                            ? 'bg-sidebar-accent font-semibold text-sidebar-accent-foreground'
                             : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
                         )}
                       >

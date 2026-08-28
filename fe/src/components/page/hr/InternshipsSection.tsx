@@ -21,12 +21,13 @@ import type { DepartmentResponse } from '@/types/api/department.types';
 import type { InternshipResponse } from '@/types/api/internship.types';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { SupervisorResponse } from '@/types/api/supervisor.types';
-import { AlertCircle, Search } from 'lucide-react';
+import { AlertCircle, Loader2, Search } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
 export interface InternshipsSectionState {
   isPending: boolean;
+  isFetching?: boolean;
   isActionPending?: boolean;
   isError: boolean;
   errorMessage?: string;
@@ -70,9 +71,6 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'ARCHIVED', label: 'Diarsipkan' },
 ];
 
-/**
- * InternshipsSection — Pusat Kontrol Magang (HR Admin).
- */
 export function InternshipsSection({ state, actions }: InternshipsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
@@ -108,6 +106,8 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
     setGenerateCertOpen(true);
   };
 
+  const isInitialLoading = state.isPending && state.internships.length === 0;
+
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -118,8 +118,46 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
         </p>
       </header>
 
-      {state.isPending ? (
-        <Card className="h-64" />
+      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                actions.onKeywordChange(e.target.value);
+              }}
+              placeholder="Cari nama / email / NIM…"
+              className="pl-9 pr-9"
+            />
+            {state.isFetching && (
+              <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
+            )}
+          </div>
+          <Button type="submit" variant="outline">
+            Cari
+          </Button>
+        </form>
+        <Select
+          value={state.statusFilter || 'all'}
+          onValueChange={(value) => actions.onStatusChange(value === 'all' ? '' : value)}
+        >
+          <SelectTrigger className="w-full md:w-52">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {isInitialLoading ? (
+        <Card className="h-64 animate-pulse bg-muted/40" />
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
@@ -129,53 +167,16 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
           </div>
         </div>
       ) : (
-        <>
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    actions.onKeywordChange(e.target.value);
-                  }}
-                  placeholder="Cari nama / email / NIM…"
-                  className="pl-9"
-                />
-              </div>
-              <Button type="submit" variant="outline">
-                Cari
-              </Button>
-            </form>
-            <Select
-              value={state.statusFilter || 'all'}
-              onValueChange={(value) => actions.onStatusChange(value === 'all' ? '' : value)}
-            >
-              <SelectTrigger className="w-full md:w-52">
-                <SelectValue placeholder="Semua Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <InternshipsTable
-            internships={state.internships}
-            onStart={actions.onStart}
-            onFinish={actions.onFinish}
-            onOpenExtend={handleOpenExtend}
-            onOpenChangeDept={handleOpenChangeDept}
-            onOpenAssignSupervisor={handleOpenAssignSupervisor}
-            onOpenGenerateCert={handleOpenGenerateCert}
-            onArchive={actions.onArchive}
-          />
-        </>
+        <InternshipsTable
+          internships={state.internships}
+          onStart={actions.onStart}
+          onFinish={actions.onFinish}
+          onOpenExtend={handleOpenExtend}
+          onOpenChangeDept={handleOpenChangeDept}
+          onOpenAssignSupervisor={handleOpenAssignSupervisor}
+          onOpenGenerateCert={handleOpenGenerateCert}
+          onArchive={actions.onArchive}
+        />
       )}
 
       {/* Action Modals */}

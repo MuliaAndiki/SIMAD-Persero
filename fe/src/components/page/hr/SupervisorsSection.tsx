@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Bell, Plus, Search } from 'lucide-react';
+import { AlertCircle, Bell, Loader2, Plus, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
@@ -24,6 +24,7 @@ import type { AlertContexType } from '@/types/ui';
 
 export interface SupervisorsSectionState {
   isPending: boolean;
+  isFetching?: boolean;
   isError: boolean;
   errorMessage?: string;
   supervisors: SupervisorResponse[];
@@ -74,9 +75,6 @@ export interface SupervisorsSectionProps {
   actions: SupervisorsSectionActions;
 }
 
-/**
- * SupervisorsSection — komposisi halaman Supervisor (HR Admin).
- */
 export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
   const [auditUserId, setAuditUserId] = useState<string | null>(null);
@@ -91,6 +89,8 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
   const assignedInternshipIds = (state.detail?.assignments ?? [])
     .map((a) => a.internshipId)
     .filter((id): id is string => Boolean(id));
+
+  const isInitialLoading = state.isPending && state.supervisors.length === 0;
 
   return (
     <section className="flex flex-col gap-6">
@@ -108,8 +108,33 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
         )}
       </header>
 
-      {state.isPending ? (
-        <Card className="h-64" />
+      <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              actions.onKeywordChange(e.target.value);
+            }}
+            placeholder="Cari nama / email supervisor…"
+            className="pl-9 pr-9"
+          />
+          {state.isFetching && (
+            <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
+          )}
+        </div>
+        <Button type="submit" variant="outline">
+          Cari
+        </Button>
+        <Button type="button" onClick={actions.onOpenCreateForm}>
+          <Plus className="mr-2 size-4" />
+          Tambah
+        </Button>
+      </form>
+
+      {isInitialLoading ? (
+        <Card className="h-64 animate-pulse bg-muted/40" />
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
@@ -119,30 +144,6 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                actions.onKeywordChange(e.target.value);
-              }}
-              placeholder="Cari nama / email supervisor…"
-              className="pl-9"
-            />
-          </div>
-          <Button type="submit" variant="outline">
-            Cari
-          </Button>
-          <Button type="button" onClick={actions.onOpenCreateForm}>
-            <Plus className="mr-2 size-4" />
-            Tambah
-          </Button>
-        </form>
-      )}
-
-      {!state.isPending && !state.isError && (
         <SupervisorTable
           supervisors={state.supervisors}
           onSelectSupervisor={actions.onSelectSupervisor}

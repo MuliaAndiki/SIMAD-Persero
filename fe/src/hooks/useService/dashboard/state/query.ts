@@ -35,6 +35,16 @@ export function useDashboardSupervisor() {
   });
 }
 
+export function useDashboardReceptionist() {
+  return useQuery({
+    queryKey: queryKey.dashboard.receptionist(),
+    queryFn: async () => {
+      const res = await Api.Dashboard.Receptionist();
+      return res.data;
+    },
+  });
+}
+
 export function useDashboardStatistics() {
   return useQuery({
     queryKey: queryKey.dashboard.statistics(),

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Plus, Search } from "lucide-react";
+import { AlertCircle, Loader2, Plus, Search } from "lucide-react";
 import type { FormEvent } from "react";
 import { useState } from "react";
 
@@ -20,6 +20,7 @@ import type { AlertContexType } from "@/types/ui";
 
 export interface OfficesSectionState {
   isPending: boolean;
+  isFetching?: boolean;
   isError: boolean;
   errorMessage?: string;
   offices: OfficeResponse[];
@@ -57,10 +58,6 @@ export interface OfficesSectionProps {
   actions: OfficesSectionActions;
 }
 
-/**
- * OfficesSection — komposisi halaman Kantor (HR Admin).
- * Murni presentasi: tanpa fetch API, tanpa state fitur, tanpa komponen besar.
- */
 export function OfficesSection({ state, actions }: OfficesSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
@@ -68,6 +65,8 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
     e.preventDefault();
     actions.onSearch();
   };
+
+  const isInitialLoading = state.isPending && state.offices.length === 0;
 
   return (
     <section className="flex flex-col gap-6">
@@ -79,8 +78,38 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
         </p>
       </header>
 
-      {state.isPending ? (
-        <Card className="h-64" />
+      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        <form
+          onSubmit={handleSubmitSearch}
+          className="flex flex-1 items-center gap-2"
+        >
+          <div className="relative flex-1">
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                actions.onKeywordChange(e.target.value);
+              }}
+              placeholder="Cari nama / alamat kantor…"
+              className="pl-9 pr-9"
+            />
+            {state.isFetching && (
+              <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
+            )}
+          </div>
+          <Button type="submit" variant="outline">
+            Cari
+          </Button>
+        </form>
+        <Button onClick={actions.onOpenCreate}>
+          <Plus className="size-4" />
+          Tambah Kantor
+        </Button>
+      </div>
+
+      {isInitialLoading ? (
+        <Card className="h-64 animate-pulse bg-muted/40" />
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
@@ -90,42 +119,13 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
           </div>
         </div>
       ) : (
-        <>
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <form
-              onSubmit={handleSubmitSearch}
-              className="flex flex-1 items-center gap-2"
-            >
-              <div className="relative flex-1">
-                <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    actions.onKeywordChange(e.target.value);
-                  }}
-                  placeholder="Cari nama / alamat kantor…"
-                  className="pl-9"
-                />
-              </div>
-              <Button type="submit" variant="outline">
-                Cari
-              </Button>
-            </form>
-            <Button onClick={actions.onOpenCreate}>
-              <Plus className="size-4" />
-              Tambah Kantor
-            </Button>
-          </div>
-
-          <OfficeTable
-            offices={state.offices}
-            isDeleting={state.isDeleting}
-            onOpenEdit={actions.onOpenEdit}
-            onManageDepartments={actions.onOpenManageDepartments}
-            alert={state.alert}
-          />
-        </>
+        <OfficeTable
+          offices={state.offices}
+          isDeleting={state.isDeleting}
+          onOpenEdit={actions.onOpenEdit}
+          onManageDepartments={actions.onOpenManageDepartments}
+          alert={state.alert}
+        />
       )}
 
       <OfficeFormDialog

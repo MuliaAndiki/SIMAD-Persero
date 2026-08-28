@@ -9,6 +9,7 @@ import type {
   RejectApplicationFormState,
 } from '@/components/organisms/application/ApplicationRejectForm';
 import { ApplicationsSection } from '@/components/page/hr/ApplicationsSection';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useApi } from '@/hooks/useService/useApi';
 import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
 import { useRouter } from 'next/navigation';
@@ -42,9 +43,11 @@ export default function HrApplicationsContainer() {
   const [approveForm, setApproveForm] = useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
   const [rejectForm, setRejectForm] = useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
 
+  const debouncedKeyword = useDebounce(keyword, 400);
+
   const list = api.application.query.list({
     status: (statusFilter || undefined) as ApplicationStatusValue | undefined,
-    keyword: keyword || undefined,
+    keyword: debouncedKeyword || undefined,
     limit: 100,
   });
 
@@ -124,6 +127,7 @@ export default function HrApplicationsContainer() {
     <ApplicationsSection
       state={{
         isPending: list.isPending,
+        isFetching: list.isFetching,
         isError: list.isError,
         errorMessage: list.error?.message,
         applications: list.data ?? [],
