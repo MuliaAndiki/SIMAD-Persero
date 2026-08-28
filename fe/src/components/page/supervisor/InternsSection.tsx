@@ -131,7 +131,7 @@ export function InternsSection({ state, service }: InternsSectionProps) {
                           <td className="px-6 py-4 text-right">
                             {today ? (
                               <Button asChild variant="outline" size="sm">
-                                <Link href={`/SUPERVISOR/dashboard/attendance/${today.id}`}>
+                                <Link href={`/supervisor/attendance/${today.id}`}>
                                   <CalendarCheck2 className="size-4" />
                                   Lihat Absensi
                                 </Link>

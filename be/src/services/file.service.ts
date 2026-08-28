@@ -142,7 +142,8 @@ class FileService {
       throw new AppError(404, 'File not found');
     }
 
-    if (file.uploadedById !== user.id && !user.roles.includes('HR_ADMIN')) {
+    const roles = (user.roles ?? []).map((r) => r.toLowerCase());
+    if (file.uploadedById !== user.id && !roles.includes('hr_admin')) {
       throw new AppError(403, 'Access denied. You can only delete your own files.');
     }
 

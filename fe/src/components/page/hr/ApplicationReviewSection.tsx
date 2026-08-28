@@ -56,7 +56,7 @@ export function ApplicationReviewSection({ state, actions }: ApplicationReviewSe
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-3">
         <Link
-          href="/HR_ADMIN/applications"
+          href="/hr_admin/applications"
           className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="size-4" />

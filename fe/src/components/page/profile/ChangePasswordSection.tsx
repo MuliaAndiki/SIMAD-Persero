@@ -38,7 +38,7 @@ export function ChangePasswordSection({ state, service }: ChangePasswordSectionP
 
       <ChangePasswordForm
         isChangingPassword={state.isChangingPassword}
-        backPath={state.backPath ?? '/INTERN/profile'}
+        backPath={state.backPath ?? '/intern/profile'}
         onChangePassword={service.onChangePassword}
       />
     </section>

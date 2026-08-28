@@ -270,7 +270,7 @@ function DashboardFrame({
 
 /**
  * InternDashboardSection — tampilan dashboard peserta magang.
- * Presentasi murni; state & service disuplai container (folder /INTERN/dashboard).
+ * Presentasi murni; state & service disuplai container (folder /intern/dashboard).
  */
 export function InternDashboardSection({ state, service }: InternDashboardSectionProps) {
   // service disiapkan untuk aksi masa depan (mis. buka detail notifikasi).
@@ -294,7 +294,7 @@ export function InternDashboardSection({ state, service }: InternDashboardSectio
 
 /**
  * HrDashboardSection — tampilan dashboard HR Admin.
- * Presentasi murni; state & service disuplai container (folder /HR_ADMIN/dashboard).
+ * Presentasi murni; state & service disuplai container (folder /hr_admin/dashboard).
  *
  * Dashboard disusun dari 4 blok independen — ringkasan cepat, statistik, grafik,
  * dan aktivitas terbaru. Tiap blok menangani pending/error/kosong sendiri lewat
@@ -337,7 +337,7 @@ export function HrDashboardSection({ state, service }: HrDashboardSectionProps) 
 
 /**
  * SupervisorDashboardSection — tampilan dashboard supervisor.
- * Presentasi murni; state & service disuplai container (folder /SUPERVISOR/dashboard).
+ * Presentasi murni; state & service disuplai container (folder /supervisor/dashboard).
  */
 export function SupervisorDashboardSection({ state, service }: SupervisorDashboardSectionProps) {
   // service disiapkan untuk aksi masa depan (mis. buka daftar absensi peserta).

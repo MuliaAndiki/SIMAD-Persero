@@ -251,7 +251,7 @@ function DayCard({
 
   if (record) {
     return (
-      <Link href={`/INTERN/history/${record.id}`} className="block h-full">
+      <Link href={`/intern/history/${record.id}`} className="block h-full">
         {content}
       </Link>
     );

@@ -149,104 +149,104 @@ export interface SidebarMenuItem {
 }
 
 export const SIDEBAR_MENU: SidebarMenuItem[] = [
-  { name: 'Beranda', url: '/INTERN/dashboard', icon: Home, subMenu: [] },
+  { name: 'Beranda', url: '/intern/dashboard', icon: Home, subMenu: [] },
   {
     name: 'Pengajuan',
-    url: '/INTERN/application',
+    url: '/intern/application',
     icon: FileText,
     subMenu: [],
   },
   {
     name: 'Onboarding',
-    url: '/INTERN/onboarding',
+    url: '/intern/onboarding',
     icon: ClipboardCheck,
     subMenu: [],
     requiresInternship: true,
   },
   {
     name: 'Absensi',
-    url: '/INTERN/attendance',
+    url: '/intern/attendance',
     icon: Clock,
     subMenu: [],
     requiresInternship: true,
   },
   {
     name: 'Riwayat',
-    url: '/INTERN/history',
+    url: '/intern/history',
     icon: History,
     subMenu: [],
     requiresInternship: true,
   },
   {
     name: 'Sertifikat',
-    url: '/INTERN/certificate',
+    url: '/intern/certificate',
     icon: Award,
     subMenu: [],
     requiresInternship: true,
   },
-  { name: 'Profil', url: '/INTERN/profile', icon: User, subMenu: [] },
+  { name: 'Profil', url: '/intern/profile', icon: User, subMenu: [] },
 ];
 
 /** Menu sidebar khusus HR_ADMIN. */
 export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
-  { name: 'Beranda', url: '/HR_ADMIN/dashboard', icon: Home, subMenu: [] },
+  { name: 'Beranda', url: '/hr_admin/dashboard', icon: Home, subMenu: [] },
   {
     name: 'Pengajuan',
-    url: '/HR_ADMIN/applications',
+    url: '/hr_admin/applications',
     icon: FileText,
     subMenu: [],
   },
   {
     name: 'Magang',
-    url: '/HR_ADMIN/internships',
+    url: '/hr_admin/internships',
     icon: BriefcaseBusiness,
     subMenu: [],
   },
   {
     name: 'Departemen',
-    url: '/HR_ADMIN/departments',
+    url: '/hr_admin/departments',
     icon: Building2,
     subMenu: [],
   },
   {
     name: 'Kantor',
-    url: '/HR_ADMIN/offices',
+    url: '/hr_admin/offices',
     icon: MapPin,
     subMenu: [],
   },
   {
     name: 'Supervisor',
-    url: '/HR_ADMIN/supervisors',
+    url: '/hr_admin/supervisors',
     icon: UserCheck,
     subMenu: [],
   },
   {
     name: 'Laporan',
-    url: '/HR_ADMIN/reports',
+    url: '/hr_admin/reports',
     icon: BarChart3,
     subMenu: [],
   },
   {
     name: 'Audit Log',
-    url: '/HR_ADMIN/audit-logs',
+    url: '/hr_admin/audit-logs',
     icon: ScrollText,
     subMenu: [],
   },
   {
     name: 'Keterampilan',
-    url: '/HR_ADMIN/skills',
+    url: '/hr_admin/skills',
     icon: Sparkles,
     subMenu: [],
   },
   {
     name: 'Sertifikat',
-    url: '/HR_ADMIN/certificate-setting',
+    url: '/hr_admin/certificate-setting',
     icon: Award,
     subMenu: [],
   },
   {
     name: 'Profil',
-    url: '/HR_ADMIN/profile',
+    url: '/hr_admin/profile',
     icon: User,
     subMenu: [],
   },
@@ -254,22 +254,22 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
 
 /** Menu sidebar khusus SUPERVISOR. */
 export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
-  { name: 'Beranda', url: '/SUPERVISOR/dashboard', icon: Home, subMenu: [] },
+  { name: 'Beranda', url: '/supervisor/dashboard', icon: Home, subMenu: [] },
   {
     name: 'Intern Bimbingan',
-    url: '/SUPERVISOR/interns',
+    url: '/supervisor/interns',
     icon: Users,
     subMenu: [],
   },
   {
     name: 'Absensi',
-    url: '/SUPERVISOR/attendance',
+    url: '/supervisor/attendance',
     icon: Clock,
     subMenu: [],
   },
   {
     name: 'Profil',
-    url: '/SUPERVISOR/profile',
+    url: '/supervisor/profile',
     icon: User,
     subMenu: [],
   },
@@ -292,14 +292,14 @@ export const DASHBOARD_ROLE_LABELS: Record<DashboardRole, string> = {
 /**
  * Path dashboard per role — single source of truth.
  *
- * Setiap role punya folder rutenya sendiri di `(private)/<ROLE>/dashboard`
+ * Setiap role punya folder rutenya sendiri di `(private)/<role>/dashboard`
  * sehingga halaman khusus role (mis. hanya ada di intern, tidak di HR)
  * cukup dibuat di dalam folder role tersebut (scalable).
  */
 export const ROLE_DASHBOARD_PATH: Record<DashboardRole, string> = {
-  INTERN: '/INTERN/dashboard',
-  HR_ADMIN: '/HR_ADMIN/dashboard',
-  SUPERVISOR: '/SUPERVISOR/dashboard',
+  INTERN: '/intern/dashboard',
+  HR_ADMIN: '/hr_admin/dashboard',
+  SUPERVISOR: '/supervisor/dashboard',
 };
 
 /**
@@ -310,12 +310,13 @@ export const ROLE_DASHBOARD_PATH: Record<DashboardRole, string> = {
  * / `SafeAuthUser.role` (string). Fallback `/dashboard` agar dispatcher tidak loop.
  */
 export function getRoleDashboardPath(role?: string | null): string {
-  switch (role) {
+  const normalizedRole = role?.toUpperCase() as DashboardRole | undefined;
+  switch (normalizedRole) {
     case 'INTERN':
     case 'HR_ADMIN':
     case 'SUPERVISOR':
-      return ROLE_DASHBOARD_PATH[role];
-    case 'HR':
+      return ROLE_DASHBOARD_PATH[normalizedRole];
+    case 'HR' as any:
       return ROLE_DASHBOARD_PATH.HR_ADMIN;
     default:
       return '/dashboard';
@@ -326,7 +327,7 @@ export function getRoleDashboardPath(role?: string | null): string {
  * Cek apakah pathname sedang berada di area menu tertentu.
  *
  * Menu `Beranda` (/dashboard) dianggap aktif juga saat berada di
- * /INTERN/dashboard, /HR_ADMIN/dashboard, atau /SUPERVISOR/dashboard.
+ * /intern/dashboard, /hr_admin/dashboard, atau /supervisor/dashboard.
  */
 export function isMenuActive(menuUrl: string, pathname: string): boolean {
   const isDashboardPath = (url: string) => url === '/dashboard' || url.endsWith('/dashboard');
@@ -336,7 +337,7 @@ export function isMenuActive(menuUrl: string, pathname: string): boolean {
     return (
       pathname === menuUrl ||
       pathname.startsWith(`${menuUrl}/`) ||
-      (menuUrl === '/INTERN/dashboard' && pathname === '/dashboard')
+      (menuUrl === '/intern/dashboard' && pathname === '/dashboard')
     );
   }
   return pathname === menuUrl || pathname.startsWith(`${menuUrl}/`);

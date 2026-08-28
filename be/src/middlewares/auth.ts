@@ -48,8 +48,8 @@ export const verifyToken = () => ({
         // dianggap ber-role default (INTERN), bukan daftar kosong.
         roles:
           user.userRoles.length > 0
-            ? user.userRoles.map((ur) => ur.role.code)
-            : [DEFAULT_ROLE_CODE],
+            ? user.userRoles.map((ur) => ur.role.code.toLowerCase())
+            : [DEFAULT_ROLE_CODE.toLowerCase()],
       };
 
       c.user = authUser;
@@ -74,7 +74,13 @@ export const verifyToken = () => ({
 export const requireRole = (roles: string[]) => ({
   beforeHandle: (c: AppContext) => {
     const user = c.user;
-    if (!user || !roles.some((role) => user.roles?.includes(role))) {
+    if (!user) {
+      return HttpResponse(c).forbidden('Access denied. Insufficient role.');
+    }
+    const userRolesLower = (user.roles ?? []).map((r) => r.toLowerCase());
+    const allowedLower = roles.map((r) => r.toLowerCase());
+    const hasRole = allowedLower.some((role) => userRolesLower.includes(role));
+    if (!hasRole) {
       return HttpResponse(c).forbidden('Access denied. Insufficient role.');
     }
   },

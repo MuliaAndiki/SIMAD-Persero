@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
  * mis. akun baru atau data lama sebelum seed dijalankan.
  * Dipakai konsisten oleh login, /auth/me, middleware verifyToken, & user profile.
  */
-export const DEFAULT_ROLE_CODE = 'INTERN';
+export const DEFAULT_ROLE_CODE = 'intern';
 
 /** Durasi Access Token dalam detik (3600s = 1 jam, sesuai API spec). */
 export const ACCESS_TOKEN_TTL = 3600;

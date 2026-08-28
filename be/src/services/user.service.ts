@@ -33,7 +33,7 @@ class UserService {
       throw new AppError(404, "Account not found");
     }
 
-    const role = dbUser.userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE;
+    const role = (dbUser.userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE).toLowerCase();
 
     return {
       id: dbUser.id,

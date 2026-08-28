@@ -333,7 +333,7 @@ export function useCreateInternProfile() {
         message: res.message,
         icon: 'success',
         onVoid: () => {
-          ns.router.replace('/INTERN/profile');
+          ns.router.replace('/intern/profile');
         },
       });
     },

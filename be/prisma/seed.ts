@@ -39,25 +39,25 @@ async function findOrCreate<T extends { id: string }>(
 // ─── 1. Roles ─────────────────────────────────────────────────────
 const ROLES = [
   {
-    code: "INTERN",
+    code: "intern",
     name: "Intern",
     description:
       "Mahasiswa magang yang mengajukan lamaran dan melakukan aktivitas harian.",
   },
   {
-    code: "HR_ADMIN",
+    code: "hr_admin",
     name: "HR Admin",
     description:
       "Admin HR yang menyetujui lamaran, mengelola internship, dan master data.",
   },
   {
-    code: "SUPERVISOR",
+    code: "supervisor",
     name: "Supervisor",
     description:
       "Pembimbing lapangan yang memantau kehadiran dan menilai intern.",
   },
   {
-    code: "RECEPTIONIST",
+    code: "receptionist",
     name: "Receptionist",
     description:
       "Petugas resepsionis yang dapat melihat kehadiran harian intern.",
@@ -190,7 +190,7 @@ const PERMISSIONS = [
 
 // Role → permission codes
 const ROLE_PERMISSIONS: Record<string, string[]> = {
-  INTERN: [
+  intern: [
     "APPLICATION_CREATE",
     "APPLICATION_VIEW",
     "ATTENDANCE_CHECK_IN",
@@ -201,8 +201,8 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "DASHBOARD_VIEW",
     "FILE_UPLOAD",
   ],
-  HR_ADMIN: PERMISSIONS.map((p) => p.code),
-  SUPERVISOR: [
+  hr_admin: PERMISSIONS.map((p) => p.code),
+  supervisor: [
     "APPLICATION_VIEW",
     "ATTENDANCE_VIEW",
     "ATTENDANCE_OVERRIDE",
@@ -214,7 +214,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "CERTIFICATE_VIEW",
     "DASHBOARD_VIEW",
   ],
-  RECEPTIONIST: ["ATTENDANCE_VIEW", "INTERNSHIP_VIEW", "DASHBOARD_VIEW"],
+  receptionist: ["ATTENDANCE_VIEW", "INTERNSHIP_VIEW", "DASHBOARD_VIEW"],
 };
 
 // ─── 3. Master data lain ──────────────────────────────────────────
@@ -868,7 +868,7 @@ async function main() {
     },
   });
 
-  const hrAdminRoleId = roleIds.get("HR_ADMIN");
+  const hrAdminRoleId = roleIds.get("hr_admin");
   if (hrAdminRoleId) {
     await prisma.userRole.upsert({
       where: { userId_roleId: { userId: admin.id, roleId: hrAdminRoleId } },

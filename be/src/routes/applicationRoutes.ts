@@ -32,7 +32,7 @@ class ApplicationRouter {
 
     // 14.1 POST /applications — Create application (INTERN)
     this.applicationRouter.post('/', (c: AppContext) => applicationController.create(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       body: CreateApplicationDto,
     });
 
@@ -41,32 +41,32 @@ class ApplicationRouter {
       '/me',
       (c: AppContext) => applicationController.getMyApplications(c),
       {
-        beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       },
     );
 
     // 14.3 PATCH /applications/:id — Update draft (INTERN)
     this.applicationRouter.patch('/:id', (c: AppContext) => applicationController.updateDraft(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       body: UpdateApplicationDto,
       params: ApplicationIdParam,
     });
 
     // 14.4 POST /applications/:id/submit — Submit application (INTERN)
     this.applicationRouter.post('/:id/submit', (c: AppContext) => applicationController.submit(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       params: ApplicationIdParam,
     });
 
     // 14.5 POST /applications/:id/cancel — Cancel application (INTERN)
     this.applicationRouter.post('/:id/cancel', (c: AppContext) => applicationController.cancel(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       params: ApplicationIdParam,
     });
 
     // 14.10 DELETE /applications/:id — Delete draft (INTERN)
     this.applicationRouter.delete('/:id', (c: AppContext) => applicationController.deleteDraft(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['INTERN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       params: ApplicationIdParam,
     });
 
@@ -74,7 +74,7 @@ class ApplicationRouter {
 
     // 14.6 GET /applications — List all applications (HR_ADMIN)
     this.applicationRouter.get('/', (c: AppContext) => applicationController.list(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['HR_ADMIN']).beforeHandle],
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
       query: ApplicationListQuery,
     });
 
@@ -82,7 +82,7 @@ class ApplicationRouter {
     this.applicationRouter.get('/:id', (c: AppContext) => applicationController.getById(c), {
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['HR_ADMIN', 'SUPERVISOR', 'INTERN']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor', 'intern']).beforeHandle,
       ],
       params: ApplicationIdParam,
     });
@@ -94,7 +94,7 @@ class ApplicationRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['HR_ADMIN']).beforeHandle,
+          requireRole(['hr_admin']).beforeHandle,
           idempotencyMiddleware.beforeHandle,
         ],
         afterHandle: [idempotencyMiddleware.afterHandle],
@@ -110,7 +110,7 @@ class ApplicationRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['HR_ADMIN']).beforeHandle,
+          requireRole(['hr_admin']).beforeHandle,
           idempotencyMiddleware.beforeHandle,
         ],
         afterHandle: [idempotencyMiddleware.afterHandle],

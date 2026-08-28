@@ -32,7 +32,7 @@ class UserRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(["INTERN", "HR_ADMIN", "SUPERVISOR"]).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor"]).beforeHandle,
         ],
         detail: {
           summary: "Profil pengguna saat ini",
@@ -50,7 +50,7 @@ class UserRouter {
         body: UpdateProfileDto,
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(["INTERN", "HR_ADMIN", "SUPERVISOR"]).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor"]).beforeHandle,
         ],
         detail: {
           summary: "Ubah profil",
@@ -69,7 +69,7 @@ class UserRouter {
         body: UploadProfilePhotoDto,
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(["INTERN", "HR_ADMIN", "SUPERVISOR"]).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor"]).beforeHandle,
           rateLimit({ ...RateLimitRule.UPLOAD, keyGenerator: keyByUser })
             .beforeHandle,
         ],

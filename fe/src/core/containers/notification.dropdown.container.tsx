@@ -22,10 +22,11 @@ export default function NotificationDropdownContainer() {
 
   const me = api.auth.query.me();
   const role = me.data?.role;
+  const roleUpper = role?.toUpperCase();
   const rolePath = getRoleDashboardPath(role);
 
-  const isIntern = role === 'INTERN';
-  const isHr = role === 'HR_ADMIN';
+  const isIntern = roleUpper === 'INTERN';
+  const isHr = roleUpper === 'HR_ADMIN';
 
   const notifications = notif.query.list({ limit: 10 }, { enabled: Boolean(role) });
   const unread = notif.query.unreadCount({ enabled: Boolean(role) });

@@ -53,7 +53,7 @@ export function AttendanceDetailSection({ state, actions }: AttendanceDetailSect
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
         <Button asChild variant="ghost" size="sm" className="w-fit -ml-2">
-          <Link href="/SUPERVISOR/dashboard/interns">
+          <Link href="/supervisor/interns">
             <ArrowLeft className="size-4" />
             Kembali ke Peserta Bimbingan
           </Link>

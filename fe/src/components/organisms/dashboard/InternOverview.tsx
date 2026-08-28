@@ -108,7 +108,7 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                     onboarding agar HR dapat mengaktifkan magang Anda.
                   </p>
                   <Button asChild size="sm" className="w-fit">
-                    <Link href="/INTERN/onboarding">Selesaikan Onboarding</Link>
+                    <Link href="/intern/onboarding">Selesaikan Onboarding</Link>
                   </Button>
                 </div>
               )}
@@ -171,7 +171,7 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                 </ol>
               </div>
               <Button asChild size="sm" className="w-fit">
-                <Link href="/INTERN/application">Ajukan Magang Sekarang</Link>
+                <Link href="/intern/application">Ajukan Magang Sekarang</Link>
               </Button>
             </div>
           )}

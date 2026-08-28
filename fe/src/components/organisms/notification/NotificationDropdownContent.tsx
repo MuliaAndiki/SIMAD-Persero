@@ -48,8 +48,8 @@ export function NotificationDropdownContent({
   onMarkAllAsRead,
   onMarkAsRead,
 }: NotificationDropdownContentProps) {
-  const isIntern = role === 'INTERN';
-  const isHr = role === 'HR_ADMIN';
+  const isIntern = role?.toUpperCase() === 'INTERN';
+  const isHr = role?.toUpperCase() === 'HR_ADMIN';
 
   return (
     <DropdownMenuContent align="end" className="w-80">
@@ -64,7 +64,7 @@ export function NotificationDropdownContent({
               <FileText className="size-3.5" />
               Riwayat Pengajuan
             </span>
-            <Link href="/INTERN/application" className="text-primary hover:underline">
+            <Link href="/intern/application" className="text-primary hover:underline">
               Lihat semua
             </Link>
           </DropdownMenuLabel>
@@ -73,7 +73,7 @@ export function NotificationDropdownContent({
           ) : (
             <ApplicationHistoryList
               applications={myApplications}
-              getHref={(application) => `/INTERN/application/${application.id}`}
+              getHref={(application) => `/intern/application/${application.id}`}
             />
           )}
           <DropdownMenuSeparator />
