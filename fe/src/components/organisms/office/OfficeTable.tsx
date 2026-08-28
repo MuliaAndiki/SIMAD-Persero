@@ -1,19 +1,25 @@
-'use client';
+"use client";
 
-import { MapPin, Pencil, Settings2, Trash2 } from 'lucide-react';
+import { MapPin, Pencil, Settings2, Trash2 } from "lucide-react";
 
-import { Badge } from '@/components/atoms/badge';
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { OfficeResponse } from '@/types/api/office.types';
-import type { AlertContexType } from '@/types/ui';
+import { Badge } from "@/components/atoms/badge";
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import type { OfficeResponse } from "@/types/api/office.types";
+import type { AlertContexType } from "@/types/ui";
 
 export interface OfficeTableProps {
   offices: OfficeResponse[];
   isDeleting: boolean;
   onOpenEdit: (office: OfficeResponse) => void;
   onManageDepartments: (office: OfficeResponse) => void;
-  onDelete: (id: string) => void;
+
   alert: AlertContexType;
 }
 
@@ -28,7 +34,7 @@ export function OfficeTable({
   isDeleting,
   onOpenEdit,
   onManageDepartments,
-  onDelete,
+
   alert,
 }: OfficeTableProps) {
   return (
@@ -66,7 +72,7 @@ export function OfficeTable({
                     <td className="px-6 py-4 font-medium">{office.name}</td>
                     <td className="px-6 py-4">
                       {office.departments.length === 0 ? (
-                        '-'
+                        "-"
                       ) : (
                         <div className="flex flex-wrap gap-1">
                           {office.departments.map((department) => (
@@ -91,18 +97,13 @@ export function OfficeTable({
                           <Settings2 className="size-4" />
                           Departemen
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => onOpenEdit(office)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onOpenEdit(office)}
+                        >
                           <Pencil className="size-4" />
                           Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          disabled={isDeleting}
-                          onClick={() => onDelete(office.id)}
-                        >
-                          <Trash2 className="size-4" />
                         </Button>
                       </div>
                     </td>
