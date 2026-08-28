@@ -13,6 +13,16 @@ export function useInstitutionList(query?: InstitutionQuery) {
     queryKey: queryKey.institution.list(query),
     queryFn: async () => {
       const res = await Api.Institution.List(query);
+      return res;
+    },
+  });
+}
+
+export function useEducationLevelList() {
+  return useQuery({
+    queryKey: ['institution', 'education-levels'],
+    queryFn: async () => {
+      const res = await Api.Institution.EducationLevels();
       return res.data;
     },
   });

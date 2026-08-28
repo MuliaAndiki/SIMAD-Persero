@@ -8,6 +8,7 @@ import type {
   InternDashboardResponse,
   RecentActivityQuery,
   RecentActivityResponse,
+  ReceptionistDashboardData,
   SupervisorDashboardData,
 } from '@/types/api/dashboard.types';
 import { buildQueryString } from '@/utils/query-string';
@@ -50,6 +51,19 @@ class DashboardService {
     const res = await client.GetResponse<SupervisorDashboardData>(DASHBOARD_ENDPOINTS.SUPERVISOR);
     return toServiceResponse(res, {
       message: 'Dashboard supervisor berhasil dimuat',
+    });
+  }
+
+  /**
+   * GET /receptionist/dashboard
+   * Mengambil dashboard receptionist (RECEPTIONIST).
+   */
+  public async Receptionist(): Promise<TResponse<ReceptionistDashboardData>> {
+    const res = await client.GetResponse<ReceptionistDashboardData>(
+      DASHBOARD_ENDPOINTS.RECEPTIONIST,
+    );
+    return toServiceResponse(res, {
+      message: 'Dashboard receptionist berhasil dimuat',
     });
   }
 

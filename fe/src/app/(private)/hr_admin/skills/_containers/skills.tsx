@@ -11,11 +11,10 @@ export default function SkillsContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
   const [keyword, setKeyword] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const debounceSearchQuery = useDebounce(searchQuery, 500);
+  const debouncedKeyword = useDebounce(keyword, 400);
 
   const skillsQuery = api.internship.query.skills({
-    search: debounceSearchQuery,
+    search: debouncedKeyword,
     limit: 50,
   });
 
@@ -26,10 +25,6 @@ export default function SkillsContainer() {
   const handleKeywordChange = useCallback((value: string) => {
     setKeyword(value);
   }, []);
-
-  const handleSearch = useCallback(() => {
-    setSearchQuery(keyword);
-  }, [keyword]);
 
   const handleAddSkill = useCallback(
     async (data: { name: string; category: string }) => {
@@ -56,6 +51,7 @@ export default function SkillsContainer() {
     <SkillsSection
       state={{
         isPending: skillsQuery.isPending,
+        isFetching: skillsQuery.isFetching,
         isError: skillsQuery.isError,
         errorMessage: skillsQuery.error?.message,
         skills: skillsQuery.data ?? [],
@@ -66,7 +62,7 @@ export default function SkillsContainer() {
       }}
       actions={{
         onKeywordChange: handleKeywordChange,
-        onSearch: handleSearch,
+        onSearch: () => {},
         onAddSkill: handleAddSkill,
         onUpdateSkill: handleUpdateSkill,
         onDeleteSkill: handleDeleteSkill,

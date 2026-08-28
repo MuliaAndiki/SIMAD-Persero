@@ -1,6 +1,7 @@
 import { env } from '@/config/env.config';
 import { AppError } from '@/http/error';
 import { buildFrontendUrl, sendEmail } from '@/services/email.service';
+import { generateEmailHtml } from '@/utils/email-template.util';
 import type { AuthUser, JwtPayload } from '@/types/auth.types';
 import {
   ACCESS_TOKEN_TTL,
@@ -149,6 +150,14 @@ class AuthService {
       to: newUser.email,
       subject: 'Verifikasi Email SIMAD',
       text: `Halo ${newUser.fullName},\n\nVerifikasi email kamu melalui link berikut:\n${verifyUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku 24 jam.`,
+      html: generateEmailHtml({
+        recipientName: newUser.fullName,
+        title: 'Verifikasi Email SIMAD',
+        bodyText: 'Terima kasih telah mendaftar di Sistem Informasi Manajemen Magang (SIMAD). Silakan klik tombol di bawah ini untuk memverifikasi email dan mengaktifkan akun Anda.',
+        buttonText: 'Verifikasi Email Saya',
+        buttonUrl: verifyUrl,
+        token,
+      }),
     });
 
     return { userId: newUser.id, email: newUser.email };
@@ -179,6 +188,14 @@ class AuthService {
       to: user.email,
       subject: 'Verifikasi Email SIMAD',
       text: `Halo ${user.fullName},\n\nVerifikasi email kamu melalui link berikut:\n${verifyUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku 24 jam.`,
+      html: generateEmailHtml({
+        recipientName: user.fullName,
+        title: 'Verifikasi Email SIMAD',
+        bodyText: 'Silakan klik tombol di bawah ini untuk memverifikasi alamat email akun SIMAD Anda.',
+        buttonText: 'Verifikasi Email Saya',
+        buttonUrl: verifyUrl,
+        token,
+      }),
     });
   }
 
@@ -321,8 +338,6 @@ class AuthService {
         include: { userRoles: { include: { role: true } } },
       });
     } else if (!user.emailVerified) {
-      // Email sudah dipakai akun yang belum terverifikasi — kepemilikan email
-      // sudah dibuktikan oleh Google, jadi langsung tandai terverifikasi.
       user = await prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: true, emailVerifiedAt: new Date() },
@@ -373,6 +388,15 @@ class AuthService {
       to: user.email,
       subject: 'Magic Link Login SIMAD',
       text: `Halo ${user.fullName},\n\nGunakan link berikut untuk login:\n${magicUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku satu kali pakai dan kedaluwarsa dalam 24 jam.`,
+      html: generateEmailHtml({
+        recipientName: user.fullName,
+        title: 'Magic Link Login SIMAD',
+        bodyText: 'Anda meminta tautan masuk langsung (Magic Link) untuk akun SIMAD Anda. Klik tombol di bawah untuk langsung masuk.',
+        buttonText: 'Login ke SIMAD',
+        buttonUrl: magicUrl,
+        token,
+        expiryText: 'Token ini hanya dapat digunakan satu kali dan kedaluwarsa dalam 24 jam.',
+      }),
     });
   }
 
@@ -427,6 +451,14 @@ class AuthService {
         to: user.email,
         subject: 'Reset Password SIMAD',
         text: `Halo ${user.fullName},\n\nReset password kamu melalui link berikut:\n${resetUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku 24 jam.`,
+        html: generateEmailHtml({
+          recipientName: user.fullName,
+          title: 'Reset Password SIMAD',
+          bodyText: 'Kami menerima permintaan untuk mereset kata sandi akun SIMAD Anda. Klik tombol di bawah untuk membuat kata sandi baru.',
+          buttonText: 'Reset Password Saya',
+          buttonUrl: resetUrl,
+          token,
+        }),
       });
     }
   }
@@ -613,6 +645,14 @@ class AuthService {
       to: normalized,
       subject: 'Konfirmasi Perubahan Email SIMAD',
       text: `Halo ${dbUser.fullName},\n\nKonfirmasi perubahan email kamu menjadi ${normalized} melalui link berikut:\n${verifyUrl}\n\nAtau gunakan token:\n${token}\n\nToken berlaku 24 jam.`,
+      html: generateEmailHtml({
+        recipientName: dbUser.fullName,
+        title: 'Konfirmasi Perubahan Email SIMAD',
+        bodyText: `Kami menerima permintaan untuk mengubah alamat email akun SIMAD Anda menjadi ${normalized}. Klik tombol di bawah ini untuk mengonfirmasi perubahan.`,
+        buttonText: 'Konfirmasi Email Baru',
+        buttonUrl: verifyUrl,
+        token,
+      }),
     });
   }
 

@@ -86,7 +86,7 @@ export default function InternProfileContainer() {
         isPending: me.isPending || institutions.isPending,
         isError: Boolean(me.isError || institutions.isError),
         errorMessage: institutions.error?.message ?? me.error?.message,
-        institutions: institutions.data ?? [],
+        institutions: institutions.data?.data ?? [],
         formApplication,
         setFormApplication,
         institutionId,

@@ -4,16 +4,17 @@ import { Award, Briefcase, CalendarCheck, FileClock, Users } from 'lucide-react'
 
 /**
  * HrOverview — ringkasan dashboard HR (GET /dashboard/hr).
- * Presentasi murni; data disuplai oleh section/container.
+ * Responsif sempurna untuk layar mobile & desktop.
  */
 export function HrOverview({ data }: { data: HrDashboardResponse }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       <StatCard
         icon={FileClock}
         label="Pengajuan Menunggu"
         value={data.pendingApplications}
         description="Perlu direview"
+        className="col-span-2 sm:col-span-1"
       />
       <StatCard
         icon={Briefcase}

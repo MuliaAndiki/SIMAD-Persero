@@ -17,12 +17,21 @@ export interface InstitutionQuery {
   page?: number;
   limit?: number;
   keyword?: string;
+  educationLevelId?: string;
 }
 
 // ---------- Response (data dari backend) ----------
 
+export interface EducationLevelResponse {
+  id: string;
+  code: string | null;
+  name: string | null;
+}
+
 export interface InstitutionResponse
   extends Partial<
-      Pick<IInstitution, 'educationLevelId' | 'name' | 'shortName' | 'province' | 'city'>
+      Pick<IInstitution, 'educationLevelId' | 'name' | 'shortName' | 'province' | 'city' | 'logo'>
     >,
-    Pick<IInstitution, 'id'> {}
+    Pick<IInstitution, 'id'> {
+  educationLevel?: EducationLevelResponse | null;
+}

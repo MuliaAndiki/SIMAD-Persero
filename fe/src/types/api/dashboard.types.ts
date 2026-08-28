@@ -22,7 +22,26 @@ export interface RecentActivityQuery {
 }
 
 /** Role pengguna yang menentukan varian dashboard (GET /dashboard/:role). */
-export type DashboardRole = 'INTERN' | 'HR_ADMIN' | 'SUPERVISOR';
+export type DashboardRole = 'INTERN' | 'HR_ADMIN' | 'SUPERVISOR' | 'RECEPTIONIST';
+
+// ---------- Response (data dari backend) ----------
+
+/** Respons dashboard receptionist (GET /receptionist/dashboard). */
+export interface ReceptionistDashboardData {
+  activeInternsCount: number;
+  presentTodayCount: number;
+  pendingCheckInCount: number;
+  recentAttendances: Array<{
+    id: string;
+    internName: string;
+    internEmail: string;
+    departmentName: string | null;
+    officeName: string | null;
+    checkInAt: string | null;
+    checkInStatus: string | null;
+    attendanceStatus: string | null;
+  }>;
+}
 
 // ---------- Response (data dari backend) ----------
 

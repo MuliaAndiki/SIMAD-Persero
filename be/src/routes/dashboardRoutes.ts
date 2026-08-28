@@ -23,6 +23,7 @@ class DashboardRouter {
     const internRouter = new Elysia({ prefix: '/intern/dashboard' });
     const hrAdminRouter = new Elysia({ prefix: '/hr-admin/dashboard' });
     const supervisorRouter = new Elysia({ prefix: '/supervisor/dashboard' });
+    const receptionistRouter = new Elysia({ prefix: '/receptionist/dashboard' });
 
     // 19.1 GET /intern/dashboard (INTERN)
     internRouter.get('/', (c: AppContext) => dashboardController.internDashboard(c), {
@@ -37,6 +38,11 @@ class DashboardRouter {
     // 19.3 GET /supervisor/dashboard (SUPERVISOR)
     supervisorRouter.get('/', (c: AppContext) => dashboardController.supervisorDashboard(c), {
       beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
+    });
+
+    // GET /receptionist/dashboard (RECEPTIONIST)
+    receptionistRouter.get('/', (c: AppContext) => dashboardController.receptionistDashboard(c), {
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['receptionist']).beforeHandle],
     });
 
     // 19.4 GET /hr-admin/dashboard/statistics (HR_ADMIN)
@@ -59,7 +65,11 @@ class DashboardRouter {
       },
     );
 
-    this.router = new Elysia().use(internRouter).use(hrAdminRouter).use(supervisorRouter);
+    this.router = new Elysia()
+      .use(internRouter)
+      .use(hrAdminRouter)
+      .use(supervisorRouter)
+      .use(receptionistRouter);
   }
 }
 
