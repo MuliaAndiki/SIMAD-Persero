@@ -85,6 +85,7 @@ export interface IInstitution {
   shortName: string;
   province: string;
   city: string;
+  logo: string;
   createdAt: string;
   updatedAt: string;
 }

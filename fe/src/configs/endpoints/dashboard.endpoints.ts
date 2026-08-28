@@ -24,6 +24,8 @@ export const DASHBOARD_ENDPOINTS = {
   HR: '/hr-admin/dashboard',
   /** GET /supervisor/dashboard — Dashboard supervisor (SUPERVISOR) */
   SUPERVISOR: '/supervisor/dashboard',
+  /** GET /receptionist/dashboard — Dashboard receptionist (RECEPTIONIST) */
+  RECEPTIONIST: '/receptionist/dashboard',
   /** GET /hr-admin/dashboard/statistics — Statistik (HR_ADMIN) */
   STATISTICS: '/hr-admin/dashboard/statistics',
   /** GET /hr-admin/dashboard/charts — Data chart (HR_ADMIN) */

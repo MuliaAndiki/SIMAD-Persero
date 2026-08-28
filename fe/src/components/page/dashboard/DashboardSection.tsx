@@ -135,34 +135,36 @@ function DashboardBlock<T>({
   return <>{children(block.data)}</>;
 }
 
-/** Skeleton grid statistik (4 kartu) berbasis phantom-ui. */
+/** Skeleton statistik berbasis tab aktif. */
 function StatisticsSkeleton() {
   return (
     <PhantomSkeleton loading>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {PLACEHOLDER_CARDS.slice(0, 4).map((card) => (
-          <Card key={`stats-${card.id}`} className="h-56">
-            <CardHeader className="space-y-0.5">
-              <div className="h-4 w-1/3 rounded bg-muted" />
-              <div className="h-3 w-1/2 rounded bg-muted" />
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {PLACEHOLDER_CARDS.slice(0, 2).map((item) => (
-                <div
-                  key={`stats-item-${item.id}`}
-                  className="flex items-center gap-3 rounded-lg border p-3"
-                >
-                  <div className="size-9 rounded-lg bg-muted" />
-                  <div className="flex flex-col gap-1.5">
-                    <div className="h-3 w-16 rounded bg-muted" />
-                    <div className="h-4 w-10 rounded bg-muted" />
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card className="flex flex-col gap-4 p-5">
+        <div className="flex flex-col gap-1.5">
+          <div className="h-5 w-44 rounded bg-muted" />
+          <div className="h-3 w-64 rounded bg-muted" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <div className="h-9 w-40 rounded-lg bg-muted" />
+          <div className="h-9 w-36 rounded-lg bg-muted" />
+          <div className="h-9 w-36 rounded-lg bg-muted" />
+          <div className="h-9 w-32 rounded-lg bg-muted" />
+        </div>
+        <div className="mt-2 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+          {PLACEHOLDER_CARDS.slice(0, 4).map((card) => (
+            <div
+              key={`stats-skeleton-${card.id}`}
+              className="flex items-center gap-3.5 rounded-xl border p-4"
+            >
+              <div className="size-10 rounded-xl bg-muted" />
+              <div className="flex flex-col gap-1.5">
+                <div className="h-3 w-20 rounded bg-muted" />
+                <div className="h-4 w-12 rounded bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </PhantomSkeleton>
   );
 }

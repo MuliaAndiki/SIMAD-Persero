@@ -80,6 +80,24 @@ export type SupervisorDashboardData = {
   invalidAttendance: number;
 };
 
+// ── Receptionist Dashboard ─────────────────────────────────────────────
+
+export type ReceptionistDashboardData = {
+  activeInternsCount: number;
+  presentTodayCount: number;
+  pendingCheckInCount: number;
+  recentAttendances: Array<{
+    id: string;
+    internName: string;
+    internEmail: string;
+    departmentName: string | null;
+    officeName: string | null;
+    checkInAt: Date | string | null;
+    checkInStatus: string | null;
+    attendanceStatus: string | null;
+  }>;
+};
+
 // ── 19.4 Dashboard Statistics ──────────────────────────────────────────
 
 export type DashboardStatistics = {

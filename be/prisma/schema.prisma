@@ -124,6 +124,7 @@ model Institution {
   name              String?            @db.VarChar(200)
   shortName         String?            @map("short_name") @db.VarChar(100)
   province          String?            @db.VarChar(100)
+  logo              String?            @map("logo") 
   city              String?            @db.VarChar(100)
   createdAt         DateTime?          @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt         DateTime?          @updatedAt @map("updated_at") @db.Timestamp(6)

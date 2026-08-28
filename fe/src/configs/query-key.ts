@@ -112,6 +112,7 @@ export const queryKey = {
     intern: () => ['dashboard', 'intern'] as const,
     hr: () => ['dashboard', 'hr'] as const,
     supervisor: () => ['dashboard', 'supervisor'] as const,
+    receptionist: () => ['dashboard', 'receptionist'] as const,
     statistics: () => ['dashboard', 'statistics'] as const,
     charts: () => ['dashboard', 'charts'] as const,
     recentActivities: (query?: Record<string, any>) =>

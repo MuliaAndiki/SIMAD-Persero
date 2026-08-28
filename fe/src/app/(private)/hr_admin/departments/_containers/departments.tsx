@@ -6,6 +6,7 @@ import type {
 } from '@/components/organisms/department/DepartmentFormDialog';
 import { DepartmentsSection } from '@/components/page/hr/DepartmentsSection';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useApi } from '@/hooks/useService/useApi';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import { useCallback, useState } from 'react';
@@ -28,8 +29,10 @@ export default function HrDepartmentsContainer() {
   const [editing, setEditing] = useState<DepartmentResponse | null>(null);
   const [form, setForm] = useState<DepartmentFormState>(EMPTY_FORM);
 
+  const debouncedKeyword = useDebounce(keyword, 400);
+
   const list = api.department.query.list({
-    keyword: keyword || undefined,
+    keyword: debouncedKeyword || undefined,
     limit: 100,
   });
   const create = api.department.mutate.create();
@@ -96,23 +99,16 @@ export default function HrDepartmentsContainer() {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      const confirmed = await ns.alert.confirm({
-        title: 'Hapus Departemen?',
-        icon: 'question',
-        deskripsi:
-          'Departemen yang dihapus tidak dapat dikembalikan. Pastikan tidak ada data terkait.',
-        confirmButtonText: 'Hapus',
-      });
-      if (!confirmed) return;
       await remove.mutateAsync({ departmentId: id });
     },
-    [ns.alert, remove],
+    [remove],
   );
 
   return (
     <DepartmentsSection
       state={{
         isPending: list.isPending,
+        isFetching: list.isFetching,
         isError: list.isError,
         errorMessage: list.error?.message,
         departments: list.data ?? [],

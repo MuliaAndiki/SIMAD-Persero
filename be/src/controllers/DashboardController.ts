@@ -43,6 +43,16 @@ class DashboardController {
     }
   }
 
+  // GET /receptionist/dashboard
+  public async receptionistDashboard(c: AppContext) {
+    try {
+      const data = await dashboardService.getReceptionistDashboard();
+      return HttpResponse(c).ok(data);
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
   // GET /dashboard/statistics
   public async statistics(c: AppContext) {
     try {

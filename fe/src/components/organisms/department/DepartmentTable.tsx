@@ -91,9 +91,10 @@ export function DepartmentTable({
                           disabled={isDeleting}
                           onClick={() =>
                             alert.confirm({
-                              title: 'Hapus ?',
-                              deskripsi: 'Apakah Kamu Akan Menghapus Depertemen Ini',
+                              title: 'Hapus Departemen?',
+                              deskripsi: 'Apakah Anda yakin ingin menghapus departemen ini?',
                               icon: 'question',
+                              confirmButtonText: 'Hapus',
                               onConfirm: () => {
                                 onDelete(department.id);
                               },

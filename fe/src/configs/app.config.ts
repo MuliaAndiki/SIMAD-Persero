@@ -6,11 +6,13 @@ import {
   ClipboardCheck,
   Clock,
   FileText,
+  GraduationCap,
   History,
   Home,
   type LucideIcon,
   MapPin,
   ScrollText,
+  SlidersHorizontal,
   Sparkles,
   User,
   UserCheck,
@@ -136,11 +138,18 @@ export const navigationMenuConfig: NavigationMenuConfig = {
   ],
 };
 
+export interface SidebarSubMenuItem {
+  name: string;
+  url: string;
+  icon?: LucideIcon;
+  requiresInternship?: boolean;
+}
+
 export interface SidebarMenuItem {
   name: string;
   url: string;
   icon: LucideIcon;
-  subMenu: [];
+  subMenu?: SidebarSubMenuItem[];
   /**
    * Menu hanya boleh diakses jika intern memiliki magang aktif
    * (`internship` tidak null pada GET /dashboard/intern).
@@ -149,106 +158,124 @@ export interface SidebarMenuItem {
 }
 
 export const SIDEBAR_MENU: SidebarMenuItem[] = [
-  { name: 'Beranda', url: '/intern/dashboard', icon: Home, subMenu: [] },
+  { name: 'Beranda', url: '/intern/dashboard', icon: Home },
   {
     name: 'Pengajuan',
     url: '/intern/application',
     icon: FileText,
-    subMenu: [],
   },
   {
     name: 'Onboarding',
     url: '/intern/onboarding',
     icon: ClipboardCheck,
-    subMenu: [],
     requiresInternship: true,
   },
   {
     name: 'Absensi',
     url: '/intern/attendance',
     icon: Clock,
-    subMenu: [],
     requiresInternship: true,
   },
   {
     name: 'Riwayat',
     url: '/intern/history',
     icon: History,
-    subMenu: [],
     requiresInternship: true,
   },
   {
     name: 'Sertifikat',
     url: '/intern/certificate',
     icon: Award,
-    subMenu: [],
     requiresInternship: true,
   },
-  { name: 'Profil', url: '/intern/profile', icon: User, subMenu: [] },
+  { name: 'Profil', url: '/intern/profile', icon: User },
 ];
 
-/** Menu sidebar khusus HR_ADMIN. */
+/** Menu sidebar khusus HR_ADMIN dengan struktur terkelompok (grouped/dropdown). */
 export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
-  { name: 'Beranda', url: '/hr_admin/dashboard', icon: Home, subMenu: [] },
+  { name: 'Beranda', url: '/hr_admin/dashboard', icon: Home },
   {
-    name: 'Pengajuan',
+    name: 'Operasional',
     url: '/hr_admin/applications',
-    icon: FileText,
-    subMenu: [],
-  },
-  {
-    name: 'Magang',
-    url: '/hr_admin/internships',
     icon: BriefcaseBusiness,
-    subMenu: [],
+    subMenu: [
+      {
+        name: 'Pengajuan',
+        url: '/hr_admin/applications',
+        icon: FileText,
+      },
+      {
+        name: 'Magang',
+        url: '/hr_admin/internships',
+        icon: BriefcaseBusiness,
+      },
+    ],
   },
   {
-    name: 'Departemen',
+    name: 'Organisasi',
     url: '/hr_admin/departments',
     icon: Building2,
-    subMenu: [],
+    subMenu: [
+      {
+        name: 'Departemen',
+        url: '/hr_admin/departments',
+        icon: Building2,
+      },
+      {
+        name: 'Kantor',
+        url: '/hr_admin/offices',
+        icon: MapPin,
+      },
+      {
+        name: 'Supervisor',
+        url: '/hr_admin/supervisors',
+        icon: UserCheck,
+      },
+    ],
   },
   {
-    name: 'Kantor',
-    url: '/hr_admin/offices',
-    icon: MapPin,
-    subMenu: [],
-  },
-  {
-    name: 'Supervisor',
-    url: '/hr_admin/supervisors',
-    icon: UserCheck,
-    subMenu: [],
-  },
-  {
-    name: 'Laporan',
+    name: 'Monitoring',
     url: '/hr_admin/reports',
     icon: BarChart3,
-    subMenu: [],
+    subMenu: [
+      {
+        name: 'Laporan',
+        url: '/hr_admin/reports',
+        icon: BarChart3,
+      },
+      {
+        name: 'Audit Log',
+        url: '/hr_admin/audit-logs',
+        icon: ScrollText,
+      },
+    ],
   },
   {
-    name: 'Audit Log',
-    url: '/hr_admin/audit-logs',
-    icon: ScrollText,
-    subMenu: [],
-  },
-  {
-    name: 'Keterampilan',
+    name: 'Konfigurasi',
     url: '/hr_admin/skills',
-    icon: Sparkles,
-    subMenu: [],
-  },
-  {
-    name: 'Sertifikat',
-    url: '/hr_admin/certificate-setting',
-    icon: Award,
-    subMenu: [],
+    icon: SlidersHorizontal,
+    subMenu: [
+      {
+        name: 'Keterampilan',
+        url: '/hr_admin/skills',
+        icon: Sparkles,
+      },
+      {
+        name: 'Universitas',
+        url: '/hr_admin/universities',
+        icon: GraduationCap,
+      },
+      {
+        name: 'Sertifikat',
+        url: '/hr_admin/certificate-setting',
+        icon: Award,
+      },
+    ],
   },
   {
     name: 'Profil',
     url: '/hr_admin/profile',
     icon: User,
-    subMenu: [],
   },
 ];
 
@@ -275,11 +302,23 @@ export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
   },
 ];
 
+/** Menu sidebar khusus RECEPTIONIST. */
+export const SIDEBAR_MENU_RECEPTIONIST: SidebarMenuItem[] = [
+  { name: 'Beranda', url: '/receptionist/dashboard', icon: Home, subMenu: [] },
+  {
+    name: 'Profil',
+    url: '/receptionist/profile',
+    icon: User,
+    subMenu: [],
+  },
+];
+
 /** Peta menu sidebar per role — dipakai AppSidebar (single source of truth). */
 export const ROLE_SIDEBAR_MENU: Record<DashboardRole, SidebarMenuItem[]> = {
   INTERN: SIDEBAR_MENU,
   HR_ADMIN: SIDEBAR_MENU_HR_ADMIN,
   SUPERVISOR: SIDEBAR_MENU_SUPERVISOR,
+  RECEPTIONIST: SIDEBAR_MENU_RECEPTIONIST,
 };
 
 /** Label role untuk UI (header dashboard, badge, dll). */
@@ -287,6 +326,7 @@ export const DASHBOARD_ROLE_LABELS: Record<DashboardRole, string> = {
   INTERN: 'Peserta Magang',
   HR_ADMIN: 'HR Admin',
   SUPERVISOR: 'Supervisor',
+  RECEPTIONIST: 'Resepsionis',
 };
 
 /**
@@ -300,6 +340,7 @@ export const ROLE_DASHBOARD_PATH: Record<DashboardRole, string> = {
   INTERN: '/intern/dashboard',
   HR_ADMIN: '/hr_admin/dashboard',
   SUPERVISOR: '/supervisor/dashboard',
+  RECEPTIONIST: '/receptionist/dashboard',
 };
 
 /**
@@ -315,6 +356,7 @@ export function getRoleDashboardPath(role?: string | null): string {
     case 'INTERN':
     case 'HR_ADMIN':
     case 'SUPERVISOR':
+    case 'RECEPTIONIST':
       return ROLE_DASHBOARD_PATH[normalizedRole];
     case 'HR' as any:
       return ROLE_DASHBOARD_PATH.HR_ADMIN;
@@ -342,3 +384,19 @@ export function isMenuActive(menuUrl: string, pathname: string): boolean {
   }
   return pathname === menuUrl || pathname.startsWith(`${menuUrl}/`);
 }
+
+/**
+ * Cek apakah item menu utama (atau salah satu subMenu di dalamnya) sedang aktif.
+ */
+export function isItemActive(item: SidebarMenuItem, pathname: string): boolean {
+  if (item.url && isMenuActive(item.url, pathname)) {
+    if (!item.subMenu || item.subMenu.length === 0) {
+      return true;
+    }
+  }
+  if (item.subMenu && item.subMenu.length > 0) {
+    return item.subMenu.some((sub) => isMenuActive(sub.url, pathname));
+  }
+  return false;
+}
+

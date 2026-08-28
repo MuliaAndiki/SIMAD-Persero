@@ -1,13 +1,19 @@
 import type { AppContext } from '@/contex';
 import InstitutionController from '@/controllers/InstitutionController';
-import { InstitutionParamsDto, InstitutionQueryDto } from '@/dtos/institution.dto';
-import { verifyToken } from '@/middlewares/auth';
+import {
+  CreateInstitutionDto,
+  InstitutionParamsDto,
+  InstitutionQueryDto,
+  UpdateInstitutionDto,
+} from '@/dtos/institution.dto';
+import { requireRole, verifyToken } from '@/middlewares/auth';
 import Elysia from 'elysia';
 
 /**
  * Routes modul Institution.
  * Base URL: /institutions
  * - GET (list/detail) : semua role terautentikasi (dipakai INTERN untuk form profil)
+ * - POST / PUT / DELETE : role hr_admin
  */
 class InstitutionRouter {
   public institutionRouter;
@@ -30,6 +36,19 @@ class InstitutionRouter {
       },
     });
 
+    // GET /institutions/education-levels
+    this.institutionRouter.get(
+      '/education-levels',
+      (c: AppContext) => InstitutionController.getEducationLevels(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          summary: 'Daftar tingkat pendidikan',
+          tags: ['Institution'],
+        },
+      },
+    );
+
     // GET /institutions/:institutionId
     this.institutionRouter.get(
       '/:institutionId',
@@ -40,6 +59,45 @@ class InstitutionRouter {
         detail: {
           summary: 'Detail institusi',
           description: 'Mengembalikan detail satu institusi berdasarkan ID.',
+          tags: ['Institution'],
+        },
+      },
+    );
+
+    // POST /institutions (HR_ADMIN)
+    this.institutionRouter.post('/', (c: AppContext) => InstitutionController.create(c), {
+      body: CreateInstitutionDto,
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+      detail: {
+        summary: 'Tambah institusi',
+        tags: ['Institution'],
+      },
+    });
+
+    // PUT /institutions/:institutionId (HR_ADMIN)
+    this.institutionRouter.put(
+      '/:institutionId',
+      (c: AppContext) => InstitutionController.update(c),
+      {
+        params: InstitutionParamsDto,
+        body: UpdateInstitutionDto,
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+        detail: {
+          summary: 'Update institusi',
+          tags: ['Institution'],
+        },
+      },
+    );
+
+    // DELETE /institutions/:institutionId (HR_ADMIN)
+    this.institutionRouter.delete(
+      '/:institutionId',
+      (c: AppContext) => InstitutionController.delete(c),
+      {
+        params: InstitutionParamsDto,
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+        detail: {
+          summary: 'Hapus institusi',
           tags: ['Institution'],
         },
       },
