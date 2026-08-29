@@ -267,6 +267,7 @@ class AuthService {
       user: {
         id: user.id,
         fullName: user.fullName,
+        email: user.email,
         role: this.getRoleCode(user.userRoles),
       },
     };
@@ -360,6 +361,7 @@ class AuthService {
       user: {
         id: user.id,
         fullName: user.fullName,
+        email: user.email,
         role: this.getRoleCode(user.userRoles),
       },
     };
