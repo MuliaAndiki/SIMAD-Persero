@@ -76,6 +76,34 @@ function buildBaseHeaders(accessToken?: string): Record<string, string> {
   return headers;
 }
 
+function extractErrorMessage(resStatus: number, json: any): string {
+  if (typeof json?.message === 'string' && json.message.trim() !== '') {
+    return json.message;
+  }
+  if (typeof json?.error === 'string' && json.error.trim() !== '') {
+    return json.error;
+  }
+  if (typeof json?.summary === 'string' && json.summary.trim() !== '') {
+    return json.summary;
+  }
+  if (Array.isArray(json?.errors) && json.errors[0]?.message) {
+    return json.errors[0].message;
+  }
+  if (resStatus === 503) {
+    return 'Gagal terhubung ke database. Silakan coba beberapa saat lagi.';
+  }
+  if (resStatus === 401) {
+    return 'Sesi Anda telah berakhir. Silakan login kembali.';
+  }
+  if (resStatus === 403) {
+    return 'Akses ditolak. Anda tidak memiliki izin.';
+  }
+  if (resStatus === 404) {
+    return 'Data atau layanan tidak ditemukan.';
+  }
+  return `Permintaan gagal dengan status ${resStatus}`;
+}
+
 async function clientCoreFetchResponse<T>(
   path: string,
   config: ClientRequestConfig = {},
@@ -126,14 +154,14 @@ async function clientCoreFetchResponse<T>(
     }
   }
 
-  let json: ApiSuccessResponse<T>;
+  let json: ApiSuccessResponse<T> | any;
   try {
     json = await res.json();
   } catch {
-    throw new ApiErrorClass(`Request failed with status ${res.status}`, res.status);
+    throw new ApiErrorClass(extractErrorMessage(res.status, null), res.status);
   }
 
-  if (!res.ok || json?.success === false) {
+  if (!res.ok || json?.success === false || (json?.status && json.status >= 400)) {
     if (res.status === 401 && typeof window !== 'undefined') {
       clearSessionCookies();
 
@@ -147,11 +175,8 @@ async function clientCoreFetchResponse<T>(
       }
     }
 
-    throw new ApiErrorClass(
-      json?.message ?? `Request failed with status ${res.status}`,
-      res.status,
-      json?.errors,
-    );
+    const errorMessage = extractErrorMessage(res.status, json);
+    throw new ApiErrorClass(errorMessage, res.status, json?.errors);
   }
 
   return json;
@@ -261,14 +286,14 @@ export async function ClientPostFormDataResponse<T>(
     cache: 'no-store',
   });
 
-  let json: ApiSuccessResponse<T>;
+  let json: ApiSuccessResponse<T> | any;
   try {
     json = await res.json();
   } catch {
-    throw new ApiErrorClass(`Request failed with status ${res.status}`, res.status);
+    throw new ApiErrorClass(extractErrorMessage(res.status, null), res.status);
   }
 
-  if (!res.ok || json?.success === false) {
+  if (!res.ok || json?.success === false || (json?.status && json.status >= 400)) {
     if (res.status === 401 && typeof window !== 'undefined') {
       clearSessionCookies();
 
@@ -282,11 +307,8 @@ export async function ClientPostFormDataResponse<T>(
       }
     }
 
-    throw new ApiErrorClass(
-      json?.message ?? `Request failed with status ${res.status}`,
-      res.status,
-      json?.errors,
-    );
+    const errorMessage = extractErrorMessage(res.status, json);
+    throw new ApiErrorClass(errorMessage, res.status, json?.errors);
   }
 
   return json;
