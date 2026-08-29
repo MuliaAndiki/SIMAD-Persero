@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
 import {
   type ProficiencyValue,
   ProfileSkillsSection,
   type SelectedSkill,
-} from '@/components/page/profile/ProfileSkillsSection';
-import { useDebounce } from '@/hooks/useDebounce';
-import { useApi } from '@/hooks/useService/useApi';
-import { useMemo, useState } from 'react';
+} from "@/components/page/profile/ProfileSkillsSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useApi } from "@/hooks/useService/useApi";
+import { useMemo, useState } from "react";
 
 /**
  * Container halaman "Kelola Skill" (profile intern).
@@ -21,9 +22,9 @@ import { useMemo, useState } from 'react';
  */
 export default function ProfileSkillsContainer() {
   const api = useApi();
-
-  const [search, setSearch] = useState('');
-  const [proficiency, setProficiency] = useState<ProficiencyValue>('BEGINNER');
+  const ns = useAppNameSpace();
+  const [search, setSearch] = useState("");
+  const [proficiency, setProficiency] = useState<ProficiencyValue>("BEGINNER");
   const [selectedSkills, setSelectedSkills] = useState<SelectedSkill[]>([]);
   const debouncedSearch = useDebounce(search, 400);
 
@@ -36,16 +37,18 @@ export default function ProfileSkillsContainer() {
   const removeSkill = api.internship.mutate.removeSkill();
 
   const addedSkillIds = useMemo(
-    () => new Set((myProfile.data?.profileSkills ?? []).map((ps) => ps.skillId)),
+    () =>
+      new Set((myProfile.data?.profileSkills ?? []).map((ps) => ps.skillId)),
     [myProfile.data],
   );
 
   const removingSkillIds = useMemo(() => {
-    if (!removeSkill.isPending || !removeSkill.variables) return new Set<string>();
+    if (!removeSkill.isPending || !removeSkill.variables)
+      return new Set<string>();
     return new Set([removeSkill.variables.skillId]);
   }, [removeSkill.isPending, removeSkill.variables]);
 
-  const handleToggleSelect = (skill: SelectedSkill['skill']) => {
+  const handleToggleSelect = (skill: SelectedSkill["skill"]) => {
     setSelectedSkills((prev) => {
       const exists = prev.some((item) => item.skill.id === skill.id);
       if (exists) {
@@ -56,7 +59,9 @@ export default function ProfileSkillsContainer() {
   };
 
   const handleRemoveSelected = (skillId: string) => {
-    setSelectedSkills((prev) => prev.filter((item) => item.skill.id !== skillId));
+    setSelectedSkills((prev) =>
+      prev.filter((item) => item.skill.id !== skillId),
+    );
   };
 
   const handleRemoveSkill = (skillId: string) => {
@@ -92,6 +97,7 @@ export default function ProfileSkillsContainer() {
         hasProfile: Boolean(myProfile.data?.id),
         selectedSkills,
         isSubmitting: addSkill.isPending,
+        router: ns.router,
       }}
       service={{
         onSearchChange: setSearch,
