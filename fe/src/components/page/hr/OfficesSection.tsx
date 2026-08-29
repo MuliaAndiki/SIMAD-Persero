@@ -61,11 +61,6 @@ export interface OfficesSectionProps {
 export function OfficesSection({ state, actions }: OfficesSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
-  const handleSubmitSearch = (e: FormEvent) => {
-    e.preventDefault();
-    actions.onSearch();
-  };
-
   const isInitialLoading = state.isPending && state.offices.length === 0;
 
   return (
@@ -79,10 +74,7 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
       </header>
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <form
-          onSubmit={handleSubmitSearch}
-          className="flex flex-1 items-center gap-2"
-        >
+        <div className="flex flex-1 items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -98,10 +90,7 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
               <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
             )}
           </div>
-          <Button type="submit" variant="outline">
-            Cari
-          </Button>
-        </form>
+        </div>
         <Button onClick={actions.onOpenCreate}>
           <Plus className="size-4" />
           Tambah Kantor

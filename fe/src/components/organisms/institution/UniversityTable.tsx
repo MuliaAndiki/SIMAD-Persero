@@ -1,31 +1,27 @@
-'use client';
-
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { InstitutionResponse } from '@/types/api/institution.types';
-import type { AlertContexType } from '@/types/ui';
-import { GraduationCap, MapPin, Pencil, Trash2 } from 'lucide-react';
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import type { InstitutionResponse } from "@/types/api/institution.types";
+import { Eye, GraduationCap, MapPin, Pencil } from "lucide-react";
+import Link from "next/link";
 
 export interface UniversityTableProps {
   universities: InstitutionResponse[];
-  isDeleting: boolean;
-  onOpenEdit: (university: InstitutionResponse) => void;
-  onDelete: (id: string) => void;
-  alert: AlertContexType;
 }
 
-export function UniversityTable({
-  universities,
-  isDeleting,
-  onOpenEdit,
-  onDelete,
-  alert,
-}: UniversityTableProps) {
+export function UniversityTable({ universities }: UniversityTableProps) {
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Daftar Universitas & Perguruan Tinggi</CardTitle>
-        <CardDescription>{universities.length} institusi terdaftar</CardDescription>
+        <CardDescription>
+          {universities.length} institusi terdaftar
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {universities.length === 0 ? (
@@ -59,7 +55,7 @@ export function UniversityTable({
                           <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/20">
                             <img
                               src={item.logo as string}
-                              alt={item.name || 'Logo'}
+                              alt={item.name || "Logo"}
                               className="size-full object-contain p-0.5"
                             />
                           </div>
@@ -94,37 +90,22 @@ export function UniversityTable({
                         <div className="flex items-center gap-1.5 text-xs">
                           <MapPin className="size-3.5 shrink-0 text-muted-foreground/70" />
                           <span>
-                            {[item.city, item.province].filter(Boolean).join(', ')}
+                            {[item.city, item.province]
+                              .filter(Boolean)
+                              .join(", ")}
                           </span>
                         </div>
                       ) : (
-                        '-'
+                        "-"
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => onOpenEdit(item)}>
-                          <Pencil className="size-4" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          disabled={isDeleting}
-                          onClick={() =>
-                            alert.confirm({
-                              title: 'Hapus Universitas?',
-                              deskripsi: `Apakah Anda yakin ingin menghapus "${item.name}"?`,
-                              icon: 'question',
-                              confirmButtonText: 'Hapus',
-                              onConfirm: () => {
-                                onDelete(item.id);
-                              },
-                            })
-                          }
-                        >
-                          <Trash2 className="size-4" />
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/hr_admin/universities/${item.id}`}>
+                            <Eye className="size-4" />
+                            Detail
+                          </Link>
                         </Button>
                       </div>
                     </td>
