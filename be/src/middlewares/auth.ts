@@ -55,13 +55,17 @@ export const verifyToken = () => ({
       c.user = authUser;
     } catch (error: any) {
       if (error?.name === 'TokenExpiredError') {
-        return HttpResponse(c).unauthorized('Token has expired.');
+        return HttpResponse(c).unauthorized('Sesi login Anda telah berakhir (token expired). Silakan login kembali.');
       }
       if (error?.name === 'JsonWebTokenError') {
-        return HttpResponse(c).forbidden('Invalid token.');
+        return HttpResponse(c).forbidden('Token autentikasi tidak valid.');
+      }
+      if (error?.code === 'P2024' || error?.code === 'P1001' || error?.name?.includes('Prisma')) {
+        getLogger().error({ err: error }, 'Database connection error during JWT verification');
+        return HttpResponse(c).serviceUnavailable('Gagal terhubung ke database. Silakan coba beberapa saat lagi.');
       }
       getLogger().error({ err: error }, 'JWT verification error');
-      return HttpResponse(c).internalError();
+      return HttpResponse(c).internalError(error, 'Terjadi kesalahan saat memverifikasi autentikasi.');
     }
   },
 });

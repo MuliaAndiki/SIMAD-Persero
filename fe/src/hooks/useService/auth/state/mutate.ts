@@ -141,7 +141,7 @@ export function useLogin() {
       const previousData = readAuthSnapshot(ns);
       return { previousData };
     },
-    onSuccess: (res) => {
+    onSuccess: (res, variables) => {
       ns.alert.toast({
         title: res.message,
         message: res.message,
@@ -157,6 +157,20 @@ export function useLogin() {
           role: data.user?.role,
           expiresIn: data.expiresIn,
         });
+
+        // Simpan data akun terakhir untuk login otomatis tanpa ketik ulang email
+        const userEmail = data.user?.email || variables?.email;
+        if (userEmail && typeof window !== 'undefined') {
+          try {
+            const accountInfo = {
+              email: userEmail,
+              fullName: data.user?.fullName,
+              avatarUrl: (data.user as any)?.avatarUrl || (data.user as any)?.profilePhoto,
+            };
+            localStorage.setItem('simad_remembered_account', JSON.stringify(accountInfo));
+            localStorage.setItem('simad_last_email', userEmail);
+          } catch {}
+        }
       }
 
       // Redirect sesuai role akun — setiap role punya folder dashboard sendiri.
@@ -207,6 +221,19 @@ export function useGoogleLogin() {
           role: data.user?.role,
           expiresIn: data.expiresIn,
         });
+
+        const googleEmail = data.user?.email;
+        if (googleEmail && typeof window !== 'undefined') {
+          try {
+            const accountInfo = {
+              email: googleEmail,
+              fullName: data.user?.fullName,
+              avatarUrl: (data.user as any)?.avatarUrl || (data.user as any)?.profilePhoto,
+            };
+            localStorage.setItem('simad_remembered_account', JSON.stringify(accountInfo));
+            localStorage.setItem('simad_last_email', googleEmail);
+          } catch {}
+        }
       }
 
       // Redirect sesuai role akun — setiap role punya folder dashboard sendiri.

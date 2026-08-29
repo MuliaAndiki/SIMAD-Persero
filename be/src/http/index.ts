@@ -73,15 +73,17 @@ export function HttpResponse(c: AppContext) {
       }
       return errorResponse(c, 429, message, code);
     },
-    internalError: (error?: unknown) =>
-      c.json?.(
+    internalError: (error?: unknown, customMessage?: string) => {
+      const { message: friendlyMessage, status } = getFriendlyErrorMessage(error);
+      const finalMessage = customMessage || friendlyMessage || 'Terjadi kesalahan pada server';
+      return c.json?.(
         {
-          status: 500,
-          message: 'Terjadi kesalahan pada server',
-          error: error instanceof Error ? error.message : error,
+          status,
+          message: finalMessage,
         },
-        500,
-      ),
+        status,
+      );
+    },
     notImplemented: (message = 'Fitur belum diimplementasikan') =>
       c.json?.({ status: 501, message }, 501),
     badGateway: (message = 'Gateway bermasalah') => c.json?.({ status: 502, message }, 502),
@@ -90,8 +92,73 @@ export function HttpResponse(c: AppContext) {
   };
 }
 
+export function getFriendlyErrorMessage(error: unknown): { message: string; status: number } {
+  if (!error) {
+    return { message: 'Terjadi kesalahan pada server', status: 500 };
+  }
+
+  const errObj = error as any;
+  const code = errObj?.code || errObj?.name;
+
+  // Handle Database & Prisma Known Request Errors
+  if (
+    code === 'P2024' ||
+    code === 'P1001' ||
+    code === 'P1002' ||
+    code === 'P1003' ||
+    code === 'P1008' ||
+    code === 'P1017'
+  ) {
+    return {
+      message: 'Gagal terhubung ke database. Silakan coba beberapa saat lagi.',
+      status: 503,
+    };
+  }
+
+  if (code === 'P2002') {
+    return {
+      message: 'Data yang Anda masukkan sudah terdaftar (duplikat).',
+      status: 409,
+    };
+  }
+
+  if (code === 'P2025') {
+    return {
+      message: 'Data yang dicari tidak ditemukan.',
+      status: 404,
+    };
+  }
+
+  if (code === 'P2003' || code === 'P2014') {
+    return {
+      message: 'Data tidak dapat diproses karena terikat dengan data lain.',
+      status: 400,
+    };
+  }
+
+  if (code === 'P2023') {
+    return {
+      message: 'Format ID atau kolom data tidak valid.',
+      status: 400,
+    };
+  }
+
+  if (errObj instanceof AppError) {
+    return { message: errObj.message, status: errObj.status };
+  }
+
+  if (typeof errObj.message === 'string' && errObj.message.trim() !== '') {
+    if (errObj.message.includes('Invalid `prisma.') || errObj.message.includes('PrismaClient')) {
+      return { message: 'Terjadi kesalahan pada pemrosesan database', status: 500 };
+    }
+    return { message: errObj.message, status: errObj.status || 500 };
+  }
+
+  return { message: 'Terjadi kesalahan pada server', status: 500 };
+}
+
 /**
- * Pemetaan AppError (service layer) ke response HTTP standar.
+ * Pemetaan AppError & PrismaError ke response HTTP standar.
  * Controller cukup memanggil `return handleAppError(c, error)` di catch block.
  */
 export function handleAppError(c: AppContext, error: unknown) {
