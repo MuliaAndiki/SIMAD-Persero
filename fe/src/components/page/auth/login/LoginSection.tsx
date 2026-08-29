@@ -1,7 +1,7 @@
 import { Button } from '@/components/atoms/button';
 import { Separator } from '@/components/atoms/separator';
 import { LoginForm } from '@/components/organisms/LoginForm';
-import type { LoginBody } from '@/types/api/auth.types';
+import type { LoginBody, RememberedAccount } from '@/types/api/auth.types';
 import { GoogleLogin } from '@react-oauth/google';
 import Image from 'next/image';
 import type React from 'react';
@@ -11,10 +11,12 @@ export interface LoginSectionProps {
     formLogin: LoginBody;
     showPassword?: boolean;
     isPending: boolean;
+    rememberedAccount?: RememberedAccount | null;
   };
   service: {
     handleSubmit: (event: React.FormEvent) => void;
     onFormChange: (newForm: Partial<LoginBody>) => void;
+    onClearSavedEmail?: () => void;
     setShowPassword?: (show: boolean) => void;
     handleGoogleLogin: (credential: string) => void;
     handleGoogleError?: () => void;
@@ -37,8 +39,10 @@ export function LoginSection({ state, service }: LoginSectionProps) {
           <LoginForm
             formLogin={state.formLogin}
             isPending={state.isPending}
+            rememberedAccount={state.rememberedAccount}
             onSubmit={service.handleSubmit}
             onChange={service.onFormChange}
+            onClearSavedEmail={service.onClearSavedEmail}
           />
 
           <div className="my-6 flex items-center gap-3">

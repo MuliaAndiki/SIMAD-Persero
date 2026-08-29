@@ -83,9 +83,18 @@ export interface RegisterResponse {
   email: string;
 }
 
+/** Data akun yang disimpan di local storage untuk login kembali. */
+export interface RememberedAccount {
+  email: string;
+  fullName?: string;
+  avatarUrl?: string;
+}
+
 /** User ringkas yang dibawa di dalam session login / magic link. */
 export interface AuthSessionUser extends Pick<IUser, 'id' | 'fullName'> {
   role: string;
+  email?: string;
+  avatarUrl?: string;
 }
 
 /** Data hasil login / verify magic link. */

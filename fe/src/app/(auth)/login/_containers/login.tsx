@@ -3,9 +3,12 @@
 import { LoginSection } from '@/components/page/auth/login/LoginSection';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useApi } from '@/hooks/useService/useApi';
-import type { LoginBody } from '@/types/api/auth.types';
+import type { LoginBody, RememberedAccount } from '@/types/api/auth.types';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+const LAST_ACCOUNT_KEY = 'simad_remembered_account';
+const LAST_EMAIL_KEY = 'simad_last_email';
 
 export default function LoginContainer() {
   const api = useApi();
@@ -17,17 +20,58 @@ export default function LoginContainer() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberedAccount, setRememberedAccount] = useState<RememberedAccount | null>(null);
+
+  useEffect(() => {
+    try {
+      const rawAccount = localStorage.getItem(LAST_ACCOUNT_KEY);
+      if (rawAccount) {
+        const parsed: RememberedAccount = JSON.parse(rawAccount);
+        if (parsed?.email) {
+          setFormLogin((prev) => ({ ...prev, email: parsed.email }));
+          setRememberedAccount(parsed);
+          return;
+        }
+      }
+
+      const savedEmail = localStorage.getItem(LAST_EMAIL_KEY);
+      if (savedEmail) {
+        setFormLogin((prev) => ({ ...prev, email: savedEmail }));
+        setRememberedAccount({ email: savedEmail });
+      }
+    } catch {}
+  }, []);
 
   const login = api.auth.mutate.login();
   const googleLogin = api.auth.mutate.googleLogin();
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    if (formLogin.email) {
+      try {
+        const currentAccount: RememberedAccount = {
+          email: formLogin.email,
+          fullName: rememberedAccount?.fullName,
+          avatarUrl: rememberedAccount?.avatarUrl,
+        };
+        localStorage.setItem(LAST_ACCOUNT_KEY, JSON.stringify(currentAccount));
+        localStorage.setItem(LAST_EMAIL_KEY, formLogin.email);
+      } catch {}
+    }
     login.mutate(formLogin);
   };
 
   const handleFormChange = (newForm: Partial<LoginBody>) => {
     setFormLogin((prev) => ({ ...prev, ...newForm }));
+  };
+
+  const handleClearSavedEmail = () => {
+    try {
+      localStorage.removeItem(LAST_ACCOUNT_KEY);
+      localStorage.removeItem(LAST_EMAIL_KEY);
+    } catch {}
+    setFormLogin((prev) => ({ ...prev, email: '', password: '' }));
+    setRememberedAccount(null);
   };
 
   const handleGoogleLogin = (credential: string) => {
@@ -48,10 +92,12 @@ export default function LoginContainer() {
         formLogin,
         showPassword,
         isPending: login.isPending || googleLogin.isPending,
+        rememberedAccount,
       }}
       service={{
         handleSubmit,
         onFormChange: handleFormChange,
+        onClearSavedEmail: handleClearSavedEmail,
         setShowPassword,
         handleGoogleLogin,
         handleGoogleError,
