@@ -1,26 +1,29 @@
-'use client';
+"use client";
 
-import { AlertCircle, Bell, Loader2, Plus, Search } from 'lucide-react';
-import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { AlertCircle, Bell, Loader2, Plus, Search } from "lucide-react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 
-import { Button } from '@/components/atoms/button';
-import { Card } from '@/components/atoms/card';
-import { Input } from '@/components/atoms/input';
-import { UserAuditLogModal } from '@/components/organisms/auditLog/UserAuditLogModal';
-import { SendNotificationModal } from '@/components/organisms/notification/SendNotificationModal';
-import { SupervisorAssignInternDialog } from '@/components/organisms/supervisor/SupervisorAssignInternDialog';
-import { SupervisorDetailDialog } from '@/components/organisms/supervisor/SupervisorDetailDialog';
+import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
+import { Input } from "@/components/atoms/input";
+import { UserAuditLogModal } from "@/components/organisms/auditLog/UserAuditLogModal";
+import { SendNotificationModal } from "@/components/organisms/notification/SendNotificationModal";
+import { SupervisorAssignInternDialog } from "@/components/organisms/supervisor/SupervisorAssignInternDialog";
+import { SupervisorDetailDialog } from "@/components/organisms/supervisor/SupervisorDetailDialog";
 import {
   SupervisorFormDialog,
   type SupervisorFormType,
-} from '@/components/organisms/supervisor/SupervisorFormDialog';
-import { SupervisorTable } from '@/components/organisms/supervisor/SupervisorTable';
-import type { ApplicationResponse } from '@/types/api/application.types';
-import type { DepartmentResponse } from '@/types/api/department.types';
-import type { OfficeResponse } from '@/types/api/office.types';
-import type { SupervisorDetailResponse, SupervisorResponse } from '@/types/api/supervisor.types';
-import type { AlertContexType } from '@/types/ui';
+} from "@/components/organisms/supervisor/SupervisorFormDialog";
+import { SupervisorTable } from "@/components/organisms/supervisor/SupervisorTable";
+import type { ApplicationResponse } from "@/types/api/application.types";
+import type { DepartmentResponse } from "@/types/api/department.types";
+import type { OfficeResponse } from "@/types/api/office.types";
+import type {
+  SupervisorDetailResponse,
+  SupervisorResponse,
+} from "@/types/api/supervisor.types";
+import type { AlertContexType } from "@/types/ui";
 
 export interface SupervisorsSectionState {
   isPending: boolean;
@@ -75,16 +78,14 @@ export interface SupervisorsSectionProps {
   actions: SupervisorsSectionActions;
 }
 
-export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) {
+export function SupervisorsSection({
+  state,
+  actions,
+}: SupervisorsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
   const [auditUserId, setAuditUserId] = useState<string | null>(null);
   const [auditUserName, setAuditUserName] = useState<string | undefined>();
   const [sendNotifOpen, setSendNotifOpen] = useState(false);
-
-  const handleSubmitSearch = (e: FormEvent) => {
-    e.preventDefault();
-    actions.onSearch();
-  };
 
   const assignedInternshipIds = (state.detail?.assignments ?? [])
     .map((a) => a.internshipId)
@@ -108,7 +109,7 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
         )}
       </header>
 
-      <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
+      <div className="flex flex-1 items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -127,11 +128,7 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
         <Button type="submit" variant="outline">
           Cari
         </Button>
-        <Button type="button" onClick={actions.onOpenCreateForm}>
-          <Plus className="mr-2 size-4" />
-          Tambah
-        </Button>
-      </form>
+      </div>
 
       {isInitialLoading ? (
         <Card className="h-64 animate-pulse bg-muted/40" />

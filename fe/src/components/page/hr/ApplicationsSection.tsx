@@ -1,33 +1,33 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/atoms/button';
-import { Card } from '@/components/atoms/card';
-import { Input } from '@/components/atoms/input';
+import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
+import { Input } from "@/components/atoms/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/atoms/select';
+} from "@/components/atoms/select";
 import {
   ApplicationApproveForm,
   type ApproveApplicationFormField,
   type ApproveApplicationFormState,
-} from '@/components/organisms/application/ApplicationApproveForm';
+} from "@/components/organisms/application/ApplicationApproveForm";
 import {
   ApplicationRejectForm,
   type RejectApplicationFormField,
   type RejectApplicationFormState,
-} from '@/components/organisms/application/ApplicationRejectForm';
-import { ApplicationTable } from '@/components/organisms/application/ApplicationTable';
-import type { ApplicationResponse } from '@/types/api/application.types';
-import type { DepartmentResponse } from '@/types/api/department.types';
-import type { OfficeResponse } from '@/types/api/office.types';
-import type { SupervisorResponse } from '@/types/api/supervisor.types';
-import { AlertCircle, Loader2, Search } from 'lucide-react';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+} from "@/components/organisms/application/ApplicationRejectForm";
+import { ApplicationTable } from "@/components/organisms/application/ApplicationTable";
+import type { ApplicationResponse } from "@/types/api/application.types";
+import type { DepartmentResponse } from "@/types/api/department.types";
+import type { OfficeResponse } from "@/types/api/office.types";
+import type { SupervisorResponse } from "@/types/api/supervisor.types";
+import { AlertCircle, Loader2, Search } from "lucide-react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 
 export interface ApplicationsSectionState {
   isPending: boolean;
@@ -37,7 +37,7 @@ export interface ApplicationsSectionState {
   applications: ApplicationResponse[];
   statusFilter: string;
   keyword: string;
-  modalMode: 'approve' | 'reject' | null;
+  modalMode: "approve" | "reject" | null;
   approveForm: ApproveApplicationFormState;
   rejectForm: RejectApplicationFormState;
   isApproving: boolean;
@@ -55,8 +55,14 @@ export interface ApplicationsSectionActions {
   onOpenApprove: (app: ApplicationResponse) => void;
   onOpenReject: (app: ApplicationResponse) => void;
   onCloseModal: () => void;
-  onApproveFieldChange: (field: ApproveApplicationFormField, value: string) => void;
-  onRejectFieldChange: (field: RejectApplicationFormField, value: string) => void;
+  onApproveFieldChange: (
+    field: ApproveApplicationFormField,
+    value: string,
+  ) => void;
+  onRejectFieldChange: (
+    field: RejectApplicationFormField,
+    value: string,
+  ) => void;
   onSubmitApprove: () => void | Promise<void>;
   onSubmitReject: () => void | Promise<void>;
 }
@@ -67,22 +73,20 @@ export interface ApplicationsSectionProps {
 }
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
-  { value: 'all', label: 'Semua Status' },
-  { value: 'DRAFT', label: 'Draft' },
-  { value: 'SUBMITTED', label: 'Diajukan' },
-  { value: 'UNDER_REVIEW', label: 'Sedang Direview' },
-  { value: 'RESUBMITTED', label: 'Diajukan Ulang' },
-  { value: 'APPROVED', label: 'Disetujui' },
-  { value: 'REJECTED', label: 'Ditolak' },
+  { value: "all", label: "Semua Status" },
+  { value: "DRAFT", label: "Draft" },
+  { value: "SUBMITTED", label: "Diajukan" },
+  { value: "UNDER_REVIEW", label: "Sedang Direview" },
+  { value: "RESUBMITTED", label: "Diajukan Ulang" },
+  { value: "APPROVED", label: "Disetujui" },
+  { value: "REJECTED", label: "Ditolak" },
 ];
 
-export function ApplicationsSection({ state, actions }: ApplicationsSectionProps) {
+export function ApplicationsSection({
+  state,
+  actions,
+}: ApplicationsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
-
-  const handleSubmitSearch = (e: FormEvent) => {
-    e.preventDefault();
-    actions.onSearch();
-  };
 
   const isInitialLoading = state.isPending && state.applications.length === 0;
 
@@ -96,7 +100,7 @@ export function ApplicationsSection({ state, actions }: ApplicationsSectionProps
       </header>
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -112,13 +116,12 @@ export function ApplicationsSection({ state, actions }: ApplicationsSectionProps
               <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
             )}
           </div>
-          <Button type="submit" variant="outline">
-            Cari
-          </Button>
-        </form>
+        </div>
         <Select
-          value={state.statusFilter || 'all'}
-          onValueChange={(value) => actions.onStatusChange(value === 'all' ? '' : value)}
+          value={state.statusFilter || "all"}
+          onValueChange={(value) =>
+            actions.onStatusChange(value === "all" ? "" : value)
+          }
         >
           <SelectTrigger className="w-full md:w-48">
             <SelectValue placeholder="Semua Status" />
@@ -154,7 +157,7 @@ export function ApplicationsSection({ state, actions }: ApplicationsSectionProps
         />
       )}
 
-      {state.modalMode === 'approve' && (
+      {state.modalMode === "approve" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <Card className="w-full max-w-md p-6">
             <ApplicationApproveForm
@@ -171,7 +174,7 @@ export function ApplicationsSection({ state, actions }: ApplicationsSectionProps
         </div>
       )}
 
-      {state.modalMode === 'reject' && (
+      {state.modalMode === "reject" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <Card className="w-full max-w-md p-6">
             <ApplicationRejectForm

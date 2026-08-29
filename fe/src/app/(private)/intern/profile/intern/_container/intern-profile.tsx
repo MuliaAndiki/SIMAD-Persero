@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { InternProfileSection } from '@/components/page/profile/InternProfileSection';
-import { useApi } from '@/hooks/useService/useApi';
-import type { PickMergeInternship } from '@/types/api/internship.types';
-import { useEffect, useState } from 'react';
+import { InternProfileSection } from "@/components/page/profile/InternProfileSection";
+import { useApi } from "@/hooks/useService/useApi";
+import type { PickMergeInternship } from "@/types/api/internship.types";
+import { useEffect, useState } from "react";
 
 /**
  * Container halaman profil magang (GET /institutions; GET /internships/my; POST /internships/profile).
@@ -19,22 +19,22 @@ export default function InternProfileContainer() {
   const myProfile = api.internship.query.myProfile();
   const createProfile = api.internship.mutate.createProfile();
   const userId = me.data?.id;
-  const [institutionId, setInstitutionId] = useState<string>('');
+  const [institutionId, setInstitutionId] = useState<string>("");
 
   const [formApplication, setFormApplication] = useState<PickMergeInternship>({
-    address: '',
-    bio: '',
-    birthDate: '',
-    birthPlace: '',
-    emergencyContact: '',
-    gender: '',
-    id: '',
-    institutionId: '',
-    majorId: '',
-    name: '',
-    phone: '',
-    studentNumber: '',
-    userId: '',
+    address: "",
+    bio: "",
+    birthDate: "",
+    birthPlace: "",
+    emergencyContact: "",
+    gender: "",
+    id: "",
+    institutionId: "",
+    majorId: "",
+    name: "",
+    phone: "",
+    studentNumber: "",
+    userId: "",
   });
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function InternProfileContainer() {
       studentNumber: profile.studentNumber ?? prev.studentNumber,
       userId: profile.userId ?? prev.userId,
     }));
-    setInstitutionId(profile.institutionId ?? '');
+    setInstitutionId(profile.institutionId ?? "");
   }, [myProfile.data]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

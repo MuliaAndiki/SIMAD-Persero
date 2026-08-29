@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { SkillsSection } from '@/components/page/hr/SkillsSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import { useDebounce } from '@/hooks/useDebounce';
-import { useApi } from '@/hooks/useService/useApi';
-import type { SkillResponse } from '@/types/api/internship.types';
-import { useCallback, useState } from 'react';
+import { SkillsSection } from "@/components/page/hr/SkillsSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useApi } from "@/hooks/useService/useApi";
+import type { SkillResponse } from "@/types/api/internship.types";
+import { useCallback, useState } from "react";
 
 export default function SkillsContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState("");
   const debouncedKeyword = useDebounce(keyword, 400);
 
   const skillsQuery = api.internship.query.skills({

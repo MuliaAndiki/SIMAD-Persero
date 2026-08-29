@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/atoms/button';
-import { Card } from '@/components/atoms/card';
-import { Input } from '@/components/atoms/input';
+import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
+import { Input } from "@/components/atoms/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/atoms/select';
-import { GenerateCertificateModal } from '@/components/organisms/certificate/GenerateCertificateModal';
+} from "@/components/atoms/select";
+import { GenerateCertificateModal } from "@/components/organisms/certificate/GenerateCertificateModal";
 import {
   AssignSupervisorModal,
   ChangeDepartmentModal,
   ExtendInternshipModal,
-} from '@/components/organisms/internship/InternshipActionModals';
-import { InternshipsTable } from '@/components/organisms/internship/InternshipsTable';
-import type { DepartmentResponse } from '@/types/api/department.types';
-import type { InternshipResponse } from '@/types/api/internship.types';
-import type { OfficeResponse } from '@/types/api/office.types';
-import type { SupervisorResponse } from '@/types/api/supervisor.types';
-import { AlertCircle, Loader2, Search } from 'lucide-react';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+} from "@/components/organisms/internship/InternshipActionModals";
+import { InternshipsTable } from "@/components/organisms/internship/InternshipsTable";
+import type { DepartmentResponse } from "@/types/api/department.types";
+import type { InternshipResponse } from "@/types/api/internship.types";
+import type { OfficeResponse } from "@/types/api/office.types";
+import type { SupervisorResponse } from "@/types/api/supervisor.types";
+import { AlertCircle, Loader2, Search } from "lucide-react";
+import { useState } from "react";
+import type { FormEvent } from "react";
 
 export interface InternshipsSectionState {
   isPending: boolean;
@@ -46,12 +46,18 @@ export interface InternshipsSectionActions {
   // Control actions
   onStart?: (id: string) => void;
   onFinish?: (id: string) => void;
-  onExtendSubmit?: (id: string, data: { newEndDate: string; reason: string }) => Promise<void>;
+  onExtendSubmit?: (
+    id: string,
+    data: { newEndDate: string; reason: string },
+  ) => Promise<void>;
   onChangeDepartmentSubmit?: (
     id: string,
     data: { departmentId: string; officeLocationId: string },
   ) => Promise<void>;
-  onAssignSupervisorSubmit?: (id: string, data: { supervisorId: string }) => Promise<void>;
+  onAssignSupervisorSubmit?: (
+    id: string,
+    data: { supervisorId: string },
+  ) => Promise<void>;
   onGenerateCertSubmit?: (internshipId: string) => Promise<void>;
   onArchive?: (id: string) => void;
 }
@@ -62,29 +68,28 @@ export interface InternshipsSectionProps {
 }
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
-  { value: 'all', label: 'Semua Status' },
-  { value: 'ONBOARDING_PENDING', label: 'Menunggu Onboarding' },
-  { value: 'ONBOARDING_COMPLETED', label: 'Onboarding Selesai' },
-  { value: 'ACTIVE', label: 'Aktif' },
-  { value: 'COMPLETED', label: 'Selesai' },
-  { value: 'CERTIFICATE_GENERATED', label: 'Sertifikat Dibuat' },
-  { value: 'ARCHIVED', label: 'Diarsipkan' },
+  { value: "all", label: "Semua Status" },
+  { value: "ONBOARDING_PENDING", label: "Menunggu Onboarding" },
+  { value: "ONBOARDING_COMPLETED", label: "Onboarding Selesai" },
+  { value: "ACTIVE", label: "Aktif" },
+  { value: "COMPLETED", label: "Selesai" },
+  { value: "CERTIFICATE_GENERATED", label: "Sertifikat Dibuat" },
+  { value: "ARCHIVED", label: "Diarsipkan" },
 ];
 
-export function InternshipsSection({ state, actions }: InternshipsSectionProps) {
+export function InternshipsSection({
+  state,
+  actions,
+}: InternshipsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
   // Local state for modals
-  const [selectedInternship, setSelectedInternship] = useState<InternshipResponse | null>(null);
+  const [selectedInternship, setSelectedInternship] =
+    useState<InternshipResponse | null>(null);
   const [extendOpen, setExtendOpen] = useState(false);
   const [changeDeptOpen, setChangeDeptOpen] = useState(false);
   const [assignSuperOpen, setAssignSuperOpen] = useState(false);
   const [generateCertOpen, setGenerateCertOpen] = useState(false);
-
-  const handleSubmitSearch = (e: FormEvent) => {
-    e.preventDefault();
-    actions.onSearch();
-  };
 
   const handleOpenExtend = (internship: InternshipResponse) => {
     setSelectedInternship(internship);
@@ -111,15 +116,17 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">Magang (Pusat Kontrol)</h1>
+        <h1 className="text-2xl font-bold text-foreground">
+          Magang (Pusat Kontrol)
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Kelola siklus hidup magang peserta: mulai, selesaikan, perpanjang, ubah departemen,
-          tugaskan supervisor, hingga terbitkan sertifikat.
+          Kelola siklus hidup magang peserta: mulai, selesaikan, perpanjang,
+          ubah departemen, tugaskan supervisor, hingga terbitkan sertifikat.
         </p>
       </header>
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
+        <div className="flex flex-1 items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -135,13 +142,12 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
               <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
             )}
           </div>
-          <Button type="submit" variant="outline">
-            Cari
-          </Button>
-        </form>
+        </div>
         <Select
-          value={state.statusFilter || 'all'}
-          onValueChange={(value) => actions.onStatusChange(value === 'all' ? '' : value)}
+          value={state.statusFilter || "all"}
+          onValueChange={(value) =>
+            actions.onStatusChange(value === "all" ? "" : value)
+          }
         >
           <SelectTrigger className="w-full md:w-52">
             <SelectValue placeholder="Semua Status" />

@@ -11,7 +11,9 @@ import {
   SelectValue,
 } from '@/components/atoms/select';
 import type { SkillResponse } from '@/types/api/internship.types';
-import { AlertCircle, Check, Loader2, Plus, Save, Search, Sparkles, Trash2, X } from 'lucide-react';
+import { AlertCircle, Check, Loader2, Plus, Save, Search, Sparkles, Trash2, X, ArrowLeft } from 'lucide-react';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+
 
 export type ProficiencyValue = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 
@@ -47,6 +49,7 @@ export interface ProfileSkillsSectionProps {
     hasProfile: boolean;
     selectedSkills: SelectedSkill[];
     isSubmitting: boolean;
+    router:AppRouterInstance
   };
   service: {
     onSearchChange: (value: string) => void;
@@ -81,6 +84,12 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
+        <div>
+        <Button onClick={() => state.router.back()} size={"sm"} variant={'outline'}>
+            <ArrowLeft className="size-4" />
+            Kembali
+          </Button>
+          </div>
         <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
           <Sparkles className="size-5 text-primary" />
           Kelola Skill

@@ -1,18 +1,29 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/atoms/button';
-import { Card } from '@/components/atoms/card';
-import { Input } from '@/components/atoms/input';
+import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
+import { Input } from "@/components/atoms/input";
 import {
   UniversityFormDialog,
   type UniversityFormField,
   type UniversityFormState,
-} from '@/components/organisms/institution/UniversityFormDialog';
-import { UniversityTable } from '@/components/organisms/institution/UniversityTable';
-import type { EducationLevelResponse, InstitutionResponse } from '@/types/api/institution.types';
-import type { AlertContexType } from '@/types/ui';
-import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Plus, Search } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+} from "@/components/organisms/institution/UniversityFormDialog";
+import { UniversityTable } from "@/components/organisms/institution/UniversityTable";
+import type {
+  EducationLevelResponse,
+  InstitutionResponse,
+} from "@/types/api/institution.types";
+import type { AlertContexType } from "@/types/ui";
+import {
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Plus,
+  Search,
+} from "lucide-react";
+import { type FormEvent, useState } from "react";
+import { Select } from "@/components/atoms";
 
 export interface UniversitiesSectionState {
   isPending: boolean;
@@ -30,7 +41,6 @@ export interface UniversitiesSectionState {
   editing: InstitutionResponse | null;
   form: UniversityFormState;
   isSaving: boolean;
-  isDeleting: boolean;
   alert: AlertContexType;
 }
 
@@ -40,11 +50,9 @@ export interface UniversitiesSectionActions {
   onSearch: () => void;
   onPageChange: (page: number) => void;
   onOpenCreate: () => void;
-  onOpenEdit: (university: InstitutionResponse) => void;
   onCloseForm: () => void;
   onFieldChange: (field: UniversityFormField, value: string) => void;
   onSubmit: () => void | Promise<void>;
-  onDelete: (id: string) => void | Promise<void>;
 }
 
 export interface UniversitiesSectionProps {
@@ -52,7 +60,10 @@ export interface UniversitiesSectionProps {
   actions: UniversitiesSectionActions;
 }
 
-export function UniversitiesSection({ state, actions }: UniversitiesSectionProps) {
+export function UniversitiesSection({
+  state,
+  actions,
+}: UniversitiesSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
   const handleSubmitSearch = (e: FormEvent) => {
@@ -65,14 +76,19 @@ export function UniversitiesSection({ state, actions }: UniversitiesSectionProps
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">Universitas & Perguruan Tinggi</h1>
+        <h1 className="text-2xl font-bold text-foreground">
+          Universitas & Perguruan Tinggi
+        </h1>
         <p className="text-sm text-muted-foreground">
           Kelola master data perguruan tinggi / institusi asal peserta magang.
         </p>
       </header>
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
+        <form
+          onSubmit={handleSubmitSearch}
+          className="flex flex-1 items-center gap-2"
+        >
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -91,7 +107,7 @@ export function UniversitiesSection({ state, actions }: UniversitiesSectionProps
           <select
             value={state.selectedEducationLevelId}
             onChange={(e) => actions.onEducationLevelChange(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="h-9 rounded-md border border-input bg-background  text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="">Semua Jenjang</option>
             {state.educationLevels.map((lvl) => (
@@ -100,9 +116,6 @@ export function UniversitiesSection({ state, actions }: UniversitiesSectionProps
               </option>
             ))}
           </select>
-          <Button type="submit" variant="outline">
-            Cari
-          </Button>
         </form>
         <Button onClick={actions.onOpenCreate}>
           <Plus className="size-4" />
@@ -122,18 +135,13 @@ export function UniversitiesSection({ state, actions }: UniversitiesSectionProps
         </div>
       ) : (
         <>
-          <UniversityTable
-            universities={state.universities}
-            isDeleting={state.isDeleting}
-            onOpenEdit={actions.onOpenEdit}
-            onDelete={actions.onDelete}
-            alert={state.alert}
-          />
+          <UniversityTable universities={state.universities} />
 
           {state.totalPages > 1 && (
             <div className="flex items-center justify-between px-2 text-xs text-muted-foreground">
               <span>
-                Halaman {state.page} dari {state.totalPages} ({state.total} data)
+                Halaman {state.page} dari {state.totalPages} ({state.total}{" "}
+                data)
               </span>
               <div className="flex items-center gap-2">
                 <Button
@@ -159,16 +167,15 @@ export function UniversitiesSection({ state, actions }: UniversitiesSectionProps
           )}
         </>
       )}
-
       <UniversityFormDialog
-        open={state.formOpen}
-        editing={state.editing}
         form={state.form}
+        onFieldChange={actions.onFieldChange}
+        editing={state.editing}
         educationLevels={state.educationLevels}
         isSaving={state.isSaving}
-        onFieldChange={actions.onFieldChange}
         onClose={actions.onCloseForm}
         onSubmit={actions.onSubmit}
+        open={state.formOpen}
       />
     </section>
   );
