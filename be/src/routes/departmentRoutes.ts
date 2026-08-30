@@ -30,7 +30,7 @@ class DepartmentRouter {
       query: DepartmentQueryDto,
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['hr_admin', 'supervisor']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor', 'receptionist']).beforeHandle,
       ],
       detail: {
         summary: 'Daftar departemen',
@@ -45,7 +45,7 @@ class DepartmentRouter {
       params: DepartmentParamsDto,
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['hr_admin', 'supervisor']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor', 'receptionist']).beforeHandle,
       ],
       detail: {
         summary: 'Detail departemen',

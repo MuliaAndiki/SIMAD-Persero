@@ -306,6 +306,18 @@ export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
 export const SIDEBAR_MENU_RECEPTIONIST: SidebarMenuItem[] = [
   { name: 'Beranda', url: '/receptionist/dashboard', icon: Home, subMenu: [] },
   {
+    name: 'Pengajuan',
+    url: '/receptionist/applications',
+    icon: FileText,
+    subMenu: [],
+  },
+  {
+    name: 'Intern Aktif',
+    url: '/receptionist/interns',
+    icon: Users,
+    subMenu: [],
+  },
+  {
     name: 'Profil',
     url: '/receptionist/profile',
     icon: User,

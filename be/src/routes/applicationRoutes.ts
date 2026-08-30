@@ -72,17 +72,20 @@ class ApplicationRouter {
 
     // ─── HR / Admin Routes ─────────────────────────────────────
 
-    // 14.6 GET /applications — List all applications (HR_ADMIN)
+    // 14.6 GET /applications — List all applications (HR_ADMIN, RECEPTIONIST)
     this.applicationRouter.get('/', (c: AppContext) => applicationController.list(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+      beforeHandle: [
+        verifyToken().beforeHandle,
+        requireRole(['hr_admin', 'receptionist']).beforeHandle,
+      ],
       query: ApplicationListQuery,
     });
 
-    // 14.7 GET /applications/:id — Application detail (HR_ADMIN, SUPERVISOR, INTERN own)
+    // 14.7 GET /applications/:id — Application detail (HR_ADMIN, SUPERVISOR, INTERN own, RECEPTIONIST)
     this.applicationRouter.get('/:id', (c: AppContext) => applicationController.getById(c), {
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['hr_admin', 'supervisor', 'intern']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor', 'intern', 'receptionist']).beforeHandle,
       ],
       params: ApplicationIdParam,
     });

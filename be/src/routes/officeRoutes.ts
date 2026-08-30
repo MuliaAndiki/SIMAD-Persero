@@ -30,7 +30,7 @@ class OfficeRouter {
       query: OfficeQueryDto,
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['hr_admin', 'supervisor']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor', 'receptionist']).beforeHandle,
       ],
       detail: {
         summary: 'Daftar lokasi kantor',
@@ -45,7 +45,7 @@ class OfficeRouter {
       params: OfficeParamsDto,
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['hr_admin', 'supervisor']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor', 'receptionist']).beforeHandle,
       ],
       detail: {
         summary: 'Detail lokasi kantor',
