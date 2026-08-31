@@ -1,12 +1,12 @@
-import type { AppContext } from '@/contex';
-import { HttpResponse, handleAppError } from '@/http';
-import supervisorService from '@/services/supervisor.service';
+import type { AppContext } from "@/contex";
+import { HttpResponse, handleAppError } from "@/http";
+import supervisorService from "@/services/supervisor.service";
 import type {
   AssignInternBody,
   CreateSupervisorBody,
   SupervisorQuery,
   UpdateSupervisorBody,
-} from '@/types/supervisor.types';
+} from "@/types/supervisor.types";
 
 /**
  * Thin controller modul Supervisor.
@@ -53,8 +53,12 @@ class SupervisorController {
   public async assign(c: AppContext) {
     try {
       const body = c.body as unknown as AssignInternBody;
-      const data = await supervisorService.assignIntern(c.params.supervisorId, c.user!.id, body);
-      return HttpResponse(c).created(data, 'Intern berhasil ditugaskan.');
+      const data = await supervisorService.assignIntern(
+        c.params.supervisorId,
+        c.user!.id,
+        body,
+      );
+      return HttpResponse(c).created(data, "Intern berhasil ditugaskan.");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -68,7 +72,11 @@ class SupervisorController {
         c.params.assignmentId,
         c.user!.id,
       );
-      return HttpResponse(c).ok(data, undefined, 'Penugasan supervisor berhasil dihapus.');
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        "Penugasan supervisor berhasil dihapus.",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -79,7 +87,7 @@ class SupervisorController {
     try {
       const body = c.body as unknown as CreateSupervisorBody;
       const data = await supervisorService.createAccount(c.user!.id, body);
-      return HttpResponse(c).created(data, 'Akun supervisor berhasil dibuat.');
+      return HttpResponse(c).created(data, "Akun supervisor berhasil dibuat.");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -89,8 +97,16 @@ class SupervisorController {
   public async updateAccount(c: AppContext) {
     try {
       const body = c.body as unknown as UpdateSupervisorBody;
-      const data = await supervisorService.updateAccount(c.user!.id, c.params.supervisorId, body);
-      return HttpResponse(c).ok(data, undefined, 'Akun supervisor berhasil diperbarui.');
+      const data = await supervisorService.updateAccount(
+        c.user!.id,
+        c.params.supervisorId,
+        body,
+      );
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        "Akun supervisor berhasil diperbarui.",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -100,7 +116,11 @@ class SupervisorController {
   public async deleteAccount(c: AppContext) {
     try {
       await supervisorService.deleteAccount(c.user!.id, c.params.supervisorId);
-      return HttpResponse(c).ok(null, undefined, 'Akun supervisor berhasil dihapus.');
+      return HttpResponse(c).ok(
+        null,
+        undefined,
+        "Akun supervisor berhasil dihapus.",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
