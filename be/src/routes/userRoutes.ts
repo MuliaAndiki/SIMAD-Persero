@@ -32,7 +32,8 @@ class UserRouter {
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(["intern", "hr_admin", "supervisor"]).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
         detail: {
           summary: "Profil pengguna saat ini",
