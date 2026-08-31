@@ -16,6 +16,7 @@ import {
   Sparkles,
   User,
   UserCheck,
+  UserCog,
   Users,
 } from 'lucide-react';
 import type React from 'react';
@@ -231,6 +232,11 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
         url: '/hr_admin/supervisors',
         icon: UserCheck,
       },
+      {
+        name: 'Resepsionis',
+        url: '/hr_admin/receptionists',
+        icon: UserCog,
+      },
     ],
   },
   {
@@ -305,6 +311,18 @@ export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
 /** Menu sidebar khusus RECEPTIONIST. */
 export const SIDEBAR_MENU_RECEPTIONIST: SidebarMenuItem[] = [
   { name: 'Beranda', url: '/receptionist/dashboard', icon: Home, subMenu: [] },
+  {
+    name: 'Pengajuan',
+    url: '/receptionist/applications',
+    icon: FileText,
+    subMenu: [],
+  },
+  {
+    name: 'Intern Aktif',
+    url: '/receptionist/interns',
+    icon: Users,
+    subMenu: [],
+  },
   {
     name: 'Profil',
     url: '/receptionist/profile',

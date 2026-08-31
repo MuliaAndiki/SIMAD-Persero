@@ -15,6 +15,7 @@ import notificationRoutes from './notificationRoutes';
 import officeRoutes from './officeRoutes';
 import reportingRoutes from './reportingRoutes';
 import supervisorRoutes from './supervisorRoutes';
+import receptionistRoutes from './receptionistRoutes';
 import userRoutes from './userRoutes';
 
 class ApiRouter {
@@ -47,6 +48,7 @@ class ApiRouter {
       .use(certificateRoutes)
       .use(notificationRoutes)
       .use(supervisorRoutes)
+      .use(receptionistRoutes)
       .use(reportingRoutes)
       .use(auditLogRoutes)
       .use(dashboardRoutes)

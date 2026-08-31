@@ -10,6 +10,7 @@ import institutionService from '@/services/api/institution.service';
 import internshipService from '@/services/api/internship.service';
 import notificationService from '@/services/api/notification.service';
 import officeService from '@/services/api/office.service';
+import receptionistService from '@/services/api/receptionist.service';
 import reportingService from '@/services/api/reporting.service';
 import supervisorService from '@/services/api/supervisor.service';
 import userService from '@/services/api/user.service';
@@ -30,6 +31,7 @@ class Api {
   static Certificate = WrapApi(certificateService);
   static Notification = WrapApi(notificationService);
   static Supervisor = WrapApi(supervisorService);
+  static Receptionist = WrapApi(receptionistService);
   static Reporting = WrapApi(reportingService);
   static AuditLog = WrapApi(auditLogService);
   static Dashboard = WrapApi(dashboardService);

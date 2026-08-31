@@ -102,11 +102,21 @@ export function SupervisorsSection({
             Kelola supervisor pembimbing dan penugasan peserta magang.
           </p>
         </div>
-        {actions.onSendNotification && (
-          <Button variant="outline" onClick={() => setSendNotifOpen(true)}>
-            <Bell className="mr-2 size-4 text-primary" />+ Kirim Pengumuman
+        <div className="w-full flex gap-4 justify-end ">
+          {actions.onSendNotification && (
+            <Button variant="outline" onClick={() => setSendNotifOpen(true)}>
+              <Bell className="mr-2 size-4 text-primary" />
+              Kirim Pengumuman
+            </Button>
+          )}
+
+          <Button
+            variant={"outline"}
+            onClick={() => actions.onOpenCreateForm()}
+          >
+            Buat Supervisor
           </Button>
-        )}
+        </div>
       </header>
 
       <div className="flex flex-1 items-center gap-2">

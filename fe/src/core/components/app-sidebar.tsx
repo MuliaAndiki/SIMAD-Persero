@@ -50,7 +50,7 @@ export function AppSidebar() {
 
   const role = api.auth.query.me().data?.role?.toUpperCase();
   const roleMenus =
-    (role === 'INTERN' || role === 'HR_ADMIN' || role === 'SUPERVISOR'
+    (role === 'INTERN' || role === 'HR_ADMIN' || role === 'SUPERVISOR' || role === 'RECEPTIONIST'
       ? ROLE_SIDEBAR_MENU[role]
       : null) ?? SIDEBAR_MENU;
 

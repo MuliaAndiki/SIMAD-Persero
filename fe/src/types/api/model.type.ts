@@ -29,6 +29,8 @@ export interface IUser {
   createdAt: string;
   updatedAt: string;
   deletedAt: string;
+  departmentId: string | null;
+  officeId: string | null;
 }
 
 export interface IRole {

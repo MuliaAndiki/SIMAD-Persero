@@ -12,6 +12,7 @@ import { useNotification } from './notification/useNotification';
 import { useOffice } from './office/useOffice';
 import { useReporting } from './reporting/useReporting';
 import { useSupervisor } from './supervisor/useSupervisor';
+import { useReceptionist } from './receptionist/useReceptionist';
 import { useUser } from './user/useUser';
 
 /**
@@ -38,6 +39,7 @@ export function useApi() {
     department: useDepartment(),
     office: useOffice(),
     supervisor: useSupervisor(),
+    receptionist: useReceptionist(),
     reporting: useReporting(),
     auditLog: useAuditLog(),
     file: useFile(),
