@@ -69,10 +69,13 @@ export default function HrSupervisorsContainer() {
   useEffect(() => {
     if (editingId && editingDetail.data) {
       const departmentId = editingDetail.data.departmentId ?? "";
+      // Gunakan officeId langsung dari response; fallback ke pencarian via departments
       const officeId =
+        editingDetail.data.officeId ??
         offices.data?.find((o) =>
           o.departments.some((d) => d.id === departmentId),
-        )?.id ?? "";
+        )?.id ??
+        "";
       setFormData({
         fullName: editingDetail.data.fullName,
         email: editingDetail.data.email,
@@ -154,30 +157,27 @@ export default function HrSupervisorsContainer() {
   );
 
   const handleSubmitForm = useCallback(async () => {
-    const createBody: CreateSupervisorBody = {
-      fullName: formData.fullName,
-      email: formData.email,
-      departmentId: formData.departmentId,
-    };
-    if (formData.password) {
-      createBody.password = formData.password;
-    }
-
     if (editingId) {
       const updateBody: UpdateSupervisorBody = {
         fullName: formData.fullName,
         email: formData.email,
         departmentId: formData.departmentId,
+        officeId: formData.officeId || undefined,
         isActive: formData.isActive,
       };
-      if (formData.password) {
-        updateBody.password = formData.password;
-      }
+      if (formData.password) updateBody.password = formData.password;
       await updateSupervisor.mutateAsync({
         params: { supervisorId: editingId },
         body: updateBody,
       });
     } else {
+      const createBody: CreateSupervisorBody = {
+        fullName: formData.fullName,
+        email: formData.email,
+        departmentId: formData.departmentId,
+        officeId: formData.officeId || undefined,
+      };
+      if (formData.password) createBody.password = formData.password;
       await createSupervisor.mutateAsync(createBody);
     }
     setFormOpen(false);

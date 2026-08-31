@@ -13,6 +13,7 @@ import type {
 export type SupervisorQuery = Partial<{
   page: number;
   limit: number;
+  keyword: string;
 }>;
 
 export type AssignInternBody = {
@@ -21,7 +22,7 @@ export type AssignInternBody = {
 
 export type SupervisorResponse = Pick<
   IUser,
-  'id' | 'fullName' | 'email' | 'isActive' | 'avatarFileId' | 'createdAt'
+  'id' | 'fullName' | 'email' | 'isActive' | 'avatarFileId' | 'createdAt' | 'officeId'
 > & {
   activeAssignmentsCount: number;
   departmentId: IUser['departmentId'];
@@ -65,8 +66,8 @@ export type SupervisorDashboardResponse = {
 
 export type CreateSupervisorBody = Pick<
   IUser,
-  'fullName' | 'email' | 'password' | 'departmentId'
-> & { departmentId: string };
+  'fullName' | 'email' | 'password' | 'departmentId' | 'officeId'
+>;
 export type UpdateSupervisorBody = Partial<CreateSupervisorBody> & {
   isActive?: boolean;
 };

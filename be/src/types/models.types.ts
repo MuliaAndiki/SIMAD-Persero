@@ -37,6 +37,7 @@ export interface IUser {
   updatedAt: Date | null;
   deletedAt: Date | null;
   departmentId: string | null;
+  officeId: string | null;
 }
 
 export interface IRole {

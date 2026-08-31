@@ -41,6 +41,7 @@ export interface SupervisorResponse
   extends Pick<IUser, 'id' | 'fullName' | 'email' | 'isActive' | 'avatarFileId' | 'createdAt'> {
   activeAssignmentsCount: number;
   departmentId: string | null;
+  officeId: string | null;
 }
 
 /** Data satu penugasan supervisor ke internship. */
@@ -78,10 +79,10 @@ export interface CreateSupervisorBody {
   fullName: string;
   email: string;
   departmentId: string;
+  officeId?: string;
   password?: string;
 }
 
 export type UpdateSupervisorBody = Partial<CreateSupervisorBody> & {
   isActive?: boolean;
-  password?: string;
 };

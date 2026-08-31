@@ -16,6 +16,7 @@ import {
   Sparkles,
   User,
   UserCheck,
+  UserCog,
   Users,
 } from 'lucide-react';
 import type React from 'react';
@@ -230,6 +231,11 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
         name: 'Supervisor',
         url: '/hr_admin/supervisors',
         icon: UserCheck,
+      },
+      {
+        name: 'Resepsionis',
+        url: '/hr_admin/receptionists',
+        icon: UserCog,
       },
     ],
   },

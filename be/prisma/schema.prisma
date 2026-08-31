@@ -21,7 +21,9 @@ model User {
   updatedAt                 DateTime?                 @updatedAt @map("updated_at") @db.Timestamp(6)
   deletedAt                 DateTime?                 @map("deleted_at") @db.Timestamp(6)
   departmentId              String?                   @map("department_id") @db.Uuid
+  officeId                  String?                   @map("office_id") @db.Uuid
   department                Department?               @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  officeLocation            OfficeLocation?           @relation(fields: [officeId], references: [id], onDelete: Restrict)
   activityLogs              ActivityLog[]
   trustedDevices            AttendanceDevice[]
   overriddenAttendances     AttendanceOverride[]
@@ -185,6 +187,7 @@ model OfficeLocation {
   departments        Department[]
   attendanceSettings AttendanceSetting[]
   internships        Internship[]
+  users              User[]
 
   @@map("office_locations")
 }

@@ -78,6 +78,7 @@ class SupervisorService {
       createdAt: user.createdAt ?? null,
       activeAssignmentsCount,
       departmentId: user.departmentId ?? null,
+      officeId: user.officeId ?? null,
     };
   }
 
@@ -107,10 +108,18 @@ class SupervisorService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
 
+    const where: any = { ...this.supervisorUserWhere, deletedAt: null };
+    if (query.keyword) {
+      where.OR = [
+        { fullName: { contains: query.keyword, mode: 'insensitive' } },
+        { email: { contains: query.keyword, mode: 'insensitive' } },
+      ];
+    }
+
     const [total, users] = await prisma.$transaction([
-      prisma.user.count({ where: this.supervisorUserWhere }),
+      prisma.user.count({ where }),
       prisma.user.findMany({
-        where: this.supervisorUserWhere,
+        where,
         orderBy: { fullName: 'asc' },
         skip: (page - 1) * limit,
         take: limit,
@@ -121,6 +130,8 @@ class SupervisorService {
           isActive: true,
           avatarFileId: true,
           createdAt: true,
+          departmentId: true,
+          officeId: true,
           _count: {
             select: {
               assignedSupervisors: { where: { isActive: true } },
@@ -330,6 +341,7 @@ class SupervisorService {
           password: hashedPassword,
           isActive: true,
           departmentId: input.departmentId,
+          officeId: input.officeId,
           userRoles: {
             create: { roleId: role.id, assignedById: actionUserId },
           },
@@ -375,6 +387,7 @@ class SupervisorService {
       if (input.email !== undefined) updateData.email = input.email;
       if (input.isActive !== undefined) updateData.isActive = input.isActive;
       if (input.departmentId !== undefined) updateData.departmentId = input.departmentId;
+      if (input.officeId !== undefined) updateData.officeId = input.officeId;
       if (input.password) {
         updateData.password = await bcryptjs.hash(input.password, 10);
       }
