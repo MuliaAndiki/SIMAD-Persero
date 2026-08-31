@@ -91,6 +91,12 @@ export const queryKey = {
     detail: (supervisorId: string) => ['supervisor', 'detail', supervisorId] as const,
   },
 
+  receptionistRoot: () => ['receptionist'] as const,
+  receptionist: {
+    list: (query?: Record<string, any>) => ['receptionist', 'list', query] as const,
+    detail: (receptionistId: string) => ['receptionist', 'detail', receptionistId] as const,
+  },
+
   reportingRoot: () => ['reporting'] as const,
   reporting: {
     attendance: (query?: Record<string, any>) => ['reporting', 'attendance', query] as const,

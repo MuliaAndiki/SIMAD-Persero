@@ -214,7 +214,12 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "CERTIFICATE_VIEW",
     "DASHBOARD_VIEW",
   ],
-  receptionist: ["ATTENDANCE_VIEW", "INTERNSHIP_VIEW", "DASHBOARD_VIEW"],
+  receptionist: [
+    "APPLICATION_VIEW",
+    "ATTENDANCE_VIEW",
+    "INTERNSHIP_VIEW",
+    "DASHBOARD_VIEW",
+  ],
 };
 
 // ─── 3. Master data lain ──────────────────────────────────────────

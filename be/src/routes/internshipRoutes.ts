@@ -48,16 +48,19 @@ class InternshipRouter {
 
     // ─── HR / Admin / Supervisor Routes ────────────────────────
 
-    // 15.1b GET /internships — List all internships (HR_ADMIN)
+    // 15.1b GET /internships — List all internships (HR_ADMIN, RECEPTIONIST)
     this.internshipRouter.get('/', (c: AppContext) => internshipController.list(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+      beforeHandle: [
+        verifyToken().beforeHandle,
+        requireRole(['hr_admin', 'receptionist']).beforeHandle,
+      ],
     });
 
-    // 15.2 GET /internships/:id — Internship detail (HR_ADMIN, SUPERVISOR)
+    // 15.2 GET /internships/:id — Internship detail (HR_ADMIN, SUPERVISOR, RECEPTIONIST)
     this.internshipRouter.get('/:id', (c: AppContext) => internshipController.getById(c), {
       beforeHandle: [
         verifyToken().beforeHandle,
-        requireRole(['hr_admin', 'supervisor']).beforeHandle,
+        requireRole(['hr_admin', 'supervisor', 'receptionist']).beforeHandle,
       ],
       params: InternshipIdParam,
     });
