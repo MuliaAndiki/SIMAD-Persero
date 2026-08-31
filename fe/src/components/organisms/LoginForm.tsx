@@ -1,9 +1,9 @@
-import { Button } from '@/components/atoms/button';
-import TextField from '@/core/components/text-field';
-import type { LoginBody, RememberedAccount } from '@/types/api/auth.types';
-import Image from 'next/image';
-import { useState } from 'react';
-import type React from 'react';
+import { Button } from "@/components/atoms/button";
+import TextField from "@/core/components/text-field";
+import type { LoginBody, RememberedAccount } from "@/types/api/auth.types";
+import Image from "next/image";
+import { useState } from "react";
+import type React from "react";
 
 export interface LoginFormProps {
   formLogin: LoginBody;
@@ -25,9 +25,9 @@ export function LoginForm({
   const [imageError, setImageError] = useState(false);
 
   const getInitial = (nameOrEmail?: string): string => {
-    if (!nameOrEmail) return 'U';
+    if (!nameOrEmail) return "U";
     const clean = nameOrEmail.trim();
-    return clean.length > 0 ? clean[0].toUpperCase() : 'U';
+    return clean.length > 0 ? clean[0].toUpperCase() : "U";
   };
 
   const getDisplayName = (): string => {
@@ -35,14 +35,12 @@ export function LoginForm({
       return rememberedAccount.fullName;
     }
     if (formLogin.email) {
-      return formLogin.email.split('@')[0];
+      return formLogin.email.split("@")[0];
     }
-    return 'Pengguna';
+    return "Pengguna";
   };
 
-  const hasRemembered = Boolean(
-    rememberedAccount?.email || (formLogin.email && onClearSavedEmail),
-  );
+  const hasRemembered = Boolean(rememberedAccount?.email);
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -117,7 +115,7 @@ export function LoginForm({
         variant="default"
         disabled={isPending}
       >
-        {isPending ? 'Memproses...' : 'Masuk'}
+        {isPending ? "Memproses..." : "Masuk"}
       </Button>
     </form>
   );
