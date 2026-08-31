@@ -1,10 +1,10 @@
-import { Button } from '@/components/atoms/button';
-import { Separator } from '@/components/atoms/separator';
-import { LoginForm } from '@/components/organisms/LoginForm';
-import type { LoginBody, RememberedAccount } from '@/types/api/auth.types';
-import { GoogleLogin } from '@react-oauth/google';
-import Image from 'next/image';
-import type React from 'react';
+import { Button } from "@/components/atoms/button";
+import { Separator } from "@/components/atoms/separator";
+import { LoginForm } from "@/components/organisms/LoginForm";
+import type { LoginBody, RememberedAccount } from "@/types/api/auth.types";
+import { GoogleLogin } from "@react-oauth/google";
+import Image from "next/image";
+import type React from "react";
 
 export interface LoginSectionProps {
   state: {
@@ -30,7 +30,12 @@ export function LoginSection({ state, service }: LoginSectionProps) {
         <div className="px-8 py-10">
           <div className="text-center mb-10">
             <div className="w-full flex justify-center ">
-              <Image alt="logo" src={'/images/logos.png'} height={86} width={86} />
+              <Image
+                alt="logo"
+                src={"/images/logos.png"}
+                height={86}
+                width={86}
+              />
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Login</h1>
             <p className="text-sm text-foreground/60">SIMAD PLN Persero</p>
