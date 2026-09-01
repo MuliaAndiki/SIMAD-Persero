@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { ResetPasswordSection } from '@/components/page/auth/reset-password/ResetPasswordSection';
-import { useApi } from '@/hooks/useService/useApi';
-import type { ResetPasswordBody } from '@/types/api/auth.types';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { ResetPasswordSection } from "@/components/page/auth/reset-password/ResetPasswordSection";
+import { useApi } from "@/hooks/useService/useApi";
+import type { ResetPasswordBody } from "@/types/api/auth.types";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export default function ResetPasswordContainer() {
   const api = useApi();
@@ -12,23 +12,23 @@ export default function ResetPasswordContainer() {
   const searchParams = useSearchParams();
 
   // Extract token from URL search params (e.g., ?token=xyz123)
-  const tokenParams = searchParams?.get('token') || '';
+  const tokenParams = searchParams?.get("token") || "";
 
   const [formReset, setFormReset] = useState<ResetPasswordBody>({
     token: tokenParams,
-    password: '',
+    password: "",
   });
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const resetPassword = api.auth.mutate.resetPassword();
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-
     resetPassword.mutate(formReset, {
       onSuccess: () => {
-        router.push('/login?reset_success=true');
+        router.push("/login?reset_success=true");
       },
     });
   };
@@ -43,6 +43,8 @@ export default function ResetPasswordContainer() {
         formReset,
         showPassword,
         isPending: resetPassword.isPending,
+        confirmPassword,
+        setConfirmPassword,
       }}
       service={{
         handleSubmit,
