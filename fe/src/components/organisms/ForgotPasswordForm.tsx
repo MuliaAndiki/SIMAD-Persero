@@ -1,8 +1,8 @@
-import { Button } from '@/components/atoms/button';
-import TextField from '@/core/components/text-field';
-import type { ForgotPasswordBody } from '@/types/api/auth.types';
-import { MailCheck } from 'lucide-react';
-import type React from 'react';
+import { Button } from "@/components/atoms/button";
+import TextField from "@/core/components/text-field";
+import type { ForgotPasswordBody } from "@/types/api/auth.types";
+import { MailCheck } from "lucide-react";
+import type React from "react";
 
 export interface ForgotPasswordFormProps {
   formForgot: ForgotPasswordBody;
@@ -25,9 +25,14 @@ export function ForgotPasswordForm({
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-2">
           <MailCheck className="w-8 h-8 text-primary" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground">Email Terkirim</h3>
+        <h3 className="text-lg font-semibold text-foreground">
+          Email Terkirim
+        </h3>
         <p className="text-sm text-foreground/70">
-          Silakan cek kotak masuk email Anda dan ikuti instruksi untuk mengatur ulang password Anda.
+          Silakan cek <span className="font-bold">Kotak Masuk</span> email atau{" "}
+          {""}
+          <span className="font-bold">Folder Spam</span> Anda dan ikuti
+          instruksi untuk mengatur ulang password Anda.
         </p>
       </div>
     );
@@ -53,7 +58,7 @@ export function ForgotPasswordForm({
         variant="default"
         disabled={isPending}
       >
-        {isPending ? 'Mengirim...' : 'Kirim Link Reset'}
+        {isPending ? "Mengirim..." : "Kirim Link Reset"}
       </Button>
     </form>
   );
