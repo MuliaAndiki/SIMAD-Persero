@@ -26,10 +26,12 @@ class CertificateService {
     internship: {
       include: {
         department: { select: { id: true, code: true, name: true } },
+        officeLocation: { select: { id: true, name: true } },
         internProfile: {
           select: {
             id: true,
             studentNumber: true,
+            institution: { select: { id: true, name: true, shortName: true } },
             user: { select: { id: true, fullName: true, email: true } },
           },
         },
@@ -231,9 +233,11 @@ class CertificateService {
         internProfile: {
           include: {
             user: { select: { id: true, fullName: true, email: true } },
+            institution: { select: { id: true, name: true, shortName: true } },
           },
         },
         department: { select: { id: true, code: true, name: true } },
+        officeLocation: { select: { id: true, name: true } },
         certificate: true,
       },
     });
@@ -258,7 +262,10 @@ class CertificateService {
     }
 
     const internName = internship.internProfile?.user?.fullName ?? '-';
+    const studentNumber = internship.internProfile?.studentNumber ?? '-';
+    const institutionName = internship.internProfile?.institution?.name ?? '-';
     const departmentName = internship.department?.name ?? '-';
+    const cityName = internship.officeLocation?.name ?? 'Jakarta';
 
     const template = await this.getActiveTemplate();
     const certificateNumber = await this.generateCertificateNumber();
@@ -268,10 +275,13 @@ class CertificateService {
     const pdfBuffer = generateCertificatePdf({
       certificateNumber,
       internName,
+      studentNumber,
+      institutionName,
       departmentName,
       startDate: this.formatDate(internship.actualStartDate),
       endDate: this.formatDate(internship.actualEndDate),
       verificationToken,
+      cityName,
     });
 
     const file = await this.createPdfFile(userId, `${certificateNumber}.pdf`, pdfBuffer);
@@ -357,15 +367,21 @@ class CertificateService {
     // regenerasi membuat file PDF baru dengan template terkini.
     const template = await this.getActiveTemplate();
     const internName = certificate.internship?.internProfile?.user?.fullName ?? '-';
+    const studentNumber = certificate.internship?.internProfile?.studentNumber ?? '-';
+    const institutionName = certificate.internship?.internProfile?.institution?.name ?? '-';
     const departmentName = certificate.internship?.department?.name ?? '-';
+    const cityName = certificate.internship?.officeLocation?.name ?? 'Jakarta';
 
     const pdfBuffer = generateCertificatePdf({
       certificateNumber: certificate.certificateNumber ?? '-',
       internName,
+      studentNumber,
+      institutionName,
       departmentName,
       startDate: this.formatDate(certificate.internship?.actualStartDate ?? null),
       endDate: this.formatDate(certificate.internship?.actualEndDate ?? null),
       verificationToken: certificate.verificationToken ?? '-',
+      cityName,
     });
 
     const file = await this.createPdfFile(
