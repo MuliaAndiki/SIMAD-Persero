@@ -54,13 +54,19 @@ export default function ApplicationContainer() {
       });
 
       if (res.data?.id) {
-        return { fileId: res.data.id };
+        return { fileId: res.data.id, fileUrl: fileUnivUrl };
       }
       return null;
     } catch (err) {
       console.error('Failed to upload file univ:', err);
       return null;
     }
+  };
+
+  // Handle preview PDF file
+  const handlePreviewFile = (fileUrl: string) => {
+    // Open PDF in new tab for preview
+    window.open(fileUrl, '_blank', 'noopener,noreferrer');
   };
 
   // Actions
@@ -87,6 +93,17 @@ export default function ApplicationContainer() {
     },
   ) => {
     try {
+      // Jika ada file baru, hapus file lama dari R2 untuk mencegah double upload
+      if (data.coverLetterFileId) {
+        const app = (myApps.data ?? []).find((a) => a.id === id);
+        if (app?.introductionLetterFile?.url) {
+          const { deleteObject } = await import('@/utils/r2-utils');
+          await deleteObject(app.introductionLetterFile.url).catch((err) => {
+            console.warn('Failed to delete old file from R2:', err);
+          });
+        }
+      }
+
       await updateMutation.mutateAsync({ params: { id }, body: data });
     } catch {
       // error handled by mutation onError
@@ -121,13 +138,22 @@ export default function ApplicationContainer() {
     if (!confirmed) return;
 
     try {
+      // Hapus file dari R2 terlebih dahulu sebelum hapus draft
       if (app?.introductionLetterFile?.url) {
         const { deleteObject } = await import('@/utils/r2-utils');
         await deleteObject(app.introductionLetterFile.url).catch((err) => {
           console.warn('Failed to delete file from R2:', err);
+          // Tetap lanjut hapus draft meskipun gagal hapus file
         });
       }
+      
       await deleteDraftMutation.mutateAsync({ id });
+      
+      ns.alert.toast({
+        title: 'Draft Dihapus',
+        message: 'Draft pengajuan dan file terkait berhasil dihapus',
+        icon: 'success',
+      });
     } catch {
       // error handled by mutation onError
     }
@@ -172,6 +198,7 @@ export default function ApplicationContainer() {
         onDeleteDraft: handleDeleteDraft,
         onCancel: handleCancel,
         onUploadFile: handleUploadFile,
+        onPreviewFile: handlePreviewFile,
       }}
     />
   );

@@ -8,8 +8,9 @@
  */
 
 export const USER_ENDPOINTS = {
-  PROFILE: '/users/profile',
-  UPDATE_PROFILE: '/users/profile',
-  UPLOAD_PHOTO: '/users/profile/photo',
-  CHANGE_PASSWORD: '/users/change-password',
+  PROFILE: "/users/profile",
+  UPDATE_PROFILE: "/users/profile",
+  UPLOAD_PHOTO: "/users/profile/photo",
+  CHANGE_PASSWORD: "/users/change-password",
+  DELETE_ACCOUNT: "/users/delete-account",
 } as const;
