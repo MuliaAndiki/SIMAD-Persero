@@ -98,6 +98,17 @@ class UserRouter {
         },
       },
     );
+    this.userRouter.delete(
+      "/delete-account",
+      (c: AppContext) => UserController.deleteAccount(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+        detail: {
+          summary: "Hapus Account",
+          tags: ["User"],
+        },
+      },
+    );
   }
 }
 

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { EditProfileSection } from '@/components/page/profile/EditProfileSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import { useApi } from '@/hooks/useService/useApi';
+import { EditProfileSection } from "@/components/page/profile/EditProfileSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useApi } from "@/hooks/useService/useApi";
 
 /**
  * Container halaman ubah profil HR Admin (GET /users/profile; PATCH /users/profile).
@@ -17,9 +17,9 @@ export default function HrEditProfileContainer() {
   const profile = api.user.query.profile();
   const updateProfile = api.user.mutate.updateProfile();
 
-  const handleUpdateProfile = (data: { fullName: string; phone: string }) => {
+  const handleUpdateProfile = (data: { fullName: string }) => {
     updateProfile.mutate(data, {
-      onSuccess: () => ns.router.replace('/hr_admin/profile'),
+      onSuccess: () => ns.router.replace("/hr_admin/profile"),
     });
   };
 

@@ -1,12 +1,18 @@
-import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import { Input } from '@/components/atoms/input';
-import type { ProfileResponse } from '@/types/api/user.types';
-import { AlertCircle, Loader2, Save, UserRound } from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import { Input } from "@/components/atoms/input";
+import type { ProfileResponse } from "@/types/api/user.types";
+import { AlertCircle, Loader2, Save, UserRound } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import type { FormEvent } from "react";
 
 /** State yang disuplai container — section murni presentasi. */
 export interface EditProfileSectionState {
@@ -19,10 +25,7 @@ export interface EditProfileSectionState {
 
 /** Aksi dari container (mutation) — section hanya memanggil. */
 export interface EditProfileSectionService {
-  onUpdateProfile: (data: {
-    fullName: string;
-    phone: string;
-  }) => void | Promise<void>;
+  onUpdateProfile: (data: { fullName: string }) => void | Promise<void>;
 }
 
 export interface EditProfileSectionProps {
@@ -33,16 +36,19 @@ export interface EditProfileSectionProps {
 /** Base path halaman profil sesuai role — dipakai untuk link kembali. */
 function profileBasePath(role: string | null): string {
   switch (role?.toUpperCase()) {
-    case 'HR_ADMIN':
-      return '/hr_admin/profile';
-    case 'SUPERVISOR':
-      return '/supervisor/profile';
+    case "HR_ADMIN":
+      return "/hr_admin/profile";
+    case "SUPERVISOR":
+      return "/supervisor/profile";
     default:
-      return '/intern/profile';
+      return "/intern/profile";
   }
 }
 
-export function EditProfileSection({ state, service }: EditProfileSectionProps) {
+export function EditProfileSection({
+  state,
+  service,
+}: EditProfileSectionProps) {
   if (state.isPending) {
     return (
       <PhantomSkeleton loading>
@@ -56,9 +62,12 @@ export function EditProfileSection({ state, service }: EditProfileSectionProps) 
       <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
         <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
         <div className="flex flex-col gap-0.5">
-          <span className="font-medium text-foreground">Gagal memuat profil</span>
+          <span className="font-medium text-foreground">
+            Gagal memuat profil
+          </span>
           <span className="text-muted-foreground">
-            {state.errorMessage || 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}
+            {state.errorMessage ||
+              "Terjadi kesalahan saat mengambil data. Silakan coba lagi."}
           </span>
         </div>
       </div>
@@ -73,7 +82,8 @@ export function EditProfileSection({ state, service }: EditProfileSectionProps) 
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-foreground">Ubah Profil</h1>
         <p className="text-sm text-muted-foreground">
-          Perbarui nama lengkap dan nomor telepon yang terhubung dengan akun Anda.
+          Perbarui nama lengkap dan nomor telepon yang terhubung dengan akun
+          Anda.
         </p>
       </header>
 
@@ -94,13 +104,9 @@ function EditProfileForm({
 }: {
   profile: ProfileResponse;
   isUpdating: boolean;
-  onUpdateProfile: (data: {
-    fullName: string;
-    phone: string;
-  }) => void | Promise<void>;
+  onUpdateProfile: (data: { fullName: string }) => void | Promise<void>;
 }) {
   const [fullName, setFullName] = useState(profile.fullName);
-  const [phone, setPhone] = useState(profile.phone ?? '');
   const [localError, setLocalError] = useState<string | null>(null);
 
   // Path kembali menyesuaikan role (dari GET /users/profile).
@@ -111,17 +117,12 @@ function EditProfileForm({
     setLocalError(null);
 
     const name = fullName.trim();
-    const phoneValue = phone.trim();
     if (!name) {
-      setLocalError('Nama lengkap wajib diisi.');
-      return;
-    }
-    if (!phoneValue) {
-      setLocalError('Nomor telepon wajib diisi.');
+      setLocalError("Nama lengkap wajib diisi.");
       return;
     }
 
-    onUpdateProfile({ fullName: name, phone: phoneValue });
+    onUpdateProfile({ fullName: name });
   };
 
   return (
@@ -131,7 +132,9 @@ function EditProfileForm({
           <UserRound className="size-4 text-primary" />
           Informasi Pribadi
         </CardTitle>
-        <CardDescription>Hanya nama lengkap dan nomor telepon yang dapat diubah.</CardDescription>
+        <CardDescription>
+          Hanya nama lengkap dan nomor telepon yang dapat diubah.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -157,19 +160,6 @@ function EditProfileForm({
             </p>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label htmlFor="phone" className="text-sm font-medium">
-              Nomor Telepon
-            </label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="08xxxxxxxxxx"
-            />
-          </div>
-
           {localError && (
             <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
               <AlertCircle className="size-4 shrink-0" />
@@ -187,7 +177,7 @@ function EditProfileForm({
               ) : (
                 <Save className="size-4" />
               )}
-              {isUpdating ? 'Menyimpan…' : 'Simpan Perubahan'}
+              {isUpdating ? "Menyimpan…" : "Simpan Perubahan"}
             </Button>
           </div>
         </form>

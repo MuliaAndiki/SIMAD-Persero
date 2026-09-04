@@ -33,7 +33,9 @@ class UserService {
       throw new AppError(404, "Account not found");
     }
 
-    const role = (dbUser.userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE).toLowerCase();
+    const role = (
+      dbUser.userRoles[0]?.role.code ?? DEFAULT_ROLE_CODE
+    ).toLowerCase();
 
     return {
       id: dbUser.id,
@@ -136,7 +138,11 @@ class UserService {
   }
 
   // Register avatar photo using R2 URL uploaded directly from FE
-  public async savePhotoUrl(user: AuthUser, url: string, originalName?: string) {
+  public async savePhotoUrl(
+    user: AuthUser,
+    url: string,
+    originalName?: string,
+  ) {
     const dbUser = await prisma.user.findUnique({
       where: { id: user.id },
       include: { avatarFile: true },
@@ -198,6 +204,36 @@ class UserService {
       where: { id: userId },
       data: { password: hashedPassword },
     });
+  }
+  public async deleteAccount(userId: string) {
+    const query = await prisma.$transaction(async (tx) => {
+      await tx.user.delete({
+        where: {
+          id: userId,
+        },
+      });
+
+      await tx.refreshToken.deleteMany({
+        where: {
+          userId: userId,
+        },
+      });
+      await tx.attendanceDevice.deleteMany({
+        where: {
+          userId: userId,
+        },
+      });
+      await tx.auditLog.create({
+        data: {
+          userId: userId,
+          module: "USER_ACCOUNT",
+          action: "SOFT_DELETE",
+          tableName: "users",
+          recordId: userId,
+        },
+      });
+    });
+    return { query };
   }
 }
 

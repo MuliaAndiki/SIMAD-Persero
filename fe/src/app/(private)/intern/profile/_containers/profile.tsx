@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { ProfileSection } from '@/components/page/profile/ProfileSection';
-import { useProfileLogic } from '@/hooks/useProfileLogic';
-import { useApi } from '@/hooks/useService/useApi';
+import { ProfileSection } from "@/components/page/profile/ProfileSection";
+import { useProfileLogic } from "@/hooks/useProfileLogic";
+import { useApi } from "@/hooks/useService/useApi";
 
 /**
  * Container halaman profil Intern (GET /users/profile; POST /users/profile/photo; GET /auth/sessions).
@@ -28,7 +28,8 @@ export default function ProfileContainer() {
   return (
     <ProfileSection
       state={{
-        isPending: profile.isPending || isLogoutPending || internProfile.isLoading,
+        isPending:
+          profile.isPending || isLogoutPending || internProfile.isLoading,
         isError: profile.isError,
         errorMessage: profile.error?.message,
         profile: profile.data ?? null,

@@ -1,12 +1,12 @@
-import { Api } from '@/api/api-entry';
-import type { TResponse } from '@/api/types/response.types';
-import { USER_ENDPOINTS } from '@/configs/endpoints/user.endpoints';
+import { Api } from "@/api/api-entry";
+import type { TResponse } from "@/api/types/response.types";
+import { USER_ENDPOINTS } from "@/configs/endpoints/user.endpoints";
 import type {
   ChangePasswordBody,
   ProfileResponse,
   UpdateProfileBody,
-} from '@/types/api/user.types';
-import { toServiceResponse } from '@/utils/service-response';
+} from "@/types/api/user.types";
+import { toServiceResponse } from "@/utils/service-response";
 
 /**
  * Service modul User — 4 method, satu method per endpoint backend
@@ -22,17 +22,24 @@ class UserService {
    * Mengambil profil pengguna saat ini.
    */
   public async GetProfile(): Promise<TResponse<ProfileResponse>> {
-    const res = await client.GetResponse<ProfileResponse>(USER_ENDPOINTS.PROFILE);
-    return toServiceResponse(res, { message: 'Profil berhasil dimuat' });
+    const res = await client.GetResponse<ProfileResponse>(
+      USER_ENDPOINTS.PROFILE,
+    );
+    return toServiceResponse(res, { message: "Profil berhasil dimuat" });
   }
 
   /**
    * PATCH /users/profile
    * Memperbarui profil pengguna.
    */
-  public async UpdateProfile(body: UpdateProfileBody): Promise<TResponse<ProfileResponse>> {
-    const res = await client.PatchResponse<ProfileResponse>(USER_ENDPOINTS.UPDATE_PROFILE, body);
-    return toServiceResponse(res, { message: 'Profil berhasil diperbarui' });
+  public async UpdateProfile(
+    body: UpdateProfileBody,
+  ): Promise<TResponse<ProfileResponse>> {
+    const res = await client.PatchResponse<ProfileResponse>(
+      USER_ENDPOINTS.UPDATE_PROFILE,
+      body,
+    );
+    return toServiceResponse(res, { message: "Profil berhasil diperbarui" });
   }
 
   /**
@@ -47,10 +54,15 @@ class UserService {
         USER_ENDPOINTS.UPLOAD_PHOTO,
         payload,
       );
-      return toServiceResponse(res, { message: 'Foto profil berhasil diunggah' });
+      return toServiceResponse(res, {
+        message: "Foto profil berhasil diunggah",
+      });
     }
-    const res = await client.PostResponse<ProfileResponse>(USER_ENDPOINTS.UPLOAD_PHOTO, payload);
-    return toServiceResponse(res, { message: 'Foto profil berhasil diunggah' });
+    const res = await client.PostResponse<ProfileResponse>(
+      USER_ENDPOINTS.UPLOAD_PHOTO,
+      payload,
+    );
+    return toServiceResponse(res, { message: "Foto profil berhasil diunggah" });
   }
 
   /**
@@ -58,10 +70,19 @@ class UserService {
    * Mengubah password pengguna.
    */
   public async ChangePassword(
-    body: Pick<ChangePasswordBody, 'oldPassword' | 'newPassword'>,
+    body: Pick<ChangePasswordBody, "oldPassword" | "newPassword">,
   ): Promise<TResponse<null>> {
-    const res = await client.PatchResponse<null>(USER_ENDPOINTS.CHANGE_PASSWORD, body);
-    return toServiceResponse(res, { message: 'Password berhasil diubah' });
+    const res = await client.PatchResponse<null>(
+      USER_ENDPOINTS.CHANGE_PASSWORD,
+      body,
+    );
+    return toServiceResponse(res, { message: "Password berhasil diubah" });
+  }
+  public async DeleteAccount(): Promise<TResponse<null>> {
+    const res = await client.DeleteResponse<null>(
+      USER_ENDPOINTS.DELETE_ACCOUNT,
+    );
+    return toServiceResponse(res, { message: "Berhasil Delete Account" });
   }
 }
 

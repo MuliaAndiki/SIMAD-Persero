@@ -1,7 +1,9 @@
-import type { AppContext } from '@/contex';
-import { HttpResponse, handleAppError } from '@/http';
-import UserService from '@/services/user.service';
-import type { ChangePasswordBody, UpdateProfileBody } from '@/types/user.types';
+import type { AppContext } from "@/contex";
+import { HttpResponse, handleAppError } from "@/http";
+import userService from "@/services/user.service";
+import UserService from "@/services/user.service";
+import { JwtPayload } from "@/types/auth.types";
+import type { ChangePasswordBody, UpdateProfileBody } from "@/types/user.types";
 
 /**
  * Controller modul User — tipis.
@@ -20,7 +22,11 @@ class UserController {
     try {
       const user = c.user!;
       const data = await UserService.getProfile(user);
-      return HttpResponse(c).ok(data, undefined, 'Profile retrieved successfully');
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        "Profile retrieved successfully",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -32,7 +38,11 @@ class UserController {
       const user = c.user!;
       const body = c.body as UpdateProfileBody;
       const data = await UserService.updateProfile(user.id, body);
-      return HttpResponse(c).ok(data, undefined, 'Profile updated successfully');
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        "Profile updated successfully",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -42,16 +52,28 @@ class UserController {
   public async uploadPhoto(c: AppContext) {
     try {
       const user = c.user!;
-      const body = (c.body || {}) as { photo?: File; url?: string; originalName?: string };
+      const body = (c.body || {}) as {
+        photo?: File;
+        url?: string;
+        originalName?: string;
+      };
 
       if (body.url) {
-        const data = await UserService.savePhotoUrl(user, body.url, body.originalName);
-        return HttpResponse(c).ok(data, undefined, 'Profile photo updated successfully');
+        const data = await UserService.savePhotoUrl(
+          user,
+          body.url,
+          body.originalName,
+        );
+        return HttpResponse(c).ok(
+          data,
+          undefined,
+          "Profile photo updated successfully",
+        );
       }
 
       const photo = body.photo;
       if (!photo) {
-        return HttpResponse(c).unprocessable('Photo or URL is required');
+        return HttpResponse(c).unprocessable("Photo or URL is required");
       }
 
       const buffer = Buffer.from(await photo.arrayBuffer());
@@ -62,7 +84,11 @@ class UserController {
         buffer,
       });
 
-      return HttpResponse(c).ok(data, undefined, 'Profile photo updated successfully');
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        "Profile photo updated successfully",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -74,7 +100,30 @@ class UserController {
       const user = c.user!;
       const body = c.body as ChangePasswordBody;
       await UserService.changePassword(user.id, body);
-      return HttpResponse(c).ok(undefined, undefined, 'Password changed successfully');
+      return HttpResponse(c).ok(
+        undefined,
+        undefined,
+        "Password changed successfully",
+      );
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+  public async deleteAccount(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload;
+
+      if (!user) {
+        return HttpResponse(c).unauthorized();
+      }
+
+      const queryService = await userService.deleteAccount(user.id);
+
+      if (!queryService) {
+        return HttpResponse(c).badGateway();
+      }
+
+      return HttpResponse(c).ok(queryService);
     } catch (error) {
       return this.handleError(c, error);
     }

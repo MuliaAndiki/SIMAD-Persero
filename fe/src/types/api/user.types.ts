@@ -6,13 +6,11 @@
  * (be/src/controllers/UserController.ts).
  */
 
-import type { IUser } from './model.type';
+import type { IUser } from "./model.type";
 
 // ---------- Payload (request body / path params) ----------
 
-export type UpdateProfileBody = Partial<Pick<IUser, 'fullName'>> & {
-  phone?: string;
-};
+export type UpdateProfileBody = Partial<Pick<IUser, "fullName">>;
 
 export interface ChangePasswordBody {
   oldPassword: string;
@@ -22,7 +20,10 @@ export interface ChangePasswordBody {
 // ---------- Response (data dari backend) ----------
 
 /** Profil pengguna saat ini (GET /users/profile, PATCH /users/profile). */
-export interface ProfileResponse extends Pick<IUser, 'id' | 'fullName' | 'email'> {
+export interface ProfileResponse extends Pick<
+  IUser,
+  "id" | "fullName" | "email"
+> {
   phone: string | null;
   role: string;
   profilePhoto: string | null;
