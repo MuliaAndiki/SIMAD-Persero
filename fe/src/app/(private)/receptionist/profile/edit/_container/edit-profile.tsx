@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { EditProfileSection } from '@/components/page/profile/EditProfileSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import { useApi } from '@/hooks/useService/useApi';
+import { EditProfileSection } from "@/components/page/profile/EditProfileSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useApi } from "@/hooks/useService/useApi";
 
 /**
  * Container halaman ubah profil Receptionist (GET /users/profile; PATCH /users/profile).
@@ -14,9 +14,9 @@ export default function ReceptionistEditProfileContainer() {
   const profile = api.user.query.profile();
   const updateProfile = api.user.mutate.updateProfile();
 
-  const handleUpdateProfile = (data: { fullName: string; phone: string }) => {
+  const handleUpdateProfile = (data: { fullName: string }) => {
     updateProfile.mutate(data, {
-      onSuccess: () => ns.router.replace('/receptionist/profile'),
+      onSuccess: () => ns.router.replace("/receptionist/profile"),
     });
   };
 

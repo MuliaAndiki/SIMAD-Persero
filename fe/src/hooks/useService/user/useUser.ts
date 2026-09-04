@@ -1,5 +1,10 @@
-import { useChangePassword, useUpdateProfile, useUploadPhoto } from './state/mutate';
-import { useProfile } from './state/query';
+import {
+  useChangePassword,
+  useDeleteAccount,
+  useUpdateProfile,
+  useUploadPhoto,
+} from "./state/mutate";
+import { useProfile } from "./state/query";
 
 export const useUser = () => {
   return {
@@ -10,6 +15,7 @@ export const useUser = () => {
       updateProfile: useUpdateProfile,
       uploadPhoto: useUploadPhoto,
       changePassword: useChangePassword,
+      deleteAccount: useDeleteAccount,
     },
   };
 };

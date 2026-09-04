@@ -17,7 +17,7 @@ export default function EditProfileContainer() {
   const profile = api.user.query.profile();
   const updateProfile = api.user.mutate.updateProfile();
 
-  const handleUpdateProfile = (data: { fullName: string; phone: string }) => {
+  const handleUpdateProfile = (data: { fullName: string }) => {
     updateProfile.mutate(data, {
       onSuccess: () => ns.router.replace('/intern/profile'),
     });
