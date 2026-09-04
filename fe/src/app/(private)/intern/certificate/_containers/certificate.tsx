@@ -18,23 +18,33 @@ export default function InternCertificateContainer() {
 
   const handleDownload = async (certificateId: string, certificateNumber: string) => {
     try {
-      toast.loading('Sedang mengunduh sertifikat...', { id: 'download-cert' });
+      toast.loading('Sedang menyiapkan sertifikat untuk diunduh...', { id: 'download-cert' });
       const response = await downloadMutation.mutateAsync({ certificateId });
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Sertifikat-${certificateNumber.replace(/\//g, '-')}.pdf`);
+      
+      // Clean filename: remove slashes and special characters
+      const cleanNumber = certificateNumber.replace(/[/\\:*?"<>|]/g, '-');
+      link.setAttribute('download', `Sertifikat-Magang-${cleanNumber}.pdf`);
+      
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.success('Sertifikat berhasil diunduh', { id: 'download-cert' });
+      toast.success('Sertifikat berhasil diunduh! Periksa folder Download Anda.', { 
+        id: 'download-cert',
+        duration: 4000,
+      });
     } catch (error) {
       console.error('Failed to download certificate:', error);
-      toast.error('Gagal mengunduh sertifikat', { id: 'download-cert' });
+      toast.error('Gagal mengunduh sertifikat. Silakan coba lagi.', { 
+        id: 'download-cert',
+        duration: 4000,
+      });
     }
   };
 
@@ -46,6 +56,7 @@ export default function InternCertificateContainer() {
         errorMessage: myCertificates.error?.message ?? internship.error?.message,
         certificates: myCertificates.data ?? [],
         internshipStatus: internshipData?.status,
+        isDownloading: downloadMutation.isPending,
       }}
       service={{
         onDownload: handleDownload,

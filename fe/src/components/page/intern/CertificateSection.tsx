@@ -1,8 +1,10 @@
 import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { Card, CardContent } from '@/components/atoms/card';
+import { CertificateActions } from '@/components/organisms/certificate/CertificateActions';
+import { CertificateEmpty } from '@/components/organisms/certificate/CertificateEmpty';
+import { CertificatePreview } from '@/components/organisms/certificate/CertificatePreview';
 import type { CertificateResponse } from '@/types/api/certificate.types';
-import { AlertTriangle, Award, Download } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 export interface CertificateSectionState {
   isPending: boolean;
@@ -10,6 +12,7 @@ export interface CertificateSectionState {
   errorMessage?: string;
   certificates: CertificateResponse[];
   internshipStatus?: string | null;
+  isDownloading?: boolean;
 }
 
 export interface CertificateSectionService {
@@ -24,11 +27,18 @@ export interface CertificateSectionProps {
 function CertificateLoading() {
   return (
     <PhantomSkeleton loading>
-      <Card>
-        <CardContent className="p-6">
-          <div className="h-24 rounded-lg bg-muted" />
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="h-96 rounded-lg bg-muted" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="h-64 rounded-lg bg-muted" />
+          </CardContent>
+        </Card>
+      </div>
     </PhantomSkeleton>
   );
 }
@@ -48,12 +58,14 @@ function CertificateError({ message }: { message?: string }) {
 }
 
 export function CertificateSection({ state, service }: CertificateSectionProps) {
+  const certificate = state.certificates[0]; // Get first (should only be one per intern)
+
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">E-Certificate</h1>
-        <p className="text-sm text-muted-foreground">
-          Unduh sertifikat kelulusan magang Anda di sini.
+      <header className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight">E-Certificate</h1>
+        <p className="text-muted-foreground">
+          Unduh dan verifikasi sertifikat kelulusan magang Anda secara digital.
         </p>
       </header>
 
@@ -61,58 +73,25 @@ export function CertificateSection({ state, service }: CertificateSectionProps) 
         <CertificateLoading />
       ) : state.isError ? (
         <CertificateError message={state.errorMessage} />
-      ) : state.certificates.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-            <div className="mb-4 rounded-full bg-muted p-3">
-              <Award className="size-8 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground">Belum ada sertifikat yang diterbitkan.</p>
-            {state.internshipStatus !== 'CERTIFICATE_GENERATED' ? (
-              <p className="mt-1 text-sm text-muted-foreground">
-                Sertifikat baru bisa didapatkan setelah program magang berstatus selesai .
-              </p>
-            ) : (
-              <p className="mt-1 text-sm text-muted-foreground">
-                Silakan hubungi HR Admin jika status magang sudah selesai.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+      ) : !certificate ? (
+        <CertificateEmpty internshipStatus={state.internshipStatus} />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {state.certificates.map((cert) => (
-            <Card key={cert.id} className="flex flex-col overflow-hidden">
-              <CardHeader className="bg-primary/5 pb-4">
-                <CardTitle className="flex items-center justify-between text-base">
-                  <span className="flex items-center gap-2">
-                    <Award className="size-4 text-primary" />
-                    Sertifikat Magang
-                  </span>
-                </CardTitle>
-                <CardDescription>No: {cert.certificateNumber}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4 p-4">
-                <div className="flex flex-col gap-1 text-sm">
-                  <span className="text-muted-foreground">Diterbitkan pada:</span>
-                  <span className="font-medium">
-                    {new Date(cert.generatedAt).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </span>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column: Certificate Preview */}
+          <div>
+            <CertificatePreview certificate={certificate} />
+          </div>
 
-                <Button
-                  onClick={() => service.onDownload(cert.id, cert.certificateNumber)}
-                  className="w-full mt-auto"
-                >
-                  <Download className="mr-2 size-4" /> Unduh PDF
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {/* Right Column: Actions */}
+          <div>
+            <CertificateActions
+              certificateId={certificate.id}
+              certificateNumber={certificate.certificateNumber}
+              verificationToken={certificate.verificationToken}
+              isDownloading={state.isDownloading}
+              onDownload={service.onDownload}
+            />
+          </div>
         </div>
       )}
     </section>
