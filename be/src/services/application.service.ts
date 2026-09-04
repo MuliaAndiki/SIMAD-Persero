@@ -1,4 +1,4 @@
-import { AppError } from '@/http/error';
+import { AppError } from "@/http/error";
 import {
   ACTIVE_APPLICATION_STATUSES,
   type ApplicationQuery,
@@ -7,10 +7,10 @@ import {
   type CreateApplicationBody,
   type RejectApplicationBody,
   type UpdateApplicationBody,
-} from '@/types/application.types';
-import type { AuthUser } from '@/types/auth.types';
-import { InternshipStatus } from '@/types/internship.types';
-import prisma from '../../prisma/client';
+} from "@/types/application.types";
+import type { AuthUser } from "@/types/auth.types";
+import { InternshipStatus } from "@/types/internship.types";
+import prisma from "../../prisma/client";
 
 /**
  * Service layer for the Internship Application module.
@@ -25,9 +25,9 @@ class ApplicationService {
     const now = new Date();
     const datePart = [
       now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, '0'),
-      String(now.getDate()).padStart(2, '0'),
-    ].join('');
+      String(now.getMonth() + 1).padStart(2, "0"),
+      String(now.getDate()).padStart(2, "0"),
+    ].join("");
     const random = Math.floor(1000 + Math.random() * 9000);
     return `APP-${datePart}-${random}`;
   }
@@ -39,13 +39,19 @@ class ApplicationService {
       select: { id: true, deletedAt: true },
     });
     if (!profile || profile.deletedAt) {
-      throw new AppError(422, 'Intern profile not found. Please complete your profile first.');
+      throw new AppError(
+        422,
+        "Intern profile not found. Please complete your profile first.",
+      );
     }
     return profile.id;
   }
 
   /** Ensure no other active application exists for this intern profile. */
-  private async assertNoActiveApplication(internProfileId: string, excludeId?: string) {
+  private async assertNoActiveApplication(
+    internProfileId: string,
+    excludeId?: string,
+  ) {
     const where: Record<string, unknown> = {
       internProfileId,
       status: { in: ACTIVE_APPLICATION_STATUSES },
@@ -57,7 +63,7 @@ class ApplicationService {
     if (existing) {
       throw new AppError(
         409,
-        'You already have an active application. Please wait until it is resolved.',
+        "You already have an active application. Please wait until it is resolved.",
       );
     }
   }
@@ -67,13 +73,13 @@ class ApplicationService {
     const start = new Date(startDate);
     const end = new Date(endDate);
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-      throw new AppError(400, 'Invalid date format');
+      throw new AppError(400, "Invalid date format");
     }
     if (start >= end) {
-      throw new AppError(400, 'Start date must be before end date');
+      throw new AppError(400, "Start date must be before end date");
     }
     if (start < new Date()) {
-      throw new AppError(400, 'Start date must be in the future');
+      throw new AppError(400, "Start date must be in the future");
     }
   }
 
@@ -84,7 +90,7 @@ class ApplicationService {
       select: { id: true, deletedAt: true },
     });
     if (!file || file.deletedAt) {
-      throw new AppError(404, 'Cover letter file not found');
+      throw new AppError(404, "Cover letter file not found");
     }
   }
 
@@ -116,7 +122,7 @@ class ApplicationService {
 
     return prisma.internshipApplication.findMany({
       where: { internProfileId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         introductionLetterFile: {
           select: { id: true, originalName: true, mimeType: true, url: true },
@@ -127,18 +133,27 @@ class ApplicationService {
 
   // ─── 14.3 Update Draft Application ──────────────────────────
 
-  public async updateDraft(id: string, userId: string, input: UpdateApplicationBody) {
+  public async updateDraft(
+    id: string,
+    userId: string,
+    input: UpdateApplicationBody,
+  ) {
     const app = await this.findOwnedApplication(id, userId);
 
     if (app.status !== ApplicationStatus.DRAFT) {
-      throw new AppError(400, 'Only DRAFT applications can be edited');
+      throw new AppError(400, "Only DRAFT applications can be edited");
     }
 
     const data: Record<string, unknown> = {};
 
-    if (input.requestedStartDate !== undefined || input.requestedEndDate !== undefined) {
-      const startDate = input.requestedStartDate ?? app.requestedStartDate?.toISOString();
-      const endDate = input.requestedEndDate ?? app.requestedEndDate?.toISOString();
+    if (
+      input.requestedStartDate !== undefined ||
+      input.requestedEndDate !== undefined
+    ) {
+      const startDate =
+        input.requestedStartDate ?? app.requestedStartDate?.toISOString();
+      const endDate =
+        input.requestedEndDate ?? app.requestedEndDate?.toISOString();
       if (startDate && endDate) {
         this.validateDates(startDate, endDate);
       }
@@ -167,16 +182,28 @@ class ApplicationService {
   public async submit(id: string, userId: string) {
     const app = await this.findOwnedApplication(id, userId);
 
-    if (app.status !== ApplicationStatus.DRAFT && app.status !== ApplicationStatus.RESUBMITTED) {
-      throw new AppError(400, 'Only DRAFT or RESUBMITTED applications can be submitted');
+    if (
+      app.status !== ApplicationStatus.DRAFT &&
+      app.status !== ApplicationStatus.RESUBMITTED
+    ) {
+      throw new AppError(
+        400,
+        "Only DRAFT or RESUBMITTED applications can be submitted",
+      );
     }
 
     // Validate completeness
     if (!app.introductionLetterFileId) {
-      throw new AppError(400, 'Cover letter file is required before submitting');
+      throw new AppError(
+        400,
+        "Cover letter file is required before submitting",
+      );
     }
     if (!app.requestedStartDate || !app.requestedEndDate) {
-      throw new AppError(400, 'Start and end dates are required before submitting');
+      throw new AppError(
+        400,
+        "Start and end dates are required before submitting",
+      );
     }
 
     return prisma.internshipApplication.update({
@@ -191,14 +218,14 @@ class ApplicationService {
     const app = await this.findOwnedApplication(id, userId);
 
     if (app.status === ApplicationStatus.APPROVED) {
-      throw new AppError(400, 'Cannot cancel an already approved application');
+      throw new AppError(400, "Cannot cancel an already approved application");
     }
 
     // Soft delete — set status to a terminal-like state. Since the schema
     // lacks a dedicated CANCELLED status, we just hard-delete the draft/submitted
     // application so the intern can create a new one.
     await prisma.internshipApplication.delete({ where: { id } });
-    return { message: 'Application cancelled and removed' };
+    return { message: "Application cancelled and removed" };
   }
 
   // ─── 14.6 List All Applications (HR) ────────────────────────
@@ -216,11 +243,11 @@ class ApplicationService {
 
     if (query.keyword) {
       where.OR = [
-        { applicationNumber: { contains: query.keyword, mode: 'insensitive' } },
+        { applicationNumber: { contains: query.keyword, mode: "insensitive" } },
         {
           internProfile: {
             user: {
-              fullName: { contains: query.keyword, mode: 'insensitive' },
+              fullName: { contains: query.keyword, mode: "insensitive" },
             },
           },
         },
@@ -231,7 +258,7 @@ class ApplicationService {
       where.internProfile = {
         ...(where.internProfile as Record<string, unknown> | undefined),
         institution: {
-          name: { contains: query.institution, mode: 'insensitive' },
+          name: { contains: query.institution, mode: "insensitive" },
         },
       };
     }
@@ -239,7 +266,7 @@ class ApplicationService {
     const [data, total] = await prisma.$transaction([
       prisma.internshipApplication.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limit,
         include: {
@@ -301,17 +328,17 @@ class ApplicationService {
     });
 
     if (!app) {
-      throw new AppError(404, 'Application not found');
+      throw new AppError(404, "Application not found");
     }
 
     // INTERN hanya boleh melihat aplikasi miliknya sendiri.
-    if (roles?.includes('INTERN')) {
+    if (roles?.includes("INTERN")) {
       if (!userId) {
-        throw new AppError(403, 'Forbidden');
+        throw new AppError(403, "Forbidden");
       }
       const internProfileId = await this.getInternProfileId(userId);
       if (app.internProfileId !== internProfileId) {
-        throw new AppError(403, 'You do not own this application');
+        throw new AppError(403, "You do not own this application");
       }
     }
 
@@ -320,19 +347,26 @@ class ApplicationService {
 
   // ─── 14.8 Approve Application (HR) ──────────────────────────
 
-  public async approve(id: string, reviewerId: string, input: ApproveApplicationBody) {
+  public async approve(
+    id: string,
+    reviewerId: string,
+    input: ApproveApplicationBody,
+  ) {
     const app = await prisma.internshipApplication.findUnique({
       where: { id },
     });
     if (!app) {
-      throw new AppError(404, 'Application not found');
+      throw new AppError(404, "Application not found");
     }
 
     if (
       app.status !== ApplicationStatus.SUBMITTED &&
       app.status !== ApplicationStatus.UNDER_REVIEW
     ) {
-      throw new AppError(400, 'Only SUBMITTED or UNDER_REVIEW applications can be approved');
+      throw new AppError(
+        400,
+        "Only SUBMITTED or UNDER_REVIEW applications can be approved",
+      );
     }
 
     // Validate department
@@ -340,7 +374,7 @@ class ApplicationService {
       where: { id: input.departmentId },
     });
     if (!department || !department.isActive) {
-      throw new AppError(404, 'Department not found or inactive');
+      throw new AppError(404, "Department not found or inactive");
     }
 
     // Validate office location (optional)
@@ -350,7 +384,7 @@ class ApplicationService {
         where: { id: input.officeLocationId },
       });
       if (!office) {
-        throw new AppError(404, 'Office location not found');
+        throw new AppError(404, "Office location not found");
       }
       officeLocationId = office.id;
     }
@@ -365,11 +399,16 @@ class ApplicationService {
       },
     });
     if (!supervisorUser || !supervisorUser.isActive) {
-      throw new AppError(404, 'Supervisor user not found or inactive');
+      throw new AppError(404, "Supervisor user not found or inactive");
     }
-    const isSupervisor = supervisorUser.userRoles.some((ur) => ur.role?.code === 'SUPERVISOR');
+    const isSupervisor = supervisorUser.userRoles.some(
+      (ur) => ur.role?.code === "supervisor",
+    );
     if (!isSupervisor) {
-      throw new AppError(400, 'Selected user does not have the SUPERVISOR role');
+      throw new AppError(
+        400,
+        "Selected user does not have the SUPERVISOR role",
+      );
     }
 
     // Transactional: update application + create internship + create supervisor assignment
@@ -425,7 +464,7 @@ class ApplicationService {
           oldStatus: null,
           newStatus: InternshipStatus.ONBOARDING_PENDING,
           changedById: reviewerId,
-          notes: input.notes || 'Application approved, internship created.',
+          notes: input.notes || "Application approved, internship created.",
         },
       });
 
@@ -437,19 +476,26 @@ class ApplicationService {
 
   // ─── 14.9 Reject Application (HR) ──────────────────────────
 
-  public async reject(id: string, reviewerId: string, input: RejectApplicationBody) {
+  public async reject(
+    id: string,
+    reviewerId: string,
+    input: RejectApplicationBody,
+  ) {
     const app = await prisma.internshipApplication.findUnique({
       where: { id },
     });
     if (!app) {
-      throw new AppError(404, 'Application not found');
+      throw new AppError(404, "Application not found");
     }
 
     if (
       app.status !== ApplicationStatus.SUBMITTED &&
       app.status !== ApplicationStatus.UNDER_REVIEW
     ) {
-      throw new AppError(400, 'Only SUBMITTED or UNDER_REVIEW applications can be rejected');
+      throw new AppError(
+        400,
+        "Only SUBMITTED or UNDER_REVIEW applications can be rejected",
+      );
     }
 
     return prisma.internshipApplication.update({
@@ -469,11 +515,11 @@ class ApplicationService {
     const app = await this.findOwnedApplication(id, userId);
 
     if (app.status !== ApplicationStatus.DRAFT) {
-      throw new AppError(400, 'Only DRAFT applications can be deleted');
+      throw new AppError(400, "Only DRAFT applications can be deleted");
     }
 
     await prisma.internshipApplication.delete({ where: { id } });
-    return { message: 'Draft application deleted' };
+    return { message: "Draft application deleted" };
   }
 
   // ─── Private Utilities ──────────────────────────────────────
@@ -487,11 +533,11 @@ class ApplicationService {
     });
 
     if (!app) {
-      throw new AppError(404, 'Application not found');
+      throw new AppError(404, "Application not found");
     }
 
     if (app.internProfileId !== internProfileId) {
-      throw new AppError(403, 'You do not own this application');
+      throw new AppError(403, "You do not own this application");
     }
 
     return app;

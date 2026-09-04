@@ -1,44 +1,51 @@
-'use client';
-import { cn } from '@/utils/classname';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { CheckCircle, CheckSquare, LogIn, LogOut, MapPin, Search } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+"use client";
+import { cn } from "@/utils/classname";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import {
+  CheckCircle,
+  CheckSquare,
+  LogIn,
+  LogOut,
+  MapPin,
+  Search,
+} from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 const attSteps = [
   {
     id: 1,
-    label: 'Check In',
+    label: "Check In",
     icon: LogIn,
-    defaultColor: 'bg-blue-100 text-blue-600',
+    defaultColor: "bg-blue-100 text-blue-600",
   },
   {
     id: 2,
-    label: 'Lokasi',
+    label: "Lokasi",
     icon: MapPin,
-    defaultColor: 'bg-amber-100 text-amber-600',
+    defaultColor: "bg-amber-100 text-amber-600",
   },
   {
     id: 3,
-    label: 'Tercatat',
+    label: "Tercatat",
     icon: CheckSquare,
-    defaultColor: 'bg-green-100 text-green-600',
+    defaultColor: "bg-green-100 text-green-600",
   },
   {
     id: 4,
-    label: 'Pantau',
+    label: "Pantau",
     icon: Search,
-    defaultColor: 'bg-purple-100 text-purple-600',
+    defaultColor: "bg-purple-100 text-purple-600",
   },
   {
     id: 5,
-    label: 'Check Out',
+    label: "Check Out",
     icon: LogOut,
-    defaultColor: 'bg-slate-100 text-slate-600',
+    defaultColor: "bg-slate-100 text-slate-600",
   },
 ];
 
@@ -52,22 +59,25 @@ export function LandingAttendance() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: container.current,
-          start: 'top top',
-          end: '+=150%',
+          start: "top top",
+          end: "+=150%",
           scrub: 1,
           pin: true,
           onUpdate: (self) => {
             const progress = self.progress;
-            const index = Math.min(Math.floor(progress * attSteps.length), attSteps.length - 1);
+            const index = Math.min(
+              Math.floor(progress * attSteps.length),
+              attSteps.length - 1,
+            );
             setActiveStep(index);
           },
         },
       });
 
       // Simple visual timeline progress
-      tl.to('.att-progress-bar', {
-        height: '100%',
-        ease: 'none',
+      tl.to(".att-progress-bar", {
+        height: "100%",
+        ease: "none",
       });
     }, container);
 
@@ -87,8 +97,9 @@ export function LandingAttendance() {
             Absensi Akurat dengan Lokasi
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Kehadiran didukung dengan validasi geofencing, memastikan peserta berada di tempat
-            penempatan yang telah ditetapkan sebelum mengkonfirmasi kehadiran.
+            Kehadiran didukung dengan validasi geofencing, memastikan peserta
+            berada di tempat penempatan yang telah ditetapkan sebelum
+            mengkonfirmasi kehadiran.
           </p>
 
           <div className="bg-card p-6 rounded-2xl shadow-sm border border-border">
@@ -99,8 +110,8 @@ export function LandingAttendance() {
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
                 <CheckCircle
                   className={cn(
-                    'w-6 h-6 transition-colors duration-300',
-                    activeStep >= 2 ? 'text-success' : 'text-muted-foreground',
+                    "w-6 h-6 transition-colors duration-300",
+                    activeStep >= 2 ? "text-success" : "text-muted-foreground",
                   )}
                 />
               </div>
@@ -119,7 +130,7 @@ export function LandingAttendance() {
             <div className="att-progress-bar w-full bg-primary h-0" />
           </div>
 
-          <div className="flex flex-col justify-between h-full relative z-10 w-full pl-0">
+          <div className="flex flex-col justify-between h-full relative z-10 w-full pl-0 -translate-x-5">
             {attSteps.map((step, index) => {
               const Icon = step.icon;
               const isActive = activeStep >= index;
@@ -129,20 +140,20 @@ export function LandingAttendance() {
                 <div
                   key={step.id}
                   className={cn(
-                    'flex items-center gap-6 transition-all duration-300',
+                    "flex items-center gap-6 transition-all duration-300",
                     isCurrent
-                      ? 'scale-105 opacity-100'
+                      ? "scale-105 opacity-100"
                       : isActive
-                        ? 'opacity-100'
-                        : 'opacity-40 grayscale',
+                        ? "opacity-100"
+                        : "opacity-40 grayscale",
                   )}
                 >
                   <div
                     className={cn(
-                      'w-12 h-12 rounded-full flex items-center justify-center border-2 shadow-sm transition-colors duration-300',
+                      "w-12 h-12 rounded-full flex items-center justify-center border-2 shadow-sm transition-colors duration-300",
                       isActive
-                        ? 'border-primary bg-background text-primary'
-                        : 'border-border bg-card text-muted-foreground',
+                        ? "border-primary bg-background text-primary translate-x-5"
+                        : "border-border bg-card text-muted-foreground translate-x-4",
                     )}
                   >
                     <Icon className="w-5 h-5" />
@@ -150,8 +161,8 @@ export function LandingAttendance() {
                   <div className="bg-card px-4 py-2 border border-border shadow-sm rounded-lg flex-1">
                     <span
                       className={cn(
-                        'font-medium',
-                        isActive ? 'text-foreground' : 'text-muted-foreground',
+                        "font-medium",
+                        isActive ? "text-foreground" : "text-muted-foreground",
                       )}
                     >
                       {step.label}
