@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { OnboardingSection } from '@/components/page/intern/OnboardingSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import { useApi } from '@/hooks/useService/useApi';
-import type { InternshipResponse } from '@/types/api/internship.types';
+import { OnboardingSection } from "@/components/page/intern/OnboardingSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useApi } from "@/hooks/useService/useApi";
+import type { InternshipResponse } from "@/types/api/internship.types";
 
 /**
  * Container halaman onboarding intern (GET /internships/me;
@@ -26,10 +26,11 @@ export default function OnboardingContainer() {
   const handleSubmit = async () => {
     if (!internship) return;
     const confirmed = await ns.alert.confirm({
-      title: 'Konfirmasi Penyelesaian Onboarding',
-      icon: 'question',
-      deskripsi: 'Pastikan Anda telah membaca dan menyetujui seluruh ketentuan tata tertib magang.',
-      confirmButtonText: 'Ya, Saya Menyetujui',
+      title: "Konfirmasi Penyelesaian Onboarding",
+      icon: "question",
+      deskripsi:
+        "Pastikan Anda telah membaca dan menyetujui seluruh ketentuan tata tertib magang.",
+      confirmButtonText: "Ya, Saya Menyetujui",
     });
     if (!confirmed) return;
     completeOnboarding.mutate({ id: internship.id });

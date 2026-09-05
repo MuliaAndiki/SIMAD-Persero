@@ -207,9 +207,13 @@ class UserService {
   }
   public async deleteAccount(userId: string) {
     const query = await prisma.$transaction(async (tx) => {
-      await tx.user.delete({
+      await tx.user.update({
         where: {
           id: userId,
+        },
+        data: {
+          isActive: false,
+          deletedAt: new Date(),
         },
       });
 
