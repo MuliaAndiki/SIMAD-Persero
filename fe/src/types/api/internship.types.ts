@@ -75,6 +75,8 @@ export interface InternshipResponse extends Omit<IInternship, "status"> {
     requestedEndDate?: string | null;
   } | null;
   internProfile: {
+    id?: string;
+    studentNumber?: string;
     institution: {
       id: string;
       name: string;
@@ -86,6 +88,7 @@ export interface InternshipResponse extends Omit<IInternship, "status"> {
     user: {
       id: string;
       fullName: string;
+      email?: string;
     };
     major: {
       id: string;

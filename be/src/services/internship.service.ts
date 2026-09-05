@@ -108,6 +108,7 @@ class InternshipService {
             requestedEndDate: true,
           },
         },
+
         supervisorAssignments: {
           where: { isActive: true },
           select: {

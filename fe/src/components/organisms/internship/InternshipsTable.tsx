@@ -1,7 +1,13 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +15,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/atoms/dropdown-menu';
-import { InternshipStatusBadge } from '@/components/organisms/internship/InternshipStatusBadge';
-import type { InternshipResponse } from '@/types/api/internship.types';
-import { formatDate } from '@/utils/string.format';
+} from "@/components/atoms/dropdown-menu";
+import { InternshipStatusBadge } from "@/components/organisms/internship/InternshipStatusBadge";
+import type { InternshipResponse } from "@/types/api/internship.types";
+import { formatDate } from "@/utils/string.format";
 import {
   Archive,
   Award,
@@ -23,7 +29,7 @@ import {
   Play,
   UserCheck,
   Users,
-} from 'lucide-react';
+} from "lucide-react";
 
 export interface InternshipsTableProps {
   internships: InternshipResponse[];
@@ -81,7 +87,8 @@ export function InternshipsTable({
               <tbody>
                 {internships.map((internship) => {
                   const supervisor =
-                    internship.supervisorAssignments?.[0]?.supervisor?.fullName ?? '-';
+                    internship.supervisorAssignments?.[0]?.supervisor
+                      ?.fullName ?? "-";
 
                   return (
                     <tr
@@ -91,7 +98,7 @@ export function InternshipsTable({
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {internship.internProfile?.user.fullName ?? '-'}
+                            {internship.internProfile?.user.fullName ?? "-"}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {internship.internProfile?.studentNumber ||
@@ -100,10 +107,14 @@ export function InternshipsTable({
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {internship.internProfile?.institution?.name ?? '-'}
+                        {internship.internProfile?.institution?.name ?? "-"}
                       </td>
-                      <td className="px-6 py-4">{internship.internProfile?.major?.name ?? '-'}</td>
-                      <td className="px-6 py-4">{internship.department?.name ?? '-'}</td>
+                      <td className="px-6 py-4">
+                        {internship.internProfile?.major?.name ?? "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        {internship.department?.name ?? "-"}
+                      </td>
                       <td className="px-6 py-4">{supervisor}</td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-0.5">
@@ -119,7 +130,11 @@ export function InternshipsTable({
                       <td className="px-6 py-4 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="size-8 p-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="size-8 p-0"
+                            >
                               <MoreHorizontal className="size-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -127,55 +142,68 @@ export function InternshipsTable({
                             <DropdownMenuLabel>Aksi Magang</DropdownMenuLabel>
                             <DropdownMenuSeparator />
 
-                            {(internship.status === 'ONBOARDING_COMPLETED' ||
-                              internship.status === 'ONBOARDING_PENDING') &&
+                            {(internship.status === "ONBOARDING_COMPLETED" ||
+                              internship.status === "ONBOARDING_PENDING") &&
                               onStart && (
-                                <DropdownMenuItem onClick={() => onStart(internship.id)}>
+                                <DropdownMenuItem
+                                  onClick={() => onStart(internship.id)}
+                                >
                                   <Play className="mr-2 size-4 text-emerald-500" />
                                   Mulai Magang
                                 </DropdownMenuItem>
                               )}
 
-                            {internship.status === 'ACTIVE' && onFinish && (
-                              <DropdownMenuItem onClick={() => onFinish(internship.id)}>
+                            {internship.status === "ACTIVE" && onFinish && (
+                              <DropdownMenuItem
+                                onClick={() => onFinish(internship.id)}
+                              >
                                 <CheckCircle2 className="mr-2 size-4 text-blue-500" />
                                 Selesaikan Magang
                               </DropdownMenuItem>
                             )}
 
-                            {internship.status === 'COMPLETED' && onOpenGenerateCert && (
-                              <DropdownMenuItem
-                                onClick={() => onOpenGenerateCert(internship)}
-                                className="text-primary font-medium"
-                              >
-                                <Award className="mr-2 size-4" />
-                                Terbitkan Sertifikat
-                              </DropdownMenuItem>
-                            )}
+                            {internship.status === "COMPLETED" &&
+                              onOpenGenerateCert && (
+                                <DropdownMenuItem
+                                  onClick={() => onOpenGenerateCert(internship)}
+                                  className="text-primary font-medium"
+                                >
+                                  <Award className="mr-2 size-4" />
+                                  Terbitkan Sertifikat
+                                </DropdownMenuItem>
+                              )}
 
                             {onOpenExtend && (
-                              <DropdownMenuItem onClick={() => onOpenExtend(internship)}>
+                              <DropdownMenuItem
+                                onClick={() => onOpenExtend(internship)}
+                              >
                                 <Calendar className="mr-2 size-4" />
                                 Perpanjang Magang
                               </DropdownMenuItem>
                             )}
 
                             {onOpenChangeDept && (
-                              <DropdownMenuItem onClick={() => onOpenChangeDept(internship)}>
+                              <DropdownMenuItem
+                                onClick={() => onOpenChangeDept(internship)}
+                              >
                                 <Building2 className="mr-2 size-4" />
                                 Pindahkan Departemen
                               </DropdownMenuItem>
                             )}
 
                             {onOpenAssignSupervisor && (
-                              <DropdownMenuItem onClick={() => onOpenAssignSupervisor(internship)}>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  onOpenAssignSupervisor(internship)
+                                }
+                              >
                                 <UserCheck className="mr-2 size-4" />
                                 Tugaskan Supervisor
                               </DropdownMenuItem>
                             )}
 
-                            {(internship.status === 'COMPLETED' ||
-                              internship.status === 'CERTIFICATE_GENERATED') &&
+                            {(internship.status === "COMPLETED" ||
+                              internship.status === "CERTIFICATE_GENERATED") &&
                               onArchive && (
                                 <>
                                   <DropdownMenuSeparator />
