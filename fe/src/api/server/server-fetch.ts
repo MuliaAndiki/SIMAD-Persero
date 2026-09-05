@@ -251,15 +251,17 @@ async function coreFetch<T>(
 
     if (!retryRes.ok) {
       let message = `Request failed with status ${retryRes.status}`;
+      let title: string | undefined;
       let errors: Record<string, string[]> | undefined;
       try {
         const errJson = await retryRes.json();
         if (errJson?.message) message = errJson.message;
+        if (errJson?.title) title = errJson.title;
         if (errJson?.errors) errors = errJson.errors;
       } catch {
         /* ignore */
       }
-      throw new ApiErrorClass(message, retryRes.status, errors);
+      throw new ApiErrorClass(message, retryRes.status, title, errors);
     }
 
     const retryJson: ApiResponse<T> = await retryRes.json();
@@ -274,17 +276,19 @@ async function coreFetch<T>(
 
   if (!res.ok) {
     let message = `Request failed with status ${res.status}`;
+    let title: string | undefined;
     let errors: Record<string, string[]> | undefined;
 
     try {
       const errJson = await res.json();
       if (errJson?.message) message = errJson.message;
+      if (errJson?.title) title = errJson.title;
       if (errJson?.errors) errors = errJson.errors;
     } catch {
       /* ignore */
     }
 
-    throw new ApiErrorClass(message, res.status, errors);
+    throw new ApiErrorClass(message, res.status, title, errors);
   }
 
   const json: ApiResponse<T> = await res.json();

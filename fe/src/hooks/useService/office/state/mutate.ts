@@ -3,6 +3,7 @@ import { queryKey } from '@/configs/query-key';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import Api from '@/services/props.service';
 import { type OfficeCacheContext, readOfficeSnapshot } from '@/utils/cache/office.cache';
+import { ResponseTitles } from '@/utils/response-titles';
 
 import type {
   CreateOfficeBody,
@@ -41,14 +42,14 @@ export function useCreateOffice() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -83,14 +84,14 @@ export function useUpdateOffice() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -114,14 +115,14 @@ export function useDeleteOffice() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });

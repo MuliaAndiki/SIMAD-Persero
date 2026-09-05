@@ -6,6 +6,7 @@ import {
   type AttendanceCacheContext,
   readAttendanceSnapshot,
 } from '@/utils/cache/attendance.cache';
+import { ResponseTitles } from '@/utils/response-titles';
 
 import type {
   AttendanceParams,
@@ -43,14 +44,14 @@ export function useCheckIn() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -80,14 +81,14 @@ export function useCheckOut() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -125,14 +126,14 @@ export function useOverrideAttendance() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });

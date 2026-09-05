@@ -1,10 +1,10 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from "@tanstack/react-query";
 
-import type { TResponse } from '@/api/types/response.types';
-import { getRoleDashboardPath } from '@/configs/app.config';
-import { queryKey } from '@/configs/query-key';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
-import AuthService from '@/services/api/auth.service';
+import type { TResponse } from "@/api/types/response.types";
+import { getRoleDashboardPath } from "@/configs/app.config";
+import { queryKey } from "@/configs/query-key";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import AuthService from "@/services/api/auth.service";
 import type {
   AuthSessionResponse,
   ChangeEmailBody,
@@ -24,10 +24,18 @@ import type {
   SessionParams,
   VerifyEmailBody,
   VerifyMagicLinkBody,
-} from '@/types/api/auth.types';
-import { type AuthCacheContext, readAuthSnapshot } from '@/utils/cache/auth.cache';
-import { clearSessionCookies, getRefreshToken, setSessionCookies } from '@/utils/session-cookie';
-import { useRouter } from 'next/navigation';
+} from "@/types/api/auth.types";
+import {
+  type AuthCacheContext,
+  readAuthSnapshot,
+} from "@/utils/cache/auth.cache";
+import { ResponseTitles } from "@/utils/response-titles";
+import {
+  clearSessionCookies,
+  getRefreshToken,
+  setSessionCookies,
+} from "@/utils/session-cookie";
+import { useRouter } from "next/navigation";
 
 /**
  * POST /auth/register
@@ -37,11 +45,12 @@ export function useRegister() {
   return useMutation<
     TResponse<RegisterResponse>,
     Error,
-    Pick<RegisterBody, 'fullName' | 'email' | 'password'>,
+    Pick<RegisterBody, "fullName" | "email" | "password">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<RegisterBody, 'fullName' | 'email' | 'password'>) =>
-      AuthService.Register(payload),
+    mutationFn: (
+      payload: Pick<RegisterBody, "fullName" | "email" | "password">,
+    ) => AuthService.Register(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);
@@ -49,16 +58,16 @@ export function useRegister() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.auth.registerFailed,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -69,8 +78,13 @@ export function useRegister() {
  */
 export function useSendVerifyEmail() {
   const ns = useAppNameSpace();
-  return useMutation<TResponse<null>, Error, Pick<SendVerifyEmailBody, 'email'>, AuthCacheContext>({
-    mutationFn: (payload: Pick<SendVerifyEmailBody, 'email'>) =>
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<SendVerifyEmailBody, "email">,
+    AuthCacheContext
+  >({
+    mutationFn: (payload: Pick<SendVerifyEmailBody, "email">) =>
       AuthService.SendVerifyEmail(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
@@ -79,16 +93,16 @@ export function useSendVerifyEmail() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -99,8 +113,14 @@ export function useSendVerifyEmail() {
  */
 export function useVerifyEmail() {
   const ns = useAppNameSpace();
-  return useMutation<TResponse<null>, Error, Pick<VerifyEmailBody, 'token'>, AuthCacheContext>({
-    mutationFn: (payload: Pick<VerifyEmailBody, 'token'>) => AuthService.VerifyEmail(payload),
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<VerifyEmailBody, "token">,
+    AuthCacheContext
+  >({
+    mutationFn: (payload: Pick<VerifyEmailBody, "token">) =>
+      AuthService.VerifyEmail(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);
@@ -108,16 +128,16 @@ export function useVerifyEmail() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -132,10 +152,11 @@ export function useLogin() {
   return useMutation<
     TResponse<AuthSessionResponse>,
     Error,
-    Pick<LoginBody, 'email' | 'password'>,
+    Pick<LoginBody, "email" | "password">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<LoginBody, 'email' | 'password'>) => AuthService.Login(payload),
+    mutationFn: (payload: Pick<LoginBody, "email" | "password">) =>
+      AuthService.Login(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);
@@ -143,9 +164,9 @@ export function useLogin() {
     },
     onSuccess: (res, variables) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
 
       const data = res.data;
@@ -160,15 +181,20 @@ export function useLogin() {
 
         // Simpan data akun terakhir untuk login otomatis tanpa ketik ulang email
         const userEmail = data.user?.email || variables?.email;
-        if (userEmail && typeof window !== 'undefined') {
+        if (userEmail && typeof window !== "undefined") {
           try {
             const accountInfo = {
               email: userEmail,
               fullName: data.user?.fullName,
-              avatarUrl: (data.user as any)?.avatarUrl || (data.user as any)?.profilePhoto,
+              avatarUrl:
+                (data.user as any)?.avatarUrl ||
+                (data.user as any)?.profilePhoto,
             };
-            localStorage.setItem('simad_remembered_account', JSON.stringify(accountInfo));
-            localStorage.setItem('simad_last_email', userEmail);
+            localStorage.setItem(
+              "simad_remembered_account",
+              JSON.stringify(accountInfo),
+            );
+            localStorage.setItem("simad_last_email", userEmail);
           } catch {}
         }
       }
@@ -179,9 +205,9 @@ export function useLogin() {
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.auth.loginFailed,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -196,10 +222,11 @@ export function useGoogleLogin() {
   return useMutation<
     TResponse<AuthSessionResponse>,
     Error,
-    Pick<GoogleLoginBody, 'credential'>,
+    Pick<GoogleLoginBody, "credential">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<GoogleLoginBody, 'credential'>) => AuthService.GoogleLogin(payload),
+    mutationFn: (payload: Pick<GoogleLoginBody, "credential">) =>
+      AuthService.GoogleLogin(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);
@@ -207,9 +234,9 @@ export function useGoogleLogin() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
 
       const data = res.data;
@@ -223,15 +250,20 @@ export function useGoogleLogin() {
         });
 
         const googleEmail = data.user?.email;
-        if (googleEmail && typeof window !== 'undefined') {
+        if (googleEmail && typeof window !== "undefined") {
           try {
             const accountInfo = {
               email: googleEmail,
               fullName: data.user?.fullName,
-              avatarUrl: (data.user as any)?.avatarUrl || (data.user as any)?.profilePhoto,
+              avatarUrl:
+                (data.user as any)?.avatarUrl ||
+                (data.user as any)?.profilePhoto,
             };
-            localStorage.setItem('simad_remembered_account', JSON.stringify(accountInfo));
-            localStorage.setItem('simad_last_email', googleEmail);
+            localStorage.setItem(
+              "simad_remembered_account",
+              JSON.stringify(accountInfo),
+            );
+            localStorage.setItem("simad_last_email", googleEmail);
           } catch {}
         }
       }
@@ -242,9 +274,9 @@ export function useGoogleLogin() {
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -255,8 +287,14 @@ export function useGoogleLogin() {
  */
 export function useSendMagicLink() {
   const ns = useAppNameSpace();
-  return useMutation<TResponse<null>, Error, Pick<SendMagicLinkBody, 'email'>, AuthCacheContext>({
-    mutationFn: (payload: Pick<SendMagicLinkBody, 'email'>) => AuthService.SendMagicLink(payload),
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<SendMagicLinkBody, "email">,
+    AuthCacheContext
+  >({
+    mutationFn: (payload: Pick<SendMagicLinkBody, "email">) =>
+      AuthService.SendMagicLink(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);
@@ -264,16 +302,16 @@ export function useSendMagicLink() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -288,10 +326,10 @@ export function useVerifyMagicLink() {
   return useMutation<
     TResponse<AuthSessionResponse>,
     Error,
-    Pick<VerifyMagicLinkBody, 'token'>,
+    Pick<VerifyMagicLinkBody, "token">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<VerifyMagicLinkBody, 'token'>) =>
+    mutationFn: (payload: Pick<VerifyMagicLinkBody, "token">) =>
       AuthService.VerifyMagicLink(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
@@ -300,9 +338,9 @@ export function useVerifyMagicLink() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
 
       const data = res.data;
@@ -322,9 +360,9 @@ export function useVerifyMagicLink() {
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -335,8 +373,14 @@ export function useVerifyMagicLink() {
  */
 export function useForgotPassword() {
   const ns = useAppNameSpace();
-  return useMutation<TResponse<null>, Error, Pick<ForgotPasswordBody, 'email'>, AuthCacheContext>({
-    mutationFn: (payload: Pick<ForgotPasswordBody, 'email'>) => AuthService.ForgotPassword(payload),
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<ForgotPasswordBody, "email">,
+    AuthCacheContext
+  >({
+    mutationFn: (payload: Pick<ForgotPasswordBody, "email">) =>
+      AuthService.ForgotPassword(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);
@@ -344,16 +388,16 @@ export function useForgotPassword() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -367,10 +411,10 @@ export function useResetPassword() {
   return useMutation<
     TResponse<null>,
     Error,
-    Pick<ResetPasswordBody, 'token' | 'password'>,
+    Pick<ResetPasswordBody, "token" | "password">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<ResetPasswordBody, 'token' | 'password'>) =>
+    mutationFn: (payload: Pick<ResetPasswordBody, "token" | "password">) =>
       AuthService.ResetPassword(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
@@ -379,16 +423,16 @@ export function useResetPassword() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -402,10 +446,10 @@ export function useRefreshToken() {
   return useMutation<
     TResponse<RefreshTokenResponse>,
     Error,
-    Pick<RefreshTokenBody, 'refreshToken'>,
+    Pick<RefreshTokenBody, "refreshToken">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<RefreshTokenBody, 'refreshToken'>) =>
+    mutationFn: (payload: Pick<RefreshTokenBody, "refreshToken">) =>
       AuthService.RefreshToken({
         refreshToken: payload?.refreshToken ?? getRefreshToken(),
       }),
@@ -416,9 +460,9 @@ export function useRefreshToken() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
 
       // Refresh hanya mengembalikan access token baru — perbarui cookie sesi.
@@ -432,9 +476,9 @@ export function useRefreshToken() {
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -446,8 +490,13 @@ export function useRefreshToken() {
 export function useLogout() {
   const ns = useAppNameSpace();
   const router = useRouter();
-  return useMutation<TResponse<null>, Error, Pick<LogoutBody, 'refreshToken'>, AuthCacheContext>({
-    mutationFn: (payload: Pick<LogoutBody, 'refreshToken'>) =>
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<LogoutBody, "refreshToken">,
+    AuthCacheContext
+  >({
+    mutationFn: (payload: Pick<LogoutBody, "refreshToken">) =>
       AuthService.Logout({
         refreshToken: payload?.refreshToken ?? getRefreshToken(),
       }),
@@ -465,20 +514,20 @@ export function useLogout() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
 
       // Hapus cookie sesi lalu kembali ke halaman login.
       clearSessionCookies();
-      router.push('/login');
+      router.push("/login");
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -506,19 +555,19 @@ export function useLogoutAll() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
 
       clearSessionCookies();
-      router.push('/login');
+      router.push("/login");
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -532,11 +581,12 @@ export function useChangePassword() {
   return useMutation<
     TResponse<null>,
     Error,
-    Pick<ChangePasswordBody, 'currentPassword' | 'newPassword'>,
+    Pick<ChangePasswordBody, "currentPassword" | "newPassword">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<ChangePasswordBody, 'currentPassword' | 'newPassword'>) =>
-      AuthService.ChangePassword(payload),
+    mutationFn: (
+      payload: Pick<ChangePasswordBody, "currentPassword" | "newPassword">,
+    ) => AuthService.ChangePassword(payload),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.authRoot() });
       const previousData = readAuthSnapshot(ns);
@@ -544,16 +594,16 @@ export function useChangePassword() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -567,10 +617,10 @@ export function useChangeEmail() {
   return useMutation<
     TResponse<null>,
     Error,
-    Pick<ChangeEmailBody, 'newEmail' | 'password'>,
+    Pick<ChangeEmailBody, "newEmail" | "password">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<ChangeEmailBody, 'newEmail' | 'password'>) =>
+    mutationFn: (payload: Pick<ChangeEmailBody, "newEmail" | "password">) =>
       AuthService.ChangeEmail(payload),
 
     onSettled: async () => {
@@ -583,16 +633,16 @@ export function useChangeEmail() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -606,10 +656,10 @@ export function useChangeEmailVerify() {
   return useMutation<
     TResponse<null>,
     Error,
-    Pick<ChangeEmailVerifyBody, 'token'>,
+    Pick<ChangeEmailVerifyBody, "token">,
     AuthCacheContext
   >({
-    mutationFn: (payload: Pick<ChangeEmailVerifyBody, 'token'>) =>
+    mutationFn: (payload: Pick<ChangeEmailVerifyBody, "token">) =>
       AuthService.ChangeEmailVerify(payload),
 
     onSettled: async () => {
@@ -622,16 +672,16 @@ export function useChangeEmailVerify() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });
@@ -642,8 +692,14 @@ export function useChangeEmailVerify() {
  */
 export function useDeleteSession() {
   const ns = useAppNameSpace();
-  return useMutation<TResponse<null>, Error, Pick<SessionParams, 'sessionId'>, AuthCacheContext>({
-    mutationFn: (payload: Pick<SessionParams, 'sessionId'>) => AuthService.DeleteSession(payload),
+  return useMutation<
+    TResponse<null>,
+    Error,
+    Pick<SessionParams, "sessionId">,
+    AuthCacheContext
+  >({
+    mutationFn: (payload: Pick<SessionParams, "sessionId">) =>
+      AuthService.DeleteSession(payload),
 
     onSettled: async () => {
       await ns.queryClient.invalidateQueries({
@@ -657,16 +713,16 @@ export function useDeleteSession() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
-        icon: 'success',
+        icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
-        icon: 'error',
+        icon: "error",
       });
     },
   });

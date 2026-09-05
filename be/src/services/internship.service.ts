@@ -516,12 +516,20 @@ class InternshipService {
     }
 
     const isSupervisor = supervisorUser.userRoles.some(
-      (ur) => ur.role?.code === "SUPERVISOR",
+      (ur) => ur.role?.code === "supervisor",
     );
+
+    if (supervisorUser.departmentId !== internship.departmentId) {
+      throw new AppError(
+        404,
+        "Departement supervisor tidak sesuai, Mohon Untuk Menganti Departement Terlebih Dahulu",
+      );
+    }
+
     if (!isSupervisor) {
       throw new AppError(
         400,
-        "Selected user does not have the SUPERVISOR role",
+        "Selected user does not have the supervisor role",
       );
     }
 

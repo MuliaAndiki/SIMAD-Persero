@@ -6,6 +6,7 @@ import {
   type SupervisorCacheContext,
   readSupervisorSnapshot,
 } from '@/utils/cache/supervisor.cache';
+import { ResponseTitles } from '@/utils/response-titles';
 
 import type { IUser } from '@/types/api/model.type';
 import type {
@@ -53,14 +54,14 @@ export function useAssignIntern() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -86,14 +87,14 @@ export function useCreateSupervisor() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: 'Berhasil',
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: 'Gagal',
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -127,14 +128,14 @@ export function useUpdateSupervisor() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: 'Berhasil',
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: 'Gagal',
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -165,14 +166,14 @@ export function useDeleteSupervisor() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: 'Berhasil',
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: 'Gagal',
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -207,14 +208,14 @@ export function useRemoveAssignment() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });

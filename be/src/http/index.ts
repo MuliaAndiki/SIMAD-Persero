@@ -35,60 +35,81 @@ function buildGetResponseMeta(c: AppContext, meta?: unknown) {
   return { process_time };
 }
 
-function errorResponse(c: AppContext, status: number, message: string, code?: ErrorCode) {
-  return c.json?.({ status, message, ...(code ? { code } : {}) }, status);
+function errorResponse(c: AppContext, status: number, message: string, title?: string, code?: ErrorCode) {
+  return c.json?.({ status, title: title || getDefaultErrorTitle(status), message, ...(code ? { code } : {}) }, status);
+}
+
+function getDefaultErrorTitle(status: number): string {
+  switch (status) {
+    case 400: return 'Permintaan Tidak Valid';
+    case 401: return 'Tidak Berizin';
+    case 403: return 'Akses Ditolak';
+    case 404: return 'Tidak Ditemukan';
+    case 409: return 'Terjadi Konflik';
+    case 422: return 'Data Tidak Valid';
+    case 429: return 'Terlalu Banyak Permintaan';
+    case 500: return 'Kesalahan Server';
+    case 502: return 'Gateway Bermasalah';
+    case 503: return 'Layanan Tidak Tersedia';
+    default: return 'Terjadi Kesalahan';
+  }
 }
 
 export function HttpResponse(c: AppContext) {
   return {
-    ok: (data?: any, meta?: any, message = 'Berhasil') => {
+    ok: (data?: any, meta?: any, message = 'Berhasil', title = 'Berhasil') => {
       const responseMeta = isGetRequest(c) ? buildGetResponseMeta(c, meta) : meta;
 
-      return c.json?.({ status: 200, message, data, meta: responseMeta }, 200);
+      return c.json?.({ status: 200, title, message, data, meta: responseMeta }, 200);
     },
-    created: (data?: any, message = 'Berhasil dibuat') =>
-      c.json?.({ status: 201, message, data }, 201),
-    accepted: (data?: any, message = 'Permintaan diterima') =>
-      c.json?.({ status: 202, message, data }, 202),
-    noContent: (message = 'Tidak ada konten') => c.json?.({ status: 204, message }, 204),
-    badRequest: (message = 'Permintaan tidak valid', code?: ErrorCode) =>
-      errorResponse(c, 400, message, code),
-    unauthorized: (message = 'Tidak berizin', code?: ErrorCode) =>
-      errorResponse(c, 401, message, code),
-    forbidden: (message = 'Akses ditolak', code?: ErrorCode) =>
-      errorResponse(c, 403, message, code),
-    notFound: (message = 'Tidak ditemukan', code?: ErrorCode) =>
-      errorResponse(c, 404, message, code),
-    conflict: (message = 'Terjadi konflik', code?: ErrorCode) =>
-      errorResponse(c, 409, message, code),
-    unprocessable: (message = 'Entitas tidak dapat diproses', code?: ErrorCode) =>
-      errorResponse(c, 422, message, code),
+    created: (data?: any, message = 'Data berhasil dibuat', title = 'Berhasil Dibuat') =>
+      c.json?.({ status: 201, title, message, data }, 201),
+    accepted: (data?: any, message = 'Permintaan Anda sedang diproses', title = 'Permintaan Diterima') =>
+      c.json?.({ status: 202, title, message, data }, 202),
+    noContent: (message = 'Tidak ada konten', title = 'Tidak Ada Konten') => 
+      c.json?.({ status: 204, title, message }, 204),
+    badRequest: (message = 'Permintaan tidak valid', code?: ErrorCode, title?: string) =>
+      errorResponse(c, 400, message, title, code),
+    unauthorized: (message = 'Tidak berizin', code?: ErrorCode, title?: string) =>
+      errorResponse(c, 401, message, title, code),
+    forbidden: (message = 'Akses ditolak', code?: ErrorCode, title?: string) =>
+      errorResponse(c, 403, message, title, code),
+    notFound: (message = 'Tidak ditemukan', code?: ErrorCode, title?: string) =>
+      errorResponse(c, 404, message, title, code),
+    conflict: (message = 'Terjadi konflik', code?: ErrorCode, title?: string) =>
+      errorResponse(c, 409, message, title, code),
+    unprocessable: (message = 'Entitas tidak dapat diproses', code?: ErrorCode, title?: string) =>
+      errorResponse(c, 422, message, title, code),
     tooManyRequests: (
       message = 'Terlalu banyak permintaan',
       code?: ErrorCode,
       retryAfterSeconds?: number,
+      title?: string,
     ) => {
       if (retryAfterSeconds !== undefined) {
         c.set.headers['Retry-After'] = String(retryAfterSeconds);
       }
-      return errorResponse(c, 429, message, code);
+      return errorResponse(c, 429, message, title, code);
     },
-    internalError: (error?: unknown, customMessage?: string) => {
+    internalError: (error?: unknown, customMessage?: string, customTitle?: string) => {
       const { message: friendlyMessage, status } = getFriendlyErrorMessage(error);
       const finalMessage = customMessage || friendlyMessage || 'Terjadi kesalahan pada server';
+      const finalTitle = customTitle || getDefaultErrorTitle(status);
       return c.json?.(
         {
           status,
+          title: finalTitle,
           message: finalMessage,
         },
         status,
       );
     },
-    notImplemented: (message = 'Fitur belum diimplementasikan') =>
-      c.json?.({ status: 501, message }, 501),
-    badGateway: (message = 'Gateway bermasalah') => c.json?.({ status: 502, message }, 502),
-    serviceUnavailable: (message = 'Layanan tidak tersedia') =>
-      c.json?.({ status: 503, message }, 503),
+    notImplemented: (message = 'Fitur belum diimplementasikan', title = 'Belum Tersedia') =>
+      c.json?.({ status: 501, title, message }, 501),
+    badGateway: (message = 'Gateway bermasalah', title = 'Gateway Bermasalah') => 
+      c.json?.({ status: 502, title, message }, 502),
+    serviceUnavailable: (message = 'Layanan tidak tersedia', title = 'Layanan Tidak Tersedia') =>
+      c.json?.({ status: 503, title, message }, 503),
   };
 }
 
@@ -171,23 +192,25 @@ export function handleAppError(c: AppContext, error: unknown) {
       getLogger().warn({ code }, `[AppWarn] ${status} - ${message}`);
     }
 
+    const title = getDefaultErrorTitle(status);
+
     switch (status) {
       case 400:
-        return HttpResponse(c).badRequest(message, code);
+        return HttpResponse(c).badRequest(message, code, title);
       case 401:
-        return HttpResponse(c).unauthorized(message, code);
+        return HttpResponse(c).unauthorized(message, code, title);
       case 403:
-        return HttpResponse(c).forbidden(message, code);
+        return HttpResponse(c).forbidden(message, code, title);
       case 404:
-        return HttpResponse(c).notFound(message, code);
+        return HttpResponse(c).notFound(message, code, title);
       case 409:
-        return HttpResponse(c).conflict(message, code);
+        return HttpResponse(c).conflict(message, code, title);
       case 410:
-        return HttpResponse(c).notFound(message, code);
+        return HttpResponse(c).notFound(message, code, title);
       case 422:
-        return HttpResponse(c).unprocessable(message, code);
+        return HttpResponse(c).unprocessable(message, code, title);
       case 429:
-        return HttpResponse(c).tooManyRequests(message, code);
+        return HttpResponse(c).tooManyRequests(message, code, undefined, title);
       default:
         return HttpResponse(c).internalError(error);
     }
