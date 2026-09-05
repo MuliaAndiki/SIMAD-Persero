@@ -13,14 +13,20 @@ import {
   Shirt,
   User,
   UserCheck,
-} from 'lucide-react';
-import { useState } from 'react';
+} from "lucide-react";
+import { useState } from "react";
 
-import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
-import { Badge } from '@/components/atoms/badge';
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { InternshipResponse } from '@/types/api/internship.types';
+import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
+import { Badge } from "@/components/atoms/badge";
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import type { InternshipResponse } from "@/types/api/internship.types";
 
 /** State yang disuplai container — section murni presentasi. */
 export interface OnboardingSectionState {
@@ -48,63 +54,63 @@ const PLACEHOLDER_ROWS = Array.from({ length: 5 }, (_, i) => ({
 
 /** Ketentuan tata tertib yang wajib disetujui peserta magang. */
 const TATA_TERTIB = [
-  'Wajib hadir tepat waktu sesuai jadwal yang ditetapkan.',
-  'Menggunakan pakaian rapi dan sopan selama kegiatan magang.',
-  'Menjaga nama baik perusahaan dan kerahasiaan data perusahaan.',
-  'Mengisi absensi harian melalui aplikasi pada saat masuk dan pulang.',
-  'Melaporkan kendala atau ketidakhadiran kepada supervisor.',
-  'Mematuhi seluruh aturan dan ketentuan yang berlaku di lingkungan kerja.',
+  "Wajib hadir tepat waktu sesuai jadwal yang ditetapkan.",
+  "Menggunakan pakaian rapi dan sopan selama kegiatan magang.",
+  "Menjaga nama baik perusahaan dan kerahasiaan data perusahaan.",
+  "Mengisi absensi harian melalui aplikasi pada saat masuk dan pulang.",
+  "Melaporkan kendala atau ketidakhadiran kepada supervisor.",
+  "Mematuhi seluruh aturan dan ketentuan yang berlaku di lingkungan kerja.",
 ];
 
 /** Jam kerja harian selama magang (Senin – Jumat). */
 const JAM_KERJA = [
-  { hari: 'Senin – Kamis', jam: '08.00 – 17.00' },
-  { hari: 'Jumat', jam: '07.30 – 17.00' },
-  { hari: 'Istirahat', jam: '12.30 – 13.30' },
+  { hari: "Senin – Kamis", jam: "08.00 – 17.00" },
+  { hari: "Jumat", jam: "07.30 – 17.00" },
+  { hari: "Istirahat", jam: "12.30 – 13.30" },
 ];
 
 /** Tata cara pakaian harian selama magang (Senin – Jumat). */
 const PAKAIAN = [
-  { hari: 'Senin', aturan: 'Hitam putih, jilbab hitam.' },
-  { hari: 'Selasa', aturan: 'PDH Kampus.' },
+  { hari: "Senin", aturan: "Hitam putih, jilbab hitam." },
+  { hari: "Selasa", aturan: "PDH Kampus." },
   {
-    hari: 'Rabu – Kamis',
-    aturan: 'Menyesuaikan, yang penting rapi dan sopan.',
+    hari: "Rabu – Kamis",
+    aturan: "Menyesuaikan, yang penting rapi dan sopan.",
   },
   {
-    hari: 'Jumat',
+    hari: "Jumat",
     aturan:
-      'Ada 2 opsi: jika ada pengajian pakai batik; jika senam/olahraga pakai training pagi, siang Jumat ganti batik.',
+      "Ada 2 opsi: jika ada pengajian pakai batik; jika senam/olahraga pakai training pagi, siang Jumat ganti batik.",
   },
 ];
 
 function formatDate(value: string | null): string {
-  if (!value) return '-';
+  if (!value) return "-";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   });
 }
 
 function internshipStatusLabel(status: string | null): string {
   switch (status) {
-    case 'ONBOARDING_PENDING':
-      return 'Menunggu Onboarding';
-    case 'ONBOARDING_COMPLETED':
-      return 'Onboarding Selesai';
-    case 'ACTIVE':
-      return 'Aktif';
-    case 'COMPLETED':
-      return 'Selesai';
-    case 'CERTIFICATE_GENERATED':
-      return 'Sertifikat Dibuat';
-    case 'ARCHIVED':
-      return 'Diarsipkan';
+    case "ONBOARDING_PENDING":
+      return "Menunggu Onboarding";
+    case "ONBOARDING_COMPLETED":
+      return "Onboarding Selesai";
+    case "ACTIVE":
+      return "Aktif";
+    case "COMPLETED":
+      return "Selesai";
+    case "CERTIFICATE_GENERATED":
+      return "Sertifikat Dibuat";
+    case "ARCHIVED":
+      return "Diarsipkan";
     default:
-      return status ?? '-';
+      return status ?? "-";
   }
 }
 
@@ -129,9 +135,11 @@ function OnboardingError({ message }: { message?: string }) {
     <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
       <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
       <div className="flex flex-col gap-1">
-        <p className="font-medium text-destructive">Gagal memuat data onboarding</p>
+        <p className="font-medium text-destructive">
+          Gagal memuat data onboarding
+        </p>
         <p className="text-muted-foreground">
-          {message ?? 'Silakan muat ulang halaman untuk mencoba lagi.'}
+          {message ?? "Silakan muat ulang halaman untuk mencoba lagi."}
         </p>
       </div>
     </div>
@@ -148,13 +156,14 @@ function NoInternshipCard() {
           Belum Ada Pengajuan Disetujui
         </CardTitle>
         <CardDescription>
-          Halaman ini hanya tersedia setelah pengajuan magang Anda disetujui oleh HR.
+          Halaman ini hanya tersedia setelah pengajuan magang Anda disetujui
+          oleh HR.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          Setelah pengajuan disetujui, Anda dapat menyelesaikan onboarding di halaman ini agar
-          status magang siap diaktifkan.
+          Setelah pengajuan disetujui, Anda dapat menyelesaikan onboarding di
+          halaman ini agar status magang siap diaktifkan.
         </p>
       </CardContent>
     </Card>
@@ -174,16 +183,18 @@ function OnboardingDoneCard({
           <CheckCircle2 className="size-4 text-emerald-500" />
           Onboarding Selesai
         </CardTitle>
-        <CardDescription>Persetujuan onboarding Anda telah tercatat di sistem.</CardDescription>
+        <CardDescription>
+          Persetujuan onboarding Anda telah tercatat di sistem.
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div>
           <Badge>{internshipStatusLabel(internship.status)}</Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          {internship.status === 'ONBOARDING_COMPLETED'
-            ? 'Tim HR akan segera mengaktifkan magang Anda. Menu Absensi & Riwayat aktif setelah status magang menjadi Aktif.'
-            : 'Magang Anda sudah berjalan. Anda dapat menggunakan menu Absensi & Riwayat.'}
+          {internship.status === "ONBOARDING_COMPLETED"
+            ? "Tim HR akan segera mengaktifkan magang Anda. Menu Absensi & Riwayat aktif setelah status magang menjadi Aktif."
+            : "Magang Anda sudah berjalan. Anda dapat menggunakan menu Absensi & Riwayat."}
         </p>
       </CardContent>
     </Card>
@@ -206,7 +217,9 @@ function SupervisorInfoCard({
           <UserCheck className="size-4 text-primary" />
           Supervisor Pembimbing
         </CardTitle>
-        <CardDescription>Pembimbing yang bertanggung jawab selama Anda magang.</CardDescription>
+        <CardDescription>
+          Pembimbing yang bertanggung jawab selama Anda magang.
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-2.5 text-sm">
         {supervisor ? (
@@ -222,13 +235,16 @@ function SupervisorInfoCard({
             {assignment?.assignedAt ? (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <CalendarDays className="size-4 shrink-0" />
-                <span>Ditugaskan sejak {formatDate(assignment.assignedAt)}</span>
+                <span>
+                  Ditugaskan sejak {formatDate(assignment.assignedAt)}
+                </span>
               </div>
             ) : null}
           </>
         ) : (
           <p className="text-muted-foreground">
-            Supervisor pembimbing akan ditetapkan oleh HR setelah onboarding selesai.
+            Supervisor pembimbing akan ditetapkan oleh HR setelah onboarding
+            selesai.
           </p>
         )}
       </CardContent>
@@ -245,7 +261,9 @@ function WorkInfoCard() {
           <Clock className="size-4 text-primary" />
           Jam Kerja & Tata Cara Pakaian
         </CardTitle>
-        <CardDescription>Ketentuan harian selama menjalani magang (Senin – Jumat).</CardDescription>
+        <CardDescription>
+          Ketentuan harian selama menjalani magang (Senin – Jumat).
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {/* Jam kerja */}
@@ -277,7 +295,8 @@ function WorkInfoCard() {
                   {index + 1}
                 </span>
                 <span>
-                  <span className="font-medium">{item.hari}:</span> {item.aturan}
+                  <span className="font-medium">{item.hari}:</span>{" "}
+                  {item.aturan}
                 </span>
               </li>
             ))}
@@ -306,32 +325,32 @@ function OnboardingAgreementCard({
   const rows = [
     {
       icon: User,
-      label: 'Nama',
-      value: internship.internProfile?.user.fullName ?? '-',
+      label: "Nama",
+      value: internship.internProfile?.user.fullName ?? "-",
     },
     {
       icon: GraduationCap,
-      label: 'Institusi',
-      value: internship.internProfile?.institution?.name ?? '-',
+      label: "Institusi",
+      value: internship.internProfile?.institution?.name ?? "-",
     },
     {
       icon: BookOpen,
-      label: 'Jurusan',
-      value: internship.internProfile?.major?.name ?? '-',
+      label: "Jurusan",
+      value: internship.internProfile?.major?.name ?? "-",
     },
     {
       icon: Building2,
-      label: 'Departemen',
-      value: internship.department?.name ?? '-',
+      label: "Departemen",
+      value: internship.department?.name ?? "-",
     },
     {
       icon: MapPin,
-      label: 'Penempatan',
-      value: internship.officeLocation?.name ?? '-',
+      label: "Penempatan",
+      value: internship.officeLocation?.name ?? "-",
     },
     {
       icon: CalendarDays,
-      label: 'Periode',
+      label: "Periode",
       value: `${formatDate(internship.actualStartDate)} – ${formatDate(internship.actualEndDate)}`,
     },
   ];
@@ -345,7 +364,8 @@ function OnboardingAgreementCard({
             Persetujuan Onboarding
           </CardTitle>
           <CardDescription>
-            Periksa data diri dan ketentuan berikut sebelum menyelesaikan onboarding.
+            Periksa data diri dan ketentuan berikut sebelum menyelesaikan
+            onboarding.
           </CardDescription>
         </div>
         <Badge>{internshipStatusLabel(internship.status)}</Badge>
@@ -393,8 +413,8 @@ function OnboardingAgreementCard({
               className="mt-0.5 size-4 shrink-0 accent-primary"
             />
             <span>
-              Saya telah membaca, memahami, dan menyetujui seluruh ketentuan tata tertib magang di
-              atas.
+              Saya telah membaca, memahami, dan menyetujui seluruh ketentuan
+              tata tertib magang di atas.
             </span>
           </label>
           <Button
@@ -410,7 +430,7 @@ function OnboardingAgreementCard({
                 Menyimpan…
               </>
             ) : (
-              'Saya Menyetujui & Selesaikan Onboarding'
+              "Saya Menyetujui & Selesaikan Onboarding"
             )}
           </Button>
         </div>
@@ -438,7 +458,7 @@ export function OnboardingSection({ state, service }: OnboardingSectionProps) {
         <OnboardingError message={state.errorMessage} />
       ) : !internship ? (
         <NoInternshipCard />
-      ) : internship.status === 'ONBOARDING_PENDING' ? (
+      ) : internship.status === "ONBOARDING_PENDING" ? (
         <OnboardingAgreementCard
           internship={internship}
           agreed={agreed}
