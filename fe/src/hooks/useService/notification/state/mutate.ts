@@ -6,6 +6,7 @@ import {
   type NotificationCacheContext,
   readNotificationSnapshot,
 } from '@/utils/cache/notification.cache';
+import { ResponseTitles } from '@/utils/response-titles';
 
 import type {
   NotificationParams,
@@ -37,14 +38,14 @@ export function useMarkAsRead() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -68,14 +69,14 @@ export function useMarkAllAsRead() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -109,14 +110,14 @@ export function useSendNotification() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -146,14 +147,14 @@ export function useDeleteNotification() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });

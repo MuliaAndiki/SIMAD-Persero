@@ -12,6 +12,7 @@
 
 export interface ApiResponse<T = unknown> {
   status: number;
+  title?: string;
   message: string;
   data?: T;
   meta?: Record<string, unknown>;
@@ -21,6 +22,7 @@ export interface ApiResponse<T = unknown> {
 export interface ApiSuccessResponse<T = unknown> {
   success: boolean;
   status: number;
+  title?: string;
   message: string;
   data: T;
   meta?: Record<string, unknown>;
@@ -30,12 +32,14 @@ export interface ApiSuccessResponse<T = unknown> {
 /** Error terstruktur dari lapisan fetch (dipakai variant raw-data). */
 export class ApiError extends Error {
   public status: number;
+  public title?: string;
   public errors?: Record<string, string[]> | null;
 
-  constructor(message: string, status: number, errors?: Record<string, string[]> | null) {
+  constructor(message: string, status: number, title?: string, errors?: Record<string, string[]> | null) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.title = title;
     this.errors = errors;
   }
 }
@@ -45,6 +49,7 @@ export type ApiStatus = 'success' | 'error';
 export interface TResponse<T = unknown> {
   statusCode: number;
   status: ApiStatus;
+  title: string;
   message: string;
   data: T | null;
   meta: Record<string, unknown> | null;

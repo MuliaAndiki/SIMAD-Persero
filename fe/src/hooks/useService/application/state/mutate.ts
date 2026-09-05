@@ -6,6 +6,7 @@ import {
   type ApplicationCacheContext,
   readApplicationSnapshot,
 } from '@/utils/cache/application.cache';
+import { ResponseTitles } from '@/utils/response-titles';
 
 import type {
   ApplicationParams,
@@ -47,14 +48,14 @@ export function useCreateApplication() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.application.createFailed,
         message: err.message,
         icon: 'error',
       });
@@ -89,14 +90,14 @@ export function useUpdateApplicationDraft() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.application.updateFailed,
         message: err.message,
         icon: 'error',
       });
@@ -125,14 +126,14 @@ export function useSubmitApplication() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.application.submitFailed,
         message: err.message,
         icon: 'error',
       });
@@ -161,14 +162,14 @@ export function useCancelApplication() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.application.cancelFailed,
         message: err.message,
         icon: 'error',
       });
@@ -197,14 +198,14 @@ export function useDeleteApplicationDraft() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.application.deleteFailed,
         message: err.message,
         icon: 'error',
       });
@@ -251,14 +252,14 @@ export function useApproveApplication() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.application.approveFailed,
         message: err.message,
         icon: 'error',
       });
@@ -293,14 +294,14 @@ export function useRejectApplication() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.application.rejectFailed,
         message: err.message,
         icon: 'error',
       });

@@ -28,6 +28,8 @@ export default function HrReceptionistsContainer() {
     isActive: true,
   });
 
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
   const debouncedKeyword = useDebounce(keyword, 1000);
 
   // ── Queries ──────────────────────────────────────────────────────────────
@@ -127,6 +129,8 @@ export default function HrReceptionistsContainer() {
         isPending: list.isPending,
         isFetching: list.isFetching,
         isError: list.isError,
+        setShowPassword,
+        showPassword,
         errorMessage: list.error?.message,
         receptionists: list.data ?? [],
         offices: offices.data ?? [],

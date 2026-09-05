@@ -1,11 +1,25 @@
-'use client';
+"use client";
 
-import { Badge } from '@/components/atoms/badge';
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { SupervisorResponse } from '@/types/api/supervisor.types';
-import type { AlertContexType } from '@/types/ui';
-import { Eye, History, UserCheck } from 'lucide-react';
+import { Badge } from "@/components/atoms/badge";
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import type { SupervisorResponse } from "@/types/api/supervisor.types";
+import type { AlertContexType } from "@/types/ui";
+import { Eye, MoreHorizontal, Trash, UserCheck } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/atoms/dropdown-menu";
 
 export interface SupervisorTableProps {
   supervisors: SupervisorResponse[];
@@ -31,7 +45,9 @@ export function SupervisorTable({
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Daftar Supervisor</CardTitle>
-        <CardDescription>{supervisors.length} supervisor ditemukan</CardDescription>
+        <CardDescription>
+          {supervisors.length} supervisor ditemukan
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {supervisors.length === 0 ? (
@@ -53,66 +69,90 @@ export function SupervisorTable({
                   <th className="px-6 py-3 text-right font-medium">Aksi</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="">
                 {supervisors.map((supervisor) => (
                   <tr
                     key={supervisor.id}
                     className="border-b transition-colors last:border-0 hover:bg-muted/40"
                   >
-                    <td className="px-6 py-4 font-medium">{supervisor.fullName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{supervisor.email}</td>
+                    <td className="px-6 py-4 font-medium">
+                      {supervisor.fullName}
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground">
+                      {supervisor.email}
+                    </td>
                     <td className="px-6 py-4">
-                      <Badge variant={supervisor.isActive ? 'default' : 'secondary'}>
-                        {supervisor.isActive ? 'Aktif' : 'Nonaktif'}
+                      <Badge
+                        variant={supervisor.isActive ? "default" : "secondary"}
+                      >
+                        {supervisor.isActive ? "Aktif" : "Nonaktif"}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4">{supervisor.activeAssignmentsCount}</td>
-                    <td className="text-right space-x-2">
-                      {onViewAuditLog && supervisor.id && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onViewAuditLog(supervisor.id!, supervisor.fullName)}
-                          title="Lihat Log Aktivitas"
-                        >
-                          <History className="size-4 text-muted-foreground" />
-                        </Button>
-                      )}
-                      {onEditSupervisor && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onEditSupervisor(supervisor.id)}
-                        >
-                          Edit
-                        </Button>
-                      )}
-                      {onDeleteSupervisor && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() =>
-                            alert.confirm({
-                              title: 'Hapus',
-                              deskripsi: 'Apakah Kamu Ingin Menghapus Supervisor Ini?',
-                              icon: 'question',
-                              onConfirm: () => {
-                                onDeleteSupervisor(supervisor.id);
-                              },
-                            })
-                          }
-                        >
-                          Hapus
-                        </Button>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onSelectSupervisor(supervisor.id)}
-                      >
-                        <Eye className="size-4" />
-                        Detail
-                      </Button>
+                    <td className="px-6 py-4">
+                      {supervisor.activeAssignmentsCount}
+                    </td>
+                    <td className="flex justify-center ">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild className="mt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="size-8 p-0"
+                          >
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          <DropdownMenuLabel>Opsi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {onViewAuditLog && supervisor.id && (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                onViewAuditLog(
+                                  supervisor.id!,
+                                  supervisor.fullName,
+                                )
+                              }
+                            >
+                              <h1 className="font-semibold">History</h1>
+                            </DropdownMenuItem>
+                          )}
+                          {onDeleteSupervisor && (
+                            <DropdownMenuItem
+                              onClick={() => onEditSupervisor!(supervisor.id)}
+                            >
+                              <h1 className="font-semibold ">Edit</h1>
+                            </DropdownMenuItem>
+                          )}
+
+                          <DropdownMenuItem
+                            variant="default"
+                            onClick={() => onDeleteSupervisor!(supervisor.id)}
+                          >
+                            <Eye className="size-4" />
+                            <span className="font-semibold">Detail</span>
+                          </DropdownMenuItem>
+                          {onDeleteSupervisor && (
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() =>
+                                alert.confirm({
+                                  title: "Hapus",
+                                  deskripsi:
+                                    "Apakah Kamu Ingin Menghapus Supervisor Ini?",
+                                  icon: "question",
+                                  onConfirm: () => {
+                                    onDeleteSupervisor(supervisor.id);
+                                  },
+                                })
+                              }
+                            >
+                              <Trash />
+                              <h1 className="font-semibold ">Hapus</h1>
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}

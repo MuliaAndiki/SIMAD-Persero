@@ -23,7 +23,8 @@ export default function HrSupervisorsContainer() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
   const [internshipId, setInternshipId] = useState("");
-  const [formOpen, setFormOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<SupervisorFormType>({
     fullName: "",
@@ -212,6 +213,8 @@ export default function HrSupervisorsContainer() {
         errorMessage: list.error?.message,
         supervisors: list.data ?? [],
         keyword,
+        setShowPassword,
+        showPassword,
         alert: ns.alert,
         detail: detail.data ?? null,
         isDetailPending: detail.isPending,

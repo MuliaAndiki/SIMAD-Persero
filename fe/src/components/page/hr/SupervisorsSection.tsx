@@ -1,9 +1,7 @@
 "use client";
 
-import { AlertCircle, Bell, Loader2, Plus, Search } from "lucide-react";
-import type { FormEvent } from "react";
+import { AlertCircle, Bell, Loader2, Search } from "lucide-react";
 import { useState } from "react";
-
 import { Button } from "@/components/atoms/button";
 import { Card } from "@/components/atoms/card";
 import { Input } from "@/components/atoms/input";
@@ -35,6 +33,8 @@ export interface SupervisorsSectionState {
   detail: SupervisorDetailResponse | null;
   isDetailPending: boolean;
   isAssigning: boolean;
+  showPassword: boolean;
+  setShowPassword: React.Dispatch<React.SetStateAction<boolean>>;
   isRemoving: boolean;
   approvedApplications: ApplicationResponse[];
   assignOpen: boolean;
@@ -193,6 +193,8 @@ export function SupervisorsSection({
         formData={state.formData}
         onChange={actions.onChangeForm}
         onSubmit={actions.onSubmitForm}
+        setShowPassword={state.setShowPassword}
+        showPassword={state.showPassword}
         isPending={state.formIsPending}
       />
 

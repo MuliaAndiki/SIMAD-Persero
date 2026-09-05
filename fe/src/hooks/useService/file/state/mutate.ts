@@ -3,6 +3,7 @@ import { queryKey } from '@/configs/query-key';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import Api from '@/services/props.service';
 import { type FileCacheContext, readFileSnapshot } from '@/utils/cache/file.cache';
+import { ResponseTitles } from '@/utils/response-titles';
 
 import type { FileParams, FileResponse } from '@/types/api/file.types';
 import { useMutation } from '@tanstack/react-query';
@@ -26,14 +27,14 @@ export function useUploadFile() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -55,14 +56,14 @@ export function useDeleteFile() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -85,14 +86,14 @@ export function useDownloadFile() {
     },
     onSuccess: () => {
       ns.alert.toast({
-        title: 'Success',
-        message: 'Downloaded successfully',
+        title: ResponseTitles.file.downloaded,
+        message: 'File berhasil diunduh',
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
