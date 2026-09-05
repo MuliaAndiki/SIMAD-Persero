@@ -19,10 +19,6 @@ export function useProfileLogic() {
   const changeEmailVerify = api.auth.mutate.changeEmailVerify();
   const deleteAccount = api.user.mutate.deleteAccount();
 
-  const handleDeleteAccount = useCallback(() => {
-    deleteAccount.mutate();
-  }, [deleteAccount]);
-
   const handleUploadPhoto = useCallback(
     async (file: File) => {
       try {
@@ -50,6 +46,14 @@ export function useProfileLogic() {
   const handleLogout = useCallback(() => {
     logout.mutate({});
   }, [logout]);
+
+  const handleDeleteAccount = useCallback(() => {
+    deleteAccount.mutate(undefined, {
+      onSuccess: () => {
+        handleLogout();
+      },
+    });
+  }, [deleteAccount]);
 
   const handleOpenChangeEmail = useCallback(() => {
     setChangeEmailModalOpen(true);

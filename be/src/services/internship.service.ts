@@ -108,6 +108,7 @@ class InternshipService {
             requestedEndDate: true,
           },
         },
+
         supervisorAssignments: {
           where: { isActive: true },
           select: {
@@ -139,6 +140,13 @@ class InternshipService {
         officeLocation: { select: { id: true, name: true } },
         application: {
           select: { id: true, applicationNumber: true, status: true },
+        },
+        internProfile: {
+          select: {
+            institution: true,
+            user: true,
+            major: true,
+          },
         },
         supervisorAssignments: {
           where: { isActive: true },

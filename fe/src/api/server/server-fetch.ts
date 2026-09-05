@@ -1,29 +1,30 @@
-'use server';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+"use server";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import {
   ApiError as ApiErrorClass,
   type ApiResponse,
   type ApiSuccessResponse,
-} from '@/api/types/response.types';
+} from "@/api/types/response.types";
 import {
   APP_SESSION_COOKIE_KEY,
   APP_SESSION_COOKIE_REFRESH,
   APP_SESSION_COOKIE_ROLE,
-} from '@/configs/cookies.config';
-import { AUTH_ENDPOINTS } from '@/configs/endpoints/auth.endpoints';
-import { Logger } from '@/utils/log';
+} from "@/configs/cookies.config";
+import { AUTH_ENDPOINTS } from "@/configs/endpoints/auth.endpoints";
+import { Logger } from "@/utils/log";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
-const API_GATE = process.env.NEXT_PUBLIC_GATE_API || '/api';
-const API_VERSION = process.env.NEXT_PUBLIC_VERSION_API || '/v1';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const API_GATE = process.env.NEXT_PUBLIC_GATE_API || "/api";
+const API_VERSION = process.env.NEXT_PUBLIC_VERSION_API || "/v1";
 
 function joinUrl(...parts: string[]): string {
   return parts
-    .map((part) => part.replace(/^\/+|\/+$/g, ''))
+    .map((part) => part.replace(/^\/+|\/+$/g, ""))
     .filter(Boolean)
-    .join('/');
+    .join("/");
 }
 
 const BASE_URL = joinUrl(API_BASE_URL, API_GATE, API_VERSION);
@@ -34,21 +35,21 @@ const COOKIE_KEYS = {
 } as const;
 
 export interface RequestConfig {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   headers?: Record<string, string>;
   cache?: RequestCache;
   next?: NextFetchRequestConfig;
 }
 
-type UnauthorizedMode = 'redirect' | 'json401';
+type UnauthorizedMode = "redirect" | "json401";
 
 type FetchOptions = {
   withAuth: boolean;
   unauthorizedMode?: UnauthorizedMode;
 };
 
-const IS_API_DEBUG = process.env.NODE_ENV === 'development';
+const IS_API_DEBUG = process.env.NODE_ENV === "development";
 
 async function getAccessToken(): Promise<string | undefined> {
   const store = await cookies();
@@ -72,11 +73,11 @@ function buildBaseHeaders(accessToken?: string): Record<string, string> {
     process.env.NEXT_INTERNAL_API_SECRET ||
     process.env.INTERNAL_API_SECRET ||
     process.env.INTERNAL_API_KEY ||
-    '';
+    "";
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'x-internal-api-key': internalApiKey,
+    "Content-Type": "application/json",
+    "x-internal-api-key": internalApiKey,
   };
 
   if (accessToken) {
@@ -92,7 +93,12 @@ function logApiRequest(params: {
   headers: Record<string, string>;
   payload?: unknown;
 }): void {
-  Logger.request(params.method, params.endpoint, params.headers, params.payload);
+  Logger.request(
+    params.method,
+    params.endpoint,
+    params.headers,
+    params.payload,
+  );
 }
 
 function logApiResponse(params: {
@@ -101,7 +107,12 @@ function logApiResponse(params: {
   status: number;
   response: unknown;
 }): void {
-  Logger.response(params.method, params.endpoint, params.status, params.response);
+  Logger.response(
+    params.method,
+    params.endpoint,
+    params.status,
+    params.response,
+  );
 }
 
 let _refreshInFlight: Promise<string | null> | null = null;
@@ -121,10 +132,10 @@ async function _doRefreshOnce(): Promise<string | null> {
   let res: Response;
   try {
     res = await fetch(`${BASE_URL}${AUTH_ENDPOINTS.REFRESH_TOKEN}`, {
-      method: 'POST',
+      method: "POST",
       headers: buildBaseHeaders(),
       body: JSON.stringify({ refreshToken }),
-      cache: 'no-store',
+      cache: "no-store",
     });
   } catch {
     return null;
@@ -136,7 +147,8 @@ async function _doRefreshOnce(): Promise<string | null> {
 
   let accessToken: string | undefined;
   try {
-    const json: ApiResponse<{ accessToken: string; expiresIn: number }> = await res.json();
+    const json: ApiResponse<{ accessToken: string; expiresIn: number }> =
+      await res.json();
     accessToken = json.data?.accessToken;
   } catch {
     return null;
@@ -148,18 +160,18 @@ async function _doRefreshOnce(): Promise<string | null> {
 
   try {
     const store = await cookies();
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === "production";
 
     store.set(COOKIE_KEYS.accessToken, accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
-      path: '/',
+      sameSite: "lax",
+      path: "/",
       maxAge: 60 * 15,
     });
   } catch (err) {
     if (IS_API_DEBUG) {
-      console.error('[Auth] refresh: gagal menyimpan cookie', err);
+      console.error("[Auth] refresh: gagal menyimpan cookie", err);
     }
   }
 
@@ -181,8 +193,8 @@ async function doRefreshToken(): Promise<string | null> {
 async function handleUnauthorized(unauthorizedMode: UnauthorizedMode) {
   await clearTokens();
 
-  if (unauthorizedMode === 'redirect') {
-    redirect('/login');
+  if (unauthorizedMode === "redirect") {
+    redirect("/login");
   }
 }
 
@@ -193,13 +205,13 @@ async function coreFetch<T>(
   isRetry = false,
 ): Promise<T> {
   const {
-    method = 'GET',
+    method = "GET",
     body,
     headers: extraHeaders = {},
-    cache = 'no-store',
+    cache = "no-store",
     next,
   } = config ?? {};
-  const unauthorizedMode = options.unauthorizedMode ?? 'redirect';
+  const unauthorizedMode = options.unauthorizedMode ?? "redirect";
 
   const accessToken = options.withAuth ? await getAccessToken() : undefined;
   const endpoint = `${BASE_URL}${path}`;
@@ -223,7 +235,7 @@ async function coreFetch<T>(
 
     if (!newAccessToken) {
       await handleUnauthorized(unauthorizedMode);
-      throw new ApiErrorClass('Unauthorized', 401);
+      throw new ApiErrorClass("Unauthorized", 401);
     }
 
     const retryRes = await fetch(endpoint, {
@@ -292,13 +304,13 @@ async function coreFetchResponse<T>(
   isRetry = false,
 ): Promise<ApiSuccessResponse<T>> {
   const {
-    method = 'GET',
+    method = "GET",
     body,
     headers: extraHeaders = {},
-    cache = 'no-store',
+    cache = "no-store",
     next,
   } = config ?? {};
-  const unauthorizedMode = options.unauthorizedMode ?? 'redirect';
+  const unauthorizedMode = options.unauthorizedMode ?? "redirect";
 
   const accessToken = options.withAuth ? await getAccessToken() : undefined;
   const endpoint = `${BASE_URL}${path}`;
@@ -325,7 +337,7 @@ async function coreFetchResponse<T>(
       return {
         success: false,
         status: 401,
-        message: 'Unauthorized',
+        message: "Unauthorized",
         data: null as T,
       };
     }
@@ -371,7 +383,7 @@ async function coreFetchResponse<T>(
     return {
       success: true,
       status: retryJson.status ?? retryRes.status,
-      message: retryJson.message ?? 'Berhasil',
+      message: retryJson.message ?? "Berhasil",
       data: retryJson.data as T,
       meta: retryJson.meta,
     };
@@ -408,7 +420,7 @@ async function coreFetchResponse<T>(
   return {
     success: true,
     status: json.status ?? res.status,
-    message: json.message ?? 'Berhasil',
+    message: json.message ?? "Berhasil",
     data: json.data as T,
     meta: json.meta,
   };
@@ -418,7 +430,12 @@ export async function proxyGatewayRequest(
   pathWithQuery: string,
   config: RequestConfig = {},
 ): Promise<Response> {
-  const { method = 'GET', body, headers: extraHeaders = {}, cache = 'no-store' } = config;
+  const {
+    method = "GET",
+    body,
+    headers: extraHeaders = {},
+    cache = "no-store",
+  } = config;
 
   const accessToken = await getAccessToken();
   const endpoint = `${BASE_URL}${pathWithQuery}`;
@@ -448,7 +465,7 @@ export async function proxyGatewayRequest(
       return Response.json(
         {
           data: null,
-          message: 'Sesi berakhir, silakan login kembali',
+          message: "Sesi berakhir, silakan login kembali",
           success: false,
           status: 401,
         },
@@ -462,11 +479,17 @@ export async function proxyGatewayRequest(
   return res;
 }
 
-export async function PublicRequest<T>(path: string, config?: RequestConfig): Promise<T> {
+export async function PublicRequest<T>(
+  path: string,
+  config?: RequestConfig,
+): Promise<T> {
   return coreFetch<T>(path, config, { withAuth: false });
 }
 
-export async function Request<T>(path: string, config?: RequestConfig): Promise<T> {
+export async function Request<T>(
+  path: string,
+  config?: RequestConfig,
+): Promise<T> {
   return coreFetch<T>(path, config, { withAuth: true });
 }
 
@@ -477,70 +500,84 @@ export async function RequestResponse<T>(
   return coreFetchResponse<T>(path, config, { withAuth: true });
 }
 
-export async function Get<T>(path: string, next?: NextFetchRequestConfig): Promise<T> {
-  return Request<T>(path, { method: 'GET', next });
+export async function Get<T>(
+  path: string,
+  next?: NextFetchRequestConfig,
+): Promise<T> {
+  return Request<T>(path, { method: "GET", next });
 }
 
 export async function GetResponse<T>(
   path: string,
   next?: NextFetchRequestConfig,
 ): Promise<ApiSuccessResponse<T>> {
-  return RequestResponse<T>(path, { method: 'GET', next });
+  return RequestResponse<T>(path, { method: "GET", next });
 }
 
 export async function Post<T>(path: string, data?: unknown): Promise<T> {
-  return Request<T>(path, { method: 'POST', body: data });
+  return Request<T>(path, { method: "POST", body: data });
 }
 
 export async function PostResponse<T>(
   path: string,
   data?: unknown,
 ): Promise<ApiSuccessResponse<T>> {
-  return RequestResponse<T>(path, { method: 'POST', body: data });
+  return RequestResponse<T>(path, { method: "POST", body: data });
 }
 
 export async function Put<T>(path: string, data?: unknown): Promise<T> {
-  return Request<T>(path, { method: 'PUT', body: data });
+  return Request<T>(path, { method: "PUT", body: data });
 }
 
-export async function PutResponse<T>(path: string, data?: unknown): Promise<ApiSuccessResponse<T>> {
-  return RequestResponse<T>(path, { method: 'PUT', body: data });
+export async function PutResponse<T>(
+  path: string,
+  data?: unknown,
+): Promise<ApiSuccessResponse<T>> {
+  return RequestResponse<T>(path, { method: "PUT", body: data });
 }
 
 export async function Patch<T>(path: string, data?: unknown): Promise<T> {
-  return Request<T>(path, { method: 'PATCH', body: data });
+  return Request<T>(path, { method: "PATCH", body: data });
 }
 
 export async function PatchResponse<T>(
   path: string,
   data?: unknown,
 ): Promise<ApiSuccessResponse<T>> {
-  return RequestResponse<T>(path, { method: 'PATCH', body: data });
+  return RequestResponse<T>(path, { method: "PATCH", body: data });
 }
 
 export async function Del<T>(path: string): Promise<T> {
-  return Request<T>(path, { method: 'DELETE' });
+  return Request<T>(path, { method: "DELETE" });
 }
 
-export async function DelResponse<T>(path: string): Promise<ApiSuccessResponse<T>> {
-  return RequestResponse<T>(path, { method: 'DELETE' });
+export async function DelResponse<T>(
+  path: string,
+): Promise<ApiSuccessResponse<T>> {
+  return RequestResponse<T>(path, { method: "DELETE" });
 }
 
 export async function PublicPost<T>(path: string, data?: unknown): Promise<T> {
-  return PublicRequest<T>(path, { method: 'POST', body: data });
+  return PublicRequest<T>(path, { method: "POST", body: data });
 }
 
 export async function PublicPostResponse<T>(
   path: string,
   data?: unknown,
 ): Promise<ApiSuccessResponse<T>> {
-  return coreFetchResponse<T>(path, { method: 'POST', body: data }, { withAuth: false });
+  return coreFetchResponse<T>(
+    path,
+    { method: "POST", body: data },
+    { withAuth: false },
+  );
 }
 
 export async function PublicGet<T>(path: string): Promise<T> {
-  return PublicRequest<T>(path, { method: 'GET' });
+  return PublicRequest<T>(path, { method: "GET" });
 }
 
-export async function PublicGetResponse<T>(path: string): Promise<ApiSuccessResponse<T>> {
-  return coreFetchResponse<T>(path, { method: 'GET' }, { withAuth: false });
+export async function PublicGetResponse<T>(
+  path: string,
+): Promise<ApiSuccessResponse<T>> {
+  return coreFetchResponse<T>(path, { method: "GET" }, { withAuth: false });
 }
