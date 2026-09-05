@@ -6,6 +6,7 @@ import {
   type CertificateCacheContext,
   readCertificateSnapshot,
 } from '@/utils/cache/certificate.cache';
+import { ResponseTitles } from '@/utils/response-titles';
 
 import type {
   CertificateParams,
@@ -36,14 +37,14 @@ export function useGenerateCertificate() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -73,14 +74,14 @@ export function useRegenerateCertificate() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -105,14 +106,14 @@ export function useDownloadCertificate() {
     },
     onSuccess: () => {
       ns.alert.toast({
-        title: 'Success',
+        title: ResponseTitles.success,
         message: 'Downloaded successfully',
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });

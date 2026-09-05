@@ -79,7 +79,7 @@ class ApplicationService {
       APPLICATION_ENDPOINTS.SUBMIT(params.id),
       {},
     );
-    return toServiceResponse(res, { message: 'Lamaran berhasil dikirim' });
+    return toServiceResponse(res, { message: 'Lamaran berhasil dikirim', });
   }
 
   /**

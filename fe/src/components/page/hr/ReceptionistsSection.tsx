@@ -28,6 +28,8 @@ export interface ReceptionistsSectionProps {
     editingData: ReceptionistResponse | null;
     formData: ReceptionistFormType;
     alert: AlertContexType;
+    setShowPassword: React.Dispatch<React.SetStateAction<boolean>>;
+    showPassword: boolean;
   };
   actions: {
     onKeywordChange: (val: string) => void;
@@ -100,6 +102,8 @@ export function ReceptionistsSection({
 
       <ReceptionistFormDialog
         open={state.formOpen}
+        setShowPassword={state.setShowPassword}
+        showPassword={state.showPassword}
         isEditing={Boolean(state.editingData)}
         onClose={actions.onCloseForm}
         offices={state.offices}

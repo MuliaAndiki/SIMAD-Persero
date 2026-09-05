@@ -2,6 +2,7 @@ import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import Api from '@/services/props.service';
+import { ResponseTitles } from '@/utils/response-titles';
 import type { IUser } from '@/types/api/model.type';
 import type {
   CreateReceptionistBody,
@@ -21,14 +22,14 @@ export function useCreateReceptionist() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: 'Berhasil',
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: 'Gagal',
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -51,14 +52,14 @@ export function useUpdateReceptionist() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: 'Berhasil',
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: 'Gagal',
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -77,14 +78,14 @@ export function useDeleteReceptionist() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: 'Berhasil',
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: 'Gagal',
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });

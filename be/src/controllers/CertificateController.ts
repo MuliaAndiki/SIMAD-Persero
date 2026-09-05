@@ -1,7 +1,7 @@
-import type { AppContext } from '@/contex';
-import { HttpResponse, handleAppError } from '@/http';
-import certificateService from '@/services/certificate.service';
-import type { GenerateCertificateBody } from '@/types/certificate.types';
+import type { AppContext } from "@/contex";
+import { HttpResponse, handleAppError } from "@/http";
+import certificateService from "@/services/certificate.service";
+import type { GenerateCertificateBody } from "@/types/certificate.types";
 
 /**
  * Thin controller modul Certificate.
@@ -36,7 +36,10 @@ class CertificateController {
   // GET /certificates/:certificateId/download — redirect to R2 public URL.
   public async download(c: AppContext) {
     try {
-      const result = await certificateService.download(c.params.certificateId, c.user!);
+      const result = await certificateService.download(
+        c.params.certificateId,
+        c.user!,
+      );
       return c.redirect(result.url, 302);
     } catch (error) {
       return this.handleError(c, error);
@@ -48,7 +51,7 @@ class CertificateController {
     try {
       const body = c.body as unknown as GenerateCertificateBody;
       const data = await certificateService.generate(c.user!.id, body);
-      return HttpResponse(c).created(data, 'Sertifikat berhasil dibuat.');
+      return HttpResponse(c).created(data, "Sertifikat berhasil dibuat.");
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -67,8 +70,16 @@ class CertificateController {
   // POST /certificates/:certificateId/regenerate
   public async regenerate(c: AppContext) {
     try {
-      const data = await certificateService.regenerate(c.user!.id, c.params.certificateId, c.user!);
-      return HttpResponse(c).ok(data, undefined, 'Sertifikat berhasil diperbarui.');
+      const data = await certificateService.regenerate(
+        c.user!.id,
+        c.params.certificateId,
+        c.user!,
+      );
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        "Sertifikat berhasil diperbarui.",
+      );
     } catch (error) {
       return this.handleError(c, error);
     }

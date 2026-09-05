@@ -34,14 +34,14 @@ export function useUpdateProfile() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: "Gagal Memperbarui Profil",
         message: err.message,
         icon: "error",
       });
@@ -69,14 +69,14 @@ export function useUploadPhoto() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: "Gagal Mengunggah Foto",
         message: err.message,
         icon: "error",
       });
@@ -102,14 +102,14 @@ export function useChangePassword() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: "Gagal Mengubah Password",
         message: err.message,
         icon: "error",
       });
@@ -128,14 +128,14 @@ export function useDeleteAccount() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: "success",
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: "Gagal Menghapus Akun",
         message: err.message,
         icon: "error",
       });

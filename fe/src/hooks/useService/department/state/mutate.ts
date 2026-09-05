@@ -6,6 +6,7 @@ import {
   type DepartmentCacheContext,
   readDepartmentSnapshot,
 } from '@/utils/cache/department.cache';
+import { ResponseTitles } from '@/utils/response-titles';
 
 import type {
   CreateDepartmentBody,
@@ -37,14 +38,14 @@ export function useCreateDepartment() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -79,14 +80,14 @@ export function useUpdateDepartment() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
@@ -115,14 +116,14 @@ export function useDeleteDepartment() {
     },
     onSuccess: (res) => {
       ns.alert.toast({
-        title: res.message,
+        title: res.title,
         message: res.message,
         icon: 'success',
       });
     },
     onError: (err) => {
       ns.alert.toast({
-        title: err.message,
+        title: ResponseTitles.error,
         message: err.message,
         icon: 'error',
       });
