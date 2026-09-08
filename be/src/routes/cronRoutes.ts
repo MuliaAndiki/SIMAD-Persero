@@ -11,6 +11,23 @@ class CronRouter {
   }
 
   private routes() {
+    // Database warm-up / ping (wake up DB connection to avoid cold start)
+    this.cronRouter.get('/ping', async (c: AppContext) => {
+      return cronController.pingDatabase(c);
+    });
+
+    this.cronRouter.post('/ping', async (c: AppContext) => {
+      return cronController.pingDatabase(c);
+    });
+
+    this.cronRouter.get('/warmup', async (c: AppContext) => {
+      return cronController.pingDatabase(c);
+    });
+
+    this.cronRouter.post('/warmup', async (c: AppContext) => {
+      return cronController.pingDatabase(c);
+    });
+
     // Existing internship auto-start
     this.cronRouter.post('/internship', async (c: AppContext) => {
       return cronController.autoStartInternships(c);
