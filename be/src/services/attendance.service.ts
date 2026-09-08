@@ -1030,47 +1030,52 @@ class AttendanceService {
     };
   }
 
+  public async buildInitialAttendances(
+    internshipId: string,
+    startDate: Date,
+    endDate: Date,
+  ) {
+    const calendarDays = await calendarService.getCalendarDays(
+      startDate,
+      endDate,
+    );
+
+    return calendarDays.map((day) => {
+      let status: string = AttendanceStatus.ABSENT;
+      let checkInStatus: string | null = AttendanceStatus.ABSENT;
+      let checkOutStatus: string | null = AttendanceStatus.ABSENT;
+      let notes: string | null = null;
+
+      if (day.status === "WEEKEND" || day.status === "HOLIDAY") {
+        status = day.status;
+        checkInStatus = null;
+        checkOutStatus = null;
+        notes = day.title;
+      }
+
+      return {
+        internshipId,
+        attendanceDate: new Date(`${day.date}T00:00:00.000Z`),
+        checkInStatus,
+        checkOutStatus,
+        attendanceStatus: status,
+        totalWorkMinutes: 0,
+        notes,
+      };
+    });
+  }
+
   public async generateInitialAttendances(
     tx: any,
     internshipId: string,
     startDate: Date,
     endDate: Date,
   ) {
-    let current = new Date(startDate);
-    current.setHours(0, 0, 0, 0);
-    const end = new Date(endDate);
-    end.setHours(0, 0, 0, 0);
-
-    const newAttendances = [];
-
-    while (current <= end) {
-      const dateStr = current.toISOString().slice(0, 10);
-      const dayStatus = await calendarService.getDayStatus(dateStr);
-
-      let status: string = AttendanceStatus.ABSENT;
-      let checkInStatus: string | null = AttendanceStatus.ABSENT;
-      let checkOutStatus: string | null = AttendanceStatus.ABSENT;
-      let notes: string | null = null;
-
-      if (dayStatus.status === "WEEKEND" || dayStatus.status === "HOLIDAY") {
-        status = dayStatus.status;
-        checkInStatus = null;
-        checkOutStatus = null;
-        notes = dayStatus.title;
-      }
-
-      newAttendances.push({
-        internshipId,
-        attendanceDate: new Date(dateStr),
-        checkInStatus,
-        checkOutStatus,
-        attendanceStatus: status,
-        totalWorkMinutes: 0,
-        notes,
-      });
-
-      current.setDate(current.getDate() + 1);
-    }
+    const newAttendances = await this.buildInitialAttendances(
+      internshipId,
+      startDate,
+      endDate,
+    );
 
     if (newAttendances.length > 0) {
       await tx.attendance.createMany({
