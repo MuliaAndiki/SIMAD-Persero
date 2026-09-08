@@ -294,45 +294,50 @@ class InternshipService {
       }
     }
 
-    return prisma.$transaction(async (tx) => {
-      const actualStartDate = internship.actualStartDate ?? new Date();
-      const updated = await tx.internship.update({
-        where: { id },
-        data: {
-          status: InternshipStatus.ACTIVE,
-          onboardingCompleted: true,
+    const actualStartDate = internship.actualStartDate ?? new Date();
+    const endDate =
+      internship.actualEndDate ?? internship.application?.requestedEndDate;
+
+    // Build attendance records outside transaction to avoid holding DB transaction during external API calls
+    const initialAttendances = endDate
+      ? await attendanceService.buildInitialAttendances(
+          id,
           actualStartDate,
-        },
-      });
+          endDate,
+        )
+      : [];
 
-      await this.recordStatusHistory(
-        tx,
-        id,
-        internship.status,
-        InternshipStatus.ACTIVE,
-        userId,
-        "Internship started",
-      );
-
-      // Generate future attendances logically
-      if (
-        internship.application?.requestedEndDate ||
-        internship.actualEndDate
-      ) {
-        const endDate =
-          internship.actualEndDate ?? internship.application?.requestedEndDate;
-        if (endDate) {
-          await attendanceService.generateInitialAttendances(
-            tx,
-            id,
+    return prisma.$transaction(
+      async (tx) => {
+        const updated = await tx.internship.update({
+          where: { id },
+          data: {
+            status: InternshipStatus.ACTIVE,
+            onboardingCompleted: true,
             actualStartDate,
-            endDate,
-          );
-        }
-      }
+          },
+        });
 
-      return updated;
-    });
+        await this.recordStatusHistory(
+          tx,
+          id,
+          internship.status,
+          InternshipStatus.ACTIVE,
+          userId,
+          "Internship started",
+        );
+
+        if (initialAttendances.length > 0) {
+          await tx.attendance.createMany({
+            data: initialAttendances,
+            skipDuplicates: true,
+          });
+        }
+
+        return updated;
+      },
+      { timeout: 30000, maxWait: 10000 },
+    );
   }
 
   // ─── 15.3b Auto-Start Due Internships (Scheduled Job) ───────
@@ -367,39 +372,49 @@ class InternshipService {
     let started = 0;
     for (const internship of dueInternships) {
       try {
-        await prisma.$transaction(async (tx) => {
-          const actualStartDate = internship.actualStartDate ?? now;
-          await tx.internship.update({
-            where: { id: internship.id },
-            data: {
-              status: InternshipStatus.ACTIVE,
-              onboardingCompleted: true,
-              actualStartDate,
-            },
-          });
+        const actualStartDate = internship.actualStartDate ?? now;
+        const endDate =
+          internship.actualEndDate ??
+          internship.application?.requestedEndDate;
 
-          await this.recordStatusHistory(
-            tx,
-            internship.id,
-            internship.status,
-            InternshipStatus.ACTIVE,
-            null,
-            "Auto-started by scheduled job (start date reached)",
-          );
-
-          // Generate future attendances logically
-          const endDate =
-            internship.actualEndDate ??
-            internship.application?.requestedEndDate;
-          if (endDate) {
-            await attendanceService.generateInitialAttendances(
-              tx,
+        // Build attendance records outside transaction to avoid holding DB connection
+        const initialAttendances = endDate
+          ? await attendanceService.buildInitialAttendances(
               internship.id,
               actualStartDate,
               endDate,
+            )
+          : [];
+
+        await prisma.$transaction(
+          async (tx) => {
+            await tx.internship.update({
+              where: { id: internship.id },
+              data: {
+                status: InternshipStatus.ACTIVE,
+                onboardingCompleted: true,
+                actualStartDate,
+              },
+            });
+
+            await this.recordStatusHistory(
+              tx,
+              internship.id,
+              internship.status,
+              InternshipStatus.ACTIVE,
+              null,
+              "Auto-started by scheduled job (start date reached)",
             );
-          }
-        });
+
+            if (initialAttendances.length > 0) {
+              await tx.attendance.createMany({
+                data: initialAttendances,
+                skipDuplicates: true,
+              });
+            }
+          },
+          { timeout: 30000, maxWait: 10000 },
+        );
         started += 1;
       } catch (error) {
         getLogger().error(

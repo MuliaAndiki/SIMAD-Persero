@@ -23,20 +23,22 @@ class CalendarService {
       const minStr = timeMin.toISOString();
       const maxStr = timeMax.toISOString();
 
-      const url = `https://www.googleapis.com/calendar/v3/calendars/id.indonesian%23holiday%40group.v.calendar.google.com/events`;
+      const url =
+        "https://www.googleapis.com/calendar/v3/calendars/id.indonesian%23holiday%40group.v.calendar.google.com/events";
       const response = await axios.get(url, {
         params: {
           key: env.GOOGLE_CALENDER_API,
           timeMin: minStr,
           timeMax: maxStr,
         },
+        timeout: 8000,
       });
 
       const items = response.data.items || [];
       const holidayMap: Record<string, string> = {};
 
       for (const item of items) {
-        if (item.start && item.start.date) {
+        if (item.start?.date) {
           holidayMap[item.start.date] = item.summary || "Holiday";
         }
       }
@@ -59,12 +61,15 @@ class CalendarService {
     const holidays = await this.getHolidays(startDate, endDate);
     const days: CalendarDay[] = [];
 
-    // Clone start date to avoid modifying original reference.
+    // Clone and normalize dates to UTC midnight to avoid timezone shifts
     const current = new Date(startDate.getTime());
+    current.setUTCHours(0, 0, 0, 0);
+    const end = new Date(endDate.getTime());
+    end.setUTCHours(0, 0, 0, 0);
 
-    while (current <= endDate) {
+    while (current <= end) {
       const dateStr = current.toISOString().slice(0, 10);
-      const dayOfWeek = current.getDay();
+      const dayOfWeek = current.getUTCDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       const holidayTitle = holidays[dateStr];
 
@@ -85,7 +90,7 @@ class CalendarService {
         title,
       });
 
-      current.setDate(current.getDate() + 1);
+      current.setUTCDate(current.getUTCDate() + 1);
     }
 
     return days;
