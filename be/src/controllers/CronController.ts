@@ -2,8 +2,35 @@ import type { AppContext } from '@/contex';
 import { HttpResponse } from '@/http';
 import cleanupService from '@/services/cleanup.service';
 import internshipService from '@/services/internship.service';
+import { pingDatabase } from '@/config/databases';
+import { getLogger } from '@/telemetry/otel.config';
 
 class CronController {
+  /**
+   * Ping / Warm-up database to prevent cold starts before executing other cron jobs
+   * GET/POST /cron/ping
+   */
+  public async pingDatabase(c: AppContext) {
+    try {
+      const result = await pingDatabase();
+
+      return HttpResponse(c).ok(
+        {
+          database: 'connected',
+          latency: `${result.latencyMs}ms`,
+          timestamp: new Date().toISOString(),
+        },
+        undefined,
+        `Database warm-up successful (${result.latencyMs}ms)`,
+      );
+    } catch (error) {
+      getLogger().error({ err: error }, '[cron] Database ping failed');
+      return HttpResponse(c).serviceUnavailable(
+        `Database ping failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
   public async autoStartInternships(c: AppContext) {
     const result = await internshipService.autoStartDueInternships();
 

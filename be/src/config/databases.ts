@@ -43,4 +43,11 @@ export async function checkDatabaseHealth(): Promise<boolean> {
   }
 }
 
+export async function pingDatabase(): Promise<{ ok: boolean; latencyMs: number }> {
+  const start = performance.now();
+  await prisma.$queryRaw`SELECT 1`;
+  const latencyMs = Math.round(performance.now() - start);
+  return { ok: true, latencyMs };
+}
+
 export { prisma };
