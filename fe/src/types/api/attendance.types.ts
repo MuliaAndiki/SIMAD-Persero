@@ -85,6 +85,23 @@ export interface AttendanceLog
   distanceMeter: number | null;
 }
 
+export interface AttendanceOfficeInfo {
+  id: string;
+  name: string;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  radiusMeter: number;
+}
+
+export interface AttendanceSettingInfo {
+  checkInStart: string | null;
+  checkInEnd: string | null;
+  checkOutStart: string | null;
+  checkOutEnd: string | null;
+  lateAfter: string | null;
+}
+
 /** Data satu absensi (GET /attendance/me, GET /attendance/today, GET /attendance/:attendanceId). */
 export interface AttendanceResponse
   extends Omit<IAttendance, 'checkInStatus' | 'checkOutStatus' | 'attendanceStatus'> {
@@ -92,6 +109,8 @@ export interface AttendanceResponse
   checkOutStatus: CheckOutStatus | null;
   attendanceStatus: AttendanceStatus | null;
   logs?: AttendanceLog[];
+  office?: AttendanceOfficeInfo | null;
+  setting?: AttendanceSettingInfo | null;
 }
 
 /** Detail absensi (GET /attendance/:attendanceId) — menambahkan relasi. */
