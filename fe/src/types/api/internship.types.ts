@@ -66,7 +66,22 @@ export interface InternshipUserRef extends Pick<
 export interface InternshipResponse extends Omit<IInternship, "status"> {
   status: InternshipStatusValue | null;
   department?: { id: string; code: string; name: string | null } | null;
-  officeLocation?: { id: string; name: string; address?: string | null } | null;
+  officeLocation?: {
+    id: string;
+    name: string;
+    address?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    radiusMeter?: number | null;
+    attendanceSettings?: Array<{
+      id?: string;
+      checkInStart: string | null;
+      checkInEnd: string | null;
+      checkOutStart: string | null;
+      checkOutEnd: string | null;
+      lateAfter: string | null;
+    }>;
+  } | null;
   application?: {
     id: string;
     applicationNumber: string | null;

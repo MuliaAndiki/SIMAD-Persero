@@ -3,7 +3,12 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import { StatCard } from '@/components/organisms/dashboard/StatCard';
-import type { AttendanceResponse, AttendanceSummaryResponse } from '@/types/api/attendance.types';
+import type {
+  AttendanceOfficeInfo,
+  AttendanceResponse,
+  AttendanceSettingInfo,
+  AttendanceSummaryResponse,
+} from '@/types/api/attendance.types';
 import {
   AlertTriangle,
   CalendarCheck,
@@ -28,6 +33,8 @@ export interface AttendanceSectionState {
   history: AttendanceResponse[];
   isCheckInPending: boolean;
   isCheckOutPending: boolean;
+  office?: AttendanceOfficeInfo | null;
+  setting?: AttendanceSettingInfo | null;
 }
 
 /** Aksi dari container (geolokasi + mutation) — section hanya memanggil. */
@@ -145,12 +152,14 @@ function AttendanceHeader({ userName }: { userName?: string }) {
 /** Kartu status hari ini + aksi check-in/check-out. */
 function TodayCard({
   today,
+  office,
   isCheckInPending,
   isCheckOutPending,
   onCheckIn,
   onCheckOut,
 }: {
   today: AttendanceResponse | null;
+  office?: AttendanceOfficeInfo | null;
   isCheckInPending: boolean;
   isCheckOutPending: boolean;
   onCheckIn: () => void;
@@ -158,6 +167,7 @@ function TodayCard({
 }) {
   const canCheckIn = !today || !today.checkInAt;
   const canCheckOut = Boolean(today?.checkInAt) && !today?.checkOutAt;
+  const hasAttendanceRecord = Boolean(today && (today.id || today.checkInAt));
 
   return (
     <Card>
@@ -169,7 +179,7 @@ function TodayCard({
         <CardDescription>{formatDate(today?.attendanceDate ?? null)}</CardDescription>
       </CardHeader>
       <CardContent>
-        {today ? (
+        {hasAttendanceRecord && today ? (
           <div className="flex flex-col gap-3 text-sm">
             <div className="flex items-center justify-between gap-2">
               <span className="text-muted-foreground">Check-in</span>
@@ -201,6 +211,29 @@ function TodayCard({
             Belum ada absensi hari ini. Silakan lakukan check-in.
           </p>
         )}
+
+        {/* Informasi Jadwal & Lokasi Kantor */}
+        <div className="mt-4 flex flex-col gap-1.5 rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 font-medium text-foreground">
+            <Clock className="size-3.5 text-primary" />
+            <span>Ketentuan Jam & Lokasi Absensi SIMAD:</span>
+          </div>
+          <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+            <span>
+              • Jam Check-in: <strong className="text-foreground">08:00 - 10:00 WIB</strong>
+            </span>
+            <span>
+              • Jam Check-out: <strong className="text-foreground">17:00 - 20:00 WIB</strong>
+            </span>
+          </div>
+          {office ? (
+            <div className="mt-1 flex items-center gap-1.5 border-t border-border/60 pt-2 text-[11px] text-foreground">
+              <MapPin className="size-3.5 text-primary shrink-0" />
+              <span className="font-medium">{office.name}</span>
+              <span className="text-muted-foreground">({office.radiusMeter}m radius)</span>
+            </div>
+          ) : null}
+        </div>
 
         <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -325,6 +358,7 @@ export function AttendanceSection({
         <>
           <TodayCard
             today={state.today}
+            office={state.office}
             isCheckInPending={state.isCheckInPending}
             isCheckOutPending={state.isCheckOutPending}
             onCheckIn={service.onCheckIn}
