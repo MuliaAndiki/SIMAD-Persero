@@ -7,14 +7,14 @@
  * - Footer: Tanda tangan & stempel
  * 
  * Koordinat dalam points (1 pt = 1/72 inch).
- * A4 Landscape: 841.89 x 595.28 pt
+ * A4 Landscape: 29.7 cm × 21.0 cm (841.89 pt × 595.28 pt)
  */
 
 export const CERTIFICATE_CONFIG = {
-  // Page settings
+  // Page settings (A4 Landscape: 29.7 cm x 21.0 cm)
   page: {
-    width: 841.89, // A4 landscape width
-    height: 595.28, // A4 landscape height
+    width: 841.89, // A4 landscape width (29.7 cm / 11.693 in * 72 pt)
+    height: 595.28, // A4 landscape height (21.0 cm / 8.268 in * 72 pt)
     orientation: 'landscape' as const,
   },
 
@@ -26,122 +26,71 @@ export const CERTIFICATE_CONFIG = {
     right: 60,
   },
 
-  // Logo position (top center)
-  logo: {
-    x: 370, // centered approximately
-    y: 520,
-    width: 100,
-    height: 50,
+  // Colors (RGB fractions 0-1 for PDF operator 'rg')
+  colors: {
+    cyan: '0.043 0.631 0.725', // #0ba1b9 Official PLN Cyan
+    black: '0 0 0',
+    slate: '0.12 0.16 0.22',
   },
 
-  // Title "SERTIFIKAT"
+  // Title "SERTIFIKAT" (PLN Cyan #0ba1b9)
   title: {
-    y: 450,
-    fontSize: 32,
+    y: 460,
+    fontSize: 36,
     fontWeight: 'bold' as const,
     align: 'center' as const,
   },
 
-  // Company name "PT PLN (Persero)"
-  companyName: {
-    y: 425,
-    fontSize: 18,
-    fontWeight: 'bold' as const,
-    align: 'center' as const,
-  },
-
-  // "Diberikan kepada" text
+  // "diberikan kepada" text (lowercase)
   givenTo: {
-    y: 390,
+    y: 425,
     fontSize: 12,
     fontWeight: 'normal' as const,
     align: 'center' as const,
   },
 
-  // Intern name (main focus)
+  // Intern name (main focus - bold black, no underline)
   internName: {
-    y: 360,
-    fontSize: 26,
+    y: 385,
+    fontSize: 28,
     fontWeight: 'bold' as const,
     align: 'center' as const,
-    maxWidth: 600,
+    maxWidth: 650,
   },
 
-  // Student number (NIM/NPM)
+  // Student number (NIM: 230401039)
   studentNumber: {
-    y: 335,
-    fontSize: 12,
-    fontWeight: 'normal' as const,
-    align: 'center' as const,
-  },
-
-  // Institution name
-  institution: {
-    y: 315,
-    fontSize: 13,
-    fontWeight: 'normal' as const,
-    align: 'center' as const,
-    maxWidth: 600,
-  },
-
-  // "Telah menyelesaikan program magang di" text
-  completionText: {
-    y: 285,
-    fontSize: 11,
-    fontWeight: 'normal' as const,
-    align: 'center' as const,
-  },
-
-  // Company unit text
-  companyUnit: {
-    y: 270,
+    y: 355,
     fontSize: 13,
     fontWeight: 'bold' as const,
     align: 'center' as const,
   },
 
-  // "pada bidang" text
-  departmentLabel: {
+  // Description text lines
+  completion: {
+    line1Y: 315,
+    line2Y: 298,
+    fontSize: 11,
+    fontWeight: 'normal' as const,
+    align: 'center' as const,
+  },
+
+  // Grade / Result "SANGAT KOMPETEN" (PLN Cyan #0ba1b9)
+  grade: {
     y: 250,
-    fontSize: 11,
-    fontWeight: 'normal' as const,
-    align: 'center' as const,
-  },
-
-  // Department name
-  department: {
-    y: 230,
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: 'bold' as const,
     align: 'center' as const,
-    maxWidth: 500,
   },
 
-  // Date range text
-  dateRange: {
-    y: 200,
-    fontSize: 11,
-    fontWeight: 'normal' as const,
-    align: 'center' as const,
-  },
-
-  // Certificate number
-  certificateNumber: {
-    y: 170,
-    fontSize: 10,
-    fontWeight: 'normal' as const,
-    align: 'center' as const,
-  },
-
-  // Signature section
+  // Signature section (Centered horizontally)
   signature: {
-    x: 600,
-    y: 130,
-    cityDateY: 130,
-    nameY: 80,
-    positionY: 65,
+    cityDateY: 195,
+    nameY: 130,
+    positionY: 115,
+    unitY: 100,
     fontSize: 11,
-    fontSizeName: 12,
+    fontSizeName: 13,
     fontSizePosition: 10,
     align: 'center' as const,
   },
@@ -154,23 +103,21 @@ export const CERTIFICATE_CONFIG = {
     align: 'center' as const,
   },
 
-  // Official data (can be configured)
+  // Official data (default based on Contoh.jpg)
   official: {
-    name: 'Direktur Sumber Daya Manusia',
-    position: 'PT PLN (Persero)',
-    city: 'Jakarta',
+    name: 'NURLANA',
+    position: 'Senior Manager Keuangan, Komunikasi & Umum',
+    unit: 'PLN UID Aceh',
+    city: 'Banda Aceh',
   },
 
   // Text constants
   text: {
     title: 'SERTIFIKAT',
+    givenTo: 'diberikan kepada',
+    studentNumberPrefix: 'NIM:',
+    grade: 'SANGAT KOMPETEN',
     company: 'PT PLN (Persero)',
-    givenTo: 'Diberikan kepada',
-    studentNumberPrefix: 'NIM/NPM:',
-    completionText: 'Telah menyelesaikan program magang di',
-    departmentLabel: 'pada bidang',
-    dateRangePrefix: 'dari tanggal',
-    dateRangeMid: 'sampai dengan',
     certificateNumberPrefix: 'Nomor Sertifikat:',
     verificationPrefix: 'Kode Verifikasi:',
   },

@@ -18,8 +18,9 @@ interface PdfTextLine {
   text: string;
   size: number;
   bold?: boolean;
-  y?: number; // Custom Y position (if specified)
-  x?: number; // Custom X position (if specified, for right-aligned text)
+  color?: string; // RGB color string in PDF format: "r g b", e.g. "0.043 0.631 0.725"
+  y?: number; // Custom Y position
+  x?: number; // Custom X position (if undefined, centers horizontally)
 }
 
 /**
@@ -60,22 +61,20 @@ function buildContentStream(lines: PdfTextLine[]): string {
     const text = escapePdfText(line.text);
     if (text.length > 0) {
       const font = line.bold ? 'F2' : 'F1';
-      
-      // Use custom Y if provided, otherwise text will be positioned manually
+      const colorCmd = line.color ? `${line.color} rg` : '0 0 0 rg';
       const y = line.y ?? 400;
-      
+
       // Determine X position based on whether custom x is provided
       let x: number;
       if (line.x !== undefined) {
-        // Custom X (for right-aligned signature section)
         x = line.x;
       } else {
         // Center-aligned (default)
         x = centerX(line.text, line.size);
       }
-      
+
       commands.push(
-        `BT /${font} ${line.size} Tf ${x.toFixed(2)} ${y.toFixed(2)} Td (${text}) Tj ET`,
+        `q ${colorCmd} BT /${font} ${line.size} Tf ${x.toFixed(2)} ${y.toFixed(2)} Td (${text}) Tj ET Q`,
       );
     }
   }
@@ -122,172 +121,128 @@ export interface CertificatePdfData {
 }
 
 /**
- * Generate sertifikat magang dalam bentuk PDF dengan template enhanced.
- * Layout landscape A4 mengikuti referensi sertifikat PLN.
- * Mendukung auto-scaling untuk nama panjang dan wrapping text.
+ * Generate sertifikat magang dalam bentuk PDF dengan layout dan posisi
+ * yang presisi mengikuti referensi resmi Contoh.jpg.
  */
 export function generateCertificatePdf(data: CertificatePdfData): Buffer {
   const config = CERTIFICATE_CONFIG;
   const lines: PdfTextLine[] = [];
 
-  // --- HEADER SECTION ---
-  
-  // Title: "SERTIFIKAT"
+  // --- 1. TITLE: "SERTIFIKAT" (PLN Cyan #0ba1b9) ---
   lines.push({
     text: config.text.title,
     size: config.title.fontSize,
     bold: true,
+    color: config.colors.cyan,
     y: config.title.y,
   });
 
-  // Company name: "PT PLN (Persero)"
-  lines.push({
-    text: config.text.company,
-    size: config.companyName.fontSize,
-    bold: true,
-    y: config.companyName.y,
-  });
-
-  // --- BODY SECTION ---
-
-  // "Diberikan kepada"
+  // --- 2. SUBTITLE: "diberikan kepada" ---
   lines.push({
     text: config.text.givenTo,
     size: config.givenTo.fontSize,
     bold: false,
+    color: config.colors.slate,
     y: config.givenTo.y,
   });
 
-  // Intern name (with auto-scaling if too long)
+  // --- 3. RECIPIENT NAME: Large Bold Black (No underline) ---
   const nameSize = getScaledFontSize(
     data.internName,
     config.internName.fontSize,
-    config.internName.maxWidth ?? 600,
+    config.internName.maxWidth ?? 650,
   );
   lines.push({
-    text: data.internName,
+    text: data.internName.toUpperCase(),
     size: nameSize,
     bold: true,
+    color: config.colors.black,
     y: config.internName.y,
   });
 
-  // Student number (NIM/NPM)
+  // --- 4. NIM ---
   lines.push({
     text: `${config.text.studentNumberPrefix} ${data.studentNumber}`,
     size: config.studentNumber.fontSize,
-    bold: false,
+    bold: true,
+    color: config.colors.black,
     y: config.studentNumber.y,
   });
 
-  // Institution name (with auto-scaling if too long)
-  const institutionSize = getScaledFontSize(
-    data.institutionName,
-    config.institution.fontSize,
-    config.institution.maxWidth ?? 600,
-  );
-  lines.push({
-    text: data.institutionName,
-    size: institutionSize,
-    bold: false,
-    y: config.institution.y,
-  });
-
-  // "Telah menyelesaikan program magang di"
-  lines.push({
-    text: config.text.completionText,
-    size: config.completionText.fontSize,
-    bold: false,
-    y: config.completionText.y,
-  });
-
-  // Company unit
-  lines.push({
-    text: config.text.company,
-    size: config.companyUnit.fontSize,
-    bold: true,
-    y: config.companyUnit.y,
-  });
-
-  // "pada bidang"
-  lines.push({
-    text: config.text.departmentLabel,
-    size: config.departmentLabel.fontSize,
-    bold: false,
-    y: config.departmentLabel.y,
-  });
-
-  // Department name (with auto-scaling if too long)
-  const deptSize = getScaledFontSize(
-    data.departmentName,
-    config.department.fontSize,
-    config.department.maxWidth ?? 500,
-  );
-  lines.push({
-    text: data.departmentName,
-    size: deptSize,
-    bold: true,
-    y: config.department.y,
-  });
-
-  // Date range
-  const dateRangeText = `${config.text.dateRangePrefix} ${data.startDate} ${config.text.dateRangeMid} ${data.endDate}`;
-  lines.push({
-    text: dateRangeText,
-    size: config.dateRange.fontSize,
-    bold: false,
-    y: config.dateRange.y,
-  });
-
-  // Certificate number
-  lines.push({
-    text: `${config.text.certificateNumberPrefix} ${data.certificateNumber}`,
-    size: config.certificateNumber.fontSize,
-    bold: false,
-    y: config.certificateNumber.y,
-  });
-
-  // --- SIGNATURE SECTION ---
-
-  // City and date (right aligned)
+  // --- 5. DESCRIPTION PARAGRAPH ---
   const cityName = data.cityName ?? config.official.city;
-  const issueDate = data.issueDate ?? new Date().toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  const unitText = data.cityName ? `Unit Induk Distribusi ${data.cityName}` : config.official.unit;
+  
+  lines.push({
+    text: `Telah menyelesaikan program magang di PT PLN (Persero) ${unitText} pada bidang`,
+    size: config.completion.fontSize,
+    bold: false,
+    color: config.colors.black,
+    y: config.completion.line1Y,
   });
+
+  lines.push({
+    text: `${data.departmentName} dari tanggal ${data.startDate} hingga ${data.endDate} dengan hasil :`,
+    size: config.completion.fontSize,
+    bold: false,
+    color: config.colors.black,
+    y: config.completion.line2Y,
+  });
+
+  // --- 6. GRADE / RESULT: "SANGAT KOMPETEN" (PLN Cyan #0ba1b9) ---
+  lines.push({
+    text: config.text.grade,
+    size: config.grade.fontSize,
+    bold: true,
+    color: config.colors.cyan,
+    y: config.grade.y,
+  });
+
+  // --- 7. CENTERED SIGNATURE BLOCK ---
+  const issueDate = data.issueDate ?? (data.endDate || '31 Agustus 2026');
+  
+  // City and Date (Centered)
   lines.push({
     text: `${cityName}, ${issueDate}`,
     size: config.signature.fontSize,
     bold: false,
+    color: config.colors.black,
     y: config.signature.cityDateY,
-    x: config.signature.x,
   });
 
-  // Official name
+  // Signer Name (Centered, Bold Uppercase)
   lines.push({
-    text: config.official.name,
+    text: config.official.name.toUpperCase(),
     size: config.signature.fontSizeName,
     bold: true,
+    color: config.colors.black,
     y: config.signature.nameY,
-    x: config.signature.x,
   });
 
-  // Official position
+  // Signer Position (Centered)
   lines.push({
     text: config.official.position,
     size: config.signature.fontSizePosition,
     bold: false,
+    color: config.colors.black,
     y: config.signature.positionY,
-    x: config.signature.x,
   });
 
-  // --- FOOTER SECTION ---
+  // Unit (Centered)
+  lines.push({
+    text: config.official.unit,
+    size: config.signature.fontSizePosition,
+    bold: false,
+    color: config.colors.black,
+    y: config.signature.unitY,
+  });
 
-  // Verification code
+  // --- 8. FOOTER: VERIFICATION TOKEN ---
   lines.push({
     text: `${config.text.verificationPrefix} ${data.verificationToken}`,
     size: config.verification.fontSize,
     bold: false,
+    color: config.colors.slate,
     y: config.verification.y,
   });
 
