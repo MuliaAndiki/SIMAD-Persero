@@ -1,21 +1,12 @@
-import { ApplicationSectionService } from "@/components/page/application/ApplicationSection";
-import {
-  ApplicationResponse,
-  UpdateApplicationBody,
-} from "@/types/api/application.types";
-import { useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import { AlertCircle, FileText, UploadCloud } from "lucide-react";
-import { Button } from "@/components/atoms";
-import { cn } from "@/utils/classname";
-import { Input } from "@/components/atoms";
+import { Button } from '@/components/atoms';
+import { Input } from '@/components/atoms';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import type { ApplicationSectionService } from '@/components/page/application/ApplicationSection';
+import type { ApplicationResponse, UpdateApplicationBody } from '@/types/api/application.types';
+import { cn } from '@/utils/classname';
+import { AlertCircle, Eye, EyeOff, FileText, UploadCloud } from 'lucide-react';
+import { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 
 interface EditDraftFormProps {
   app: ApplicationResponse;
@@ -23,34 +14,26 @@ interface EditDraftFormProps {
   isSubmitting: boolean;
   onCancel: () => void;
 }
-const EditDraftForm: React.FC<EditDraftFormProps> = ({
-  app,
-  service,
-  isSubmitting,
-  onCancel,
-}) => {
+const EditDraftForm: React.FC<EditDraftFormProps> = ({ app, service, isSubmitting, onCancel }) => {
   // Initialize dengan data dari app yang ada
   const [file, setFile] = useState<File | null>(null);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [startDate, setStartDate] = useState(
-    app.requestedStartDate
-      ? new Date(app.requestedStartDate).toISOString().split("T")[0]
-      : "",
+    app.requestedStartDate ? new Date(app.requestedStartDate).toISOString().split('T')[0] : '',
   );
   const [endDate, setEndDate] = useState(
-    app.requestedEndDate
-      ? new Date(app.requestedEndDate).toISOString().split("T")[0]
-      : "",
+    app.requestedEndDate ? new Date(app.requestedEndDate).toISOString().split('T')[0] : '',
   );
-  const [motivation, setMotivation] = useState(app.motivation ?? "");
+  const [motivation, setMotivation] = useState(app.motivation ?? '');
   const [localError, setLocalError] = useState<string | null>(null);
   const [willChangeFile, setWillChangeFile] = useState(false);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] ?? null;
     if (selected && selected.size > 5 * 1024 * 1024) {
-      setLocalError("Ukuran file maksimal 5MB.");
+      setLocalError('Ukuran file maksimal 5MB.');
       setFile(null);
-      e.target.value = "";
+      e.target.value = '';
       return;
     }
     setFile(selected);
@@ -63,11 +46,11 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
     setLocalError(null);
 
     if (!startDate || !endDate) {
-      setLocalError("Tanggal mulai dan selesai harus diisi.");
+      setLocalError('Tanggal mulai dan selesai harus diisi.');
       return;
     }
     if (new Date(startDate) >= new Date(endDate)) {
-      setLocalError("Tanggal mulai harus sebelum tanggal selesai.");
+      setLocalError('Tanggal mulai harus sebelum tanggal selesai.');
       return;
     }
 
@@ -81,7 +64,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
     if (file) {
       const upload = await service.onUploadFile(file);
       if (!upload) {
-        setLocalError("Gagal mengunggah file baru");
+        setLocalError('Gagal mengunggah file baru');
         return;
       }
       updateData.coverLetterFileId = upload.fileId;
@@ -92,7 +75,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
   };
 
   const fieldClass =
-    "border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs outline-none placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm";
+    'border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs outline-none placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm';
 
   return (
     <Card>
@@ -139,7 +122,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
               id="edit-motivation"
               rows={4}
               placeholder="Ceritakan alasan dan tujuan Anda mengikuti magang…"
-              className={cn(fieldClass, "h-auto py-2")}
+              className={cn(fieldClass, 'h-auto py-2')}
               value={motivation}
               onChange={(e) => setMotivation(e.target.value)}
             />
@@ -148,29 +131,47 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
           {/* File yang sudah ada */}
           {app.introductionLetterFile && !willChangeFile && (
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium">
-                Surat Pengantar Saat Ini
-              </span>
-              <div className="flex items-center gap-3 rounded-lg border p-3">
-                <FileText className="size-4 shrink-0 text-primary" />
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="truncate text-sm font-medium">
-                    {app.introductionLetterFile.originalName}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    File saat ini
-                  </span>
+              <span className="text-sm font-medium">Surat Pengantar Saat Ini</span>
+              <div className="flex flex-col gap-3 rounded-lg border p-4 bg-muted/20">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <FileText className="size-5 shrink-0 text-primary" />
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="truncate text-sm font-semibold">
+                        {app.introductionLetterFile.originalName}
+                      </span>
+                      <span className="text-xs text-muted-foreground">File saat ini</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowPdfPreview((prev) => !prev)}
+                    >
+                      {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
+                    </Button>
+                    {app.introductionLetterFile.url && (
+                      <Button asChild variant="outline" size="sm">
+                        <a href={app.introductionLetterFile.url} target="_blank" rel="noreferrer">
+                          Buka di Tab Baru
+                        </a>
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    service.onPreviewFile?.(app.introductionLetterFile!.url)
-                  }
-                >
-                  Lihat
-                </Button>
+
+                {showPdfPreview && app.introductionLetterFile.url && (
+                  <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
+                    <iframe
+                      src={app.introductionLetterFile.url}
+                      className="h-[400px] w-full border-0"
+                      title={`Preview ${app.introductionLetterFile.originalName}`}
+                    />
+                  </div>
+                )}
               </div>
               <Button
                 type="button"
@@ -196,12 +197,12 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
               >
                 <UploadCloud className="size-8 text-muted-foreground" />
                 <span className="text-sm font-medium">
-                  {file ? file.name : "Klik untuk memilih file baru"}
+                  {file ? file.name : 'Klik untuk memilih file baru'}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {file
-                    ? "File baru siap diunggah"
-                    : "Unggah surat pengantar baru dalam format PDF"}
+                    ? 'File baru siap diunggah'
+                    : 'Unggah surat pengantar baru dalam format PDF'}
                 </span>
                 <input
                   id="edit-coverLetter"
@@ -234,16 +235,11 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
           )}
 
           <div className="flex gap-3 justify-end border-t pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
               Batal
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Menyimpan…" : "Simpan Perubahan"}
+              {isSubmitting ? 'Menyimpan…' : 'Simpan Perubahan'}
             </Button>
           </div>
         </form>

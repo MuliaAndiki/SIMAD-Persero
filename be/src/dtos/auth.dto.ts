@@ -15,7 +15,7 @@ export const RegisterDto = t.Object({
   }),
   email: t.String({ format: 'email', description: 'Alamat email' }),
   password: t.String({
-    minLength: 8,
+    minLength: 1,
     maxLength: 100,
     description: 'Kata sandi',
   }),
@@ -64,7 +64,7 @@ export const ForgotPasswordDto = t.Object({
 export const ResetPasswordDto = t.Object({
   token: t.String({ description: 'Token reset password' }),
   password: t.String({
-    minLength: 8,
+    minLength: 1,
     maxLength: 100,
     description: 'Kata sandi baru',
   }),
@@ -86,7 +86,7 @@ export const LogoutDto = t.Optional(
 export const ChangePasswordDto = t.Object({
   currentPassword: t.String({ description: 'Kata sandi saat ini' }),
   newPassword: t.String({
-    minLength: 8,
+    minLength: 1,
     maxLength: 100,
     description: 'Kata sandi baru',
   }),
