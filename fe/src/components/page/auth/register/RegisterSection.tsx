@@ -1,5 +1,5 @@
 import { Button } from '@/components/atoms';
-import { RegisterForm } from '@/components/organisms/RegisterForm';
+import { RegisterForm, type RegisterFormErrors } from '@/components/organisms/RegisterForm';
 import type { RegisterBody } from '@/types/api/auth.types';
 import { GoogleLogin } from '@react-oauth/google';
 import Image from 'next/image';
@@ -11,6 +11,7 @@ export interface RegisterSectionProps {
     formRegister: RegisterBody;
     showPassword?: boolean;
     isPending: boolean;
+    errors?: RegisterFormErrors;
   };
   service: {
     handleSubmit: (event: React.FormEvent) => void;
@@ -37,6 +38,7 @@ export function RegisterSection({ state, service }: RegisterSectionProps) {
           <RegisterForm
             formRegister={state.formRegister}
             isPending={state.isPending}
+            errors={state.errors}
             onSubmit={service.handleSubmit}
             onChange={service.onFormChange}
           />

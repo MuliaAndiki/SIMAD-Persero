@@ -7,7 +7,9 @@ const accountId = process.env.NEXT_CLOUDFLARE_ACCOUNT_ID;
 const bucketName = 'simad';
 const avatarsPrefix = 'avatars';
 const fileUnivPrefix = 'fileuniv';
-const univlogos = 'univImage'
+const univlogos = 'univImage';
+const certificateTemplatesPrefix = 'certificate-templates';
+const signaturesPrefix = 'signatures';
 
 const R2_PUBLIC_URL = process.env.NEXT_PUBLIC_R2_URL || '';
 
@@ -45,9 +47,59 @@ export async function uploadAvatar(file: File, folder: string = avatarsPrefix): 
   return `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${Key}`;
 }
 
-export async function uploadFileUniv(
+export async function uploadFileUniv(file: File, folder: string = fileUnivPrefix): Promise<string> {
+  const fileExtension = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`;
+  const folderPath = folder.endsWith('/') ? folder : `${folder}/`;
+  const Key = `${folderPath}${fileName}`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const uploadParams = {
+    Bucket: bucketName,
+    Key,
+    Body: buffer,
+    ContentType: file.type,
+  };
+
+  await R2.send(new PutObjectCommand(uploadParams));
+
+  if (R2_PUBLIC_URL) {
+    return `${R2_PUBLIC_URL}/${Key}`;
+  }
+
+  return `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${Key}`;
+}
+
+export async function uploadUnivLogo(file: File, folder: string = univlogos): Promise<string> {
+  const fileExtension = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`;
+  const folderPath = folder.endsWith('/') ? folder : `${folder}/`;
+  const Key = `${folderPath}${fileName}`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const uploadParams = {
+    Bucket: bucketName,
+    Key,
+    Body: buffer,
+    ContentType: file.type,
+  };
+
+  await R2.send(new PutObjectCommand(uploadParams));
+
+  if (R2_PUBLIC_URL) {
+    return `${R2_PUBLIC_URL}/${Key}`;
+  }
+
+  return `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${Key}`;
+}
+
+export async function uploadCertificateTemplate(
   file: File,
-  folder: string = fileUnivPrefix,
+  folder: string = certificateTemplatesPrefix,
 ): Promise<string> {
   const fileExtension = file.name.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`;
@@ -73,9 +125,9 @@ export async function uploadFileUniv(
   return `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${Key}`;
 }
 
-export async function uploadUnivLogo(
+export async function uploadSignature(
   file: File,
-  folder: string = univlogos,
+  folder: string = signaturesPrefix,
 ): Promise<string> {
   const fileExtension = file.name.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExtension}`;

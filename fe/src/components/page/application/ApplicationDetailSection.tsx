@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
 import type { ApplicationResponse } from '@/types/api/application.types';
 import { formatDate } from '@/utils/string.format';
-import { AlertCircle, ArrowLeft, CalendarClock, FileText, User } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CalendarClock, Eye, EyeOff, FileText, User } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export interface ApplicationDetailSectionState {
   isPending: boolean;
@@ -25,6 +26,8 @@ export interface ApplicationDetailSectionProps {
  * Presentasional murni: data berasal dari container (orchestration layer).
  */
 export function ApplicationDetailSection({ state }: ApplicationDetailSectionProps) {
+  const [showPdfPreview, setShowPdfPreview] = useState(true);
+
   if (state.isPending) {
     return (
       <PhantomSkeleton loading>
@@ -109,6 +112,52 @@ export function ApplicationDetailSection({ state }: ApplicationDetailSectionProp
             <span className="text-xs text-muted-foreground">Motivasi</span>
             <p className="text-sm leading-relaxed text-foreground">{app.motivation || '—'}</p>
           </div>
+
+          {app.introductionLetterFile && (
+            <div className="flex flex-col gap-3 rounded-lg border p-4 bg-muted/10">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <FileText className="size-5 shrink-0 text-primary" />
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate text-sm font-semibold">
+                      {app.introductionLetterFile.originalName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Surat Pengantar Universitas
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() => setShowPdfPreview((prev) => !prev)}
+                  >
+                    {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
+                  </Button>
+                  {app.introductionLetterFile.url && (
+                    <Button asChild variant="outline" size="sm">
+                      <a href={app.introductionLetterFile.url} target="_blank" rel="noreferrer">
+                        Buka di Tab Baru
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {showPdfPreview && app.introductionLetterFile.url && (
+                <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
+                  <iframe
+                    src={app.introductionLetterFile.url}
+                    className="h-[520px] w-full border-0"
+                    title={`Preview ${app.introductionLetterFile.originalName}`}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {intern && (
             <>

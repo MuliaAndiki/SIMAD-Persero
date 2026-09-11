@@ -28,19 +28,59 @@ export function getJwtSecret(): string {
 }
 
 /**
- * Validasi password sesuai BR-AUTH-003:
+ * Validasi password:
  * - Minimal 8 karakter
- * - Mengandung huruf besar
- * - Mengandung huruf kecil
- * - Mengandung angka
- * (karakter khusus disarankan, tidak wajib)
+ * - Mengandung huruf besar (A-Z)
+ * - Mengandung huruf kecil (a-z)
+ * - Mengandung angka (0-9)
+ * - Mengandung karakter khusus / simbol (!@#$%^&*...)
+ *
+ * Mengembalikan pesan error spesifik dalam bahasa Indonesia,
+ * misal: "Password kurang huruf besar", "Password kurang angka",
+ * atau jika beberapa kriteria belum terpenuhi:
+ * "Password harus terdiri dari huruf besar, angka, dan karakter khusus / simbol"
  */
 export function validatePasswordPolicy(password: string): string | null {
-  if (password.length < 8) return 'Password minimal 8 karakter';
-  if (!/[A-Z]/.test(password)) return 'Password harus mengandung huruf besar';
-  if (!/[a-z]/.test(password)) return 'Password harus mengandung huruf kecil';
-  if (!/\d/.test(password)) return 'Password harus mengandung angka';
-  return null;
+  if (!password || typeof password !== 'string') {
+    return 'Password wajib diisi';
+  }
+
+  const missing: string[] = [];
+  if (password.length < 8) {
+    missing.push('minimal 8 karakter');
+  }
+  if (!/[A-Z]/.test(password)) {
+    missing.push('huruf besar');
+  }
+  if (!/[a-z]/.test(password)) {
+    missing.push('huruf kecil');
+  }
+  if (!/\d/.test(password)) {
+    missing.push('angka');
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?`~]/.test(password)) {
+    missing.push('karakter khusus / simbol');
+  }
+
+  if (missing.length === 0) {
+    return null;
+  }
+
+  // Jika hanya 1 kriteria yang belum terpenuhi:
+  if (missing.length === 1) {
+    if (missing[0] === 'minimal 8 karakter') {
+      return 'Password minimal 8 karakter';
+    }
+    return `Password kurang ${missing[0]}`;
+  }
+
+  // Jika beberapa kriteria belum terpenuhi:
+  const formattedMissing =
+    missing.length === 2
+      ? `${missing[0]} dan ${missing[1]}`
+      : `${missing.slice(0, -1).join(', ')}, dan ${missing[missing.length - 1]}`;
+
+  return `Password harus terdiri dari ${formattedMissing}`;
 }
 
 export function signAccessToken(payload: JwtPayload): string {
