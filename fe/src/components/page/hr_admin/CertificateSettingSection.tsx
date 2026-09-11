@@ -9,20 +9,20 @@ import {
   CardTitle,
 } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
-import { CertificatePreviewDialog } from '@/components/organisms/certificate/CertificatePreviewDialog';
 import {
   Award,
   CheckCircle2,
   ExternalLink,
-  Eye,
   FileCheck,
   FileText,
   Image as ImageIcon,
+  LayoutTemplate,
   RotateCcw,
   Save,
   Trash2,
   UploadCloud,
 } from 'lucide-react';
+import Link from 'next/link';
 import { type FormEvent, useEffect, useState } from 'react';
 
 export interface CertificateSettingSectionState {
@@ -33,7 +33,6 @@ export interface CertificateSettingSectionState {
   signatureFileName?: string;
   templateUrl?: string;
   templateFileName?: string;
-  isPreviewOpen: boolean;
 }
 
 export interface CertificateSettingSectionService {
@@ -45,7 +44,6 @@ export interface CertificateSettingSectionService {
   }) => Promise<void>;
   onResetTemplate?: () => void;
   onResetSignature?: () => void;
-  onTogglePreview: (open: boolean) => void;
 }
 
 export interface CertificateSettingSectionProps {
@@ -139,19 +137,16 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">Pengaturan Sertifikat</h1>
           <p className="text-sm text-muted-foreground">
-            Kelola template sertifikat di Cloudflare R2, tanda tangan digital, dan data
-            penandatangan.
+            Kelola template sertifikat A4 (29,7 cm × 21 cm) di Cloudflare R2, tanda tangan digital,
+            dan data penandatangan.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => service.onTogglePreview(true)}
-            className="flex items-center gap-2 shadow-sm"
-          >
-            <Eye className="size-4 text-primary" />
-            Pratinjau Sertifikat
+          <Button asChild className="flex items-center gap-2 shadow-sm">
+            <Link href="/hr_admin/certificate-setting/certificate-builder">
+              <LayoutTemplate className="size-4" />
+              Buka Layout Builder
+            </Link>
           </Button>
         </div>
       </header>
@@ -181,7 +176,7 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
                     id="signerName"
                     value={signerName}
                     onChange={(e) => setSignerName(e.target.value)}
-                    placeholder="Contoh: Budi Santoso, S.T., M.T."
+                    placeholder="Contoh: NURLANA"
                     disabled={state.isPending || isSaving}
                   />
                 </div>
@@ -197,7 +192,7 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
                     id="signerRole"
                     value={signerRole}
                     onChange={(e) => setSignerRole(e.target.value)}
-                    placeholder="Contoh: Manager SDM & Umum"
+                    placeholder="Contoh: Senior Manager Keuangan, Komunikasi & Umum"
                     disabled={state.isPending || isSaving}
                   />
                 </div>
@@ -303,10 +298,19 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
             {/* Card 3: Upload Template Sertifikat */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Template Sertifikat</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Template Sertifikat</CardTitle>
+                  <Badge
+                    variant="outline"
+                    className="text-xs font-mono font-medium border-amber-500/40 text-amber-700 dark:text-amber-300"
+                  >
+                    A4 Landscape (29,7 cm × 21 cm)
+                  </Badge>
+                </div>
                 <CardDescription>
                   Ganti desain template sertifikat dengan mengunggah file baru ke Cloudflare R2
-                  (folder <code>certificate-templates/</code>).
+                  (folder <code>certificate-templates/</code>). Menggunakan standar dimensi{' '}
+                  <strong>A4 Landscape: 29,7 cm × 21 cm</strong>.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -385,21 +389,17 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
                     />
                   </label>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Format PDF, PNG, atau JPG (Maks. 10MB). Format PDF A4 landscape sangat
-                    disarankan.
+                    Format PDF, PNG, atau JPG (Maks. 10MB). Dimensi template:{' '}
+                    <strong>A4 Landscape (29,7 cm × 21 cm)</strong>.
                   </p>
                 </div>
               </CardContent>
               <CardFooter className="bg-muted/40 py-4 px-6 flex items-center justify-between border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => service.onTogglePreview(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Eye className="size-4 text-muted-foreground" />
-                  Pratinjau Hasil
+                <Button asChild variant="outline" size="sm" className="flex items-center gap-2">
+                  <Link href="/hr_admin/certificate-setting/certificate-builder">
+                    <LayoutTemplate className="size-4 text-violet-500" />
+                    Atur Tata Letak di Layout Builder
+                  </Link>
                 </Button>
                 <Button type="submit" disabled={state.isPending || isSaving} className="ml-auto">
                   <Save className="mr-2 size-4" />
@@ -422,19 +422,28 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
             </CardHeader>
             <CardContent className="p-5 space-y-4">
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-muted/20 p-5 text-center">
-                <Badge
-                  variant={hasCustomTemplate ? 'default' : 'secondary'}
-                  className="mb-3 text-xs"
-                >
-                  {hasCustomTemplate ? 'Template Kustom (Cloudflare R2)' : 'Template Default PLN'}
-                </Badge>
+                <div className="flex flex-wrap items-center justify-center gap-1.5 mb-3">
+                  <Badge variant={hasCustomTemplate ? 'default' : 'secondary'} className="text-xs">
+                    {hasCustomTemplate ? 'Template Kustom (Cloudflare R2)' : 'Template Default PLN'}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] font-mono border-amber-500/40 text-amber-700 dark:text-amber-300"
+                  >
+                    29,7 × 21 cm
+                  </Badge>
+                </div>
 
-                <div className="h-32 w-48 rounded-lg border border-border bg-white dark:bg-slate-900 shadow-sm flex flex-col items-center justify-center p-2 mb-3 relative overflow-hidden group">
-                  <Award className="size-10 text-amber-500/70 mb-1" />
+                {/* Proportional A4 Landscape Miniature Box (29.7 / 21 = 297/210) */}
+                <div className="w-52 aspect-[297/210] rounded-lg border border-border bg-white dark:bg-slate-900 shadow-sm flex flex-col items-center justify-center p-2 mb-3 relative overflow-hidden group">
+                  <Award className="size-9 text-amber-500/70 mb-1" />
                   <span className="text-[10px] font-bold text-foreground tracking-wider uppercase">
                     Sertifikat Magang
                   </span>
                   <span className="text-[9px] text-muted-foreground">PT PLN (Persero)</span>
+                  <span className="text-[8px] font-mono text-muted-foreground/70 mt-1">
+                    A4 • 29,7 × 21,0 cm
+                  </span>
                 </div>
 
                 <p className="text-xs font-semibold text-foreground truncate max-w-[200px]">
@@ -445,14 +454,15 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
                 </p>
 
                 <Button
-                  type="button"
+                  asChild
                   variant="outline"
                   size="sm"
-                  onClick={() => service.onTogglePreview(true)}
                   className="mt-4 w-full flex items-center justify-center gap-1.5 text-xs"
                 >
-                  <Eye className="size-3.5 text-primary" />
-                  Buka Pratinjau Sertifikat
+                  <Link href="/hr_admin/certificate-setting/certificate-builder">
+                    <LayoutTemplate className="size-3.5 text-violet-500" />
+                    Buka Layout Builder
+                  </Link>
                 </Button>
               </div>
 
@@ -482,10 +492,7 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
             </CardHeader>
             <CardContent className="p-5">
               <div className="rounded-xl border border-border bg-card p-4 flex flex-col items-center text-center shadow-xs">
-                <span className="text-xs text-muted-foreground">Jakarta, 11 September 2026</span>
-                <span className="text-xs font-semibold text-foreground mt-0.5">
-                  {signerRole || 'Manager SDM'}
-                </span>
+                <span className="text-xs text-muted-foreground">Banda Aceh, 31 Agustus 2026</span>
 
                 <div className="h-16 flex items-center justify-center my-2">
                   {effectiveSignatureUrl ? (
@@ -496,36 +503,27 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
                       className="max-h-14 max-w-[140px] object-contain"
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center border-b border-dashed border-muted-foreground/40 px-4 py-1.5">
-                      <span className="text-[10px] text-muted-foreground italic">
-                        (Belum ada tanda tangan)
-                      </span>
-                    </div>
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src="/images/sample-signature.png"
+                      alt="Tanda Tangan & Cap PT PLN (Persero)"
+                      className="max-h-14 max-w-[150px] object-contain"
+                    />
                   )}
                 </div>
 
-                <span className="text-xs font-bold text-foreground underline underline-offset-4">
-                  {signerName || 'Budi Santoso, S.T., M.T.'}
+                <span className="text-xs font-bold text-foreground uppercase tracking-wide">
+                  {signerName || 'NURLANA'}
                 </span>
-                <span className="text-[10px] text-muted-foreground mt-0.5">
-                  NIP. 197804122002121001
+                <span className="text-[11px] text-muted-foreground mt-0.5">
+                  {signerRole || 'Senior Manager Keuangan, Komunikasi & Umum'}
                 </span>
+                <span className="text-[10px] text-muted-foreground">PLN UID Aceh</span>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-
-      {/* Interactive Certificate Preview Dialog */}
-      <CertificatePreviewDialog
-        open={state.isPreviewOpen}
-        onOpenChange={service.onTogglePreview}
-        signerName={signerName}
-        signerRole={signerRole}
-        signatureUrl={effectiveSignatureUrl}
-        templateUrl={effectiveTemplateUrl}
-        templateFileName={effectiveTemplateName}
-      />
     </section>
   );
 }

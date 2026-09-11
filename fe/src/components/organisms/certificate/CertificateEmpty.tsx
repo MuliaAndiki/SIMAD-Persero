@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/atoms/card';
-import { Award, Clock, CheckCircle2 } from 'lucide-react';
+import { Award, CheckCircle2, Clock } from 'lucide-react';
 
 export interface CertificateEmptyProps {
   internshipStatus?: string | null;

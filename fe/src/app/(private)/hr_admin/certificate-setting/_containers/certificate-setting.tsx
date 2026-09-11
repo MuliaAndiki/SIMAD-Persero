@@ -8,13 +8,12 @@ import { toast } from 'sonner';
 
 export default function CertificateSettingContainer() {
   const api = useApi();
-  const [signerName, setSignerName] = useState('Budi Santoso, S.T., M.T.');
-  const [signerRole, setSignerRole] = useState('Manager SDM');
+  const [signerName, setSignerName] = useState('NURLANA');
+  const [signerRole, setSignerRole] = useState('Senior Manager Keuangan, Komunikasi & Umum');
   const [signatureUrl, setSignatureUrl] = useState('');
   const [signatureFileName, setSignatureFileName] = useState('');
   const [templateUrl, setTemplateUrl] = useState('');
   const [templateFileName, setTemplateFileName] = useState('');
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const uploadFile = api.file.mutate.upload();
@@ -154,13 +153,11 @@ export default function CertificateSettingContainer() {
         signatureFileName,
         templateUrl,
         templateFileName,
-        isPreviewOpen,
       }}
       service={{
         onSaveSettings: handleSaveSettings,
         onResetTemplate: handleResetTemplate,
         onResetSignature: handleResetSignature,
-        onTogglePreview: setIsPreviewOpen,
       }}
     />
   );
