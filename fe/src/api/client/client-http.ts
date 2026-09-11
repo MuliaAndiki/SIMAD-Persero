@@ -77,6 +77,14 @@ function buildBaseHeaders(accessToken?: string): Record<string, string> {
 }
 
 function extractErrorMessage(resStatus: number, json: any): string {
+  if (Array.isArray(json?.errors) && json.errors.length > 0) {
+    const errorMessages = json.errors
+      .map((e: any) => e?.message)
+      .filter((m: any) => typeof m === 'string' && m.trim() !== '');
+    if (errorMessages.length > 0) {
+      return errorMessages.join(', ');
+    }
+  }
   if (typeof json?.message === 'string' && json.message.trim() !== '') {
     return json.message;
   }
@@ -85,9 +93,6 @@ function extractErrorMessage(resStatus: number, json: any): string {
   }
   if (typeof json?.summary === 'string' && json.summary.trim() !== '') {
     return json.summary;
-  }
-  if (Array.isArray(json?.errors) && json.errors[0]?.message) {
-    return json.errors[0].message;
   }
   if (resStatus === 503) {
     return 'Gagal terhubung ke database. Silakan coba beberapa saat lagi.';
