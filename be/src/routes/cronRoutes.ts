@@ -12,7 +12,7 @@ class CronRouter {
 
   private routes() {
     // Database warm-up / ping (wake up DB connection to avoid cold start)
-    this.cronRouter.get("/ping", async (c: AppContext) => {
+    this.cronRouter.post("/ping", async (c: AppContext) => {
       return cronController.pingDatabase(c);
     });
 
