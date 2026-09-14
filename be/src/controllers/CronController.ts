@@ -1,9 +1,9 @@
-import type { AppContext } from '@/contex';
-import { HttpResponse } from '@/http';
-import cleanupService from '@/services/cleanup.service';
-import internshipService from '@/services/internship.service';
-import { pingDatabase } from '@/config/databases';
-import { getLogger } from '@/telemetry/otel.config';
+import type { AppContext } from "@/contex";
+import { HttpResponse } from "@/http";
+import cleanupService from "@/services/cleanup.service";
+import internshipService from "@/services/internship.service";
+import { pingDatabase } from "@/config/databases";
+import { getLogger } from "@/telemetry/otel.config";
 
 class CronController {
   /**
@@ -16,7 +16,7 @@ class CronController {
 
       return HttpResponse(c).ok(
         {
-          database: 'connected',
+          database: "connected",
           latency: `${result.latencyMs}ms`,
           timestamp: new Date().toISOString(),
         },
@@ -24,7 +24,18 @@ class CronController {
         `Database warm-up successful (${result.latencyMs}ms)`,
       );
     } catch (error) {
-      getLogger().error({ err: error }, '[cron] Database ping failed');
+      getLogger().error({ err: error }, "[cron] Database ping failed");
+      return HttpResponse(c).serviceUnavailable(
+        `Database ping failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  public async PingService(c: AppContext) {
+    try {
+      return HttpResponse(c).ok("Ping Service");
+    } catch (error) {
+      getLogger().error({ err: error }, "[cron] Database ping failed");
       return HttpResponse(c).serviceUnavailable(
         `Database ping failed: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -49,23 +60,30 @@ class CronController {
     const gracePeriod = Number(c.query.gracePeriod) || 30;
     const result = await cleanupService.getInactiveUsersCount(gracePeriod);
 
-    return HttpResponse(c).ok(result, undefined, `Found ${result.count} inactive users eligible for deletion.`);
+    return HttpResponse(c).ok(
+      result,
+      undefined,
+      `Found ${result.count} inactive users eligible for deletion.`,
+    );
   }
 
   /**
    * Hapus user yang sudah dinonaktifkan
    * POST /api/cron/cleanup/users?gracePeriod=30
-   * 
+   *
    * IMPORTANT: Ini adalah operasi PERMANEN dan tidak bisa di-undo!
    * Pastikan sudah review dengan endpoint /cleanup/preview terlebih dahulu.
    */
   public async deleteInactiveUsers(c: AppContext) {
     const gracePeriod = Number(c.query.gracePeriod) || 30;
-    
+
     // Gunakan system user ID atau user yang menjalankan cron
     const systemUserId = c.user?.id;
 
-    const result = await cleanupService.deleteInactiveUsers(gracePeriod, systemUserId);
+    const result = await cleanupService.deleteInactiveUsers(
+      gracePeriod,
+      systemUserId,
+    );
 
     return HttpResponse(c).ok(
       result,
