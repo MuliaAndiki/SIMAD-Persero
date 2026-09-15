@@ -74,7 +74,11 @@ export function CertificateSection({ state, service }: CertificateSectionProps) 
       ) : state.isError ? (
         <CertificateError message={state.errorMessage} />
       ) : !certificate ? (
-        <CertificateEmpty internshipStatus={state.internshipStatus} />
+        <CertificateEmpty
+          internshipStatus={state.internshipStatus}
+          onDownload={() => service.onDownload('', '')}
+          isDownloading={state.isDownloading}
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column: Certificate Preview */}

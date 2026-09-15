@@ -75,6 +75,7 @@ export const queryKey = {
     verify: (verificationCode: string) => ['certificate', 'verify', verificationCode] as const,
     my: () => ['certificate', 'my'] as const,
     detail: (certificateId: string) => ['certificate', 'detail', certificateId] as const,
+    settings: () => ['certificate', 'settings'] as const,
   },
 
   notificationRoot: () => ['notification'] as const,

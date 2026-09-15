@@ -43,9 +43,41 @@ export default function HrApplicationDetailContainer({ id }: { id: string }) {
 
   const handleApproveFieldChange = useCallback(
     (field: ApproveApplicationFormField, value: string) => {
-      setApproveForm((prev) => ({ ...prev, [field]: value }));
+      setApproveForm((prev) => {
+        const next = { ...prev, [field]: value };
+        if (field === 'departmentId') {
+          // Jika departemen berganti, cek apakah kantor yang sedang dipilih meng-embed departemen baru ini
+          if (next.officeLocationId) {
+            const currentOffice = offices.data?.find((o) => o.id === next.officeLocationId);
+            const officeSupportsDept = currentOffice?.departments?.some((d) => d.id === value);
+            if (
+              currentOffice?.departments &&
+              currentOffice.departments.length > 0 &&
+              !officeSupportsDept
+            ) {
+              next.officeLocationId = '';
+            }
+          }
+          // Cek apakah supervisor yang sedang dipilih berada di departemen baru ini
+          if (next.supervisorId) {
+            const currentSup = supervisors.data?.find((s) => s.id === next.supervisorId);
+            if (currentSup?.departmentId && currentSup.departmentId !== value) {
+              next.supervisorId = '';
+            }
+          }
+        } else if (field === 'officeLocationId') {
+          // Jika kantor berganti, cek apakah supervisor yang sedang dipilih berada di kantor baru ini
+          if (next.supervisorId && value) {
+            const currentSup = supervisors.data?.find((s) => s.id === next.supervisorId);
+            if (currentSup?.officeId && currentSup.officeId !== value) {
+              next.supervisorId = '';
+            }
+          }
+        }
+        return next;
+      });
     },
-    [],
+    [offices.data, supervisors.data],
   );
 
   const handleRejectFieldChange = useCallback(

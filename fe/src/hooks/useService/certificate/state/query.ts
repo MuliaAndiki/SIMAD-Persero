@@ -41,3 +41,13 @@ export function useCertificateDetail(
     enabled: options?.enabled,
   });
 }
+
+export function useCertificateSettings() {
+  return useQuery({
+    queryKey: queryKey.certificate.settings(),
+    queryFn: async () => {
+      const res = await Api.Certificate.GetSettings();
+      return res.data;
+    },
+  });
+}

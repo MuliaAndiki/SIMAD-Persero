@@ -17,9 +17,16 @@ export default function CertificateSettingContainer() {
   const [isSaving, setIsSaving] = useState(false);
 
   const uploadFile = api.file.mutate.upload();
+  const settingsQuery = api.certificate.query.settings();
+  const saveSettingsMutation = api.certificate.mutate.saveSettings();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (settingsQuery.data) {
+      if (settingsQuery.data.signerName) setSignerName(settingsQuery.data.signerName);
+      if (settingsQuery.data.signerRole) setSignerRole(settingsQuery.data.signerRole);
+      if (settingsQuery.data.signatureUrl) setSignatureUrl(settingsQuery.data.signatureUrl);
+      if (settingsQuery.data.templateUrl) setTemplateUrl(settingsQuery.data.templateUrl);
+    } else if (typeof window !== 'undefined') {
       const savedName = localStorage.getItem('simad_cert_signer_name');
       const savedRole = localStorage.getItem('simad_cert_signer_role');
       const savedSigUrl = localStorage.getItem('simad_cert_signature_url');
@@ -34,7 +41,7 @@ export default function CertificateSettingContainer() {
       if (savedTplUrl) setTemplateUrl(savedTplUrl);
       if (savedTplName) setTemplateFileName(savedTplName);
     }
-  }, []);
+  }, [settingsQuery.data]);
 
   const handleSaveSettings = async (data: {
     signerName: string;
@@ -93,6 +100,14 @@ export default function CertificateSettingContainer() {
         setTemplateFileName(updatedTplName);
       }
 
+      // Simpan konfigurasi ke backend
+      await saveSettingsMutation.mutateAsync({
+        signerName: data.signerName,
+        signerRole: data.signerRole,
+        signatureUrl: updatedSigUrl,
+        templateUrl: updatedTplUrl,
+      });
+
       // Simpan konfigurasi ke localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('simad_cert_signer_name', data.signerName);
@@ -100,10 +115,16 @@ export default function CertificateSettingContainer() {
         if (updatedSigUrl) {
           localStorage.setItem('simad_cert_signature_url', updatedSigUrl);
           localStorage.setItem('simad_cert_signature_name', updatedSigName);
+        } else {
+          localStorage.removeItem('simad_cert_signature_url');
+          localStorage.removeItem('simad_cert_signature_name');
         }
         if (updatedTplUrl) {
           localStorage.setItem('simad_cert_template_url', updatedTplUrl);
           localStorage.setItem('simad_cert_template_name', updatedTplName);
+        } else {
+          localStorage.removeItem('simad_cert_template_url');
+          localStorage.removeItem('simad_cert_template_name');
         }
       }
 
@@ -123,24 +144,44 @@ export default function CertificateSettingContainer() {
     }
   };
 
-  const handleResetTemplate = () => {
+  const handleResetTemplate = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('simad_cert_template_url');
       localStorage.removeItem('simad_cert_template_name');
     }
     setTemplateUrl('');
     setTemplateFileName('');
-    toast.success('Template sertifikat dikembalikan ke default PLN');
+    try {
+      await saveSettingsMutation.mutateAsync({
+        signerName,
+        signerRole,
+        signatureUrl,
+        templateUrl: '',
+      });
+      toast.success('Template sertifikat dikembalikan ke default PLN');
+    } catch (_err) {
+      toast.error('Gagal memperbarui pengaturan template');
+    }
   };
 
-  const handleResetSignature = () => {
+  const handleResetSignature = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('simad_cert_signature_url');
       localStorage.removeItem('simad_cert_signature_name');
     }
     setSignatureUrl('');
     setSignatureFileName('');
-    toast.success('File tanda tangan berhasil dihapus');
+    try {
+      await saveSettingsMutation.mutateAsync({
+        signerName,
+        signerRole,
+        signatureUrl: '',
+        templateUrl,
+      });
+      toast.success('File tanda tangan berhasil dihapus');
+    } catch (_err) {
+      toast.error('Gagal memperbarui tanda tangan');
+    }
   };
 
   return (

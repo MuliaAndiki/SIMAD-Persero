@@ -1,32 +1,29 @@
-"use client";
+'use client';
 
 import type {
   ApproveApplicationFormField,
   ApproveApplicationFormState,
-} from "@/components/organisms/application/ApplicationApproveForm";
+} from '@/components/organisms/application/ApplicationApproveForm';
 import type {
   RejectApplicationFormField,
   RejectApplicationFormState,
-} from "@/components/organisms/application/ApplicationRejectForm";
-import { ApplicationsSection } from "@/components/page/hr/ApplicationsSection";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useApi } from "@/hooks/useService/useApi";
-import type {
-  ApplicationResponse,
-  ApplicationStatusValue,
-} from "@/types/api/application.types";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+} from '@/components/organisms/application/ApplicationRejectForm';
+import { ApplicationsSection } from '@/components/page/hr/ApplicationsSection';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useApi } from '@/hooks/useService/useApi';
+import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
+import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 
 const EMPTY_APPROVE_FORM: ApproveApplicationFormState = {
-  departmentId: "",
-  officeLocationId: "",
-  supervisorId: "",
-  notes: "",
+  departmentId: '',
+  officeLocationId: '',
+  supervisorId: '',
+  notes: '',
 };
 
 const EMPTY_REJECT_FORM: RejectApplicationFormState = {
-  reason: "",
+  reason: '',
 };
 
 /**
@@ -39,16 +36,12 @@ export default function HrApplicationsContainer() {
   const api = useApi();
   const router = useRouter();
 
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [keyword, setKeyword] = useState<string>("");
-  const [modalMode, setModalMode] = useState<"approve" | "reject" | null>(null);
-  const [modalTarget, setModalTarget] = useState<ApplicationResponse | null>(
-    null,
-  );
-  const [approveForm, setApproveForm] =
-    useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
-  const [rejectForm, setRejectForm] =
-    useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [keyword, setKeyword] = useState<string>('');
+  const [modalMode, setModalMode] = useState<'approve' | 'reject' | null>(null);
+  const [modalTarget, setModalTarget] = useState<ApplicationResponse | null>(null);
+  const [approveForm, setApproveForm] = useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
+  const [rejectForm, setRejectForm] = useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
 
   const debouncedKeyword = useDebounce(keyword, 1000);
 
@@ -76,14 +69,14 @@ export default function HrApplicationsContainer() {
     setModalTarget(app);
     setApproveForm(EMPTY_APPROVE_FORM);
     setRejectForm(EMPTY_REJECT_FORM);
-    setModalMode("approve");
+    setModalMode('approve');
   }, []);
 
   const handleOpenReject = useCallback((app: ApplicationResponse) => {
     setModalTarget(app);
     setApproveForm(EMPTY_APPROVE_FORM);
     setRejectForm(EMPTY_REJECT_FORM);
-    setModalMode("reject");
+    setModalMode('reject');
   }, []);
 
   const handleCloseModal = useCallback(() => {
@@ -95,9 +88,41 @@ export default function HrApplicationsContainer() {
 
   const handleApproveFieldChange = useCallback(
     (field: ApproveApplicationFormField, value: string) => {
-      setApproveForm((prev) => ({ ...prev, [field]: value }));
+      setApproveForm((prev) => {
+        const next = { ...prev, [field]: value };
+        if (field === 'departmentId') {
+          // Jika departemen berganti, cek apakah kantor yang sedang dipilih meng-embed departemen baru ini
+          if (next.officeLocationId) {
+            const currentOffice = offices.data?.find((o) => o.id === next.officeLocationId);
+            const officeSupportsDept = currentOffice?.departments?.some((d) => d.id === value);
+            if (
+              currentOffice?.departments &&
+              currentOffice.departments.length > 0 &&
+              !officeSupportsDept
+            ) {
+              next.officeLocationId = '';
+            }
+          }
+          // Cek apakah supervisor yang sedang dipilih berada di departemen baru ini
+          if (next.supervisorId) {
+            const currentSup = supervisors.data?.find((s) => s.id === next.supervisorId);
+            if (currentSup?.departmentId && currentSup.departmentId !== value) {
+              next.supervisorId = '';
+            }
+          }
+        } else if (field === 'officeLocationId') {
+          // Jika kantor berganti, cek apakah supervisor yang sedang dipilih berada di kantor baru ini
+          if (next.supervisorId && value) {
+            const currentSup = supervisors.data?.find((s) => s.id === next.supervisorId);
+            if (currentSup?.officeId && currentSup.officeId !== value) {
+              next.supervisorId = '';
+            }
+          }
+        }
+        return next;
+      });
     },
-    [],
+    [offices.data, supervisors.data],
   );
 
   const handleRejectFieldChange = useCallback(

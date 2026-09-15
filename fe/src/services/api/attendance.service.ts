@@ -136,23 +136,12 @@ class AttendanceService {
    * Mengekspor data kehadiran dan mengunduhnya sebagai Excel.
    */
   public async DownloadExcel(query?: AttendanceExportQuery): Promise<void> {
-    const url = new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1');
     const qs = buildQueryString(query as Record<string, string | number | boolean>);
-    const endpoint = `${url.origin}${url.pathname}${ATTENDANCE_ENDPOINTS.EXPORT}${qs}`;
-
-    const { getAccessToken } = await import('@/utils/session-cookie');
-    const token = getAccessToken();
-
-    const response = await fetch(endpoint, {
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {},
-    });
+    const response = await client.DownloadResponse(`${ATTENDANCE_ENDPOINTS.EXPORT}${qs}`);
 
     if (!response.ok) {
-      throw new Error('Gagal mengunduh data absensi');
+      const errorText = await response.text().catch(() => '');
+      throw new Error(errorText || 'Gagal mengunduh data absensi');
     }
 
     const blob = await response.blob();
@@ -160,15 +149,16 @@ class AttendanceService {
     const link = document.createElement('a');
     link.href = downloadUrl;
 
-    const filenameMatch = response.headers.get('Content-Disposition')?.match(/filename=(.+)/);
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const filenameMatch = disposition.match(/filename=["']?([^"';]+)["']?/);
     const filename = filenameMatch
-      ? filenameMatch[1]
-      : `attendance_export_${new Date().getTime()}.xlsx`;
+      ? filenameMatch[1].trim()
+      : `attendance_export_${Date.now()}.xlsx`;
 
     link.download = filename;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.parentNode?.removeChild(link);
     window.URL.revokeObjectURL(downloadUrl);
   }
 

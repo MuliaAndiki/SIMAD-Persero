@@ -5,8 +5,10 @@ import type {
   CertificateDetailResponse,
   CertificateParams,
   CertificateResponse,
+  CertificateSettingsResponse,
   CertificateVerifyParams,
   GenerateCertificateBody,
+  UpdateCertificateSettingsBody,
 } from '@/types/api/certificate.types';
 import { toServiceResponse } from '@/utils/service-response';
 
@@ -99,6 +101,43 @@ class CertificateService {
     return toServiceResponse(res, {
       message: 'Sertifikat berhasil di-regenerate',
     });
+  }
+
+  /**
+   * GET /certificates/settings
+   * Mengambil konfigurasi sertifikat yang disimpan HR Admin.
+   */
+  public async GetSettings(): Promise<TResponse<CertificateSettingsResponse>> {
+    const res = await client.GetResponse<CertificateSettingsResponse>(
+      CERTIFICATE_ENDPOINTS.SETTINGS,
+    );
+    return toServiceResponse(res, {
+      message: 'Pengaturan sertifikat berhasil dimuat',
+    });
+  }
+
+  /**
+   * PUT /certificates/settings
+   * Menyimpan konfigurasi sertifikat (HR_ADMIN).
+   */
+  public async SaveSettings(
+    body: UpdateCertificateSettingsBody,
+  ): Promise<TResponse<CertificateSettingsResponse>> {
+    const res = await client.PutResponse<CertificateSettingsResponse>(
+      CERTIFICATE_ENDPOINTS.SETTINGS,
+      body,
+    );
+    return toServiceResponse(res, {
+      message: 'Pengaturan sertifikat berhasil disimpan',
+    });
+  }
+
+  /**
+   * GET /certificates/me/download
+   * Mengunduh file sertifikat milik intern langsung (binary response).
+   */
+  public async DownloadMy(): Promise<Response> {
+    return client.DownloadResponse(CERTIFICATE_ENDPOINTS.DOWNLOAD_MY);
   }
 }
 
