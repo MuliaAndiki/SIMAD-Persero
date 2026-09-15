@@ -11,6 +11,27 @@ class CronRouter {
   }
 
   private routes() {
+    this.cronRouter.onBeforeHandle((c: AppContext) => {
+      const authHeader = c.headers?.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        c.set.status = 401;
+        return { success: false, message: 'Unauthorized: Missing or invalid token format' };
+      }
+
+      const token = authHeader.substring(7);
+      const cronSecret = process.env.CRON_SECRET;
+
+      if (!cronSecret) {
+        c.set.status = 500;
+        return { success: false, message: 'Internal Server Error: CRON_SECRET not configured' };
+      }
+
+      if (token !== cronSecret) {
+        c.set.status = 403;
+        return { success: false, message: 'Forbidden: Invalid cron secret' };
+      }
+    });
+
     // Database warm-up / ping (wake up DB connection to avoid cold start)
     this.cronRouter.get('/ping', async (c: AppContext) => {
       return cronController.pingDatabase(c);

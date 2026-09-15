@@ -1,0 +1,67 @@
+name: SIMAD Cron Automation
+
+on:
+  schedule:
+    # 07:00 WIB (Asia/Jakarta) is 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  scheduled-tasks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Wake up Render service
+        run: |
+          echo "Waking up SIMAD API..."
+          curl \
+            --fail-with-body \
+            --show-error \
+            --retry 5 \
+            --retry-delay 15 \
+            --retry-all-errors \
+            --connect-timeout 30 \
+            --max-time 180 \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.API_BASE_URL }}/cron/warmup"
+
+      - name: Wait before database warm-up
+        run: |
+          echo "Waiting 3 minutes before database warm-up..."
+          sleep 180
+
+      - name: Warm up database
+        run: |
+          echo "Warming up database..."
+          curl \
+            --fail-with-body \
+            --show-error \
+            --retry 4 \
+            --retry-delay 15 \
+            --retry-all-errors \
+            --connect-timeout 30 \
+            --max-time 180 \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.API_BASE_URL }}/cron/ping"
+
+      - name: Wait before internship automation
+        run: |
+          echo "Waiting 3 minutes before internship automation..."
+          sleep 180
+
+      - name: Run internship auto-start
+        run: |
+          echo "Running internship auto-start..."
+          curl \
+            --fail-with-body \
+            --show-error \
+            --retry 3 \
+            --retry-delay 10 \
+            --retry-all-errors \
+            --connect-timeout 30 \
+            --max-time 180 \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.API_BASE_URL }}/cron/internship"
