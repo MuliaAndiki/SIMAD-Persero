@@ -1,23 +1,14 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import {
   UniversityFormDialog,
   type UniversityFormField,
   type UniversityFormState,
-} from "@/components/organisms/institution/UniversityFormDialog";
-import type {
-  EducationLevelResponse,
-  InstitutionResponse,
-} from "@/types/api/institution.types";
-import type { AlertContexType } from "@/types/ui";
+} from '@/components/organisms/institution/UniversityFormDialog';
+import type { EducationLevelResponse, InstitutionResponse } from '@/types/api/institution.types';
+import type { AlertContexType } from '@/types/ui';
 import {
   AlertCircle,
   ArrowLeft,
@@ -27,8 +18,8 @@ import {
   MapPin,
   Pencil,
   Trash2,
-} from "lucide-react";
-import Link from "next/link";
+} from 'lucide-react';
+import Link from 'next/link';
 
 export interface UniversityDetailSectionState {
   isPending: boolean;
@@ -57,12 +48,8 @@ export interface UniversityDetailSectionProps {
   actions: UniversityDetailSectionActions;
 }
 
-export function UniversityDetailSection({
-  state,
-  actions,
-}: UniversityDetailSectionProps) {
-  const { university, isPending, isError, errorMessage, alert, isDeleting } =
-    state;
+export function UniversityDetailSection({ state, actions }: UniversityDetailSectionProps) {
+  const { university, isPending, isError, errorMessage, alert, isDeleting } = state;
 
   if (isPending) {
     return (
@@ -96,9 +83,7 @@ export function UniversityDetailSection({
           <AlertCircle className="mt-0.5 size-4 shrink-0" />
           <div className="flex flex-col gap-1">
             <p className="font-semibold">Gagal memuat detail universitas</p>
-            <p className="opacity-90">
-              {errorMessage || "Data universitas tidak ditemukan."}
-            </p>
+            <p className="opacity-90">{errorMessage || 'Data universitas tidak ditemukan.'}</p>
           </div>
         </div>
       </section>
@@ -127,10 +112,10 @@ export function UniversityDetailSection({
             disabled={isDeleting}
             onClick={() =>
               alert.confirm({
-                title: "Hapus Universitas?",
+                title: 'Hapus Universitas?',
                 deskripsi: `Apakah Anda yakin ingin menghapus "${university.name}"? Tindakan ini tidak dapat dibatalkan.`,
-                icon: "question",
-                confirmButtonText: "Hapus",
+                icon: 'question',
+                confirmButtonText: 'Hapus',
                 onConfirm: () => {
                   actions.onDelete();
                 },
@@ -151,7 +136,7 @@ export function UniversityDetailSection({
               <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/20 p-2">
                 <img
                   src={university.logo as string}
-                  alt={university.name || "Logo"}
+                  alt={university.name || 'Logo'}
                   className="size-full object-contain"
                 />
               </div>
@@ -163,9 +148,7 @@ export function UniversityDetailSection({
 
             <div className="flex flex-1 flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold text-foreground">
-                  {university.name}
-                </h1>
+                <h1 className="text-2xl font-bold text-foreground">{university.name}</h1>
                 {university.shortName && (
                   <span className="rounded-md bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
                     {university.shortName}
@@ -181,11 +164,7 @@ export function UniversityDetailSection({
               {(university.city || university.province) && (
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="size-4 shrink-0 text-muted-foreground/70" />
-                  <span>
-                    {[university.city, university.province]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </span>
+                  <span>{[university.city, university.province].filter(Boolean).join(', ')}</span>
                 </div>
               )}
             </div>
@@ -201,50 +180,38 @@ export function UniversityDetailSection({
               <Building2 className="size-4 text-primary" />
               Detail Informasi Institusi
             </CardTitle>
-            <CardDescription>
-              Rincian lengkap master data perguruan tinggi
-            </CardDescription>
+            <CardDescription>Rincian lengkap master data perguruan tinggi</CardDescription>
           </CardHeader>
           <CardContent className="divide-y divide-border/60 text-sm">
             <div className="flex flex-col justify-between py-3 sm:flex-row">
-              <span className="text-muted-foreground">
-                Nama Lengkap Institusi
-              </span>
-              <span className="font-semibold text-foreground">
-                {university.name}
-              </span>
+              <span className="text-muted-foreground">Nama Lengkap Institusi</span>
+              <span className="font-semibold text-foreground">{university.name}</span>
             </div>
             <div className="flex flex-col justify-between py-3 sm:flex-row">
-              <span className="text-muted-foreground">
-                Akronim / Nama Pendek
-              </span>
+              <span className="text-muted-foreground">Akronim / Nama Pendek</span>
               <span className="font-medium text-foreground">
                 {university.shortName ? (
                   <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
                     {university.shortName}
                   </span>
                 ) : (
-                  "-"
+                  '-'
                 )}
               </span>
             </div>
             <div className="flex flex-col justify-between py-3 sm:flex-row">
               <span className="text-muted-foreground">Jenjang Pendidikan</span>
               <span className="font-medium text-foreground">
-                {university.educationLevel?.name || "-"}
+                {university.educationLevel?.name || '-'}
               </span>
             </div>
             <div className="flex flex-col justify-between py-3 sm:flex-row">
               <span className="text-muted-foreground">Provinsi</span>
-              <span className="font-medium text-foreground">
-                {university.province || "-"}
-              </span>
+              <span className="font-medium text-foreground">{university.province || '-'}</span>
             </div>
             <div className="flex flex-col justify-between py-3 sm:flex-row">
               <span className="text-muted-foreground">Kota / Kabupaten</span>
-              <span className="font-medium text-foreground">
-                {university.city || "-"}
-              </span>
+              <span className="font-medium text-foreground">{university.city || '-'}</span>
             </div>
           </CardContent>
         </Card>
@@ -255,9 +222,7 @@ export function UniversityDetailSection({
               <ImageIcon className="size-4 text-primary" />
               Logo & Media
             </CardTitle>
-            <CardDescription>
-              Preview logo dan link asset institusi
-            </CardDescription>
+            <CardDescription>Preview logo dan link asset institusi</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4 pt-4 text-sm">
             {university.logo ? (
@@ -265,14 +230,12 @@ export function UniversityDetailSection({
                 <div className="flex max-h-48 w-full items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/10 p-4">
                   <img
                     src={university.logo as string}
-                    alt={university.name || "Logo Preview"}
+                    alt={university.name || 'Logo Preview'}
                     className="max-h-40 object-contain"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="text-xs text-muted-foreground">
-                    URL Logo:
-                  </span>
+                  <span className="text-xs text-muted-foreground">URL Logo:</span>
                   <a
                     href={university.logo as string}
                     target="_blank"
@@ -286,9 +249,7 @@ export function UniversityDetailSection({
             ) : (
               <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border py-12 text-center text-muted-foreground">
                 <ImageIcon className="size-8 text-muted-foreground/40" />
-                <p className="text-xs">
-                  Belum ada logo terlampir untuk universitas ini.
-                </p>
+                <p className="text-xs">Belum ada logo terlampir untuk universitas ini.</p>
               </div>
             )}
           </CardContent>

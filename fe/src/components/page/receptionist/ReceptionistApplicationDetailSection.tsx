@@ -96,29 +96,23 @@ export function ReceptionistApplicationDetailSection({
       <Card className="flex flex-col gap-4 p-6">
         <h2 className="text-lg font-semibold text-foreground">Informasi Peserta</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ApplicationDetailField 
-            label="Nama Lengkap" 
-            value={application.internProfile?.user?.fullName} 
+          <ApplicationDetailField
+            label="Nama Lengkap"
+            value={application.internProfile?.user?.fullName}
           />
-          <ApplicationDetailField 
-            label="Email" 
-            value={application.internProfile?.user?.email} 
+          <ApplicationDetailField label="Email" value={application.internProfile?.user?.email} />
+          <ApplicationDetailField label="Nomor Telepon" value={application.internProfile?.phone} />
+          <ApplicationDetailField
+            label="NIM/NPM"
+            value={application.internProfile?.studentNumber}
           />
-          <ApplicationDetailField 
-            label="Nomor Telepon" 
-            value={application.internProfile?.phone} 
+          <ApplicationDetailField
+            label="Institusi"
+            value={application.internProfile?.institution?.name}
           />
-          <ApplicationDetailField 
-            label="NIM/NPM" 
-            value={application.internProfile?.studentNumber} 
-          />
-          <ApplicationDetailField 
-            label="Institusi" 
-            value={application.internProfile?.institution?.name} 
-          />
-          <ApplicationDetailField 
-            label="Jurusan/Prodi" 
-            value={application.internProfile?.major?.name} 
+          <ApplicationDetailField
+            label="Jurusan/Prodi"
+            value={application.internProfile?.major?.name}
           />
         </div>
       </Card>
@@ -188,9 +182,9 @@ export function ReceptionistApplicationDetailSection({
         <Card className="flex flex-col gap-4 p-6">
           <h2 className="text-lg font-semibold text-foreground">Informasi Review</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <ApplicationDetailField 
-              label="Direview Oleh" 
-              value={application.reviewedBy?.fullName} 
+            <ApplicationDetailField
+              label="Direview Oleh"
+              value={application.reviewedBy?.fullName}
             />
             <ApplicationDetailField
               label="Tanggal Review"

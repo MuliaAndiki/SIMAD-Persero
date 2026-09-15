@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 
 import type {
   OfficeFormField,
   OfficeFormState,
-} from "@/components/organisms/office/OfficeFormDialog";
-import { OfficesSection } from "@/components/page/hr/OfficesSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useApi } from "@/hooks/useService/useApi";
-import type { OfficeResponse } from "@/types/api/office.types";
+} from '@/components/organisms/office/OfficeFormDialog';
+import { OfficesSection } from '@/components/page/hr/OfficesSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useApi } from '@/hooks/useService/useApi';
+import type { OfficeResponse } from '@/types/api/office.types';
 
 const EMPTY_FORM: OfficeFormState = {
-  name: "",
-  address: "",
-  latitude: "",
-  longitude: "",
-  radiusMeter: "",
+  name: '',
+  address: '',
+  latitude: '',
+  longitude: '',
+  radiusMeter: '',
 };
 
 /**
@@ -32,7 +32,7 @@ export default function HrOfficesContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<OfficeResponse | null>(null);
   const [form, setForm] = useState<OfficeFormState>(EMPTY_FORM);
@@ -51,12 +51,9 @@ export default function HrOfficesContainer() {
   const update = api.office.mutate.update();
   const remove = api.office.mutate.delete();
 
-  const handleFieldChange = useCallback(
-    (field: OfficeFormField, value: string) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
+  const handleFieldChange = useCallback((field: OfficeFormField, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   const handleOpenCreate = useCallback(() => {
     setEditing(null);
@@ -69,9 +66,9 @@ export default function HrOfficesContainer() {
     setForm({
       name: office.name,
       address: office.address,
-      latitude: office.latitude != null ? String(office.latitude) : "",
-      longitude: office.longitude != null ? String(office.longitude) : "",
-      radiusMeter: office.radiusMeter != null ? String(office.radiusMeter) : "",
+      latitude: office.latitude != null ? String(office.latitude) : '',
+      longitude: office.longitude != null ? String(office.longitude) : '',
+      radiusMeter: office.radiusMeter != null ? String(office.radiusMeter) : '',
     });
     setFormOpen(true);
   }, []);

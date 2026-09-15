@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import Image from "next/image";
+import Image from 'next/image';
 
 import {
   Dialog,
@@ -8,15 +8,15 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/atoms/dialog";
-import type { ModalProps } from "@/types/ui";
+} from '@/components/atoms/dialog';
+import type { ModalProps } from '@/types/ui';
 
 const iconMap = {
-  success: "/images/artis/succes.webp",
-  error: "/images/artis/error.webp",
-  warning: "/images/artis/warning.webp",
-  info: "/images/artis/info.webp",
-  question: "/images/artis/question.webp",
+  success: '/images/artis/succes.webp',
+  error: '/images/artis/error.webp',
+  warning: '/images/artis/warning.webp',
+  info: '/images/artis/info.webp',
+  question: '/images/artis/question.webp',
 } as const;
 
 interface AlertModalInternalProps extends ModalProps {
@@ -31,9 +31,9 @@ export function AlertModal({
   setOpen,
   title,
   deskripsi,
-  icon = "info",
-  confirmButtonText = "OK",
-  confirmButtonColor = "bg-primary",
+  icon = 'info',
+  confirmButtonText = 'OK',
+  confirmButtonColor = 'bg-primary',
   cancelText,
   onConfirm,
   onCancel,

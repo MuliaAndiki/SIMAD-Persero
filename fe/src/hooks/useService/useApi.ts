@@ -10,9 +10,9 @@ import { useInstitution } from './institution/useInstitution';
 import { useInternship } from './internship/useInternship';
 import { useNotification } from './notification/useNotification';
 import { useOffice } from './office/useOffice';
+import { useReceptionist } from './receptionist/useReceptionist';
 import { useReporting } from './reporting/useReporting';
 import { useSupervisor } from './supervisor/useSupervisor';
-import { useReceptionist } from './receptionist/useReceptionist';
 import { useUser } from './user/useUser';
 
 /**

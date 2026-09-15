@@ -78,7 +78,7 @@
   --popover-foreground: #0b2d4d;
 
   /* Primary */
-  --primary: #0066b3;
+  --primary: #00a2e9;
   --primary-foreground: #ffffff;
 
   /* Secondary */
@@ -103,7 +103,7 @@
   --ring: rgba(0, 102, 179, 0.3);
 
   /* Status Colors */
-  --warning: #ffd100;
+  --warning: #fdb913;
   --warning-foreground: #0b2d4d;
   --success: #16a34a;
   --success-foreground: #ffffff;
@@ -111,16 +111,16 @@
   --info-foreground: #ffffff;
 
   /* Chart Colors */
-  --chart-1: #0066b3;
+  --chart-1: #00a2e9;
   --chart-2: #0284c7;
   --chart-3: #16a34a;
-  --chart-4: #ffd100;
+  --chart-4: #fdb913;
   --chart-5: #dc2626;
 
   /* Sidebar */
   --sidebar: #ffffff;
   --sidebar-foreground: #0b2d4d;
-  --sidebar-primary: #0066b3;
+  --sidebar-primary: #00a2e9;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #eaf5fc;
   --sidebar-accent-foreground: #005bac;
@@ -166,7 +166,7 @@
   --ring: rgba(22, 133, 212, 0.3);
 
   /* Status Colors */
-  --warning: #ffd100;
+  --warning: #fdb913;
   --warning-foreground: #0b2d4d;
   --success: #22c55e;
   --success-foreground: #ffffff;
@@ -177,7 +177,7 @@
   --chart-1: #1685d4;
   --chart-2: #38bdf8;
   --chart-3: #22c55e;
-  --chart-4: #ffd100;
+  --chart-4: #fdb913;
   --chart-5: #ef4444;
 
   /* Sidebar */
@@ -228,6 +228,32 @@
 
 .animate-leave {
   animation: leave 0.3s ease-in forwards;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.33%);
+  }
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(33.33%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse 30s linear infinite;
 }
 
 input[type="number"]::-webkit-inner-spin-button,

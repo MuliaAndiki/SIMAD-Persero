@@ -1,31 +1,25 @@
-import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
+import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/atoms/select";
+} from '@/components/atoms/select';
+import ApplicationStatusCard from '@/components/organisms/application/ApplicationActive';
 import type {
   ApplicationResponse,
   CreateApplicationBody,
   UpdateApplicationBody,
-} from "@/types/api/application.types";
-import { cn } from "@/utils/classname";
-import { formatDate } from "@/utils/string.format";
-import { AlertCircle, UploadCloud } from "lucide-react";
-import { useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-import ApplicationStatusCard from "@/components/organisms/application/ApplicationActive";
+} from '@/types/api/application.types';
+import { cn } from '@/utils/classname';
+import { formatDate } from '@/utils/string.format';
+import { AlertCircle, UploadCloud } from 'lucide-react';
+import { useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 export interface ApplicationSectionState {
   isPending: boolean;
   isError: boolean;
@@ -39,19 +33,14 @@ export interface ApplicationSectionService {
   onCreate: (
     data: Pick<
       CreateApplicationBody,
-      | "requestedStartDate"
-      | "requestedEndDate"
-      | "motivation"
-      | "coverLetterFileId"
+      'requestedStartDate' | 'requestedEndDate' | 'motivation' | 'coverLetterFileId'
     >,
   ) => Promise<void>;
   onUpdateDraft: (id: string, data: UpdateApplicationBody) => Promise<void>;
   onSubmitDraft: (id: string) => Promise<void>;
   onDeleteDraft: (id: string) => Promise<void>;
   onCancel: (id: string) => Promise<void>;
-  onUploadFile: (
-    file: File,
-  ) => Promise<{ fileId: string; fileUrl?: string } | null>;
+  onUploadFile: (file: File) => Promise<{ fileId: string; fileUrl?: string } | null>;
   onPreviewFile?: (fileUrl: string) => void;
 }
 
@@ -60,18 +49,9 @@ export interface ApplicationSectionProps {
   service: ApplicationSectionService;
 }
 
-const ACTIVE_STATUSES = [
-  "DRAFT",
-  "SUBMITTED",
-  "UNDER_REVIEW",
-  "APPROVED",
-  "RESUBMITTED",
-];
+const ACTIVE_STATUSES = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'RESUBMITTED'];
 
-export function ApplicationSection({
-  state,
-  service,
-}: ApplicationSectionProps) {
+export function ApplicationSection({ state, service }: ApplicationSectionProps) {
   if (state.isPending) {
     return (
       <PhantomSkeleton loading>
@@ -95,9 +75,7 @@ export function ApplicationSection({
     );
   }
 
-  const activeApp = state.applications.find((app) =>
-    ACTIVE_STATUSES.includes(app.status ?? ""),
-  );
+  const activeApp = state.applications.find((app) => ACTIVE_STATUSES.includes(app.status ?? ''));
 
   return (
     <section className="flex flex-col gap-6">
@@ -126,26 +104,26 @@ export function ApplicationSection({
 }
 
 const DURATION_OPTIONS = [
-  { value: "2", label: "2 Bulan" },
-  { value: "3", label: "3 Bulan" },
-  { value: "4", label: "4 Bulan" },
-  { value: "5", label: "5 Bulan" },
-  { value: "6", label: "6 Bulan" },
-  { value: "7", label: "7 Bulan" },
-  { value: "8", label: "8 Bulan" },
-  { value: "9", label: "9 Bulan" },
-  { value: "10", label: "10 Bulan" },
-  { value: "11", label: "11 Bulan" },
-  { value: "12", label: "12 Bulan" },
+  { value: '2', label: '2 Bulan' },
+  { value: '3', label: '3 Bulan' },
+  { value: '4', label: '4 Bulan' },
+  { value: '5', label: '5 Bulan' },
+  { value: '6', label: '6 Bulan' },
+  { value: '7', label: '7 Bulan' },
+  { value: '8', label: '8 Bulan' },
+  { value: '9', label: '9 Bulan' },
+  { value: '10', label: '10 Bulan' },
+  { value: '11', label: '11 Bulan' },
+  { value: '12', label: '12 Bulan' },
 ];
 
 function calculateEndDate(startIsoDate: string, monthsStr: string): string {
-  if (!startIsoDate) return "";
+  if (!startIsoDate) return '';
   const d = new Date(startIsoDate);
-  if (Number.isNaN(d.getTime())) return "";
-  const months = parseInt(monthsStr, 10) || 2;
+  if (Number.isNaN(d.getTime())) return '';
+  const months = Number.parseInt(monthsStr, 10) || 2;
   d.setMonth(d.getMonth() + months);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().split('T')[0];
 }
 
 function NewApplicationForm({
@@ -158,10 +136,10 @@ function NewApplicationForm({
   isUploading: boolean;
 }) {
   const [file, setFile] = useState<File | null>(null);
-  const [startDate, setStartDate] = useState("");
-  const [durationMonths, setDurationMonths] = useState("2");
-  const [endDate, setEndDate] = useState("");
-  const [motivation, setMotivation] = useState("");
+  const [startDate, setStartDate] = useState('');
+  const [durationMonths, setDurationMonths] = useState('2');
+  const [endDate, setEndDate] = useState('');
+  const [motivation, setMotivation] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
   const handleStartDateChange = (val: string) => {
@@ -169,7 +147,7 @@ function NewApplicationForm({
     if (val) {
       setEndDate(calculateEndDate(val, durationMonths));
     } else {
-      setEndDate("");
+      setEndDate('');
     }
   };
 
@@ -183,9 +161,9 @@ function NewApplicationForm({
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] ?? null;
     if (selected && selected.size > 5 * 1024 * 1024) {
-      setLocalError("Ukuran file maksimal 5MB.");
+      setLocalError('Ukuran file maksimal 5MB.');
       setFile(null);
-      e.target.value = "";
+      e.target.value = '';
       return;
     }
     setFile(selected);
@@ -197,19 +175,19 @@ function NewApplicationForm({
     setLocalError(null);
 
     if (!file) {
-      setLocalError("Surat pengantar wajib diunggah.");
+      setLocalError('Surat pengantar wajib diunggah.');
       return;
     }
     if (!startDate || !endDate) {
-      setLocalError("Tanggal mulai dan durasi magang harus diisi.");
+      setLocalError('Tanggal mulai dan durasi magang harus diisi.');
       return;
     }
     if (new Date(startDate) >= new Date(endDate)) {
-      setLocalError("Tanggal mulai harus sebelum tanggal selesai.");
+      setLocalError('Tanggal mulai harus sebelum tanggal selesai.');
       return;
     }
     if (new Date(startDate) <= new Date()) {
-      setLocalError("Tanggal mulai harus di masa depan.");
+      setLocalError('Tanggal mulai harus di masa depan.');
       return;
     }
 
@@ -225,15 +203,14 @@ function NewApplicationForm({
   };
 
   const fieldClass =
-    "border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs outline-none placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm";
+    'border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs outline-none placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm';
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Buat Pengajuan Baru</CardTitle>
         <CardDescription>
-          Lengkapi detail magang dan unggah surat pengantar dari instansi
-          pendidikan Anda.
+          Lengkapi detail magang dan unggah surat pengantar dari instansi pendidikan Anda.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -256,14 +233,8 @@ function NewApplicationForm({
               <label htmlFor="duration" className="text-sm font-medium">
                 Durasi Magang (Minimal 2 Bulan) *
               </label>
-              <Select
-                value={durationMonths}
-                onValueChange={handleDurationChange}
-              >
-                <SelectTrigger
-                  id="duration"
-                  className="w-full border-input border rounded-md"
-                >
+              <Select value={durationMonths} onValueChange={handleDurationChange}>
+                <SelectTrigger id="duration" className="w-full border-input border rounded-md">
                   <SelectValue placeholder="Pilih durasi magang" />
                 </SelectTrigger>
                 <SelectContent>
@@ -276,10 +247,8 @@ function NewApplicationForm({
               </Select>
               {endDate && (
                 <span className="text-xs text-muted-foreground">
-                  Estimasi Selesai:{" "}
-                  <strong className="text-foreground">
-                    {formatDate(endDate)}
-                  </strong>
+                  Estimasi Selesai:{' '}
+                  <strong className="text-foreground">{formatDate(endDate)}</strong>
                 </span>
               )}
             </div>
@@ -293,28 +262,24 @@ function NewApplicationForm({
               id="motivation"
               rows={4}
               placeholder="Ceritakan alasan dan tujuan Anda mengikuti magang…"
-              className={cn(fieldClass, "h-auto py-2")}
+              className={cn(fieldClass, 'h-auto py-2')}
               value={motivation}
               onChange={(e) => setMotivation(e.target.value)}
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium">
-              Surat Pengantar (PDF, maks 5MB) *
-            </span>
+            <span className="text-sm font-medium">Surat Pengantar (PDF, maks 5MB) *</span>
             <label
               htmlFor="coverLetter"
               className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 text-center transition-colors hover:border-primary/50 hover:bg-muted/40"
             >
               <UploadCloud className="size-8 text-muted-foreground" />
               <span className="text-sm font-medium">
-                {file ? file.name : "Klik untuk memilih file"}
+                {file ? file.name : 'Klik untuk memilih file'}
               </span>
               <span className="text-xs text-muted-foreground">
-                {file
-                  ? "File siap diunggah"
-                  : "Unggah surat pengantar dalam format PDF"}
+                {file ? 'File siap diunggah' : 'Unggah surat pengantar dalam format PDF'}
               </span>
               <input
                 id="coverLetter"
@@ -336,15 +301,13 @@ function NewApplicationForm({
           <div className="flex justify-end border-t pt-4">
             <Button
               type="submit"
-              disabled={
-                isSubmitting || isUploading || !file || !startDate || !endDate
-              }
+              disabled={isSubmitting || isUploading || !file || !startDate || !endDate}
             >
               {isUploading
-                ? "Mengunggah File…"
+                ? 'Mengunggah File…'
                 : isSubmitting
-                  ? "Menyimpan…"
-                  : "Simpan Draft Pengajuan"}
+                  ? 'Menyimpan…'
+                  : 'Simpan Draft Pengajuan'}
             </Button>
           </div>
         </form>

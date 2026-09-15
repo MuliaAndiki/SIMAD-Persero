@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
 import {
   ReceptionistFormDialog,
   type ReceptionistFormType,
-} from "@/components/organisms/receptionist/ReceptionistFormDialog";
-import { ReceptionistTable } from "@/components/organisms/receptionist/ReceptionistTable";
-import type { OfficeResponse } from "@/types/api/office.types";
-import type { ReceptionistResponse } from "@/types/api/receptionist.types";
-import type { AlertContexType } from "@/types/ui";
-import { AlertCircle, Loader2, Plus, Search } from "lucide-react";
-import { useState } from "react";
+} from '@/components/organisms/receptionist/ReceptionistFormDialog';
+import { ReceptionistTable } from '@/components/organisms/receptionist/ReceptionistTable';
+import type { OfficeResponse } from '@/types/api/office.types';
+import type { ReceptionistResponse } from '@/types/api/receptionist.types';
+import type { AlertContexType } from '@/types/ui';
+import { AlertCircle, Loader2, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
 
 export interface ReceptionistsSectionProps {
   state: {
@@ -42,10 +42,7 @@ export interface ReceptionistsSectionProps {
   };
 }
 
-export function ReceptionistsSection({
-  state,
-  actions,
-}: ReceptionistsSectionProps) {
+export function ReceptionistsSection({ state, actions }: ReceptionistsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
   const isInitialLoading = state.isPending && state.receptionists.length === 0;
@@ -59,7 +56,7 @@ export function ReceptionistsSection({
             Kelola akun petugas resepsionis di masing-masing kantor.
           </p>
         </div>
-        <Button onClick={actions.onOpenCreate} variant={"outline"}>
+        <Button onClick={actions.onOpenCreate} variant={'outline'}>
           Tambah Resepsionis
         </Button>
       </header>

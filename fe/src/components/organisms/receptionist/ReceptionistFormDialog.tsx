@@ -1,7 +1,6 @@
-"use client";
+'use client';
 
-import type { FormEvent } from "react";
-import { Button } from "@/components/atoms/button";
+import { Button } from '@/components/atoms/button';
 import {
   Dialog,
   DialogContent,
@@ -9,12 +8,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/atoms/dialog";
-import { Input } from "@/components/atoms/input";
-import type { OfficeResponse } from "@/types/api/office.types";
-import type { CreateReceptionistBody } from "@/types/api/receptionist.types";
-import { DecoratedInput } from "@/components/wrapper";
-import { Eye, EyeOff } from "lucide-react";
+} from '@/components/atoms/dialog';
+import { Input } from '@/components/atoms/input';
+import { DecoratedInput } from '@/components/wrapper';
+import type { OfficeResponse } from '@/types/api/office.types';
+import type { CreateReceptionistBody } from '@/types/api/receptionist.types';
+import { Eye, EyeOff } from 'lucide-react';
+import type { FormEvent } from 'react';
 
 export type ReceptionistFormType = CreateReceptionistBody & {
   isActive?: boolean;
@@ -59,13 +59,11 @@ export function ReceptionistFormDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <DialogHeader>
-            <DialogTitle>
-              {isEditing ? "Edit Resepsionis" : "Buat Resepsionis"}
-            </DialogTitle>
+            <DialogTitle>{isEditing ? 'Edit Resepsionis' : 'Buat Resepsionis'}</DialogTitle>
             <DialogDescription>
               {isEditing
-                ? "Ubah detail data akun resepsionis."
-                : "Tambahkan akun resepsionis baru ke dalam sistem."}
+                ? 'Ubah detail data akun resepsionis.'
+                : 'Tambahkan akun resepsionis baru ke dalam sistem.'}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
@@ -100,10 +98,8 @@ export function ReceptionistFormDialog({
               </label>
               <select
                 id="officeId"
-                value={formData.officeId ?? ""}
-                onChange={(e) =>
-                  onChange({ officeId: e.target.value, departmentId: "" })
-                }
+                value={formData.officeId ?? ''}
+                onChange={(e) => onChange({ officeId: e.target.value, departmentId: '' })}
                 required
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -130,9 +126,7 @@ export function ReceptionistFormDialog({
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="" disabled>
-                  {formData.officeId
-                    ? "Pilih departemen..."
-                    : "Pilih kantor terlebih dahulu"}
+                  {formData.officeId ? 'Pilih departemen...' : 'Pilih kantor terlebih dahulu'}
                 </option>
                 {filteredDepartments.map((dept) => (
                   <option key={dept.id} value={dept.id}>
@@ -143,16 +137,14 @@ export function ReceptionistFormDialog({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password {isEditing && "(Opsional)"}
+                Password {isEditing && '(Opsional)'}
               </label>
               <DecoratedInput
                 id="password"
-                type={showPassword ? "text" : "password"}
-                value={formData.password || ""}
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password || ''}
                 onChange={(e) => onChange({ password: e.target.value })}
-                placeholder={
-                  isEditing ? "Kosongkan jika tidak ingin diubah" : "••••••••"
-                }
+                placeholder={isEditing ? 'Kosongkan jika tidak ingin diubah' : '••••••••'}
                 required={!isEditing}
                 iconRight={
                   <button
@@ -172,10 +164,8 @@ export function ReceptionistFormDialog({
                 </label>
                 <select
                   id="isActive"
-                  value={formData.isActive ? "true" : "false"}
-                  onChange={(e) =>
-                    onChange({ isActive: e.target.value === "true" })
-                  }
+                  value={formData.isActive ? 'true' : 'false'}
+                  onChange={(e) => onChange({ isActive: e.target.value === 'true' })}
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
                   <option value="true">Aktif</option>
@@ -185,16 +175,11 @@ export function ReceptionistFormDialog({
             )}
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isPending}
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
               Batal
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Menyimpan..." : "Simpan"}
+              {isPending ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </DialogFooter>
         </form>

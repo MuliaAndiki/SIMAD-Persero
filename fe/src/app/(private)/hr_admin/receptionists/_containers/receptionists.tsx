@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
-import type { ReceptionistFormType } from "@/components/organisms/receptionist/ReceptionistFormDialog";
-import { ReceptionistsSection } from "@/components/page/hr/ReceptionistsSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useApi } from "@/hooks/useService/useApi";
+import type { ReceptionistFormType } from '@/components/organisms/receptionist/ReceptionistFormDialog';
+import { ReceptionistsSection } from '@/components/page/hr/ReceptionistsSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useApi } from '@/hooks/useService/useApi';
 import type {
   CreateReceptionistBody,
   UpdateReceptionistBody,
-} from "@/types/api/receptionist.types";
+} from '@/types/api/receptionist.types';
 
 export default function HrReceptionistsContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [formData, setFormData] = useState<ReceptionistFormType>({
-    fullName: "",
-    email: "",
-    officeId: "",
-    departmentId: "",
-    password: "",
+    fullName: '',
+    email: '',
+    officeId: '',
+    departmentId: '',
+    password: '',
     isActive: true,
   });
 
@@ -41,7 +41,7 @@ export default function HrReceptionistsContainer() {
   const offices = api.office.query.list({ limit: 100 });
 
   const editingDetail = api.receptionist.query.detail(
-    { receptionistId: editingId ?? "" },
+    { receptionistId: editingId ?? '' },
     { enabled: Boolean(editingId) },
   );
 
@@ -56,9 +56,9 @@ export default function HrReceptionistsContainer() {
       setFormData({
         fullName: editingDetail.data.fullName,
         email: editingDetail.data.email,
-        officeId: editingDetail.data.officeId ?? "",
-        departmentId: editingDetail.data.departmentId ?? "",
-        password: "",
+        officeId: editingDetail.data.officeId ?? '',
+        departmentId: editingDetail.data.departmentId ?? '',
+        password: '',
         isActive: editingDetail.data.isActive,
       });
     }
@@ -68,11 +68,11 @@ export default function HrReceptionistsContainer() {
   const handleOpenCreate = useCallback(() => {
     setEditingId(null);
     setFormData({
-      fullName: "",
-      email: "",
-      officeId: "",
-      departmentId: "",
-      password: "",
+      fullName: '',
+      email: '',
+      officeId: '',
+      departmentId: '',
+      password: '',
       isActive: true,
     });
     setFormOpen(true);
@@ -88,12 +88,9 @@ export default function HrReceptionistsContainer() {
     setEditingId(null);
   }, []);
 
-  const handleChangeForm = useCallback(
-    (partial: Partial<ReceptionistFormType>) => {
-      setFormData((prev) => ({ ...prev, ...partial }));
-    },
-    [],
-  );
+  const handleChangeForm = useCallback((partial: Partial<ReceptionistFormType>) => {
+    setFormData((prev) => ({ ...prev, ...partial }));
+  }, []);
 
   const handleSubmitForm = useCallback(async () => {
     if (editingId) {
@@ -140,8 +137,7 @@ export default function HrReceptionistsContainer() {
           createMutation.isPending ||
           updateMutation.isPending ||
           (Boolean(editingId) && editingDetail.isPending),
-        editingData:
-          editingId && editingDetail.data ? editingDetail.data : null,
+        editingData: editingId && editingDetail.data ? editingDetail.data : null,
         formData,
         alert: ns.alert,
       }}

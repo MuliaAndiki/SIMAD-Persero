@@ -10,7 +10,14 @@ export interface ReceptionistQuery {
 export interface ReceptionistResponse
   extends Pick<
     IUser,
-    'id' | 'fullName' | 'email' | 'isActive' | 'avatarFileId' | 'createdAt' | 'officeId' | 'departmentId'
+    | 'id'
+    | 'fullName'
+    | 'email'
+    | 'isActive'
+    | 'avatarFileId'
+    | 'createdAt'
+    | 'officeId'
+    | 'departmentId'
   > {}
 
 export interface CreateReceptionistBody {

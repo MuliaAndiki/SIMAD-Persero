@@ -35,9 +35,17 @@ export function toServiceResponse<T>(
   let message = '';
   if (typeof res?.message === 'string' && res.message.trim() !== '') {
     message = res.message;
-  } else if (!isSuccess && typeof (res as any)?.error === 'string' && (res as any).error.trim() !== '') {
+  } else if (
+    !isSuccess &&
+    typeof (res as any)?.error === 'string' &&
+    (res as any).error.trim() !== ''
+  ) {
     message = (res as any).error;
-  } else if (!isSuccess && typeof (res as any)?.summary === 'string' && (res as any).summary.trim() !== '') {
+  } else if (
+    !isSuccess &&
+    typeof (res as any)?.summary === 'string' &&
+    (res as any).summary.trim() !== ''
+  ) {
     message = (res as any).summary;
   } else if (isSuccess) {
     message = options.message;

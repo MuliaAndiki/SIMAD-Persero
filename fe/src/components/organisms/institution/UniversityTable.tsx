@@ -1,14 +1,8 @@
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import type { InstitutionResponse } from "@/types/api/institution.types";
-import { Eye, GraduationCap, MapPin, Pencil } from "lucide-react";
-import Link from "next/link";
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import type { InstitutionResponse } from '@/types/api/institution.types';
+import { Eye, GraduationCap, MapPin, Pencil } from 'lucide-react';
+import Link from 'next/link';
 
 export interface UniversityTableProps {
   universities: InstitutionResponse[];
@@ -19,9 +13,7 @@ export function UniversityTable({ universities }: UniversityTableProps) {
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Daftar Universitas & Perguruan Tinggi</CardTitle>
-        <CardDescription>
-          {universities.length} institusi terdaftar
-        </CardDescription>
+        <CardDescription>{universities.length} institusi terdaftar</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {universities.length === 0 ? (
@@ -55,7 +47,7 @@ export function UniversityTable({ universities }: UniversityTableProps) {
                           <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/20">
                             <img
                               src={item.logo as string}
-                              alt={item.name || "Logo"}
+                              alt={item.name || 'Logo'}
                               className="size-full object-contain p-0.5"
                             />
                           </div>
@@ -89,14 +81,10 @@ export function UniversityTable({ universities }: UniversityTableProps) {
                       {item.city || item.province ? (
                         <div className="flex items-center gap-1.5 text-xs">
                           <MapPin className="size-3.5 shrink-0 text-muted-foreground/70" />
-                          <span>
-                            {[item.city, item.province]
-                              .filter(Boolean)
-                              .join(", ")}
-                          </span>
+                          <span>{[item.city, item.province].filter(Boolean).join(', ')}</span>
                         </div>
                       ) : (
-                        "-"
+                        '-'
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">

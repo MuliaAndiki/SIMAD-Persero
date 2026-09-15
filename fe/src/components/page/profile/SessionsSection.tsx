@@ -1,17 +1,11 @@
-"use client";
+'use client';
 
-import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
-import { Badge } from "@/components/atoms/badge";
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import type { AuthSession } from "@/types/api/auth.types";
-import { AlertContexType } from "@/types/ui";
+import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import type { AuthSession } from '@/types/api/auth.types';
+import type { AlertContexType } from '@/types/ui';
 import {
   AlertCircle,
   ArrowLeft,
@@ -25,8 +19,8 @@ import {
   ShieldCheck,
   Smartphone,
   Trash2,
-} from "lucide-react";
-import Link from "next/link";
+} from 'lucide-react';
+import Link from 'next/link';
 
 export interface SessionsSectionState {
   isPending: boolean;
@@ -52,12 +46,12 @@ export interface SessionsSectionProps {
 /** Base path halaman profil berdasarkan role. */
 function profileBasePath(role?: string | null): string {
   switch (role?.toUpperCase()) {
-    case "HR_ADMIN":
-      return "/hr_admin/profile";
-    case "SUPERVISOR":
-      return "/supervisor/profile";
+    case 'HR_ADMIN':
+      return '/hr_admin/profile';
+    case 'SUPERVISOR':
+      return '/supervisor/profile';
     default:
-      return "/intern/profile";
+      return '/intern/profile';
   }
 }
 
@@ -65,9 +59,9 @@ function profileBasePath(role?: string | null): string {
 function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat("id-ID", {
-      dateStyle: "medium",
-      timeStyle: "short",
+    return new Intl.DateTimeFormat('id-ID', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
     }).format(date);
   } catch {
     return dateString;
@@ -105,12 +99,9 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
           <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-foreground">
-              Gagal memuat sesi aktif
-            </span>
+            <span className="font-medium text-foreground">Gagal memuat sesi aktif</span>
             <span className="text-muted-foreground">
-              {state.errorMessage ||
-                "Terjadi kesalahan saat mengambil data sesi."}
+              {state.errorMessage || 'Terjadi kesalahan saat mengambil data sesi.'}
             </span>
           </div>
         </div>
@@ -143,8 +134,7 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
             Perangkat & Sesi Aktif
           </h1>
           <p className="text-sm text-muted-foreground">
-            Pantau dan kelola sesi login akun Anda di berbagai perangkat dan
-            browser.
+            Pantau dan kelola sesi login akun Anda di berbagai perangkat dan browser.
           </p>
         </div>
       </div>
@@ -157,12 +147,8 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
               <Laptop className="size-6" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-bold text-foreground">
-                {state.sessions.length}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Total Sesi Aktif
-              </span>
+              <span className="text-2xl font-bold text-foreground">{state.sessions.length}</span>
+              <span className="text-xs text-muted-foreground">Total Sesi Aktif</span>
             </div>
           </CardContent>
         </Card>
@@ -173,12 +159,8 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
               <ShieldCheck className="size-6" />
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-foreground">
-                Sistem Terlindungi
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Enkripsi Token JWT
-              </span>
+              <span className="text-sm font-semibold text-foreground">Sistem Terlindungi</span>
+              <span className="text-xs text-muted-foreground">Enkripsi Token JWT</span>
             </div>
           </CardContent>
         </Card>
@@ -189,11 +171,9 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
               <Clock className="size-6" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-medium text-muted-foreground">
-                Sesi Ini Login:
-              </span>
+              <span className="text-xs font-medium text-muted-foreground">Sesi Ini Login:</span>
               <span className="text-xs font-semibold text-foreground">
-                {currentSession ? formatDate(currentSession.createdAt) : "-"}
+                {currentSession ? formatDate(currentSession.createdAt) : '-'}
               </span>
             </div>
           </CardContent>
@@ -233,9 +213,7 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
           {state.sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <ShieldCheck className="size-12 text-muted-foreground/50 mb-2" />
-              <p className="text-sm font-medium text-foreground">
-                Tidak Ada Sesi Aktif
-              </p>
+              <p className="text-sm font-medium text-foreground">Tidak Ada Sesi Aktif</p>
               <p className="text-xs text-muted-foreground">
                 Tidak ada sesi login lain yang ditemukan.
               </p>
@@ -247,16 +225,16 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
                   key={session.id}
                   className={`group relative flex flex-col gap-3 sm:flex-row sm:items-center justify-between rounded-xl border p-4 transition-all duration-200 ${
                     session.isCurrent
-                      ? "border-primary/40 bg-primary/5 shadow-sm"
-                      : "bg-card hover:bg-muted/30 hover:border-muted-foreground/20"
+                      ? 'border-primary/40 bg-primary/5 shadow-sm'
+                      : 'bg-card hover:bg-muted/30 hover:border-muted-foreground/20'
                   }`}
                 >
                   <div className="flex items-start sm:items-center gap-3.5">
                     <div
                       className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${
                         session.isCurrent
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       <Laptop className="size-5" />
@@ -276,10 +254,7 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
                             Sesi Saat Ini (Perangkat Ini)
                           </Badge>
                         ) : (
-                          <Badge
-                            variant="outline"
-                            className="text-[11px] text-muted-foreground"
-                          >
+                          <Badge variant="outline" className="text-[11px] text-muted-foreground">
                             Perangkat Lain
                           </Badge>
                         )}
@@ -287,12 +262,10 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
 
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                         <span>
-                          <strong>Dibuat:</strong>{" "}
-                          {formatDate(session.createdAt)}
+                          <strong>Dibuat:</strong> {formatDate(session.createdAt)}
                         </span>
                         <span>
-                          <strong>Kedaluwarsa:</strong>{" "}
-                          {formatDate(session.expiresAt)}
+                          <strong>Kedaluwarsa:</strong> {formatDate(session.expiresAt)}
                         </span>
                       </div>
                     </div>
@@ -336,16 +309,14 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
             <li className="flex items-start gap-2">
               <Key className="size-4 shrink-0 text-primary mt-0.5" />
               <span>
-                Ganti kata sandi Anda secara berkala jika menyadari ada
-                aktivitas mencurigakan.
+                Ganti kata sandi Anda secara berkala jika menyadari ada aktivitas mencurigakan.
               </span>
             </li>
             <li className="flex items-start gap-2">
               <LogOut className="size-4 shrink-0 text-primary mt-0.5" />
               <span>
-                Gunakan tombol <strong>"Keluar Semua Perangkat Lain"</strong>{" "}
-                apabila merasa ada yang menggunakan akun Anda dari perangkat
-                lain.
+                Gunakan tombol <strong>"Keluar Semua Perangkat Lain"</strong> apabila merasa ada
+                yang menggunakan akun Anda dari perangkat lain.
               </span>
             </li>
           </ul>
@@ -354,23 +325,19 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
 
       <Card className="bg-muted/20 border-dashed">
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            Hapus Akun Anda
-          </CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">Hapus Akun Anda</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="w-full flex flex-col space-y-2">
-            <span className="text-sm font-light">
-              Lakukan Penghapusan Account:
-            </span>
+            <span className="text-sm font-light">Lakukan Penghapusan Account:</span>
             <Button
-              variant={"destructive"}
+              variant={'destructive'}
               disabled={state.isPending}
               onClick={() =>
                 state.ns.confirm({
-                  title: "Apakah Anda Ingin Menghapus Akun Anda?",
-                  deskripsi: "Anda Tidak Akan Bisa Memulihkan Account Anda",
-                  icon: "warning",
+                  title: 'Apakah Anda Ingin Menghapus Akun Anda?',
+                  deskripsi: 'Anda Tidak Akan Bisa Memulihkan Account Anda',
+                  icon: 'warning',
                   onConfirm: () => {
                     service.onDeleteAccount();
                   },

@@ -57,7 +57,9 @@ class ReceptionistService {
     });
   }
 
-  public async Delete(params: Pick<ReceptionistParams, 'receptionistId'>): Promise<TResponse<null>> {
+  public async Delete(
+    params: Pick<ReceptionistParams, 'receptionistId'>,
+  ): Promise<TResponse<null>> {
     const res = await client.DeleteResponse<null>(
       RECEPTIONIST_ENDPOINTS.DELETE(params.receptionistId),
     );
