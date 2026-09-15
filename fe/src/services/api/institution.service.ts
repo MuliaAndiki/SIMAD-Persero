@@ -104,9 +104,7 @@ class InstitutionService {
    * DELETE /institutions/:institutionId
    * Hapus institusi (HR_ADMIN).
    */
-  public async Delete(
-    params: Pick<InstitutionParams, 'institutionId'>,
-  ): Promise<TResponse<null>> {
+  public async Delete(params: Pick<InstitutionParams, 'institutionId'>): Promise<TResponse<null>> {
     const res = await client.DeleteResponse<null>(
       INSTITUTION_ENDPOINTS.DELETE(params.institutionId),
     );

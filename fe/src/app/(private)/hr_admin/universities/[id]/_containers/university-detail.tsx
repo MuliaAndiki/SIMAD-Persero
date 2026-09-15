@@ -1,31 +1,29 @@
-"use client";
+'use client';
 
 import type {
   UniversityFormField,
   UniversityFormState,
-} from "@/components/organisms/institution/UniversityFormDialog";
-import { UniversityDetailSection } from "@/components/page/hr/UniversityDetailSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
-import type { InstitutionResponse } from "@/types/api/institution.types";
-import { useCallback, useState } from "react";
+} from '@/components/organisms/institution/UniversityFormDialog';
+import { UniversityDetailSection } from '@/components/page/hr/UniversityDetailSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
+import type { InstitutionResponse } from '@/types/api/institution.types';
+import { useCallback, useState } from 'react';
 
 const EMPTY_FORM: UniversityFormState = {
-  name: "",
-  shortName: "",
-  educationLevelId: "",
-  province: "",
-  city: "",
-  logo: "",
+  name: '',
+  shortName: '',
+  educationLevelId: '',
+  province: '',
+  city: '',
+  logo: '',
 };
 
 interface UniversityDetailContainerProps {
   id: string;
 }
 
-export default function UniversityDetailContainer({
-  id,
-}: UniversityDetailContainerProps) {
+export default function UniversityDetailContainer({ id }: UniversityDetailContainerProps) {
   const api = useApi();
   const ns = useAppNameSpace();
 
@@ -40,22 +38,19 @@ export default function UniversityDetailContainer({
 
   const university = detailQuery.data ?? null;
 
-  const handleFieldChange = useCallback(
-    (field: UniversityFormField, value: string) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
+  const handleFieldChange = useCallback((field: UniversityFormField, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   const handleOpenEdit = useCallback(() => {
     if (!university) return;
     setForm({
-      name: university.name ?? "",
-      shortName: university.shortName ?? "",
-      educationLevelId: university.educationLevelId ?? "",
-      province: university.province ?? "",
-      city: university.city ?? "",
-      logo: (university.logo as string | null | undefined) ?? "",
+      name: university.name ?? '',
+      shortName: university.shortName ?? '',
+      educationLevelId: university.educationLevelId ?? '',
+      province: university.province ?? '',
+      city: university.city ?? '',
+      logo: (university.logo as string | null | undefined) ?? '',
     });
     setFormOpen(true);
   }, [university]);

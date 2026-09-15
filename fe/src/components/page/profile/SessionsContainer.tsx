@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { SessionsSection } from "@/components/page/profile/SessionsSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useProfileLogic } from "@/hooks/useProfileLogic";
+import { SessionsSection } from '@/components/page/profile/SessionsSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useProfileLogic } from '@/hooks/useProfileLogic';
 
 /**
  * Container client component untuk halaman Perangkat & Sesi Aktif.

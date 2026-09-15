@@ -1,17 +1,8 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/atoms/badge";
-import { Button } from "@/components/atoms/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/atoms/card";
-import type { SupervisorResponse } from "@/types/api/supervisor.types";
-import type { AlertContexType } from "@/types/ui";
-import { Eye, MoreHorizontal, Trash, UserCheck } from "lucide-react";
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +10,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/atoms/dropdown-menu";
+} from '@/components/atoms/dropdown-menu';
+import type { SupervisorResponse } from '@/types/api/supervisor.types';
+import type { AlertContexType } from '@/types/ui';
+import { Eye, MoreHorizontal, Trash, UserCheck } from 'lucide-react';
 
 export interface SupervisorTableProps {
   supervisors: SupervisorResponse[];
@@ -45,9 +39,7 @@ export function SupervisorTable({
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Daftar Supervisor</CardTitle>
-        <CardDescription>
-          {supervisors.length} supervisor ditemukan
-        </CardDescription>
+        <CardDescription>{supervisors.length} supervisor ditemukan</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {supervisors.length === 0 ? (
@@ -75,30 +67,18 @@ export function SupervisorTable({
                     key={supervisor.id}
                     className="border-b transition-colors last:border-0 hover:bg-muted/40"
                   >
-                    <td className="px-6 py-4 font-medium">
-                      {supervisor.fullName}
-                    </td>
-                    <td className="px-6 py-4 text-muted-foreground">
-                      {supervisor.email}
-                    </td>
+                    <td className="px-6 py-4 font-medium">{supervisor.fullName}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{supervisor.email}</td>
                     <td className="px-6 py-4">
-                      <Badge
-                        variant={supervisor.isActive ? "default" : "secondary"}
-                      >
-                        {supervisor.isActive ? "Aktif" : "Nonaktif"}
+                      <Badge variant={supervisor.isActive ? 'default' : 'secondary'}>
+                        {supervisor.isActive ? 'Aktif' : 'Nonaktif'}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4">
-                      {supervisor.activeAssignmentsCount}
-                    </td>
+                    <td className="px-6 py-4">{supervisor.activeAssignmentsCount}</td>
                     <td className="flex justify-center ">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild className="mt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="size-8 p-0"
-                          >
+                          <Button variant="outline" size="sm" className="size-8 p-0">
                             <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -107,20 +87,13 @@ export function SupervisorTable({
                           <DropdownMenuSeparator />
                           {onViewAuditLog && supervisor.id && (
                             <DropdownMenuItem
-                              onClick={() =>
-                                onViewAuditLog(
-                                  supervisor.id!,
-                                  supervisor.fullName,
-                                )
-                              }
+                              onClick={() => onViewAuditLog(supervisor.id!, supervisor.fullName)}
                             >
                               <h1 className="font-semibold">History</h1>
                             </DropdownMenuItem>
                           )}
                           {onDeleteSupervisor && (
-                            <DropdownMenuItem
-                              onClick={() => onEditSupervisor!(supervisor.id)}
-                            >
+                            <DropdownMenuItem onClick={() => onEditSupervisor!(supervisor.id)}>
                               <h1 className="font-semibold ">Edit</h1>
                             </DropdownMenuItem>
                           )}
@@ -137,10 +110,9 @@ export function SupervisorTable({
                               variant="destructive"
                               onClick={() =>
                                 alert.confirm({
-                                  title: "Hapus",
-                                  deskripsi:
-                                    "Apakah Kamu Ingin Menghapus Supervisor Ini?",
-                                  icon: "question",
+                                  title: 'Hapus',
+                                  deskripsi: 'Apakah Kamu Ingin Menghapus Supervisor Ini?',
+                                  icon: 'question',
                                   onConfirm: () => {
                                     onDeleteSupervisor(supervisor.id);
                                   },

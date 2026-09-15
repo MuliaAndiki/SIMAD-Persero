@@ -146,9 +146,9 @@ export default function ApplicationContainer() {
           // Tetap lanjut hapus draft meskipun gagal hapus file
         });
       }
-      
+
       await deleteDraftMutation.mutateAsync({ id });
-      
+
       ns.alert.toast({
         title: 'Draft Dihapus',
         message: 'Draft pengajuan dan file terkait berhasil dihapus',

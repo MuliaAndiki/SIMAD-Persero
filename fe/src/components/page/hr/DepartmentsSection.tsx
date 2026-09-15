@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
 import {
   DepartmentFormDialog,
   type DepartmentFormField,
   type DepartmentFormState,
-} from "@/components/organisms/department/DepartmentFormDialog";
-import { DepartmentTable } from "@/components/organisms/department/DepartmentTable";
-import type { DepartmentResponse } from "@/types/api/department.types";
-import type { AlertContexType } from "@/types/ui";
-import { AlertCircle, Loader2, Plus, Search } from "lucide-react";
-import { useState } from "react";
-import type { FormEvent } from "react";
+} from '@/components/organisms/department/DepartmentFormDialog';
+import { DepartmentTable } from '@/components/organisms/department/DepartmentTable';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import type { AlertContexType } from '@/types/ui';
+import { AlertCircle, Loader2, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 
 export interface DepartmentsSectionState {
   isPending: boolean;
@@ -47,10 +47,7 @@ export interface DepartmentsSectionProps {
   actions: DepartmentsSectionActions;
 }
 
-export function DepartmentsSection({
-  state,
-  actions,
-}: DepartmentsSectionProps) {
+export function DepartmentsSection({ state, actions }: DepartmentsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
   const isInitialLoading = state.isPending && state.departments.length === 0;

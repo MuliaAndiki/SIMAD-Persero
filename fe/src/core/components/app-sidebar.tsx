@@ -18,12 +18,7 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from '@/components/atoms';
-import {
-  ROLE_SIDEBAR_MENU,
-  SIDEBAR_MENU,
-  isItemActive,
-  isMenuActive,
-} from '@/configs/app.config';
+import { ROLE_SIDEBAR_MENU, SIDEBAR_MENU, isItemActive, isMenuActive } from '@/configs/app.config';
 import { useInternAccess } from '@/hooks/useInternAccess';
 import { useApi } from '@/hooks/useService/useApi';
 import { cn } from '@/utils/classname';

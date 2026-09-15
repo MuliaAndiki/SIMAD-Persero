@@ -46,8 +46,8 @@ export function ReceptionistDashboardSection({
       (item) =>
         item.internName.toLowerCase().includes(queryLower) ||
         item.internEmail.toLowerCase().includes(queryLower) ||
-        (item.departmentName && item.departmentName.toLowerCase().includes(queryLower)) ||
-        (item.officeName && item.officeName.toLowerCase().includes(queryLower)),
+        item.departmentName?.toLowerCase().includes(queryLower) ||
+        item.officeName?.toLowerCase().includes(queryLower),
     );
   }, [data?.recentAttendances, searchQuery]);
 
@@ -205,11 +205,17 @@ export function ReceptionistDashboardSection({
                     </td>
                     <td className="px-4 py-3">
                       {item.checkInStatus === 'ON_TIME' ? (
-                        <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <Badge
+                          variant="outline"
+                          className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        >
                           Tepat Waktu
                         </Badge>
                       ) : item.checkInStatus === 'LATE' ? (
-                        <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <Badge
+                          variant="outline"
+                          className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        >
                           Terlambat
                         </Badge>
                       ) : (
@@ -217,7 +223,8 @@ export function ReceptionistDashboardSection({
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {item.attendanceStatus === 'PRESENT' || item.attendanceStatus === 'COMPLETED' ? (
+                      {item.attendanceStatus === 'PRESENT' ||
+                      item.attendanceStatus === 'COMPLETED' ? (
                         <Badge className="bg-emerald-600 hover:bg-emerald-700">Hadir</Badge>
                       ) : item.attendanceStatus === 'LATE' ? (
                         <Badge className="bg-amber-600 hover:bg-amber-700">Terlambat</Badge>

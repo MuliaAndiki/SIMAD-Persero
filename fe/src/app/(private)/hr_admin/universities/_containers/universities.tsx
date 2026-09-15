@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
 import type {
   UniversityFormField,
   UniversityFormState,
-} from "@/components/organisms/institution/UniversityFormDialog";
-import { UniversitiesSection } from "@/components/page/hr/UniversitiesSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useApi } from "@/hooks/useService/useApi";
-import type { InstitutionResponse } from "@/types/api/institution.types";
-import { useCallback, useState } from "react";
+} from '@/components/organisms/institution/UniversityFormDialog';
+import { UniversitiesSection } from '@/components/page/hr/UniversitiesSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useApi } from '@/hooks/useService/useApi';
+import type { InstitutionResponse } from '@/types/api/institution.types';
+import { useCallback, useState } from 'react';
 
 const EMPTY_FORM: UniversityFormState = {
-  name: "",
-  shortName: "",
-  educationLevelId: "",
-  province: "",
-  city: "",
-  logo: "",
+  name: '',
+  shortName: '',
+  educationLevelId: '',
+  province: '',
+  city: '',
+  logo: '',
 };
 
 /**
@@ -29,8 +29,8 @@ export default function HrUniversitiesContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
-  const [keyword, setKeyword] = useState("");
-  const [selectedEducationLevelId, setSelectedEducationLevelId] = useState("");
+  const [keyword, setKeyword] = useState('');
+  const [selectedEducationLevelId, setSelectedEducationLevelId] = useState('');
   const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<InstitutionResponse | null>(null);
@@ -64,12 +64,9 @@ export default function HrUniversitiesContainer() {
     setPage(1);
   }, []);
 
-  const handleFieldChange = useCallback(
-    (field: UniversityFormField, value: string) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
+  const handleFieldChange = useCallback((field: UniversityFormField, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   const handleOpenCreate = useCallback(() => {
     setEditing(null);

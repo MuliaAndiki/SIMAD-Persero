@@ -1,29 +1,19 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
+import { Select } from '@/components/atoms';
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
 import {
   UniversityFormDialog,
   type UniversityFormField,
   type UniversityFormState,
-} from "@/components/organisms/institution/UniversityFormDialog";
-import { UniversityTable } from "@/components/organisms/institution/UniversityTable";
-import type {
-  EducationLevelResponse,
-  InstitutionResponse,
-} from "@/types/api/institution.types";
-import type { AlertContexType } from "@/types/ui";
-import {
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Plus,
-  Search,
-} from "lucide-react";
-import { type FormEvent, useState } from "react";
-import { Select } from "@/components/atoms";
+} from '@/components/organisms/institution/UniversityFormDialog';
+import { UniversityTable } from '@/components/organisms/institution/UniversityTable';
+import type { EducationLevelResponse, InstitutionResponse } from '@/types/api/institution.types';
+import type { AlertContexType } from '@/types/ui';
+import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Plus, Search } from 'lucide-react';
+import { type FormEvent, useState } from 'react';
 
 export interface UniversitiesSectionState {
   isPending: boolean;
@@ -60,10 +50,7 @@ export interface UniversitiesSectionProps {
   actions: UniversitiesSectionActions;
 }
 
-export function UniversitiesSection({
-  state,
-  actions,
-}: UniversitiesSectionProps) {
+export function UniversitiesSection({ state, actions }: UniversitiesSectionProps) {
   const [query, setQuery] = useState(state.keyword);
 
   const handleSubmitSearch = (e: FormEvent) => {
@@ -76,19 +63,14 @@ export function UniversitiesSection({
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">
-          Universitas & Perguruan Tinggi
-        </h1>
+        <h1 className="text-2xl font-bold text-foreground">Universitas & Perguruan Tinggi</h1>
         <p className="text-sm text-muted-foreground">
           Kelola master data perguruan tinggi / institusi asal peserta magang.
         </p>
       </header>
 
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <form
-          onSubmit={handleSubmitSearch}
-          className="flex flex-1 items-center gap-2"
-        >
+        <form onSubmit={handleSubmitSearch} className="flex flex-1 items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -140,8 +122,7 @@ export function UniversitiesSection({
           {state.totalPages > 1 && (
             <div className="flex items-center justify-between px-2 text-xs text-muted-foreground">
               <span>
-                Halaman {state.page} dari {state.totalPages} ({state.total}{" "}
-                data)
+                Halaman {state.page} dari {state.totalPages} ({state.total} data)
               </span>
               <div className="flex items-center gap-2">
                 <Button

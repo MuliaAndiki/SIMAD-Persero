@@ -5,7 +5,8 @@ import { useApi } from '@/hooks/useService/useApi';
 
 export function ReceptionistDashboardContainer() {
   const api = useApi();
-  const { data, isPending, isFetching, isError, error, refetch } = api.dashboard.query.receptionist();
+  const { data, isPending, isFetching, isError, error, refetch } =
+    api.dashboard.query.receptionist();
 
   const handleRefresh = () => {
     refetch();

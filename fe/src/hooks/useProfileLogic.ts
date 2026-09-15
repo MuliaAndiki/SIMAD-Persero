@@ -1,6 +1,6 @@
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
-import { useCallback, useState } from "react";
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
+import { useCallback, useState } from 'react';
 
 export function useProfileLogic() {
   const api = useApi();
@@ -22,12 +22,12 @@ export function useProfileLogic() {
   const handleUploadPhoto = useCallback(
     async (file: File) => {
       try {
-        const { uploadAvatar, deleteObject } = await import("@/utils/r2-utils");
+        const { uploadAvatar, deleteObject } = await import('@/utils/r2-utils');
 
         // Delete old avatar photo from R2 if present
         if (profile.data?.profilePhoto) {
           await deleteObject(profile.data.profilePhoto).catch((err) => {
-            console.warn("Failed to delete old avatar from R2:", err);
+            console.warn('Failed to delete old avatar from R2:', err);
           });
         }
 
@@ -37,7 +37,7 @@ export function useProfileLogic() {
           originalName: file.name,
         });
       } catch (err) {
-        console.error("Failed to upload avatar to R2:", err);
+        console.error('Failed to upload avatar to R2:', err);
       }
     },
     [uploadPhoto, profile.data?.profilePhoto],
@@ -91,10 +91,10 @@ export function useProfileLogic() {
   const handleRevokeSession = useCallback(
     async (sessionId: string) => {
       const confirmed = await ns.alert.confirm({
-        title: "Cabut Sesi?",
-        deskripsi: "Sesi pada perangkat ini akan diakhiri.",
-        icon: "warning",
-        confirmButtonText: "Ya, Cabut",
+        title: 'Cabut Sesi?',
+        deskripsi: 'Sesi pada perangkat ini akan diakhiri.',
+        icon: 'warning',
+        confirmButtonText: 'Ya, Cabut',
       });
       if (!confirmed) return;
       await deleteSession.mutateAsync({ sessionId });
@@ -104,10 +104,10 @@ export function useProfileLogic() {
 
   const handleLogoutAll = useCallback(async () => {
     const confirmed = await ns.alert.confirm({
-      title: "Keluar Semua Perangkat?",
-      deskripsi: "Seluruh sesi login pada perangkat lain akan diakhiri.",
-      icon: "warning",
-      confirmButtonText: "Ya, Keluar Semua",
+      title: 'Keluar Semua Perangkat?',
+      deskripsi: 'Seluruh sesi login pada perangkat lain akan diakhiri.',
+      icon: 'warning',
+      confirmButtonText: 'Ya, Keluar Semua',
     });
     if (!confirmed) return;
     await logoutAll.mutateAsync();

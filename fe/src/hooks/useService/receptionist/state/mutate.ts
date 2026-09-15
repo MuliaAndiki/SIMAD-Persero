@@ -2,13 +2,13 @@ import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import Api from '@/services/props.service';
-import { ResponseTitles } from '@/utils/response-titles';
 import type { IUser } from '@/types/api/model.type';
 import type {
   CreateReceptionistBody,
   ReceptionistParams,
   UpdateReceptionistBody,
 } from '@/types/api/receptionist.types';
+import { ResponseTitles } from '@/utils/response-titles';
 import { useMutation } from '@tanstack/react-query';
 
 export function useCreateReceptionist() {

@@ -3,7 +3,8 @@ import { ReceptionistApplicationsContainer } from './_containers/ReceptionistApp
 
 export const metadata: Metadata = {
   title: 'Pengajuan Magang - Resepsionis - SIMAD',
-  description: 'Daftar pengajuan magang untuk membantu verifikasi dan informasi bagi calon peserta.',
+  description:
+    'Daftar pengajuan magang untuk membantu verifikasi dan informasi bagi calon peserta.',
 };
 
 export default function ReceptionistApplicationsPage() {
