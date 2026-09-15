@@ -15,3 +15,10 @@ export const CertificateVerifyParam = Type.Object({
 export const GenerateCertificateDto = Type.Object({
   internshipId: Type.String({ format: 'uuid' }),
 });
+
+export const UpdateCertificateSettingsDto = Type.Object({
+  signerName: Type.Optional(Type.String()),
+  signerRole: Type.Optional(Type.String()),
+  signatureUrl: Type.Optional(Type.String()),
+  templateUrl: Type.Optional(Type.String()),
+});

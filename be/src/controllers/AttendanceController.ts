@@ -150,12 +150,14 @@ class AttendanceController {
       const query = c.query as unknown as AttendanceExportQuery;
       const buffer = await attendanceService.exportAttendance(c.user!, query);
 
-      c.set.headers["Content-Type"] =
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-      c.set.headers["Content-Disposition"] =
-        `attachment; filename=attendance_export_${Date.now()}.xlsx`;
-
-      return buffer;
+      const filename = `attendance_export_${Date.now()}.xlsx`;
+      return new Response(buffer, {
+        headers: {
+          'Content-Type':
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+        },
+      });
     } catch (error) {
       return this.handleError(c, error);
     }

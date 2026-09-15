@@ -1,4 +1,6 @@
 import { randomBytes } from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 import { AppError } from '@/http/error';
 import FileService from '@/services/file.service';
 import type { AuthUser } from '@/types/auth.types';
@@ -12,6 +14,14 @@ import { createAuditLog } from '@/utils/audit.util';
 import { generateCertificatePdf } from '@/utils/pdf.util';
 import prisma from '../../prisma/client';
 
+export interface CertificateSettings {
+  signerName: string;
+  signerRole: string;
+  signatureUrl?: string;
+  templateUrl?: string;
+}
+
+const SETTINGS_FILE_PATH = path.resolve(__dirname, '../config/certificate-settings.json');
 
 /**
  * Service layer modul Certificate.
@@ -108,7 +118,19 @@ class CertificateService {
   private serializeDetail(certificate: any): CertificateDetailResponse {
     return {
       ...this.serialize(certificate),
-      file: certificate.file,
+      file: certificate.file
+        ? {
+            id: certificate.file.id,
+            originalName: certificate.file.originalName,
+            fileName: certificate.file.fileName,
+            mimeType: certificate.file.mimeType,
+            size:
+              certificate.file.size !== null && certificate.file.size !== undefined
+                ? Number(certificate.file.size)
+                : null,
+            url: certificate.file.url,
+          }
+        : null,
       template: certificate.template,
     };
   }
@@ -161,6 +183,44 @@ class CertificateService {
     });
   }
 
+  // ─── Settings Management ──────────────────────────────────────────
+
+  public getSettings(): CertificateSettings {
+    try {
+      if (fs.existsSync(SETTINGS_FILE_PATH)) {
+        const raw = fs.readFileSync(SETTINGS_FILE_PATH, 'utf-8');
+        return JSON.parse(raw);
+      }
+    } catch (err) {
+      console.error('Failed to read certificate settings file:', err);
+    }
+    return {
+      signerName: 'NURLANA',
+      signerRole: 'Senior Manager Keuangan, Komunikasi & Umum',
+      signatureUrl: '',
+      templateUrl: '',
+    };
+  }
+
+  public async updateSettings(
+    settings: Partial<CertificateSettings>,
+  ): Promise<CertificateSettings> {
+    const current = this.getSettings();
+    const updated: CertificateSettings = {
+      signerName: settings.signerName?.trim() || current.signerName,
+      signerRole: settings.signerRole?.trim() || current.signerRole,
+      signatureUrl:
+        settings.signatureUrl !== undefined ? settings.signatureUrl : current.signatureUrl,
+      templateUrl: settings.templateUrl !== undefined ? settings.templateUrl : current.templateUrl,
+    };
+    try {
+      fs.writeFileSync(SETTINGS_FILE_PATH, JSON.stringify(updated, null, 2), 'utf-8');
+    } catch (err) {
+      console.error('Failed to write certificate settings file:', err);
+    }
+    return updated;
+  }
+
   // ─── 17.1 Get My Certificate ──────────────────────────────────────
 
   public async getMyCertificate(userId: string) {
@@ -187,10 +247,80 @@ class CertificateService {
       include: { certificate: { include: this.certificateInclude } },
     });
 
-    if (!internship?.certificate) {
+    if (!internship) {
+      return null;
+    }
+
+    // Auto-generate certificate if internship is COMPLETED but certificate not yet generated!
+    if (!internship.certificate && internship.status === InternshipStatus.COMPLETED) {
+      try {
+        const cert = await this.generate(userId, { internshipId: internship.id });
+        return cert;
+      } catch (err) {
+        console.error('Auto-generate certificate in getMyCertificate failed:', err);
+        return null;
+      }
+    }
+
+    if (!internship.certificate) {
       return null;
     }
     return this.serializeDetail(internship.certificate);
+  }
+
+  // ─── Direct PDF Download (Buffer) ─────────────────────────────────
+
+  public async getCertificatePdf(
+    certificateId: string,
+    user: AuthUser,
+  ): Promise<{ pdfBuffer: Buffer; certificateNumber: string }> {
+    const certificate = await this.findById(certificateId);
+
+    // Intern hanya dapat mengunduh sertifikat miliknya sendiri.
+    if (user.roles.some((r) => r.toLowerCase() === 'intern')) {
+      const ownerId = certificate.internship?.internProfile?.user?.id ?? null;
+      if (ownerId !== user.id) {
+        throw new AppError(403, 'Access denied. You can only download your own certificate');
+      }
+    }
+
+    const settings = this.getSettings();
+    const internName = certificate.internship?.internProfile?.user?.fullName ?? '-';
+    const studentNumber = certificate.internship?.internProfile?.studentNumber ?? '-';
+    const institutionName = certificate.internship?.internProfile?.institution?.name ?? '-';
+    const departmentName = certificate.internship?.department?.name ?? '-';
+    const cityName = certificate.internship?.officeLocation?.name ?? 'Jakarta';
+
+    const pdfBuffer = generateCertificatePdf({
+      certificateNumber: certificate.certificateNumber ?? 'certificate',
+      internName,
+      studentNumber,
+      institutionName,
+      departmentName,
+      startDate: this.formatDate(certificate.internship?.actualStartDate ?? null),
+      endDate: this.formatDate(certificate.internship?.actualEndDate ?? null),
+      verificationToken: certificate.verificationToken ?? '-',
+      cityName,
+      signerName: settings.signerName,
+      signerRole: settings.signerRole,
+      signatureUrl: settings.signatureUrl,
+    });
+
+    return {
+      pdfBuffer,
+      certificateNumber: certificate.certificateNumber ?? 'certificate',
+    };
+  }
+
+  public async downloadMyCertificate(
+    userId: string,
+    user: AuthUser,
+  ): Promise<{ pdfBuffer: Buffer; certificateNumber: string }> {
+    const cert = await this.getMyCertificate(userId);
+    if (!cert) {
+      throw new AppError(404, 'Certificate not found or internship is not yet completed');
+    }
+    return this.getCertificatePdf(cert.id, user);
   }
 
   // ─── 17.3 Certificate Detail ──────────────────────────────────────
@@ -270,6 +400,24 @@ class CertificateService {
     const template = await this.getActiveTemplate();
     const certificateNumber = await this.generateCertificateNumber();
     const verificationToken = randomBytes(16).toString('hex');
+    const settings = this.getSettings();
+
+    // Tentukan generatorId: jika dipicu oleh intern (auto-generate), hubungkan ke HR Admin
+    let generatorId = userId;
+    const caller = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { userRoles: { include: { role: true } } },
+    });
+    const isHrAdmin = caller?.userRoles?.some((ur) => ur.role.code === 'hr_admin');
+    if (!isHrAdmin) {
+      const hrAdmin = await prisma.user.findFirst({
+        where: { userRoles: { some: { role: { code: 'hr_admin' } } } },
+        select: { id: true },
+      });
+      if (hrAdmin) {
+        generatorId = hrAdmin.id;
+      }
+    }
 
     // BR-CERT-006: sertifikat dalam format PDF.
     const pdfBuffer = generateCertificatePdf({
@@ -282,9 +430,12 @@ class CertificateService {
       endDate: this.formatDate(internship.actualEndDate),
       verificationToken,
       cityName,
+      signerName: settings.signerName,
+      signerRole: settings.signerRole,
+      signatureUrl: settings.signatureUrl,
     });
 
-    const file = await this.createPdfFile(userId, `${certificateNumber}.pdf`, pdfBuffer);
+    const file = await this.createPdfFile(generatorId, `${certificateNumber}.pdf`, pdfBuffer);
 
     const result = await prisma.$transaction(async (tx) => {
       const certificate = await tx.certificate.create({
@@ -371,6 +522,7 @@ class CertificateService {
     const institutionName = certificate.internship?.internProfile?.institution?.name ?? '-';
     const departmentName = certificate.internship?.department?.name ?? '-';
     const cityName = certificate.internship?.officeLocation?.name ?? 'Jakarta';
+    const settings = this.getSettings();
 
     const pdfBuffer = generateCertificatePdf({
       certificateNumber: certificate.certificateNumber ?? '-',
@@ -382,6 +534,9 @@ class CertificateService {
       endDate: this.formatDate(certificate.internship?.actualEndDate ?? null),
       verificationToken: certificate.verificationToken ?? '-',
       cityName,
+      signerName: settings.signerName,
+      signerRole: settings.signerRole,
+      signatureUrl: settings.signatureUrl,
     });
 
     const file = await this.createPdfFile(

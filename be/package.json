@@ -5,6 +5,7 @@
   "scripts": {
     "prisma:generate": "prisma generate",
     "prisma:seed": "prisma db seed",
+    "prisma:seed:completed": "bun run prisma/seed-completed-intern.ts",
     "dev": "bun run prisma:generate && bun --watch run src/serve.ts",
     "start": "bun run src/serve.ts",
     "build": "tsc",
