@@ -24,6 +24,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Api from '@/services/props.service';
 import type { AttendanceResponse } from '@/types/api/attendance.types';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 /** State yang disuplai container — section murni presentasi. */
 export interface HistorySectionState {
@@ -141,13 +142,15 @@ function buildWorkdays(month: number, year: number, start?: string | null, end?:
   return days;
 }
 
+const SKELETON_IDS = ['s1', 's2', 's3', 's4', 's5', 's6'];
+
 function HistoryLoading() {
   return (
     <PhantomSkeleton loading>
       <Card>
         <CardContent className="flex flex-col gap-4 p-6">
-          {Array.from({ length: 6 }, (_, i) => (
-            <div key={`history-skeleton-${i}`} className="h-16 rounded bg-muted" />
+          {SKELETON_IDS.map((id) => (
+            <div key={id} className="h-16 rounded bg-muted" />
           ))}
         </CardContent>
       </Card>
@@ -265,12 +268,15 @@ export function HistorySection({ state, service }: HistorySectionProps) {
   const handleExport = async () => {
     try {
       setIsExporting(true);
+      toast.loading('Sedang menyiapkan ekspor data absensi...', { id: 'export-attendance' });
       await Api.Attendance.DownloadExcel({
         month: state.month,
         year: state.year,
       });
+      toast.success('Data absensi berhasil diekspor!', { id: 'export-attendance' });
     } catch (error) {
       console.error('Failed to export:', error);
+      toast.error('Gagal mengekspor data absensi. Silakan coba lagi.', { id: 'export-attendance' });
     } finally {
       setIsExporting(false);
     }

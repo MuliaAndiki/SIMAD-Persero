@@ -11,7 +11,9 @@ import { ResponseTitles } from '@/utils/response-titles';
 import type {
   CertificateParams,
   CertificateResponse,
+  CertificateSettingsResponse,
   GenerateCertificateBody,
+  UpdateCertificateSettingsBody,
 } from '@/types/api/certificate.types';
 import { useMutation } from '@tanstack/react-query';
 
@@ -111,6 +113,46 @@ export function useDownloadCertificate() {
         icon: 'success',
       });
     },
+    onError: (err) => {
+      ns.alert.toast({
+        title: ResponseTitles.error,
+        message: err.message,
+        icon: 'error',
+      });
+    },
+  });
+}
+
+export function useSaveCertificateSettings() {
+  const ns = useAppNameSpace();
+  return useMutation<TResponse<CertificateSettingsResponse>, Error, UpdateCertificateSettingsBody>({
+    mutationFn: (body: UpdateCertificateSettingsBody) => Api.Certificate.SaveSettings(body),
+    onSettled: async () => {
+      await ns.queryClient.invalidateQueries({
+        queryKey: queryKey.certificate.settings(),
+      });
+    },
+    onSuccess: (res) => {
+      ns.alert.toast({
+        title: res.title,
+        message: res.message,
+        icon: 'success',
+      });
+    },
+    onError: (err) => {
+      ns.alert.toast({
+        title: ResponseTitles.error,
+        message: err.message,
+        icon: 'error',
+      });
+    },
+  });
+}
+
+export function useDownloadMyCertificate() {
+  const ns = useAppNameSpace();
+  return useMutation<Response, Error, void>({
+    mutationFn: () => Api.Certificate.DownloadMy(),
     onError: (err) => {
       ns.alert.toast({
         title: ResponseTitles.error,

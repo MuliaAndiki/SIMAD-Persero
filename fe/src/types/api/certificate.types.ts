@@ -20,6 +20,20 @@ export interface CertificateVerifyParams {
   verificationCode: string;
 }
 
+export interface CertificateSettingsResponse {
+  signerName: string;
+  signerRole: string;
+  signatureUrl?: string;
+  templateUrl?: string;
+}
+
+export interface UpdateCertificateSettingsBody {
+  signerName?: string;
+  signerRole?: string;
+  signatureUrl?: string;
+  templateUrl?: string;
+}
+
 // ---------- Response (data dari backend) ----------
 
 /** Sertifikat hasil serialisasi backend (GET /certificates/me, GET /certificates/:certificateId). */

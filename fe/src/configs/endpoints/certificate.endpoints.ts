@@ -20,4 +20,8 @@ export const CERTIFICATE_ENDPOINTS = {
   DETAIL: (certificateId: string) => `/certificates/${certificateId}`,
   /** POST /certificates/:certificateId/regenerate — Regenerate sertifikat (HR_ADMIN) */
   REGENERATE: (certificateId: string) => `/certificates/${certificateId}/regenerate`,
+  /** GET /certificates/settings & PUT /certificates/settings — Pengaturan sertifikat (HR_ADMIN & Authenticated) */
+  SETTINGS: '/certificates/settings',
+  /** GET /certificates/me/download — Unduh sertifikat milik intern langsung */
+  DOWNLOAD_MY: '/certificates/me/download',
 } as const;

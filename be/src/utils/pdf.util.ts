@@ -5,11 +5,15 @@
  *
  * Dipakai untuk modul Certificate (BR-CERT-006: sertifikat dalam format PDF).
  * Sumber aturan: docs/07-api-specification.md §17, docs/04-business-rules.md §23.
- * 
+ *
  * Updated: Enhanced template system with configurable layout (A4 landscape).
  */
 
-import { CERTIFICATE_CONFIG, getScaledFontSize, wrapText } from '@/config/certificate.template.config';
+import {
+  CERTIFICATE_CONFIG,
+  getScaledFontSize,
+  wrapText,
+} from '@/config/certificate.template.config';
 
 const PAGE_WIDTH = CERTIFICATE_CONFIG.page.width;
 const PAGE_HEIGHT = CERTIFICATE_CONFIG.page.height;
@@ -118,6 +122,9 @@ export interface CertificatePdfData {
   verificationToken: string;
   cityName?: string;
   issueDate?: string;
+  signerName?: string;
+  signerRole?: string;
+  signatureUrl?: string;
 }
 
 /**
@@ -172,7 +179,7 @@ export function generateCertificatePdf(data: CertificatePdfData): Buffer {
   // --- 5. DESCRIPTION PARAGRAPH ---
   const cityName = data.cityName ?? config.official.city;
   const unitText = data.cityName ? `Unit Induk Distribusi ${data.cityName}` : config.official.unit;
-  
+
   lines.push({
     text: `Telah menyelesaikan program magang di PT PLN (Persero) ${unitText} pada bidang`,
     size: config.completion.fontSize,
@@ -200,7 +207,9 @@ export function generateCertificatePdf(data: CertificatePdfData): Buffer {
 
   // --- 7. CENTERED SIGNATURE BLOCK ---
   const issueDate = data.issueDate ?? (data.endDate || '31 Agustus 2026');
-  
+  const activeSignerName = data.signerName || config.official.name;
+  const activeSignerRole = data.signerRole || config.official.position;
+
   // City and Date (Centered)
   lines.push({
     text: `${cityName}, ${issueDate}`,
@@ -212,7 +221,7 @@ export function generateCertificatePdf(data: CertificatePdfData): Buffer {
 
   // Signer Name (Centered, Bold Uppercase)
   lines.push({
-    text: config.official.name.toUpperCase(),
+    text: activeSignerName.toUpperCase(),
     size: config.signature.fontSizeName,
     bold: true,
     color: config.colors.black,
@@ -221,7 +230,7 @@ export function generateCertificatePdf(data: CertificatePdfData): Buffer {
 
   // Signer Position (Centered)
   lines.push({
-    text: config.official.position,
+    text: activeSignerRole,
     size: config.signature.fontSizePosition,
     bold: false,
     color: config.colors.black,

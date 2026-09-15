@@ -4,6 +4,7 @@ import {
   CertificateIdParam,
   CertificateVerifyParam,
   GenerateCertificateDto,
+  UpdateCertificateSettingsDto,
 } from '@/dtos/certificate.dto';
 import { requireRole, verifyToken } from '@/middlewares/auth';
 import { idempotency } from '@/middlewares/idempotency';
@@ -36,12 +37,42 @@ class CertificateRouter {
       },
     );
 
+    // ─── Certificate Settings (HR_ADMIN & Authenticated) ─────────────
+
+    // GET /certificates/settings (Authenticated)
+    this.certificateRouter.get(
+      '/settings',
+      (c: AppContext) => certificateController.getSettings(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle],
+      },
+    );
+
+    // PUT /certificates/settings (HR_ADMIN)
+    this.certificateRouter.put(
+      '/settings',
+      (c: AppContext) => certificateController.saveSettings(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+        body: UpdateCertificateSettingsDto,
+      },
+    );
+
     // ─── Intern Routes ─────────────────────────────────────────────
 
     // 17.1 GET /certificates/me (INTERN)
     this.certificateRouter.get(
       '/me',
       (c: AppContext) => certificateController.getMyCertificate(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
+      },
+    );
+
+    // GET /certificates/me/download (INTERN)
+    this.certificateRouter.get(
+      '/me/download',
+      (c: AppContext) => certificateController.downloadMine(c),
       {
         beforeHandle: [verifyToken().beforeHandle, requireRole(['intern']).beforeHandle],
       },
