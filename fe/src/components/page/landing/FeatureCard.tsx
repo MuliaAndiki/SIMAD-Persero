@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { type Variants, motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import type React from 'react';
 
@@ -11,7 +11,7 @@ interface FeatureCardProps {
   index?: number;
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
     opacity: 1,
@@ -19,7 +19,7 @@ const cardVariants = {
     transition: {
       delay: i * 0.15,
       duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
     },
   }),
 };
