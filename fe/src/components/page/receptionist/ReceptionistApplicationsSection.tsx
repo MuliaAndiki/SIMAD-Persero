@@ -91,7 +91,9 @@ export function ReceptionistApplicationsSection({
         </div>
         <Select
           value={statusFilter || 'all'}
-          onValueChange={(value) => onStatusFilter(value === 'all' ? undefined : (value as ApplicationStatusValue))}
+          onValueChange={(value) =>
+            onStatusFilter(value === 'all' ? undefined : (value as ApplicationStatusValue))
+          }
         >
           <SelectTrigger className="w-full sm:w-[200px]">
             <SelectValue placeholder="Pilih Status" />

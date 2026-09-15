@@ -1,27 +1,26 @@
-"use client";
+'use client';
 
-import { LoginSection } from "@/components/page/auth/login/LoginSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useApi } from "@/hooks/useService/useApi";
-import type { LoginBody, RememberedAccount } from "@/types/api/auth.types";
+import { LoginSection } from '@/components/page/auth/login/LoginSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useApi } from '@/hooks/useService/useApi';
+import type { LoginBody, RememberedAccount } from '@/types/api/auth.types';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-const LAST_ACCOUNT_KEY = "simad_remembered_account";
-const LAST_EMAIL_KEY = "simad_last_email";
+const LAST_ACCOUNT_KEY = 'simad_remembered_account';
+const LAST_EMAIL_KEY = 'simad_last_email';
 
 export default function LoginContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
   const [formLogin, setFormLogin] = useState<LoginBody>({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberedAccount, setRememberedAccount] =
-    useState<RememberedAccount | null>(null);
+  const [rememberedAccount, setRememberedAccount] = useState<RememberedAccount | null>(null);
 
   useEffect(() => {
     try {
@@ -72,7 +71,7 @@ export default function LoginContainer() {
       localStorage.removeItem(LAST_ACCOUNT_KEY);
       localStorage.removeItem(LAST_EMAIL_KEY);
     } catch {}
-    setFormLogin((prev) => ({ ...prev, email: "", password: "" }));
+    setFormLogin((prev) => ({ ...prev, email: '', password: '' }));
     setRememberedAccount(null);
   };
 
@@ -82,10 +81,9 @@ export default function LoginContainer() {
 
   const handleGoogleError = () => {
     ns.alert.toast({
-      title: "Gagal login dengan Google",
-      message:
-        "Tidak dapat menyelesaikan login dengan Google. Silakan coba lagi.",
-      icon: "error",
+      title: 'Gagal login dengan Google',
+      message: 'Tidak dapat menyelesaikan login dengan Google. Silakan coba lagi.',
+      icon: 'error',
     });
   };
 

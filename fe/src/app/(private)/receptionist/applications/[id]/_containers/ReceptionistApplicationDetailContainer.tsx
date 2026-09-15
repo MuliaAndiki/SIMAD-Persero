@@ -13,7 +13,7 @@ export function ReceptionistApplicationDetailContainer({
   const api = useApi();
   const { data, isPending, isError, error } = api.application.query.detail(
     { id: applicationId },
-    { enabled: Boolean(applicationId) }
+    { enabled: Boolean(applicationId) },
   );
 
   return (

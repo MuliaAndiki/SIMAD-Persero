@@ -1,16 +1,13 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
-import type { SupervisorFormType } from "@/components/organisms/supervisor/SupervisorFormDialog";
-import { SupervisorsSection } from "@/components/page/hr/SupervisorsSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useApi } from "@/hooks/useService/useApi";
-import type {
-  CreateSupervisorBody,
-  UpdateSupervisorBody,
-} from "@/types/api/supervisor.types";
+import type { SupervisorFormType } from '@/components/organisms/supervisor/SupervisorFormDialog';
+import { SupervisorsSection } from '@/components/page/hr/SupervisorsSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useApi } from '@/hooks/useService/useApi';
+import type { CreateSupervisorBody, UpdateSupervisorBody } from '@/types/api/supervisor.types';
 
 /**
  * Container halaman Supervisor (HR Admin) — orchestration layer.
@@ -19,19 +16,19 @@ export default function HrSupervisorsContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
-  const [internshipId, setInternshipId] = useState("");
+  const [internshipId, setInternshipId] = useState('');
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<SupervisorFormType>({
-    fullName: "",
-    email: "",
-    officeId: "",
-    departmentId: "",
-    password: "",
+    fullName: '',
+    email: '',
+    officeId: '',
+    departmentId: '',
+    password: '',
     isActive: true,
   });
 
@@ -43,17 +40,17 @@ export default function HrSupervisorsContainer() {
   });
 
   const detail = api.supervisor.query.detail(
-    { supervisorId: selectedId ?? "" },
+    { supervisorId: selectedId ?? '' },
     { enabled: Boolean(selectedId) },
   );
 
   const editingDetail = api.supervisor.query.detail(
-    { supervisorId: editingId ?? "" },
+    { supervisorId: editingId ?? '' },
     { enabled: Boolean(editingId) },
   );
 
   const approvedApplications = api.application.query.list({
-    status: "APPROVED",
+    status: 'APPROVED',
     limit: 100,
   });
 
@@ -69,32 +66,30 @@ export default function HrSupervisorsContainer() {
 
   useEffect(() => {
     if (editingId && editingDetail.data) {
-      const departmentId = editingDetail.data.departmentId ?? "";
+      const departmentId = editingDetail.data.departmentId ?? '';
       // Gunakan officeId langsung dari response; fallback ke pencarian via departments
       const officeId =
         editingDetail.data.officeId ??
-        offices.data?.find((o) =>
-          o.departments.some((d) => d.id === departmentId),
-        )?.id ??
-        "";
+        offices.data?.find((o) => o.departments.some((d) => d.id === departmentId))?.id ??
+        '';
       setFormData({
         fullName: editingDetail.data.fullName,
         email: editingDetail.data.email,
         officeId,
         departmentId,
-        password: "",
+        password: '',
         isActive: editingDetail.data.isActive,
       });
     }
   }, [editingDetail.data, editingId, offices.data]);
 
   const handleOpenAssign = useCallback(() => {
-    setInternshipId("");
+    setInternshipId('');
     setAssignOpen(true);
   }, []);
 
   const handleCloseAssign = useCallback(() => {
-    setInternshipId("");
+    setInternshipId('');
     setAssignOpen(false);
   }, []);
 
@@ -105,18 +100,18 @@ export default function HrSupervisorsContainer() {
       body: { internshipId },
     });
     setAssignOpen(false);
-    setInternshipId("");
+    setInternshipId('');
   }, [assign, internshipId, selectedId]);
 
   const handleRemoveAssignment = useCallback(
     async (assignmentId: string) => {
       if (!selectedId) return;
       const confirmed = await ns.alert.confirm({
-        title: "Lepas Penugasan?",
-        icon: "question",
+        title: 'Lepas Penugasan?',
+        icon: 'question',
         deskripsi:
-          "Intern akan dilepas dari bimbingan supervisor ini. Supervisor dapat di-assign ulang kapan saja.",
-        confirmButtonText: "Lepas",
+          'Intern akan dilepas dari bimbingan supervisor ini. Supervisor dapat di-assign ulang kapan saja.',
+        confirmButtonText: 'Lepas',
       });
       if (!confirmed) return;
       await removeAssignment.mutateAsync({
@@ -130,11 +125,11 @@ export default function HrSupervisorsContainer() {
   const handleOpenCreateForm = useCallback(() => {
     setEditingId(null);
     setFormData({
-      fullName: "",
-      email: "",
-      officeId: "",
-      departmentId: "",
-      password: "",
+      fullName: '',
+      email: '',
+      officeId: '',
+      departmentId: '',
+      password: '',
       isActive: true,
     });
     setFormOpen(true);
@@ -150,12 +145,9 @@ export default function HrSupervisorsContainer() {
     setEditingId(null);
   }, []);
 
-  const handleChangeForm = useCallback(
-    (partial: Partial<SupervisorFormType>) => {
-      setFormData((prev) => ({ ...prev, ...partial }));
-    },
-    [],
-  );
+  const handleChangeForm = useCallback((partial: Partial<SupervisorFormType>) => {
+    setFormData((prev) => ({ ...prev, ...partial }));
+  }, []);
 
   const handleSubmitForm = useCallback(async () => {
     if (editingId) {
@@ -230,8 +222,7 @@ export default function HrSupervisorsContainer() {
           createSupervisor.isPending ||
           updateSupervisor.isPending ||
           (Boolean(editingId) && editingDetail.isPending),
-        editingData:
-          editingId && editingDetail.data ? editingDetail.data : null,
+        editingData: editingId && editingDetail.data ? editingDetail.data : null,
         formData,
         isNotificationPending: sendNotification.isPending,
       }}

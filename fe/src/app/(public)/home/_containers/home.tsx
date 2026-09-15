@@ -1,11 +1,11 @@
 'use client';
-import { LandingSection } from '@/components/page/landing/LandingSection';
+import { PLNLandingSection } from '@/components/page/landing/PLNLandingSection';
 import NavLayout from '@/core/layouts/nav.layout';
 import Lenis from 'lenis';
 import React, { useEffect } from 'react';
 
 export default function ContainerHome() {
-  // Setup smooth scrolling with Lenis because we will heavily use GSAP
+  // Setup smooth scrolling with Lenis
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -26,7 +26,7 @@ export default function ContainerHome() {
 
   return (
     <NavLayout>
-      <LandingSection />
+      <PLNLandingSection />
     </NavLayout>
   );
 }

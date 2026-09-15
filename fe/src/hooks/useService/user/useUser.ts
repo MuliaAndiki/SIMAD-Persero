@@ -3,8 +3,8 @@ import {
   useDeleteAccount,
   useUpdateProfile,
   useUploadPhoto,
-} from "./state/mutate";
-import { useProfile } from "./state/query";
+} from './state/mutate';
+import { useProfile } from './state/query';
 
 export const useUser = () => {
   return {

@@ -25,14 +25,12 @@ interface AppShellProps {
  * sidebar dan bottom nav selalu sinkron.
  */
 export function AppShell({ children }: AppShellProps) {
-  const api = useApi()
+  const api = useApi();
 
-  const useProfile  = api.user.query.profile()
-  const {data:profile, isLoading} = useProfile
+  const useProfile = api.user.query.profile();
+  const { data: profile, isLoading } = useProfile;
 
- 
-console.log(profile?.profilePhoto)
-
+  console.log(profile?.profilePhoto);
 
   return (
     <SidebarProvider defaultOpen>
@@ -75,7 +73,7 @@ console.log(profile?.profilePhoto)
             <LanguageDropdown />
             <NotificationDropdownContainer />
             <Image
-              src={profile?.profilePhoto ? profile.profilePhoto : "/avatars/4.png"}
+              src={profile?.profilePhoto ? profile.profilePhoto : '/avatars/4.png'}
               alt="Avatar"
               height={38}
               width={38}

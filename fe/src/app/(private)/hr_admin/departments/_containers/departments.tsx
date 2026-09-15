@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
 import type {
   DepartmentFormField,
   DepartmentFormState,
-} from "@/components/organisms/department/DepartmentFormDialog";
-import { DepartmentsSection } from "@/components/page/hr/DepartmentsSection";
-import { useAppNameSpace } from "@/hooks/useAppNameSpace";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useApi } from "@/hooks/useService/useApi";
-import type { DepartmentResponse } from "@/types/api/department.types";
-import { useCallback, useState } from "react";
+} from '@/components/organisms/department/DepartmentFormDialog';
+import { DepartmentsSection } from '@/components/page/hr/DepartmentsSection';
+import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useApi } from '@/hooks/useService/useApi';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import { useCallback, useState } from 'react';
 
-const EMPTY_FORM: DepartmentFormState = { code: "", name: "", description: "" };
+const EMPTY_FORM: DepartmentFormState = { code: '', name: '', description: '' };
 
 /**
  * Container halaman Departemen (HR Admin) — orchestration layer.
@@ -24,7 +24,7 @@ export default function HrDepartmentsContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<DepartmentResponse | null>(null);
   const [form, setForm] = useState<DepartmentFormState>(EMPTY_FORM);
@@ -39,12 +39,9 @@ export default function HrDepartmentsContainer() {
   const update = api.department.mutate.update();
   const remove = api.department.mutate.delete();
 
-  const handleFieldChange = useCallback(
-    (field: DepartmentFormField, value: string) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
+  const handleFieldChange = useCallback((field: DepartmentFormField, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   const handleOpenCreate = useCallback(() => {
     setEditing(null);
@@ -57,7 +54,7 @@ export default function HrDepartmentsContainer() {
     setForm({
       code: department.code,
       name: department.name,
-      description: department.description ?? "",
+      description: department.description ?? '',
     });
     setFormOpen(true);
   }, []);
@@ -83,7 +80,7 @@ export default function HrDepartmentsContainer() {
       await create.mutateAsync({
         code: data.code,
         name: data.name,
-        description: data.description ?? "",
+        description: data.description ?? '',
       });
     }
     setFormOpen(false);

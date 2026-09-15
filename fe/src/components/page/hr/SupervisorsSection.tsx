@@ -1,27 +1,24 @@
-"use client";
+'use client';
 
-import { AlertCircle, Bell, Loader2, Search } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
-import { UserAuditLogModal } from "@/components/organisms/auditLog/UserAuditLogModal";
-import { SendNotificationModal } from "@/components/organisms/notification/SendNotificationModal";
-import { SupervisorAssignInternDialog } from "@/components/organisms/supervisor/SupervisorAssignInternDialog";
-import { SupervisorDetailDialog } from "@/components/organisms/supervisor/SupervisorDetailDialog";
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
+import { UserAuditLogModal } from '@/components/organisms/auditLog/UserAuditLogModal';
+import { SendNotificationModal } from '@/components/organisms/notification/SendNotificationModal';
+import { SupervisorAssignInternDialog } from '@/components/organisms/supervisor/SupervisorAssignInternDialog';
+import { SupervisorDetailDialog } from '@/components/organisms/supervisor/SupervisorDetailDialog';
 import {
   SupervisorFormDialog,
   type SupervisorFormType,
-} from "@/components/organisms/supervisor/SupervisorFormDialog";
-import { SupervisorTable } from "@/components/organisms/supervisor/SupervisorTable";
-import type { ApplicationResponse } from "@/types/api/application.types";
-import type { DepartmentResponse } from "@/types/api/department.types";
-import type { OfficeResponse } from "@/types/api/office.types";
-import type {
-  SupervisorDetailResponse,
-  SupervisorResponse,
-} from "@/types/api/supervisor.types";
-import type { AlertContexType } from "@/types/ui";
+} from '@/components/organisms/supervisor/SupervisorFormDialog';
+import { SupervisorTable } from '@/components/organisms/supervisor/SupervisorTable';
+import type { ApplicationResponse } from '@/types/api/application.types';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import type { OfficeResponse } from '@/types/api/office.types';
+import type { SupervisorDetailResponse, SupervisorResponse } from '@/types/api/supervisor.types';
+import type { AlertContexType } from '@/types/ui';
+import { AlertCircle, Bell, Loader2, Search } from 'lucide-react';
+import { useState } from 'react';
 
 export interface SupervisorsSectionState {
   isPending: boolean;
@@ -78,10 +75,7 @@ export interface SupervisorsSectionProps {
   actions: SupervisorsSectionActions;
 }
 
-export function SupervisorsSection({
-  state,
-  actions,
-}: SupervisorsSectionProps) {
+export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) {
   const [query, setQuery] = useState(state.keyword);
   const [auditUserId, setAuditUserId] = useState<string | null>(null);
   const [auditUserName, setAuditUserName] = useState<string | undefined>();
@@ -110,10 +104,7 @@ export function SupervisorsSection({
             </Button>
           )}
 
-          <Button
-            variant={"outline"}
-            onClick={() => actions.onOpenCreateForm()}
-          >
+          <Button variant={'outline'} onClick={() => actions.onOpenCreateForm()}>
             Buat Supervisor
           </Button>
         </div>
