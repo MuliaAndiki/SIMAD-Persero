@@ -301,7 +301,7 @@ model Internship {
   actualStartDate       DateTime?                 @map("actual_start_date") @db.Date
   actualEndDate         DateTime?                 @map("actual_end_date") @db.Date
   /// Internship status (InternshipStatus) — enforced via TS enum in service layer.
-  /// Allowed values: ONBOARDING_PENDING | ONBOARDING_COMPLETED | ACTIVE | COMPLETED | CERTIFICATE_GENERATED | ARCHIVED
+  /// Allowed values: PENDING | ACTIVE | COMPLETED | CERTIFICATE_GENERATED | ARCHIVED
   /// Source: docs/05-state-machine.md §9, docs/04-business-rules.md §11
   status                String?                   @db.VarChar(50)
   onboardingCompleted   Boolean                   @default(false) @map("onboarding_completed")

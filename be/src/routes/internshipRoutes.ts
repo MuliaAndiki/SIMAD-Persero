@@ -43,18 +43,7 @@ class InternshipRouter {
       },
     );
 
-    // 15.2 PATCH /internships/:id/onboarding — Complete onboarding (INTERN)
-    this.internshipRouter.patch(
-      "/:id/onboarding",
-      (c: AppContext) => internshipController.completeOnboarding(c),
-      {
-        beforeHandle: [
-          verifyToken().beforeHandle,
-          requireRole(["intern"]).beforeHandle,
-        ],
-        params: InternshipIdParam,
-      },
-    );
+
 
     // ─── HR / Admin / Supervisor Routes ────────────────────────
 

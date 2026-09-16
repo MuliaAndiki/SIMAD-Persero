@@ -50,22 +50,6 @@ class InternshipService {
   }
 
   /**
-   * PATCH /internships/:id/onboarding
-   * Menyelesaikan onboarding magang (INTERN).
-   */
-  public async CompleteOnboarding(
-    params: Pick<InternshipParams, 'id'>,
-  ): Promise<TResponse<InternshipResponse>> {
-    const res = await client.PatchResponse<InternshipResponse>(
-      INTERNSHIP_ENDPOINTS.ONBOARDING(params.id),
-      {},
-    );
-    return toServiceResponse(res, {
-      message: 'Onboarding berhasil diselesaikan',
-    });
-  }
-
-  /**
    * GET /internships/:id
    * Mengambil detail magang (HR_ADMIN, SUPERVISOR).
    */

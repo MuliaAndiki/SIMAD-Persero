@@ -127,14 +127,12 @@ export function InternshipsTable({
                             <DropdownMenuLabel>Aksi Magang</DropdownMenuLabel>
                             <DropdownMenuSeparator />
 
-                            {(internship.status === 'ONBOARDING_COMPLETED' ||
-                              internship.status === 'ONBOARDING_PENDING') &&
-                              onStart && (
-                                <DropdownMenuItem onClick={() => onStart(internship.id)}>
-                                  <Play className="mr-2 size-4 text-emerald-500" />
-                                  Mulai Magang
-                                </DropdownMenuItem>
-                              )}
+                            {internship.status === 'PENDING' && onStart && (
+                              <DropdownMenuItem onClick={() => onStart(internship.id)}>
+                                <Play className="mr-2 size-4 text-emerald-500" />
+                                Mulai Magang
+                              </DropdownMenuItem>
+                            )}
 
                             {internship.status === 'ACTIVE' && onFinish && (
                               <DropdownMenuItem onClick={() => onFinish(internship.id)}>

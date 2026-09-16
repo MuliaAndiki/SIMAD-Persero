@@ -20,8 +20,7 @@ import type {
 
 /** Status magang — cocok dengan vocabulary backend (internship.types.ts). */
 export type InternshipStatusValue =
-  | 'ONBOARDING_PENDING'
-  | 'ONBOARDING_COMPLETED'
+  | 'PENDING'
   | 'ACTIVE'
   | 'COMPLETED'
   | 'CERTIFICATE_GENERATED'

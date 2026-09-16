@@ -64,44 +64,6 @@ export function useStartInternship() {
   });
 }
 
-export function useCompleteOnboarding() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<InternshipResponse>,
-    Error,
-    Pick<InternshipParams, 'id'>,
-    InternshipCacheContext
-  >({
-    mutationFn: (params: Pick<InternshipParams, 'id'>) => Api.Internship.CompleteOnboarding(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      const previousData = readInternshipSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
-  });
-}
-
 export function useFinishInternship() {
   const ns = useAppNameSpace();
   return useMutation<

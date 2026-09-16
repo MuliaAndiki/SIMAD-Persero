@@ -12,8 +12,7 @@ import type {
 
 /** Internship status values matching Prisma schema comment & state machine. */
 export const InternshipStatus = {
-  ONBOARDING_PENDING: "ONBOARDING_PENDING",
-  ONBOARDING_COMPLETED: "ONBOARDING_COMPLETED",
+  PENDING: "PENDING",
   ACTIVE: "ACTIVE",
   COMPLETED: "COMPLETED",
   CERTIFICATE_GENERATED: "CERTIFICATE_GENERATED",
@@ -28,10 +27,7 @@ export const INTERNSHIP_TRANSITIONS: Record<
   InternshipStatusValue,
   InternshipStatusValue[]
 > = {
-  [InternshipStatus.ONBOARDING_PENDING]: [
-    InternshipStatus.ONBOARDING_COMPLETED,
-  ],
-  [InternshipStatus.ONBOARDING_COMPLETED]: [InternshipStatus.ACTIVE],
+  [InternshipStatus.PENDING]: [InternshipStatus.ACTIVE],
   [InternshipStatus.ACTIVE]: [InternshipStatus.COMPLETED],
   [InternshipStatus.COMPLETED]: [
     InternshipStatus.CERTIFICATE_GENERATED,

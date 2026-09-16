@@ -265,9 +265,9 @@ async function seedCompletedIntern() {
   // 10. Buat Status Histories
   const statusTransitions = [
     { oldStatus: "SUBMITTED", newStatus: "APPROVED", date: "2026-05-28T10:00:00.000Z", notes: "Pengajuan disetujui HR" },
-    { oldStatus: "APPROVED", newStatus: "ONBOARDING_PENDING", date: "2026-05-29T09:00:00.000Z", notes: "Menunggu onboarding tata tertib" },
-    { oldStatus: "ONBOARDING_PENDING", newStatus: "ONBOARDING_COMPLETED", date: "2026-06-01T08:00:00.000Z", notes: "Peserta menyetujui tata tertib" },
-    { oldStatus: "ONBOARDING_COMPLETED", newStatus: "ACTIVE", date: "2026-06-01T08:30:00.000Z", notes: "Peserta aktif magang" },
+    { oldStatus: "APPROVED", newStatus: "PENDING", date: "2026-05-29T09:00:00.000Z", notes: "Menunggu onboarding tata tertib" },
+    { oldStatus: "PENDING", newStatus: "ACTIVE", date: "2026-06-01T08:00:00.000Z", notes: "Peserta menyetujui tata tertib" },
+
     { oldStatus: "ACTIVE", newStatus: "COMPLETED", date: "2026-09-14T17:00:00.000Z", notes: "Masa magang berakhir dan selesai dengan memuaskan" },
   ];
 

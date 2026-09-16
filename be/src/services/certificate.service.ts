@@ -325,8 +325,17 @@ class CertificateService {
 
   // ─── 17.3 Certificate Detail ──────────────────────────────────────
 
-  public async getById(id: string) {
+  public async getById(id: string, userId?: string, roles?: string[]) {
     const certificate = await this.findById(id);
+    
+    // Intern hanya dapat melihat sertifikat miliknya sendiri.
+    if (roles && !roles.some((r) => r.toLowerCase() === 'hr_admin') && roles.some((r) => r.toLowerCase() === 'intern')) {
+      const ownerId = certificate.internship?.internProfile?.user?.id ?? null;
+      if (ownerId !== userId) {
+        throw new AppError(403, 'Access denied. You can only view your own certificate');
+      }
+    }
+
     return this.serializeDetail(certificate);
   }
 

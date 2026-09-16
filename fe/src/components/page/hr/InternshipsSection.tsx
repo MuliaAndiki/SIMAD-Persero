@@ -63,8 +63,7 @@ export interface InternshipsSectionProps {
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'all', label: 'Semua Status' },
-  { value: 'ONBOARDING_PENDING', label: 'Menunggu Onboarding' },
-  { value: 'ONBOARDING_COMPLETED', label: 'Onboarding Selesai' },
+  { value: 'PENDING', label: 'Pending' },
   { value: 'ACTIVE', label: 'Aktif' },
   { value: 'COMPLETED', label: 'Selesai' },
   { value: 'CERTIFICATE_GENERATED', label: 'Sertifikat Dibuat' },

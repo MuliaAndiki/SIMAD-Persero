@@ -56,30 +56,14 @@ class InternshipController {
   // GET /internships/:id
   public async getById(c: AppContext) {
     try {
-      const data = await internshipService.getById(c.params.id);
+      const data = await internshipService.getById(c.params.id, c.user!.id, c.user!.roles);
       return HttpResponse(c).ok(data);
     } catch (error) {
       return this.handleError(c, error);
     }
   }
 
-  // PATCH /internships/:id/onboarding — Complete onboarding (INTERN)
-  public async completeOnboarding(c: AppContext) {
-    try {
-      const data = await internshipService.completeOnboarding(
-        c.params.id,
-        c.user!.id,
-        this.getMeta(c),
-      );
-      return HttpResponse(c).ok(
-        data,
-        undefined,
-        "Onboarding berhasil diselesaikan",
-      );
-    } catch (error) {
-      return this.handleError(c, error);
-    }
-  }
+
 
   // PATCH /internships/:id/start
   public async start(c: AppContext) {
@@ -186,7 +170,7 @@ class InternshipController {
 
       if (authRespone) return authRespone;
 
-      let query = await internshipService.getMyProfileIntern(user.id);
+      const query = await internshipService.getMyProfileIntern(user.id);
 
       if (!query) {
         const emptyProfile = {

@@ -184,126 +184,32 @@ class InternshipService {
 
   // ─── 15.2 Get Internship Detail ─────────────────────────────
 
-  public async getById(id: string) {
-    return this.findById(id);
-  }
-
-  // ─── Complete Onboarding (INTERN) ───────────────────────────
-  //
-  // Menyelesaikan onboarding digital: menandai onboardingHistory sebagai
-  // diterima (accepted = true) dan memindahkan status internship dari
-  // ONBOARDING_PENDING ke ONBOARDING_COMPLETED (docs/05-state-machine.md §9).
-  // Side effects: waktu persetujuan, IP Address, user agent, audit log.
-
-  public async completeOnboarding(
-    id: string,
-    userId: string,
-    meta: { ipAddress?: string; userAgent?: string },
-  ) {
+  public async getById(id: string, userId?: string, roles?: string[]) {
     const internship = await this.findById(id);
 
-    // Ownership — hanya pemilik internship yang boleh menyelesaikan onboarding.
-    const profile = await prisma.internProfile.findUnique({
-      where: { userId },
-      select: { id: true },
-    });
-
-    if (!profile) {
-      throw new AppError(422, 'Intern profile not found');
-    }
-
-    if (internship.internProfileId !== profile.id) {
-      throw new AppError(403, 'You can only complete onboarding for your own internship');
-    }
-
-    // State machine — hanya boleh dari ONBOARDING_PENDING.
-    if (internship.status !== InternshipStatus.ONBOARDING_PENDING) {
-      throw new AppError(400, 'Onboarding can only be completed from ONBOARDING_PENDING status');
-    }
-
-    return prisma.$transaction(async (tx) => {
-      // 1. Tandai onboarding history sebagai diterima.
-      const onboarding = await tx.onboardingHistory.findFirst({
-        where: { internshipId: id },
-      });
-
-      if (onboarding) {
-        await tx.onboardingHistory.update({
-          where: { id: onboarding.id },
-          data: {
-            accepted: true,
-            acceptedAt: new Date(),
-            ipAddress: meta.ipAddress ?? null,
-            userAgent: meta.userAgent ?? null,
-          },
-        });
+    // Jika supervisor (dan bukan hr_admin), pastikan internship ini berada di bawah bimbingannya.
+    if (roles && !roles.some((r) => r.toLowerCase() === 'hr_admin') && roles.some((r) => r.toLowerCase() === 'supervisor')) {
+      const isSupervising = internship.supervisorAssignments?.some((sa) => sa.supervisor?.id === userId);
+      if (!isSupervising) {
+        throw new AppError(403, 'Access denied. You can only view internships assigned to you');
       }
+    }
 
-      // 2. Pindahkan status internship ke ONBOARDING_COMPLETED.
-      const updated = await tx.internship.update({
-        where: { id },
-        data: {
-          status: InternshipStatus.ONBOARDING_COMPLETED,
-          onboardingCompleted: true,
-        },
-      });
-
-      // 3. Catat histori status.
-      await this.recordStatusHistory(
-        tx,
-        id,
-        internship.status,
-        InternshipStatus.ONBOARDING_COMPLETED,
-        userId,
-        'Onboarding completed by intern',
-      );
-
-      // 4. Audit log (BR-AUDIT-001/003).
-      await createAuditLog(tx, {
-        userId,
-        module: 'INTERNSHIP',
-        action: 'COMPLETE_ONBOARDING',
-        tableName: 'internships',
-        recordId: id,
-        oldData: {
-          status: internship.status,
-          onboardingCompleted: internship.onboardingCompleted,
-        },
-        newData: {
-          status: InternshipStatus.ONBOARDING_COMPLETED,
-          onboardingCompleted: true,
-        },
-        ipAddress: meta.ipAddress ?? null,
-        userAgent: meta.userAgent ?? null,
-      });
-
-      return updated;
-    });
+    return internship;
   }
+
+
 
   // ─── 15.3 Start Internship (HR_ADMIN) ───────────────────────
 
   public async start(id: string, userId: string) {
     const internship = await this.findById(id);
 
-    if (
-      internship.status !== InternshipStatus.ONBOARDING_PENDING &&
-      internship.status !== InternshipStatus.ONBOARDING_COMPLETED
-    ) {
+    if (internship.status !== InternshipStatus.PENDING) {
       throw new AppError(
         400,
-        'Internship can only be started from ONBOARDING_PENDING or ONBOARDING_COMPLETED status',
+        'Internship can only be started from PENDING status',
       );
-    }
-
-    // If onboarding is pending, check that it has been accepted
-    if (internship.status === InternshipStatus.ONBOARDING_PENDING) {
-      const onboarding = await prisma.onboardingHistory.findFirst({
-        where: { internshipId: id, accepted: true },
-      });
-      if (!onboarding) {
-        throw new AppError(400, 'Onboarding must be completed before starting the internship');
-      }
     }
 
     const actualStartDate = internship.actualStartDate ?? new Date();
@@ -353,9 +259,8 @@ class InternshipService {
    * Automatically start internships whose determined start date
    * (actualStartDate) has arrived.
    *
-   * Only ONBOARDING_COMPLETED internships are considered — the onboarding
-   * flow must be finished before an internship may become ACTIVE
-   * (docs/05-state-machine.md §9). Called by the daily cron job
+   * Only PENDING internships are considered.
+   * Called by the daily cron job
    * (src/cron/internship.cron.ts); transitions are recorded with
    * changedById = null (system-triggered).
    */
@@ -364,7 +269,7 @@ class InternshipService {
 
     const dueInternships = await prisma.internship.findMany({
       where: {
-        status: InternshipStatus.ONBOARDING_COMPLETED,
+        status: InternshipStatus.PENDING,
         actualStartDate: { lte: now },
       },
       select: {

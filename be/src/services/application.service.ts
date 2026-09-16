@@ -433,7 +433,7 @@ class ApplicationService {
           officeLocationId,
           actualStartDate: app.requestedStartDate,
           actualEndDate: app.requestedEndDate,
-          status: InternshipStatus.ONBOARDING_PENDING,
+          status: InternshipStatus.PENDING,
           onboardingCompleted: false,
         },
       });
@@ -462,7 +462,7 @@ class ApplicationService {
         data: {
           internshipId: internship.id,
           oldStatus: null,
-          newStatus: InternshipStatus.ONBOARDING_PENDING,
+          newStatus: InternshipStatus.PENDING,
           changedById: reviewerId,
           notes: input.notes || "Application approved, internship created.",
         },
