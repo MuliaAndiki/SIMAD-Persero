@@ -13,6 +13,7 @@ jobs:
     env:
       API_BASE_URL: ${{ secrets.API_BASE_URL }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      INTERNAL_API_SECRET: ${{ secrets.INTERNAL_API_SECRET }}
     steps:
       - name: Verify secrets are configured
         run: |
@@ -24,16 +25,20 @@ jobs:
             echo "::error::CRON_SECRET is not set in GitHub Secrets!"
             exit 1
           fi
+          if [ -z "$INTERNAL_API_SECRET" ]; then
+            echo "::error::INTERNAL_API_SECRET is not set in GitHub Secrets!"
+            exit 1
+          fi
 
       - name: Normalize API_BASE_URL
         run: |
-          # Menghapus trailing slash dan /api/v1 jika ada agar URL valid
+          # Menghapus trailing slash dan /api/v1 jika ada agar URL valid, lalu memastikan format akhir adalah root URL
           NORMALIZED_URL=$(echo "$API_BASE_URL" | sed -e 's|/$||' -e 's|/api/v1$||')
           echo "NORMALIZED_URL=$NORMALIZED_URL" >> $GITHUB_ENV
 
       - name: Wake up Render service
         run: |
-          echo "Waking up SIMAD API at ${NORMALIZED_URL}..."
+          echo "Waking up SIMAD API at ${NORMALIZED_URL}/api/v1/cron/warmup..."
           curl \
             --fail-with-body \
             --show-error \
@@ -44,7 +49,8 @@ jobs:
             --max-time 180 \
             -X POST \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "${NORMALIZED_URL}/cron/warmup"
+            -H "x-internal-api-key: $INTERNAL_API_SECRET" \
+            "${NORMALIZED_URL}/api/v1/cron/warmup"
 
       - name: Wait before database warm-up
         run: |
@@ -53,7 +59,7 @@ jobs:
 
       - name: Warm up database
         run: |
-          echo "Warming up database at ${NORMALIZED_URL}..."
+          echo "Warming up database at ${NORMALIZED_URL}/api/v1/cron/ping..."
           curl \
             --fail-with-body \
             --show-error \
@@ -64,7 +70,8 @@ jobs:
             --max-time 180 \
             -X POST \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "${NORMALIZED_URL}/cron/ping"
+            -H "x-internal-api-key: $INTERNAL_API_SECRET" \
+            "${NORMALIZED_URL}/api/v1/cron/ping"
 
       - name: Wait before internship automation
         run: |
@@ -73,7 +80,7 @@ jobs:
 
       - name: Run internship auto-start
         run: |
-          echo "Running internship auto-start at ${NORMALIZED_URL}..."
+          echo "Running internship auto-start at ${NORMALIZED_URL}/api/v1/cron/internship..."
           curl \
             --fail-with-body \
             --show-error \
@@ -84,4 +91,5 @@ jobs:
             --max-time 180 \
             -X POST \
             -H "Authorization: Bearer $CRON_SECRET" \
-            "${NORMALIZED_URL}/cron/internship"
+            -H "x-internal-api-key: $INTERNAL_API_SECRET" \
+            "${NORMALIZED_URL}/api/v1/cron/internship"
