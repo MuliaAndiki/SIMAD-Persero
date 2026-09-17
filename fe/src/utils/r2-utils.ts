@@ -35,7 +35,7 @@ export async function uploadAvatar(file: File, folder: string = avatarsPrefix): 
     Bucket: bucketName,
     Key,
     Body: buffer,
-    ContentType: file.type,
+    ContentType: file.type || 'image/jpeg',
   };
 
   await R2.send(new PutObjectCommand(uploadParams));
