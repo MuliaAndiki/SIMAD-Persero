@@ -8,6 +8,7 @@ import { StatCard } from '@/components/organisms/dashboard/StatCard';
 import { StatisticsGrid } from '@/components/organisms/dashboard/StatisticsGrid';
 import { SupervisorAttendanceChart } from '@/components/organisms/dashboard/SupervisorAttendanceChart';
 import { SupervisorOverview } from '@/components/organisms/dashboard/SupervisorOverview';
+import { SupervisorTrendCharts } from '@/components/organisms/dashboard/SupervisorTrendCharts';
 import { DASHBOARD_ROLE_LABELS } from '@/configs/app.config';
 import type {
   ChartsResponse,
@@ -15,6 +16,7 @@ import type {
   HrDashboardResponse,
   InternDashboardResponse,
   RecentActivityResponse,
+  SupervisorAttendanceTrendPoint,
   SupervisorDashboardData,
 } from '@/types/api/dashboard.types';
 import { AlertTriangle, FileClock } from 'lucide-react';
@@ -58,7 +60,11 @@ export interface HrDashboardSectionProps {
 }
 
 export interface SupervisorDashboardSectionProps {
-  state: DashboardBaseState & { data: SupervisorDashboardData | null };
+  state: DashboardBaseState & {
+    data: SupervisorDashboardData | null;
+    trend7: SupervisorAttendanceTrendPoint[];
+    trend30: SupervisorAttendanceTrendPoint[];
+  };
   service: DashboardService;
 }
 
@@ -360,6 +366,7 @@ export function SupervisorDashboardSection({ state, service }: SupervisorDashboa
         <>
           <SupervisorOverview data={state.data} />
           <SupervisorAttendanceChart data={state.data} />
+          <SupervisorTrendCharts trend7={state.trend7} trend30={state.trend30} />
         </>
       ) : null}
     </DashboardFrame>

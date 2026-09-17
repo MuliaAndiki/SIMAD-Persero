@@ -4,6 +4,7 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import { ReceptionistDepartmentChart } from '@/components/organisms/dashboard/ReceptionistDepartmentChart';
 import type { ReceptionistDashboardData } from '@/types/api/dashboard.types';
 import {
   AlertCircle,
@@ -126,6 +127,11 @@ export function ReceptionistDashboardSection({
 
       {/* Main Content Area */}
       <div className="flex flex-col gap-4">
+        {/* Perbandingan hadir/tidak hadir per departemen */}
+        {data?.departmentAttendance?.length ? (
+          <ReceptionistDepartmentChart data={data.departmentAttendance} />
+        ) : null}
+
         {/* Search Input */}
         <div className="relative max-w-md">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />

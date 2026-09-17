@@ -65,11 +65,16 @@ export const ViolationSeverity = {
 } as const;
 export type ViolationSeverity = (typeof ViolationSeverity)[keyof typeof ViolationSeverity];
 
-// ── Override allowed statuses (BR-OVERRIDE-001) ────────────────────────
-export const OVERRIDE_ALLOWED_STATUSES: AttendanceStatus[] = [
-  AttendanceStatus.PRESENT,
-  AttendanceStatus.INVALID,
-];
+// ── Override type & allowed time windows (BR-OVERRIDE-001) ─────────────
+export const OverrideType = {
+  CHECK_IN: 'CHECK_IN',
+  CHECK_OUT: 'CHECK_OUT',
+  INVALID: 'INVALID',
+} as const;
+export type OverrideType = (typeof OverrideType)[keyof typeof OverrideType];
+
+export const OVERRIDE_CHECK_IN_TIME_RANGE = { start: '08:00', end: '10:00' } as const;
+export const OVERRIDE_CHECK_OUT_TIME_RANGE = { start: '17:00', end: '19:00' } as const;
 
 // ── Request body interfaces ────────────────────────────────────────────
 
@@ -88,8 +93,10 @@ export type CheckOutBody = {
 };
 
 export type OverrideAttendanceBody = {
-  /** Hanya PRESENT | INVALID yang diizinkan (BR-OVERRIDE-001). */
-  status: Extract<AttendanceStatus, 'PRESENT' | 'INVALID'>;
+  /** Jenis override: CHECK_IN (atur jam masuk), CHECK_OUT (atur jam pulang), INVALID (batalkan/tandai curang). */
+  type: OverrideType;
+  /** Waktu override dalam format HH:mm (24 jam, WIB). Wajib untuk CHECK_IN/CHECK_OUT, diabaikan untuk INVALID. */
+  time?: string;
   reason: string;
 };
 

@@ -5,7 +5,6 @@ import type {
   DepartmentFormState,
 } from '@/components/organisms/department/DepartmentFormDialog';
 import { DepartmentsSection } from '@/components/page/hr/DepartmentsSection';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useApi } from '@/hooks/useService/useApi';
 import type { DepartmentResponse } from '@/types/api/department.types';
@@ -22,8 +21,6 @@ const EMPTY_FORM: DepartmentFormState = { code: '', name: '', description: '' };
  */
 export default function HrDepartmentsContainer() {
   const api = useApi();
-  const ns = useAppNameSpace();
-
   const [keyword, setKeyword] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<DepartmentResponse | null>(null);
@@ -37,7 +34,6 @@ export default function HrDepartmentsContainer() {
   });
   const create = api.department.mutate.create();
   const update = api.department.mutate.update();
-  const remove = api.department.mutate.delete();
 
   const handleFieldChange = useCallback((field: DepartmentFormField, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -97,13 +93,6 @@ export default function HrDepartmentsContainer() {
     [update],
   );
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      await remove.mutateAsync({ departmentId: id });
-    },
-    [remove],
-  );
-
   return (
     <DepartmentsSection
       state={{
@@ -112,13 +101,11 @@ export default function HrDepartmentsContainer() {
         isError: list.isError,
         errorMessage: list.error?.message,
         departments: list.data ?? [],
-        alert: ns.alert,
         keyword,
         formOpen,
         editing,
         form,
         isSaving: create.isPending || update.isPending,
-        isDeleting: remove.isPending,
       }}
       actions={{
         onKeywordChange: setKeyword,
@@ -128,7 +115,6 @@ export default function HrDepartmentsContainer() {
         onCloseForm: handleCloseForm,
         onFieldChange: handleFieldChange,
         onSubmit: handleSubmit,
-        onDelete: handleDelete,
         onToggleActive: handleToggleActive,
       }}
     />

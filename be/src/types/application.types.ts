@@ -41,6 +41,8 @@ export type CreateApplicationBody = {
   /** Teks opsional di API — disimpan `null` di DB bila tidak diisi. */
   motivation?: string;
   coverLetterFileId: IFile['id'];
+  /** Lokasi kantor tujuan magang (wajib dipilih oleh intern). */
+  officeLocationId: IOfficeLocation['id'];
 };
 
 /** PATCH /applications/:id body (draft edit) */

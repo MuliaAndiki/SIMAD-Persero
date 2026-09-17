@@ -12,7 +12,8 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 const EMPTY_OVERRIDE_FORM: OverrideAttendanceFormState = {
-  status: 'PRESENT',
+  type: 'CHECK_IN',
+  time: '08:00',
   reason: '',
 };
 
@@ -56,7 +57,8 @@ export default function AttendanceDetailContainer() {
     await override.mutateAsync({
       params: { attendanceId },
       body: {
-        status: overrideForm.status,
+        type: overrideForm.type,
+        ...(overrideForm.type !== 'INVALID' ? { time: overrideForm.time } : {}),
         reason: overrideForm.reason.trim(),
       },
     });

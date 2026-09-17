@@ -30,7 +30,11 @@ class ApplicationService {
   public async Create(
     body: Pick<
       CreateApplicationBody,
-      'requestedStartDate' | 'requestedEndDate' | 'motivation' | 'coverLetterFileId'
+      | 'requestedStartDate'
+      | 'requestedEndDate'
+      | 'motivation'
+      | 'coverLetterFileId'
+      | 'officeLocationId'
     >,
   ): Promise<TResponse<ApplicationResponse>> {
     const res = await client.PostResponse<ApplicationResponse>(APPLICATION_ENDPOINTS.CREATE, body);

@@ -1,7 +1,15 @@
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/atoms/dropdown-menu';
 import type { InstitutionResponse } from '@/types/api/institution.types';
-import { Eye, GraduationCap, MapPin, Pencil } from 'lucide-react';
+import { Eye, GraduationCap, MapPin, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 
 export interface UniversityTableProps {
@@ -88,14 +96,23 @@ export function UniversityTable({ universities }: UniversityTableProps) {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/hr_admin/universities/${item.id}`}>
-                            <Eye className="size-4" />
-                            Detail
-                          </Link>
-                        </Button>
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="size-8 p-0">
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link href={`/hr_admin/universities/${item.id}`}>
+                              <Eye className="size-4" />
+                              Lihat Detail
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}

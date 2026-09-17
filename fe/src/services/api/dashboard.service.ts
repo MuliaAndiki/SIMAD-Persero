@@ -9,6 +9,8 @@ import type {
   RecentActivityQuery,
   RecentActivityResponse,
   ReceptionistDashboardData,
+  SupervisorAttendanceTrendPoint,
+  SupervisorAttendanceTrendQuery,
   SupervisorDashboardData,
 } from '@/types/api/dashboard.types';
 import { buildQueryString } from '@/utils/query-string';
@@ -51,6 +53,22 @@ class DashboardService {
     const res = await client.GetResponse<SupervisorDashboardData>(DASHBOARD_ENDPOINTS.SUPERVISOR);
     return toServiceResponse(res, {
       message: 'Dashboard supervisor berhasil dimuat',
+    });
+  }
+
+  /**
+   * GET /supervisor/dashboard/attendance-trend
+   * Mengambil tren absensi harian supervisor (SUPERVISOR).
+   */
+  public async SupervisorAttendanceTrend(
+    query?: SupervisorAttendanceTrendQuery,
+  ): Promise<TResponse<SupervisorAttendanceTrendPoint[]>> {
+    const qs = buildQueryString(query as Record<string, string | number | boolean>);
+    const res = await client.GetResponse<SupervisorAttendanceTrendPoint[]>(
+      `${DASHBOARD_ENDPOINTS.SUPERVISOR_ATTENDANCE_TREND}${qs}`,
+    );
+    return toServiceResponse(res, {
+      message: 'Tren absensi berhasil dimuat',
     });
   }
 

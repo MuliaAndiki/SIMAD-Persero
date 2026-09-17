@@ -24,6 +24,7 @@ export interface CreateApplicationBody {
   requestedEndDate: string;
   motivation?: string;
   coverLetterFileId: string;
+  officeLocationId: string;
 }
 
 export type UpdateApplicationBody = Partial<CreateApplicationBody>;
@@ -68,6 +69,12 @@ export interface ApplicationUserRef {
   email: string;
 }
 
+/** Referensi kantor tujuan yang dipilih intern saat pengajuan. */
+export interface ApplicationOfficeRef {
+  id: string;
+  name: string | null;
+}
+
 /** Profil intern yang di-embed di respons aplikasi (list/detail). */
 export interface ApplicationInternProfile {
   id: string;
@@ -85,6 +92,7 @@ export interface ApplicationResponse extends Omit<IInternshipApplication, 'statu
   introductionLetterFile?: ApplicationFileRef | null;
   internProfile?: ApplicationInternProfile | null;
   reviewedBy?: ApplicationUserRef | null;
+  officeLocation?: ApplicationOfficeRef | null;
   internship?: { id: string; status: string | null } | null;
 }
 

@@ -3,9 +3,17 @@
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/atoms/dropdown-menu';
 import type { AttendanceSupervisorRow } from '@/types/api/attendance.types';
 import { formatDate } from '@/utils/string.format';
-import { AlertCircle, CalendarDays, Eye, UsersRound } from 'lucide-react';
+import { AlertCircle, CalendarDays, Eye, MoreHorizontal, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 
 export interface InternsSectionState {
@@ -149,12 +157,23 @@ export function InternsSection({ state, service }: InternsSectionProps) {
                           </td>
                           <td className="px-6 py-4 text-right">
                             {internshipId ? (
-                              <Button asChild variant="outline" size="sm">
-                                <Link href={`/supervisor/interns/${internshipId}`}>
-                                  <Eye className="mr-1.5 size-3.5" />
-                                  Lihat Detail
-                                </Link>
-                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="size-8 p-0">
+                                    <MoreHorizontal className="size-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-44">
+                                  <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem asChild>
+                                    <Link href={`/supervisor/interns/${internshipId}`}>
+                                      <Eye className="size-4" />
+                                      Lihat Detail
+                                    </Link>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             ) : (
                               <span className="text-xs text-muted-foreground">-</span>
                             )}

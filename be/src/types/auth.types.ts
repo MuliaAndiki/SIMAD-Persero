@@ -11,10 +11,10 @@ import type { IUser } from './models.types';
 /** Payload yang disimpan di dalam JWT Access Token. */
 export type JwtPayload = Pick<IUser, 'id' | 'email' | 'fullName'>;
 
-/** User context yang dilampirkan middleware `verifyToken` ke `c.user`. */
 export type AuthUser = JwtPayload &
   Pick<IUser, 'emailVerified' | 'isActive'> & {
     roles: string[];
+    avatarUrl?: string | null;
   };
 
 export type RegisterBody = Pick<IUser, 'fullName' | 'email'> & {

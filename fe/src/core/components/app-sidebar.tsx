@@ -16,13 +16,23 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarFooter,
   useSidebar,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/atoms';
-import { ROLE_SIDEBAR_MENU, SIDEBAR_MENU, isItemActive, isMenuActive } from '@/configs/app.config';
+import { ROLE_SIDEBAR_MENU, SIDEBAR_MENU, getRoleDashboardPath, isItemActive, isMenuActive } from '@/configs/app.config';
 import { useInternAccess } from '@/hooks/useInternAccess';
 import { useApi } from '@/hooks/useService/useApi';
 import { cn } from '@/utils/classname';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronsUpDown, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -43,7 +53,11 @@ export function AppSidebar() {
   const { hasActiveInternship } = useInternAccess();
   const isCollapsed = state === 'collapsed';
 
-  const role = api.auth.query.me().data?.role?.toUpperCase();
+  const profileQuery = api.user.query.profile();
+  const user = profileQuery.data;
+  const role = user?.role?.toUpperCase();
+  const logoutMutation = api.auth.mutate.logout();
+
   const roleMenus =
     (role === 'INTERN' || role === 'HR_ADMIN' || role === 'SUPERVISOR' || role === 'RECEPTIONIST'
       ? ROLE_SIDEBAR_MENU[role]
@@ -167,6 +181,69 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage key={user?.profilePhoto ?? 'sidebar'} src={user?.profilePhoto ?? ''} alt={user?.fullName ?? ''} />
+                    <AvatarFallback className="rounded-lg">
+                      {user?.fullName?.charAt(0).toUpperCase() ?? 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{user?.fullName ?? 'User'}</span>
+                    <span className="truncate text-xs text-muted-foreground capitalize">
+                      {user?.role?.replace('_', ' ') ?? 'Role'}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="bottom"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage key={user?.profilePhoto ?? 'dropdown'} src={user?.profilePhoto ?? ''} alt={user?.fullName ?? ''} />
+                      <AvatarFallback className="rounded-lg">
+                        {user?.fullName?.charAt(0).toUpperCase() ?? 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">{user?.fullName ?? 'User'}</span>
+                      <span className="truncate text-xs text-muted-foreground capitalize">
+                        {user?.role?.replace('_', ' ') ?? 'Role'}
+                      </span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={`/${role?.toLowerCase()}/profile`} className="cursor-pointer">
+                    <User className="mr-2 size-4" />
+                    Profil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => logoutMutation.mutate({})} className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="mr-2 size-4" />
+                  Keluar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

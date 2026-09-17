@@ -16,6 +16,8 @@ export default function SupervisorDashboardContainer() {
 
   const me = api.auth.query.me();
   const supervisor = api.dashboard.query.supervisor();
+  const trend7 = api.dashboard.query.supervisorAttendanceTrend({ days: 7 });
+  const trend30 = api.dashboard.query.supervisorAttendanceTrend({ days: 30 });
 
   return (
     <SupervisorDashboardSection
@@ -25,6 +27,8 @@ export default function SupervisorDashboardContainer() {
         isError: supervisor.isError,
         errorMessage: supervisor.error?.message,
         userName: me.data?.fullName,
+        trend7: trend7.data ?? [],
+        trend30: trend30.data ?? [],
       }}
       service={{}}
     />

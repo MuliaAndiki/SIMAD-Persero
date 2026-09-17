@@ -3,10 +3,26 @@
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/atoms/dropdown-menu';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { ReceptionistResponse } from '@/types/api/receptionist.types';
 import type { AlertContexType } from '@/types/ui';
-import { Building2, ChevronLeft, ChevronRight, UserCog } from 'lucide-react';
+import {
+  Building2,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  UserCog,
+} from 'lucide-react';
 
 export interface ReceptionistTableProps {
   receptionists: ReceptionistResponse[];
@@ -94,25 +110,38 @@ export function ReceptionistTable({
                       </Badge>
                     </td>
 
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => onEdit(item.id)}>
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() =>
-                          alert.confirm({
-                            title: 'Hapus Resepsionis?',
-                            deskripsi: 'Akun ini akan dinonaktifkan dan tidak bisa login kembali.',
-                            icon: 'question',
-                            confirmButtonText: 'Hapus',
-                            onConfirm: () => onDelete(item.id),
-                          })
-                        }
-                      >
-                        Hapus
-                      </Button>
+                    <td className="px-6 py-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="size-8 p-0">
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => onEdit(item.id)}>
+                            <Pencil className="size-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() =>
+                              alert.confirm({
+                                title: 'Hapus Resepsionis?',
+                                deskripsi:
+                                  'Akun ini akan dinonaktifkan dan tidak bisa login kembali.',
+                                icon: 'question',
+                                confirmButtonText: 'Hapus',
+                                onConfirm: () => onDelete(item.id),
+                              })
+                            }
+                          >
+                            <Trash2 className="size-4" />
+                            Hapus
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}

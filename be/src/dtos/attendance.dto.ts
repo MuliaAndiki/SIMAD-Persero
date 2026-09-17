@@ -27,7 +27,8 @@ export const CheckOutDto = Type.Object({
 // ── Override body ──────────────────────────────────────────────────────
 
 export const OverrideAttendanceDto = Type.Object({
-  status: Type.String(),
+  type: Type.String(),
+  time: Type.Optional(Type.String()),
   reason: Type.String({ minLength: 1 }),
 });
 

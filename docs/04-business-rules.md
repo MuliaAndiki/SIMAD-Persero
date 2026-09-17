@@ -1299,12 +1299,19 @@ Override hanya dapat dilakukan oleh Supervisor.
 
 ## BR-OVERRIDE-001
 
-Supervisor dapat mengubah status absensi menjadi:
+Supervisor dapat mengubah absensi menjadi:
 
-- Invalid
-- Present
+- Check In (jam masuk) dengan rentang waktu 08:00 - 10:00 WIB.
+- Check Out (jam pulang) dengan rentang waktu 17:00 - 19:00 WIB.
+- Invalid (menandai kecurangan, misal akun dipinjamkan untuk titip absen).
 
 sesuai hasil pemeriksaan.
+
+Status absensi dihitung otomatis:
+
+- Check In → Present
+- Check Out → Completed
+- Invalid → Invalid
 
 ---
 
