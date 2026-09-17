@@ -1,6 +1,7 @@
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useApi } from '@/hooks/useService/useApi';
 import { useCallback, useState } from 'react';
+import { uploadAvatar, deleteObject } from '@/utils/r2-utils';
 
 export function useProfileLogic() {
   const api = useApi();
@@ -22,8 +23,6 @@ export function useProfileLogic() {
   const handleUploadPhoto = useCallback(
     async (file: File) => {
       try {
-        const { uploadAvatar, deleteObject } = await import('@/utils/r2-utils');
-
         // Delete old avatar photo from R2 if present
         if (profile.data?.profilePhoto) {
           await deleteObject(profile.data.profilePhoto).catch((err) => {
@@ -53,7 +52,7 @@ export function useProfileLogic() {
         handleLogout();
       },
     });
-  }, [deleteAccount]);
+  }, [deleteAccount, handleLogout]);
 
   const handleOpenChangeEmail = useCallback(() => {
     setChangeEmailModalOpen(true);

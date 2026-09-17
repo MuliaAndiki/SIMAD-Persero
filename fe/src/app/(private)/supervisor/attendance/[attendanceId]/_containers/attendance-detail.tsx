@@ -6,11 +6,14 @@ import type {
 } from '@/components/organisms/attendance/OverrideAttendanceDialog';
 import { AttendanceDetailSection } from '@/components/page/supervisor/AttendanceDetailSection';
 import { useApi } from '@/hooks/useService/useApi';
+import AttendanceService from '@/services/api/attendance.service';
 import { useParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 const EMPTY_OVERRIDE_FORM: OverrideAttendanceFormState = {
-  status: 'PRESENT',
+  type: 'CHECK_IN',
+  time: '08:00',
   reason: '',
 };
 
@@ -19,6 +22,7 @@ const EMPTY_OVERRIDE_FORM: OverrideAttendanceFormState = {
  * PATCH /attendance/:attendanceId/override). `attendanceId` dibaca dari
  * dynamic route `[attendanceId]`; seluruh feature state (dialog override +
  * object state form, §19.4/§19.5) dimiliki container.
+ * Export Excel di-scope ke internshipId peserta yang sedang dilihat.
  */
 export default function AttendanceDetailContainer() {
   const params = useParams<{ attendanceId: string }>();
@@ -29,6 +33,7 @@ export default function AttendanceDetailContainer() {
   const [overrideOpen, setOverrideOpen] = useState(false);
   const [overrideForm, setOverrideForm] =
     useState<OverrideAttendanceFormState>(EMPTY_OVERRIDE_FORM);
+  const [isExportPending, setIsExportPending] = useState(false);
 
   const detail = api.attendance.query.detail({ attendanceId }, { enabled: Boolean(attendanceId) });
   const override = api.attendance.mutate.override();
@@ -52,7 +57,8 @@ export default function AttendanceDetailContainer() {
     await override.mutateAsync({
       params: { attendanceId },
       body: {
-        status: overrideForm.status,
+        type: overrideForm.type,
+        ...(overrideForm.type !== 'INVALID' ? { time: overrideForm.time } : {}),
         reason: overrideForm.reason.trim(),
       },
     });
@@ -60,11 +66,32 @@ export default function AttendanceDetailContainer() {
     setOverrideForm(EMPTY_OVERRIDE_FORM);
   }, [attendanceId, override, overrideForm]);
 
+  /** Export Excel hanya untuk intern yang sedang dilihat */
+  const handleExport = useCallback(async () => {
+    const internshipId = detail.data?.internshipId;
+    if (!internshipId) {
+      toast.error('Data magang tidak ditemukan');
+      return;
+    }
+    try {
+      setIsExportPending(true);
+      toast.loading('Mengekspor laporan absensi...', { id: 'export-detail' });
+      await AttendanceService.DownloadExcel({ internshipId });
+      toast.success('Laporan absensi berhasil diunduh', { id: 'export-detail' });
+    } catch (error) {
+      console.error('Failed to export attendance:', error);
+      toast.error('Gagal mengekspor laporan absensi', { id: 'export-detail' });
+    } finally {
+      setIsExportPending(false);
+    }
+  }, [detail.data?.internshipId]);
+
   return (
     <AttendanceDetailSection
       state={{
         detail: detail.data ?? null,
         isPending: detail.isPending,
+        isExportPending,
         isError: detail.isError,
         errorMessage: detail.error?.message,
         overrideOpen,
@@ -73,6 +100,7 @@ export default function AttendanceDetailContainer() {
       }}
       actions={{
         onRetry: () => detail.refetch(),
+        onExport: handleExport,
         onOpenOverride: handleOpenOverride,
         onCloseOverride: handleCloseOverride,
         onOverrideFieldChange: handleFieldChange,

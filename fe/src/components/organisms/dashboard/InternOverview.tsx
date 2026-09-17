@@ -101,11 +101,10 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                   {formatDate(data.internship.actualEndDate)}
                 </span>
               </div>
-              {data.internship.status === 'ONBOARDING_PENDING' && (
+              {data.internship.status === 'PENDING' && (
                 <div className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3">
                   <p className="text-sm">
-                    Status magang Anda masih <strong>Menunggu Onboarding</strong>. Selesaikan
-                    onboarding agar HR dapat mengaktifkan magang Anda.
+                    Status magang Anda masih <strong>Pending</strong>.
                   </p>
                   <Button asChild size="sm" className="w-fit">
                     <Link href="/intern/onboarding">Selesaikan Onboarding</Link>

@@ -31,14 +31,8 @@ export interface OnboardingSectionState {
   isSubmitting: boolean;
 }
 
-/** Aksi dari container (konfirmasi + mutation). */
-export interface OnboardingSectionService {
-  onSubmit: () => void;
-}
-
 export interface OnboardingSectionProps {
   state: OnboardingSectionState;
-  service: OnboardingSectionService;
 }
 
 /** Baris placeholder skeleton — key statis agar tidak memakai indeks array. */
@@ -91,10 +85,8 @@ function formatDate(value: string | null): string {
 
 function internshipStatusLabel(status: string | null): string {
   switch (status) {
-    case 'ONBOARDING_PENDING':
-      return 'Menunggu Onboarding';
-    case 'ONBOARDING_COMPLETED':
-      return 'Onboarding Selesai';
+    case 'PENDING':
+      return 'Pending';
     case 'ACTIVE':
       return 'Aktif';
     case 'COMPLETED':
@@ -129,7 +121,7 @@ function OnboardingError({ message }: { message?: string }) {
     <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
       <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
       <div className="flex flex-col gap-1">
-        <p className="font-medium text-destructive">Gagal memuat data onboarding</p>
+        <p className="font-medium text-destructive">Gagal memuat data</p>
         <p className="text-muted-foreground">
           {message ?? 'Silakan muat ulang halaman untuk mencoba lagi.'}
         </p>
@@ -153,37 +145,7 @@ function NoInternshipCard() {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          Setelah pengajuan disetujui, Anda dapat menyelesaikan onboarding di halaman ini agar
-          status magang siap diaktifkan.
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-/** Status sudah melewati ONBOARDING_PENDING. */
-function OnboardingDoneCard({
-  internship,
-}: {
-  internship: InternshipResponse;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CheckCircle2 className="size-4 text-emerald-500" />
-          Onboarding Selesai
-        </CardTitle>
-        <CardDescription>Persetujuan onboarding Anda telah tercatat di sistem.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        <div>
-          <Badge>{internshipStatusLabel(internship.status)}</Badge>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {internship.status === 'ONBOARDING_COMPLETED'
-            ? 'Tim HR akan segera mengaktifkan magang Anda. Menu Absensi & Riwayat aktif setelah status magang menjadi Aktif.'
-            : 'Magang Anda sudah berjalan. Anda dapat menggunakan menu Absensi & Riwayat.'}
+          Setelah pengajuan disetujui, Anda dapat melihat informasi magang di halaman ini.
         </p>
       </CardContent>
     </Card>
@@ -227,9 +189,7 @@ function SupervisorInfoCard({
             ) : null}
           </>
         ) : (
-          <p className="text-muted-foreground">
-            Supervisor pembimbing akan ditetapkan oleh HR setelah onboarding selesai.
-          </p>
+          <p className="text-muted-foreground">Supervisor pembimbing belum ditetapkan.</p>
         )}
       </CardContent>
     </Card>
@@ -288,21 +248,11 @@ function WorkInfoCard() {
   );
 }
 
-interface OnboardingAgreementCardProps {
+interface InternshipInfoCardProps {
   internship: InternshipResponse;
-  agreed: boolean;
-  onAgreedChange: (value: boolean) => void;
-  isSubmitting: boolean;
-  onSubmit: () => void;
 }
 
-function OnboardingAgreementCard({
-  internship,
-  agreed,
-  onAgreedChange,
-  isSubmitting,
-  onSubmit,
-}: OnboardingAgreementCardProps) {
+function InternshipInfoCard({ internship }: InternshipInfoCardProps) {
   const rows = [
     {
       icon: User,
@@ -342,11 +292,9 @@ function OnboardingAgreementCard({
         <div className="flex flex-col gap-1">
           <CardTitle className="flex items-center gap-2">
             <BookOpenCheck className="size-4 text-primary" />
-            Persetujuan Onboarding
+            Informasi Magang
           </CardTitle>
-          <CardDescription>
-            Periksa data diri dan ketentuan berikut sebelum menyelesaikan onboarding.
-          </CardDescription>
+          <CardDescription>Periksa data diri dan ketentuan magang.</CardDescription>
         </div>
         <Badge>{internshipStatusLabel(internship.status)}</Badge>
       </CardHeader>
@@ -382,53 +330,20 @@ function OnboardingAgreementCard({
             ))}
           </ol>
         </div>
-
-        {/* Persetujuan */}
-        <div className="flex flex-col gap-4 rounded-xl border p-4">
-          <label className="flex cursor-pointer items-start gap-3 text-sm">
-            <input
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => onAgreedChange(e.target.checked)}
-              className="mt-0.5 size-4 shrink-0 accent-primary"
-            />
-            <span>
-              Saya telah membaca, memahami, dan menyetujui seluruh ketentuan tata tertib magang di
-              atas.
-            </span>
-          </label>
-          <Button
-            type="button"
-            size="sm"
-            className="w-fit"
-            disabled={!agreed || isSubmitting}
-            onClick={onSubmit}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Menyimpan…
-              </>
-            ) : (
-              'Saya Menyetujui & Selesaikan Onboarding'
-            )}
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );
 }
 
-export function OnboardingSection({ state, service }: OnboardingSectionProps) {
-  const [agreed, setAgreed] = useState(false);
+export function OnboardingSection({ state }: OnboardingSectionProps) {
   const { internship } = state;
 
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Onboarding</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Informasi Magang</h1>
         <p className="text-sm text-muted-foreground">
-          Selesaikan onboarding Anda sebelum memulai magang.
+          Lihat detail informasi dan tata tertib magang Anda.
         </p>
       </header>
 
@@ -438,16 +353,8 @@ export function OnboardingSection({ state, service }: OnboardingSectionProps) {
         <OnboardingError message={state.errorMessage} />
       ) : !internship ? (
         <NoInternshipCard />
-      ) : internship.status === 'ONBOARDING_PENDING' ? (
-        <OnboardingAgreementCard
-          internship={internship}
-          agreed={agreed}
-          onAgreedChange={setAgreed}
-          isSubmitting={state.isSubmitting}
-          onSubmit={service.onSubmit}
-        />
       ) : (
-        <OnboardingDoneCard internship={internship} />
+        <InternshipInfoCard internship={internship} />
       )}
     </section>
   );

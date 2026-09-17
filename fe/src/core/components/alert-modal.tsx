@@ -61,6 +61,7 @@ export function AlertModal({
         <div className="flex justify-center gap-2 pt-4">
           {cancelText && (
             <button
+              type="button"
               onClick={() => {
                 onCancel?.();
                 setOpen(false);
@@ -71,6 +72,7 @@ export function AlertModal({
             </button>
           )}
           <button
+            type="button"
             onClick={() => {
               onConfirm?.();
               setOpen(false);

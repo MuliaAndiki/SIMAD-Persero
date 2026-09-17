@@ -5,6 +5,7 @@ import { Card } from '@/components/atoms/card';
 import { ApplicationDetailField } from '@/components/organisms/application/ApplicationDetailField';
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
 import type { ApplicationResponse } from '@/types/api/application.types';
+import { getFilePreviewUrl } from '@/utils/file-preview';
 import { AlertCircle, ArrowLeft, FileText, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -165,7 +166,7 @@ export function ReceptionistApplicationDetailSection({
             <div className="flex flex-1 flex-col gap-1">
               <span className="text-sm font-medium text-foreground">Surat Pengantar</span>
               <Link
-                href={application.introductionLetterFile.url}
+                href={getFilePreviewUrl(application.introductionLetterFile)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline"

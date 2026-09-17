@@ -17,6 +17,8 @@ export const SupervisorListQuery = Type.Object({
   page: Type.Optional(Type.Number({ minimum: 1, default: 1 })),
   limit: Type.Optional(Type.Number({ minimum: 1, maximum: 100, default: 10 })),
   keyword: Type.Optional(Type.String()),
+  officeId: Type.Optional(Type.String()),
+  departmentId: Type.Optional(Type.String()),
 });
 
 // ── Assign body (HR_ADMIN) ─────────────────────────────────────────────

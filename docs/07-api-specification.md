@@ -984,15 +984,11 @@ Mengajukan permohonan magang.
 
 ```json
 {
-  "fullName": "Budi Santoso",
-  "studentId": "221401001",
-  "institution": "Universitas ABC",
-  "major": "Teknik Informatika",
-  "phone": "08123456789",
-  "skills": ["React", "Node.js"],
-  "startDate": "2026-09-01",
-  "endDate": "2026-12-01",
-  "coverLetterFileId": "uuid"
+  "requestedStartDate": "2026-09-01",
+  "requestedEndDate": "2026-12-01",
+  "motivation": "Alasan magang",
+  "coverLetterFileId": "uuid",
+  "officeLocationId": "uuid"
 }
 ```
 
@@ -1010,6 +1006,7 @@ Mengajukan permohonan magang.
 - Start Date < End Date
 - Durasi magang valid.
 - Surat pengantar wajib.
+- Lokasi kantor tujuan wajib (officeLocationId).
 - Profil wajib lengkap.
 
 ### Business Rules
@@ -1456,7 +1453,7 @@ application/json
 - Belum Check In hari ini
 - Jam absensi valid
 - GPS tersedia
-- Berada dalam radius kantor
+- Berada dalam radius salah satu kantor (seluruh cabang, tidak hanya kantor penempatan)
 
 ### Business Rules
 
@@ -1587,14 +1584,20 @@ SUPERVISOR
 
 ```json
 {
-  "status": "INVALID",
-  "reason": "Fake GPS"
+  "type": "CHECK_IN",
+  "time": "08:30",
+  "reason": "Kendala GPS"
 }
 ```
+
+- `type` : `CHECK_IN` (jam masuk, rentang 08:00-10:00), `CHECK_OUT` (jam pulang, rentang 17:00-19:00), atau `INVALID` (tandai kecurangan/pembatalan).
+- `time` : format `HH:mm` (WIB). Wajib untuk `CHECK_IN`/`CHECK_OUT`, diabaikan untuk `INVALID`.
+- `reason` : alasan override (wajib).
 
 ### Business Rules
 
 - Supervisor hanya boleh override peserta departemennya.
+- Check In → status otomatis `PRESENT`, Check Out → status otomatis `COMPLETED`, Invalid → status `INVALID`.
 - Semua perubahan dicatat pada Audit Log.
 
 ---

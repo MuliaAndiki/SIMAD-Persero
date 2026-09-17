@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { AttendanceTrendPoint } from '@/types/api/dashboard.types';
+import { useId } from 'react';
 import {
   Area,
   AreaChart,
@@ -11,19 +11,17 @@ import {
   YAxis,
 } from 'recharts';
 
-/** Seri absensi yang digambar sebagai area bertumpuk (token chart dari tema). */
+/** Seri absensi 2 label: Hadir & Tidak Hadir (warna token chart dari tema). */
 const ATTENDANCE_SERIES = [
-  { key: 'present', name: 'Hadir', color: 'var(--chart-3)' },
-  { key: 'late', name: 'Terlambat', color: 'var(--chart-4)' },
-  { key: 'invalid', name: 'Tidak valid', color: 'var(--chart-5)' },
+  { key: 'hadir', name: 'Hadir', color: 'var(--chart-3)' },
+  { key: 'tidakHadir', name: 'Tidak Hadir', color: 'var(--chart-5)' },
 ] as const;
 
-function monthLabel(month: string): string {
-  const [year, monthNum] = month.split('-').map(Number);
-  if (!year || !monthNum) return month;
-  return new Date(year, monthNum - 1, 1).toLocaleDateString('id-ID', {
-    month: 'short',
-  });
+/** Titik data yang diterima komponen — `label` sudah diformat oleh pemanggil. */
+export interface AttendanceTrendDatum {
+  label: string;
+  hadir: number;
+  tidakHadir: number;
 }
 
 /** Gaya tooltip agar selaras dengan tema aplikasi. */
@@ -36,34 +34,36 @@ const TOOLTIP_STYLE = {
 } as const;
 
 /**
- * AttendanceTrendChart — tren absensi 6 bulan terakhir (GET /dashboard/charts).
- * Dibangun dengan recharts (stacked area); data disuplai oleh section/container.
+ * AttendanceTrendChart — tren absensi (stacked area) dengan 2 label
+ * Hadir / Tidak Hadir. Dipakai bersama oleh dashboard HR (bulanan) dan
+ * supervisor (7/30 hari); data `label` disuplai sudah terformat.
  */
 export function AttendanceTrendChart({
   data,
+  title = 'Tren Absensi',
+  description,
 }: {
-  data: AttendanceTrendPoint[];
+  data: AttendanceTrendDatum[];
+  title?: string;
+  description?: string;
 }) {
-  const chartData = data.map((point) => ({
-    ...point,
-    label: monthLabel(point.month),
-  }));
+  const uid = useId().replace(/[:]/g, '');
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tren Absensi</CardTitle>
-        <CardDescription>6 bulan terakhir</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
               <defs>
                 {ATTENDANCE_SERIES.map((series) => (
                   <linearGradient
                     key={series.key}
-                    id={`attendance-${series.key}`}
+                    id={`attendance-${series.key}-${uid}`}
                     x1="0"
                     y1="0"
                     x2="0"
@@ -92,7 +92,7 @@ export function AttendanceTrendChart({
                   name={series.name}
                   stackId="1"
                   stroke={series.color}
-                  fill={`url(#attendance-${series.key})`}
+                  fill={`url(#attendance-${series.key}-${uid})`}
                   strokeWidth={2}
                 />
               ))}

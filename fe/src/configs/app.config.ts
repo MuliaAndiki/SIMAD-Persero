@@ -180,7 +180,6 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
     icon: Award,
     requiresInternship: true,
   },
-  { name: 'Profil', url: '/intern/profile', icon: User },
 ];
 
 /** Menu sidebar khusus HR_ADMIN dengan struktur terkelompok (grouped/dropdown). */
@@ -269,11 +268,6 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
       },
     ],
   },
-  {
-    name: 'Profil',
-    url: '/hr_admin/profile',
-    icon: User,
-  },
 ];
 
 /** Menu sidebar khusus SUPERVISOR. */
@@ -291,12 +285,6 @@ export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
     icon: Clock,
     subMenu: [],
   },
-  {
-    name: 'Profil',
-    url: '/supervisor/profile',
-    icon: User,
-    subMenu: [],
-  },
 ];
 
 /** Menu sidebar khusus RECEPTIONIST. */
@@ -312,12 +300,6 @@ export const SIDEBAR_MENU_RECEPTIONIST: SidebarMenuItem[] = [
     name: 'Intern Aktif',
     url: '/receptionist/interns',
     icon: Users,
-    subMenu: [],
-  },
-  {
-    name: 'Profil',
-    url: '/receptionist/profile',
-    icon: User,
     subMenu: [],
   },
 ];

@@ -185,6 +185,7 @@ export interface IInternshipApplication {
   requestedStartDate: string;
   requestedEndDate: string;
   motivation: string;
+  officeLocationId: string | null;
   status: string;
   reviewedById: string;
   reviewedAt: string;

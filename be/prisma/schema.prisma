@@ -126,7 +126,7 @@ model Institution {
   name              String?            @db.VarChar(200)
   shortName         String?            @map("short_name") @db.VarChar(100)
   province          String?            @db.VarChar(100)
-  logo              String?            @map("logo") 
+  logo              String?            @map("logo")
   city              String?            @db.VarChar(100)
   createdAt         DateTime?          @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt         DateTime?          @updatedAt @map("updated_at") @db.Timestamp(6)
@@ -176,18 +176,19 @@ model Department {
 }
 
 model OfficeLocation {
-  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name               String?             @db.VarChar(150)
-  address            String?
-  latitude           Decimal?            @db.Decimal
-  longitude          Decimal?            @db.Decimal
-  radiusMeter        Int?                @map("radius_meter")
-  createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt          DateTime?           @updatedAt @map("updated_at") @db.Timestamp(6)
-  departments        Department[]
-  attendanceSettings AttendanceSetting[]
-  internships        Internship[]
-  users              User[]
+  id                     String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String?                 @db.VarChar(150)
+  address                String?
+  latitude               Decimal?                @db.Decimal
+  longitude              Decimal?                @db.Decimal
+  radiusMeter            Int?                    @map("radius_meter")
+  createdAt              DateTime?               @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt              DateTime?               @updatedAt @map("updated_at") @db.Timestamp(6)
+  departments            Department[]
+  attendanceSettings     AttendanceSetting[]
+  internships            Internship[]
+  internshipApplications InternshipApplication[]
+  users                  User[]
 
   @@map("office_locations")
 }
@@ -265,30 +266,33 @@ model InternProfileSkill {
 }
 
 model InternshipApplication {
-  id                       String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  internProfileId          String        @map("intern_profile_id") @db.Uuid
-  applicationNumber        String?       @unique @map("application_number") @db.VarChar(100)
-  introductionLetterFileId String        @map("introduction_letter_file_id") @db.Uuid
-  requestedStartDate       DateTime?     @map("requested_start_date") @db.Date
-  requestedEndDate         DateTime?     @map("requested_end_date") @db.Date
+  id                       String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  internProfileId          String          @map("intern_profile_id") @db.Uuid
+  applicationNumber        String?         @unique @map("application_number") @db.VarChar(100)
+  introductionLetterFileId String          @map("introduction_letter_file_id") @db.Uuid
+  requestedStartDate       DateTime?       @map("requested_start_date") @db.Date
+  requestedEndDate         DateTime?       @map("requested_end_date") @db.Date
   motivation               String?
+  officeLocationId         String?         @map("office_location_id") @db.Uuid
   /// Application status (ApplicationStatus) — enforced via TS enum in service layer.
   /// Allowed values: DRAFT | SUBMITTED | UNDER_REVIEW | APPROVED | REJECTED | RESUBMITTED
   /// Source: docs/05-state-machine.md §8, docs/04-business-rules.md §11
-  status                   String?       @db.VarChar(50)
-  reviewedById             String?       @map("reviewed_by") @db.Uuid
-  reviewedAt               DateTime?     @map("reviewed_at") @db.Timestamp(6)
-  rejectionReason          String?       @map("rejection_reason")
-  createdAt                DateTime?     @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt                DateTime?     @updatedAt @map("updated_at") @db.Timestamp(6)
-  internProfile            InternProfile @relation(fields: [internProfileId], references: [id])
-  introductionLetterFile   File          @relation("IntroductionLetterFile", fields: [introductionLetterFileId], references: [id])
-  reviewedBy               User?         @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: Restrict)
+  status                   String?         @db.VarChar(50)
+  reviewedById             String?         @map("reviewed_by") @db.Uuid
+  reviewedAt               DateTime?       @map("reviewed_at") @db.Timestamp(6)
+  rejectionReason          String?         @map("rejection_reason")
+  createdAt                DateTime?       @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt                DateTime?       @updatedAt @map("updated_at") @db.Timestamp(6)
+  internProfile            InternProfile   @relation(fields: [internProfileId], references: [id])
+  introductionLetterFile   File            @relation("IntroductionLetterFile", fields: [introductionLetterFileId], references: [id])
+  reviewedBy               User?           @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: Restrict)
+  officeLocation           OfficeLocation? @relation(fields: [officeLocationId], references: [id], onDelete: Restrict)
   internship               Internship?
 
   @@index([internProfileId])
   @@index([introductionLetterFileId])
   @@index([reviewedById])
+  @@index([officeLocationId])
   @@map("internship_applications")
 }
 
@@ -301,7 +305,7 @@ model Internship {
   actualStartDate       DateTime?                 @map("actual_start_date") @db.Date
   actualEndDate         DateTime?                 @map("actual_end_date") @db.Date
   /// Internship status (InternshipStatus) — enforced via TS enum in service layer.
-  /// Allowed values: ONBOARDING_PENDING | ONBOARDING_COMPLETED | ACTIVE | COMPLETED | CERTIFICATE_GENERATED | ARCHIVED
+  /// Allowed values: PENDING | ACTIVE | COMPLETED | CERTIFICATE_GENERATED | ARCHIVED
   /// Source: docs/05-state-machine.md §9, docs/04-business-rules.md §11
   status                String?                   @db.VarChar(50)
   onboardingCompleted   Boolean                   @default(false) @map("onboarding_completed")

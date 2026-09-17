@@ -10,9 +10,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/atoms/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/atoms/dropdown-menu';
 import type { SupervisorDetailResponse } from '@/types/api/supervisor.types';
 import { formatDate } from '@/utils/string.format';
-import { UserPlus, Users, XCircle } from 'lucide-react';
+import { MoreHorizontal, UserPlus, Users, XCircle } from 'lucide-react';
 
 export interface SupervisorDetailDialogProps {
   open: boolean;
@@ -134,16 +142,25 @@ export function SupervisorDetailDialog({
                             </td>
                             <td className="px-4 py-3">{assignment.internship?.status ?? '-'}</td>
                             <td className="px-4 py-3 text-right">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                disabled={isRemoving}
-                                onClick={() => onRemoveAssignment(assignment.id)}
-                              >
-                                <XCircle className="size-4" />
-                                Lepas
-                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="size-8 p-0">
+                                    <MoreHorizontal className="size-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40">
+                                  <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    variant="destructive"
+                                    disabled={isRemoving}
+                                    onClick={() => onRemoveAssignment(assignment.id)}
+                                  >
+                                    <XCircle className="size-4" />
+                                    Lepas
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </td>
                           </tr>
                         ))}

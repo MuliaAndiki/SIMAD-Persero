@@ -41,8 +41,11 @@ export interface CheckOutBody {
   accuracy: number;
 }
 
+export type OverrideType = 'CHECK_IN' | 'CHECK_OUT' | 'INVALID';
+
 export interface OverrideAttendanceBody {
-  status: 'PRESENT' | 'INVALID';
+  type: OverrideType;
+  time?: string;
   reason: string;
 }
 
@@ -67,10 +70,16 @@ export interface AttendanceHistoryQuery {
 }
 
 export interface AttendanceExportQuery {
+  officeLocationId?: string;
   departmentId?: string;
+  internshipId?: string;
   month?: number;
   year?: number;
   format?: string;
+}
+
+export interface SupervisorAttendanceQuery {
+  date?: string;
 }
 
 // ---------- Response (data dari backend) ----------
@@ -148,6 +157,9 @@ export interface AttendanceSupervisorRow {
     id: string | null;
     intern: { id: string; fullName: string; email: string } | null;
     department: { id: string; name: string | null } | null;
+    status: string | null;
+    startDate: string | null;
+    endDate: string | null;
   };
   todayAttendance: AttendanceResponse | null;
 }

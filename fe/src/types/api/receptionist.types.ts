@@ -18,13 +18,16 @@ export interface ReceptionistResponse
     | 'createdAt'
     | 'officeId'
     | 'departmentId'
-  > {}
+  > {
+  department?: { id: string; name: string; code?: string } | null;
+  officeLocation?: { id: string; name: string } | null;
+}
 
 export interface CreateReceptionistBody {
   fullName: string;
   email: string;
-  departmentId: string;
   officeId: string;
+  departmentId?: string;
   password?: string;
 }
 

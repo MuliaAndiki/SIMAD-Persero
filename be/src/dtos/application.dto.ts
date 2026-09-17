@@ -13,6 +13,7 @@ export const CreateApplicationDto = t.Object({
   requestedEndDate: t.String({ format: 'date' }),
   motivation: t.Optional(t.String()),
   coverLetterFileId: t.String({ format: 'uuid' }),
+  officeLocationId: t.String({ format: 'uuid' }),
 });
 
 /** PATCH /applications/:id (draft edit) */
@@ -21,6 +22,7 @@ export const UpdateApplicationDto = t.Object({
   requestedEndDate: t.Optional(t.String({ format: 'date' })),
   motivation: t.Optional(t.String()),
   coverLetterFileId: t.Optional(t.String({ format: 'uuid' })),
+  officeLocationId: t.Optional(t.String({ format: 'uuid' })),
 });
 
 /** PATCH /applications/:id/approve */

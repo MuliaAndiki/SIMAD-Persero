@@ -94,6 +94,17 @@ class ApplicationService {
     }
   }
 
+  /** Validate that the office location exists. */
+  private async assertOfficeExists(officeLocationId: string) {
+    const office = await prisma.officeLocation.findUnique({
+      where: { id: officeLocationId },
+      select: { id: true },
+    });
+    if (!office) {
+      throw new AppError(404, "Office location not found");
+    }
+  }
+
   // ─── 14.1 Create Application ────────────────────────────────
 
   public async create(userId: string, input: CreateApplicationBody) {
@@ -101,6 +112,7 @@ class ApplicationService {
     await this.assertNoActiveApplication(internProfileId);
     this.validateDates(input.requestedStartDate, input.requestedEndDate);
     await this.assertFileExists(input.coverLetterFileId);
+    await this.assertOfficeExists(input.officeLocationId);
 
     return prisma.internshipApplication.create({
       data: {
@@ -110,6 +122,7 @@ class ApplicationService {
         requestedStartDate: new Date(input.requestedStartDate),
         requestedEndDate: new Date(input.requestedEndDate),
         motivation: input.motivation?.trim() || null,
+        officeLocationId: input.officeLocationId,
         status: ApplicationStatus.DRAFT,
       },
     });
@@ -127,6 +140,7 @@ class ApplicationService {
         introductionLetterFile: {
           select: { id: true, originalName: true, mimeType: true, url: true },
         },
+        officeLocation: { select: { id: true, name: true } },
       },
     });
   }
@@ -172,6 +186,11 @@ class ApplicationService {
     if (input.coverLetterFileId !== undefined) {
       await this.assertFileExists(input.coverLetterFileId);
       data.introductionLetterFileId = input.coverLetterFileId;
+    }
+
+    if (input.officeLocationId !== undefined) {
+      await this.assertOfficeExists(input.officeLocationId);
+      data.officeLocationId = input.officeLocationId;
     }
 
     return prisma.internshipApplication.update({ where: { id }, data });
@@ -282,6 +301,7 @@ class ApplicationService {
           introductionLetterFile: {
             select: { id: true, originalName: true, mimeType: true, url: true },
           },
+          officeLocation: { select: { id: true, name: true } },
         },
       }),
       prisma.internshipApplication.count({ where }),
@@ -323,6 +343,7 @@ class ApplicationService {
           select: { id: true, originalName: true, mimeType: true, url: true },
         },
         reviewedBy: { select: { id: true, fullName: true, email: true } },
+        officeLocation: { select: { id: true, name: true } },
         internship: { select: { id: true, status: true } },
       },
     });
@@ -377,11 +398,12 @@ class ApplicationService {
       throw new AppError(404, "Department not found or inactive");
     }
 
-    // Validate office location (optional)
+    // Validate office location — default ke kantor pilihan intern saat pengajuan.
     let officeLocationId: string | null = null;
-    if (input.officeLocationId) {
+    const requestedOfficeId = input.officeLocationId ?? app.officeLocationId;
+    if (requestedOfficeId) {
       const office = await prisma.officeLocation.findUnique({
-        where: { id: input.officeLocationId },
+        where: { id: requestedOfficeId },
       });
       if (!office) {
         throw new AppError(404, "Office location not found");
@@ -433,7 +455,7 @@ class ApplicationService {
           officeLocationId,
           actualStartDate: app.requestedStartDate,
           actualEndDate: app.requestedEndDate,
-          status: InternshipStatus.ONBOARDING_PENDING,
+          status: InternshipStatus.PENDING,
           onboardingCompleted: false,
         },
       });
@@ -462,7 +484,7 @@ class ApplicationService {
         data: {
           internshipId: internship.id,
           oldStatus: null,
-          newStatus: InternshipStatus.ONBOARDING_PENDING,
+          newStatus: InternshipStatus.PENDING,
           changedById: reviewerId,
           notes: input.notes || "Application approved, internship created.",
         },

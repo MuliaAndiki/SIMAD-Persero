@@ -5,6 +5,8 @@ import { AttendanceReportTable } from '@/components/organisms/reporting/Attendan
 import { CertificatesReportTable } from '@/components/organisms/reporting/CertificatesReportTable';
 import { DashboardReportGrid } from '@/components/organisms/reporting/DashboardReportGrid';
 import { InternshipsReportTable } from '@/components/organisms/reporting/InternshipsReportTable';
+import type { InternshipResponse } from '@/types/api/internship.types';
+import type { OfficeResponse } from '@/types/api/office.types';
 import type {
   AttendanceReportRow,
   CertificateReportRow,
@@ -33,11 +35,24 @@ export interface ReportsSectionState {
   isDashboardPending: boolean;
   isDashboardError: boolean;
   dashboardErrorMessage?: string;
+  offices: OfficeResponse[];
+  allInternships: InternshipResponse[];
+  selectedOfficeId: string;
+  selectedDepartmentId: string;
+  selectedInternshipId: string;
+  selectedMonth?: number;
+  selectedYear?: number;
 }
 
 export interface ReportsSectionActions {
   onTabChange: (tab: ReportsTab) => void;
   onRetry: (tab: ReportsTab) => void;
+  onSelectOffice: (id: string) => void;
+  onSelectDepartment: (id: string) => void;
+  onSelectInternship: (id: string) => void;
+  onSelectMonth: (month?: number) => void;
+  onSelectYear: (year?: number) => void;
+  onResetAttendanceFilter: () => void;
 }
 
 export interface ReportsSectionProps {
@@ -87,8 +102,22 @@ export function ReportsSection({ state, actions }: ReportsSectionProps) {
           isError={state.isAttendanceError}
           errorMessage={state.attendanceErrorMessage}
           onRetry={() => actions.onRetry('attendance')}
+          offices={state.offices}
+          allInternships={state.allInternships}
+          selectedOfficeId={state.selectedOfficeId}
+          selectedDepartmentId={state.selectedDepartmentId}
+          selectedInternshipId={state.selectedInternshipId}
+          selectedMonth={state.selectedMonth}
+          selectedYear={state.selectedYear}
+          onSelectOffice={actions.onSelectOffice}
+          onSelectDepartment={actions.onSelectDepartment}
+          onSelectInternship={actions.onSelectInternship}
+          onSelectMonth={actions.onSelectMonth}
+          onSelectYear={actions.onSelectYear}
+          onResetFilter={actions.onResetAttendanceFilter}
         />
       )}
+
       {state.activeTab === 'internships' && (
         <InternshipsReportTable
           rows={state.internships}

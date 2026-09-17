@@ -45,13 +45,22 @@ class FileRouter {
       },
     });
 
+    // GET /files/:fileId/view
+    this.fileRouter.get('/:fileId/view', (c: AppContext) => FileController.view(c), {
+      params: FileParamsDto,
+      detail: {
+        summary: 'Lihat file secara inline',
+        description: 'Menampilkan stream konten file PDF/gambar secara inline di browser/iframe.',
+        tags: ['File'],
+      },
+    });
+
     // GET /files/:fileId/download
     this.fileRouter.get('/:fileId/download', (c: AppContext) => FileController.download(c), {
       params: FileParamsDto,
-      beforeHandle: [verifyToken().beforeHandle],
       detail: {
         summary: 'Unduh file',
-        description: 'Mengunduh konten file berdasarkan ID.',
+        description: 'Mengunduh konten file berdasarkan ID langsung dari R2.',
         tags: ['File'],
       },
     });

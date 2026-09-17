@@ -3,6 +3,13 @@
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/atoms/select';
 import { UserAuditLogModal } from '@/components/organisms/auditLog/UserAuditLogModal';
 import { SendNotificationModal } from '@/components/organisms/notification/SendNotificationModal';
 import { SupervisorAssignInternDialog } from '@/components/organisms/supervisor/SupervisorAssignInternDialog';
@@ -17,8 +24,8 @@ import type { DepartmentResponse } from '@/types/api/department.types';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { SupervisorDetailResponse, SupervisorResponse } from '@/types/api/supervisor.types';
 import type { AlertContexType } from '@/types/ui';
-import { AlertCircle, Bell, Loader2, Search } from 'lucide-react';
-import { useState } from 'react';
+import { AlertCircle, Bell, Loader2, RotateCcw, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 export interface SupervisorsSectionState {
   isPending: boolean;
@@ -27,6 +34,8 @@ export interface SupervisorsSectionState {
   errorMessage?: string;
   supervisors: SupervisorResponse[];
   keyword: string;
+  selectedOfficeId?: string;
+  selectedDepartmentId?: string;
   detail: SupervisorDetailResponse | null;
   isDetailPending: boolean;
   isAssigning: boolean;
@@ -49,6 +58,9 @@ export interface SupervisorsSectionState {
 export interface SupervisorsSectionActions {
   onKeywordChange: (keyword: string) => void;
   onSearch: () => void;
+  onSelectOffice?: (id: string) => void;
+  onSelectDepartment?: (id: string) => void;
+  onResetFilter?: () => void;
   onSelectSupervisor: (id: string) => void;
   onCloseDetail: () => void;
   onOpenAssign: () => void;
@@ -87,6 +99,13 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
 
   const isInitialLoading = state.isPending && state.supervisors.length === 0;
 
+  const availableDepartments = useMemo(() => {
+    if (!state.selectedOfficeId) return state.departments;
+    const office = state.offices.find((o) => o.id === state.selectedOfficeId);
+    if (!office) return state.departments;
+    return state.departments.filter((d) => office.departments?.some((od) => od.id === d.id));
+  }, [state.selectedOfficeId, state.offices, state.departments]);
+
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -110,7 +129,8 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
         </div>
       </header>
 
-      <div className="flex flex-1 items-center gap-2">
+      {/* Bar Pencarian dan Filter Kantor & Departemen */}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -126,9 +146,62 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
             <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
           )}
         </div>
-        <Button type="submit" variant="outline">
-          Cari
-        </Button>
+
+        {/* Filter Kantor */}
+        <div className="w-full sm:w-[200px]">
+          <Select
+            value={state.selectedOfficeId || '__all__'}
+            onValueChange={(val) => actions.onSelectOffice?.(val === '__all__' ? '' : val)}
+          >
+            <SelectTrigger className="w-full h-9">
+              <SelectValue placeholder="Semua Kantor" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Semua Kantor</SelectItem>
+              {state.offices.map((office) => (
+                <SelectItem key={office.id} value={office.id}>
+                  {office.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Filter Departemen */}
+        <div className="w-full sm:w-[200px]">
+          <Select
+            value={state.selectedDepartmentId || '__all__'}
+            onValueChange={(val) => actions.onSelectDepartment?.(val === '__all__' ? '' : val)}
+          >
+            <SelectTrigger className="w-full h-9">
+              <SelectValue placeholder="Semua Departemen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Semua Departemen</SelectItem>
+              {availableDepartments.map((dept) => (
+                <SelectItem key={dept.id} value={dept.id}>
+                  {dept.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {(state.selectedOfficeId || state.selectedDepartmentId || query) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setQuery('');
+              actions.onKeywordChange('');
+              actions.onResetFilter?.();
+            }}
+            className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <RotateCcw className="mr-1.5 size-3.5" />
+            Reset
+          </Button>
+        )}
       </div>
 
       {isInitialLoading ? (
@@ -144,6 +217,8 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
       ) : (
         <SupervisorTable
           supervisors={state.supervisors}
+          offices={state.offices}
+          departments={state.departments}
           onSelectSupervisor={actions.onSelectSupervisor}
           onEditSupervisor={actions.onOpenEditForm}
           onDeleteSupervisor={actions.onDeleteSupervisor}

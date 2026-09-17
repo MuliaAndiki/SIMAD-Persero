@@ -52,3 +52,16 @@ export const UpdateSkillDto = t.Object({
   name: t.Optional(t.String({ minLength: 1 })),
   category: t.Optional(t.String({ minLength: 1 })),
 });
+
+/** GET /internships query */
+export const InternshipQueryDto = t.Optional(
+  t.Object({
+    page: t.Optional(t.Numeric()),
+    limit: t.Optional(t.Numeric()),
+    keyword: t.Optional(t.String()),
+    status: t.Optional(t.String()),
+    departmentId: t.Optional(t.String()),
+    officeLocationId: t.Optional(t.String()),
+    officeId: t.Optional(t.String()),
+  }),
+);

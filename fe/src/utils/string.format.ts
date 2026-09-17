@@ -16,3 +16,19 @@ export function formatDate(value: string | null): string {
     year: 'numeric',
   });
 }
+
+export function formatDateTime(value: string | null): string {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  const dateStr = date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+  const timeStr = date.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${dateStr}, ${timeStr.replace('.', ':')} WIB`;
+}

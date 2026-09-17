@@ -2,7 +2,7 @@ import type { AppContext } from "@/contex";
 import { HttpResponse, handleAppError } from "@/http";
 import userService from "@/services/user.service";
 import UserService from "@/services/user.service";
-import { JwtPayload } from "@/types/auth.types";
+import type { JwtPayload } from "@/types/auth.types";
 import type { ChangePasswordBody, UpdateProfileBody } from "@/types/user.types";
 
 /**

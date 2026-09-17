@@ -1,7 +1,10 @@
 import { queryKey } from '@/configs/query-key';
 import Api from '@/services/props.service';
 
-import type { RecentActivityQuery } from '@/types/api/dashboard.types';
+import type {
+  RecentActivityQuery,
+  SupervisorAttendanceTrendQuery,
+} from '@/types/api/dashboard.types';
 import { useQuery } from '@tanstack/react-query';
 
 export function useDashboardIntern(options?: { enabled?: boolean }) {
@@ -30,6 +33,16 @@ export function useDashboardSupervisor() {
     queryKey: queryKey.dashboard.supervisor(),
     queryFn: async () => {
       const res = await Api.Dashboard.Supervisor();
+      return res.data;
+    },
+  });
+}
+
+export function useSupervisorAttendanceTrend(query?: SupervisorAttendanceTrendQuery) {
+  return useQuery({
+    queryKey: queryKey.dashboard.supervisorAttendanceTrend(query),
+    queryFn: async () => {
+      const res = await Api.Dashboard.SupervisorAttendanceTrend(query);
       return res.data;
     },
   });

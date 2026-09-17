@@ -91,6 +91,7 @@ export function LandingFeatures() {
             <div className="absolute right-0 bottom-0 top-0 w-[45%] hidden md:flex items-center justify-end pr-8 group-hover:opacity-100 transition-opacity">
               <div className="w-full h-4/5 rounded-2xl overflow-hidden shadow-xl shadow-primary/10 border-4 border-card relative z-10">
                 <iframe
+                  title="Google Maps Location"
                   src="https://maps.google.com/maps?q=5.5623212,95.334821&z=17&output=embed"
                   width="100%"
                   height="100%"

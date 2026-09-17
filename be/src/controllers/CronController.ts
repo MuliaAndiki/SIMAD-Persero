@@ -1,9 +1,9 @@
-import type { AppContext } from "@/contex";
-import { HttpResponse } from "@/http";
-import cleanupService from "@/services/cleanup.service";
-import internshipService from "@/services/internship.service";
-import { pingDatabase } from "@/config/databases";
-import { getLogger } from "@/telemetry/otel.config";
+import { pingDatabase } from '@/config/databases';
+import type { AppContext } from '@/contex';
+import { HttpResponse } from '@/http';
+import cleanupService from '@/services/cleanup.service';
+import internshipService from '@/services/internship.service';
+import { getLogger } from '@/telemetry/otel.config';
 
 class CronController {
   /**
@@ -16,7 +16,7 @@ class CronController {
 
       return HttpResponse(c).ok(
         {
-          database: "connected",
+          database: 'connected',
           latency: `${result.latencyMs}ms`,
           timestamp: new Date().toISOString(),
         },
@@ -24,7 +24,7 @@ class CronController {
         `Database warm-up successful (${result.latencyMs}ms)`,
       );
     } catch (error) {
-      getLogger().error({ err: error }, "[cron] Database ping failed");
+      getLogger().error({ err: error }, '[cron] Database ping failed');
       return HttpResponse(c).serviceUnavailable(
         `Database ping failed: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -33,9 +33,9 @@ class CronController {
 
   public async PingService(c: AppContext) {
     try {
-      return HttpResponse(c).ok("Ping Service");
+      return HttpResponse(c).ok('Ping Service');
     } catch (error) {
-      getLogger().error({ err: error }, "[cron] Database ping failed");
+      getLogger().error({ err: error }, '[cron] Database ping failed');
       return HttpResponse(c).serviceUnavailable(
         `Database ping failed: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -43,12 +43,12 @@ class CronController {
   }
 
   public async autoStartInternships(c: AppContext) {
-    const result = await internshipService.autoStartDueInternships();
+    const result = await internshipService.runInternshipCronAutomations();
 
     return HttpResponse(c).ok(
       result,
       undefined,
-      `Success auto-start scheduled job. Processed: ${result.processed}, Started: ${result.started}`,
+      `Success internship scheduled job. Started: ${result.started}, Completed: ${result.completed}`,
     );
   }
 
@@ -80,10 +80,7 @@ class CronController {
     // Gunakan system user ID atau user yang menjalankan cron
     const systemUserId = c.user?.id;
 
-    const result = await cleanupService.deleteInactiveUsers(
-      gracePeriod,
-      systemUserId,
-    );
+    const result = await cleanupService.deleteInactiveUsers(gracePeriod, systemUserId);
 
     return HttpResponse(c).ok(
       result,

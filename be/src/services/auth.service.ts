@@ -87,7 +87,10 @@ class AuthService {
   private async findLoginUser(email: string) {
     return prisma.user.findUnique({
       where: { email },
-      include: { userRoles: { include: { role: true } } },
+      include: {
+        userRoles: { include: { role: true } },
+        avatarFile: true,
+      },
     });
   }
 
@@ -269,6 +272,7 @@ class AuthService {
         fullName: user.fullName,
         email: user.email,
         role: this.getRoleCode(user.userRoles),
+        avatarUrl: user.avatarFile?.url ?? null,
       },
     };
   }
@@ -336,13 +340,13 @@ class AuthService {
           isActive: true,
           userRoles: { create: [{ roleId: role.id }] },
         },
-        include: { userRoles: { include: { role: true } } },
+        include: { userRoles: { include: { role: true } }, avatarFile: true },
       });
     } else if (!user.emailVerified) {
       user = await prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: true, emailVerifiedAt: new Date() },
-        include: { userRoles: { include: { role: true } } },
+        include: { userRoles: { include: { role: true } }, avatarFile: true },
       });
     }
 
@@ -411,7 +415,7 @@ class AuthService {
 
     const decoded = this.verifyEmailToken(token, 'magic-link');
 
-    const user = await this.findLoginUser(decoded.id);
+    const user = await this.findLoginUser(decoded.email);
     if (!user || user.deletedAt) {
       throw new AppError(401, 'Account not found');
     }
@@ -568,6 +572,7 @@ class AuthService {
       fullName: user.fullName,
       email: user.email,
       role: (user.roles[0] ?? DEFAULT_ROLE_CODE).toLowerCase(),
+      avatarUrl: user.avatarUrl,
     };
   }
 

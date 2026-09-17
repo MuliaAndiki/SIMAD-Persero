@@ -14,6 +14,8 @@ export type SupervisorQuery = Partial<{
   page: number;
   limit: number;
   keyword: string;
+  officeId: string;
+  departmentId: string;
 }>;
 
 export type AssignInternBody = {
@@ -26,6 +28,8 @@ export type SupervisorResponse = Pick<
 > & {
   activeAssignmentsCount: number;
   departmentId: IUser['departmentId'];
+  department?: Pick<IDepartment, 'id' | 'name' | 'code'> | null;
+  officeLocation?: { id: string; name: string } | null;
 };
 
 export type SupervisorAssignmentResponse = {

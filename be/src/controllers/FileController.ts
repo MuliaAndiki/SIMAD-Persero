@@ -67,14 +67,44 @@ class FileController {
     }
   }
 
-  // GET /files/:fileId/download — redirect to R2 public URL.
+  // GET /files/:fileId/download — stream file langsung dari R2 (attachment).
   public async download(c: AppContext) {
     try {
       const { fileId } = c.params as unknown as FileParams;
-      const { url } = await FileService.download(fileId);
+      const { file, stream, contentType, contentLength } = await FileService.getFileStream(fileId);
 
-      // Redirect client directly to R2 public URL (CDN-served).
-      return c.redirect(url, 302);
+      const headers: Record<string, string> = {
+        'Content-Type': contentType,
+        'Content-Disposition': `attachment; filename="${file.originalName || 'downloaded-file'}"`,
+        'Accept-Ranges': 'bytes',
+      };
+      if (contentLength) {
+        headers['Content-Length'] = String(contentLength);
+      }
+
+      return new Response(stream, { status: 200, headers });
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // GET /files/:fileId/view — stream file inline untuk preview browser/iframe.
+  public async view(c: AppContext) {
+    try {
+      const { fileId } = c.params as unknown as FileParams;
+      const { file, stream, contentType, contentLength } = await FileService.getFileStream(fileId);
+
+      const headers: Record<string, string> = {
+        'Content-Type': contentType,
+        'Content-Disposition': `inline; filename="${file.originalName || 'file'}"`,
+        'Cache-Control': 'public, max-age=86400',
+        'Accept-Ranges': 'bytes',
+      };
+      if (contentLength) {
+        headers['Content-Length'] = String(contentLength);
+      }
+
+      return new Response(stream, { status: 200, headers });
     } catch (error) {
       return this.handleError(c, error);
     }

@@ -4,6 +4,7 @@ import {
   type AssignSupervisorBody,
   type ChangeDepartmentBody,
   type ExtendInternshipBody,
+  type InternshipQuery,
   InternshipStatus,
   type PickMergeInternship,
 } from '@/types/internship.types';
@@ -11,6 +12,7 @@ import { createAuditLog } from '@/utils/audit.util';
 import prisma from '../../prisma/client';
 import { getLogger } from '../telemetry/otel.config';
 import attendanceService from './attendance.service';
+import certificateService from './certificate.service';
 
 /**
  * Service layer for the Internship module.
@@ -85,41 +87,126 @@ class InternshipService {
 
   // ─── 15.1 Get My Internship ─────────────────────────────────
 
-  public async list() {
-    return prisma.internship.findMany({
-      include: {
-        department: { select: { id: true, code: true, name: true } },
-        officeLocation: { select: { id: true, name: true, address: true } },
-        internProfile: {
-          select: {
-            id: true,
-            studentNumber: true,
-            user: { select: { id: true, fullName: true, email: true } },
-            institution: { select: { id: true, name: true } },
-            major: { select: { id: true, name: true } },
-          },
-        },
-        application: {
-          select: {
-            id: true,
-            applicationNumber: true,
-            status: true,
-            requestedStartDate: true,
-            requestedEndDate: true,
-          },
-        },
+  public async list(query?: InternshipQuery, userId?: string, userRoles?: string[]) {
+    const isReceptionist = userRoles?.some((r) => r.toLowerCase() === 'receptionist');
+    let officeLocationId: string | undefined = query?.officeLocationId || query?.officeId;
 
-        supervisorAssignments: {
-          where: { isActive: true },
-          select: {
-            id: true,
-            supervisor: { select: { id: true, fullName: true, email: true } },
-            assignedAt: true,
+    if (isReceptionist && userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { officeId: true },
+      });
+      if (user?.officeId) {
+        officeLocationId = user.officeId;
+      }
+    }
+
+    const where: Record<string, unknown> = {};
+
+    // 1. Filter Kantor
+    if (officeLocationId) {
+      where.officeLocationId = officeLocationId;
+    }
+
+    // 2. Filter Departemen
+    if (query?.departmentId) {
+      where.departmentId = query.departmentId;
+    }
+
+    // 3. Filter Status
+    if (query?.status) {
+      where.status = query.status;
+    }
+
+    // 4. Pencarian Keyword
+    if (query?.keyword?.trim()) {
+      const kw = query.keyword.trim();
+      where.OR = [
+        { internProfile: { user: { fullName: { contains: kw, mode: 'insensitive' } } } },
+        { internProfile: { user: { email: { contains: kw, mode: 'insensitive' } } } },
+        { internProfile: { studentNumber: { contains: kw, mode: 'insensitive' } } },
+        { internProfile: { institution: { name: { contains: kw, mode: 'insensitive' } } } },
+        { department: { name: { contains: kw, mode: 'insensitive' } } },
+        { department: { code: { contains: kw, mode: 'insensitive' } } },
+        { officeLocation: { name: { contains: kw, mode: 'insensitive' } } },
+        {
+          supervisorAssignments: {
+            some: {
+              isActive: true,
+              supervisor: { fullName: { contains: kw, mode: 'insensitive' } },
+            },
           },
         },
+      ];
+    }
+
+    const page = Math.max(1, Number(query?.page) || 1);
+    const limit = Math.min(500, Math.max(1, Number(query?.limit) || 10));
+    const skip = (page - 1) * limit;
+
+    const [total, data] = await prisma.$transaction([
+      prisma.internship.count({ where }),
+      prisma.internship.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          department: { select: { id: true, code: true, name: true } },
+          officeLocation: { select: { id: true, name: true, address: true } },
+          internProfile: {
+            select: {
+              id: true,
+              studentNumber: true,
+              user: { select: { id: true, fullName: true, email: true } },
+              institution: { select: { id: true, name: true } },
+              major: { select: { id: true, name: true } },
+            },
+          },
+          application: {
+            select: {
+              id: true,
+              applicationNumber: true,
+              status: true,
+              requestedStartDate: true,
+              requestedEndDate: true,
+            },
+          },
+          supervisorAssignments: {
+            where: { isActive: true },
+            select: {
+              id: true,
+              supervisor: { select: { id: true, fullName: true, email: true } },
+              assignedAt: true,
+            },
+          },
+          attendances: {
+            orderBy: { attendanceDate: 'desc' },
+            take: 60,
+            select: {
+              id: true,
+              attendanceDate: true,
+              checkInAt: true,
+              checkOutAt: true,
+              checkInStatus: true,
+              checkOutStatus: true,
+              attendanceStatus: true,
+              notes: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { createdAt: 'desc' },
-    });
+    };
   }
 
   public async getMyInternship(userId: string) {
@@ -184,101 +271,24 @@ class InternshipService {
 
   // ─── 15.2 Get Internship Detail ─────────────────────────────
 
-  public async getById(id: string) {
-    return this.findById(id);
-  }
-
-  // ─── Complete Onboarding (INTERN) ───────────────────────────
-  //
-  // Menyelesaikan onboarding digital: menandai onboardingHistory sebagai
-  // diterima (accepted = true) dan memindahkan status internship dari
-  // ONBOARDING_PENDING ke ONBOARDING_COMPLETED (docs/05-state-machine.md §9).
-  // Side effects: waktu persetujuan, IP Address, user agent, audit log.
-
-  public async completeOnboarding(
-    id: string,
-    userId: string,
-    meta: { ipAddress?: string; userAgent?: string },
-  ) {
+  public async getById(id: string, userId?: string, roles?: string[]) {
     const internship = await this.findById(id);
 
-    // Ownership — hanya pemilik internship yang boleh menyelesaikan onboarding.
-    const profile = await prisma.internProfile.findUnique({
-      where: { userId },
-      select: { id: true },
-    });
-
-    if (!profile) {
-      throw new AppError(422, 'Intern profile not found');
-    }
-
-    if (internship.internProfileId !== profile.id) {
-      throw new AppError(403, 'You can only complete onboarding for your own internship');
-    }
-
-    // State machine — hanya boleh dari ONBOARDING_PENDING.
-    if (internship.status !== InternshipStatus.ONBOARDING_PENDING) {
-      throw new AppError(400, 'Onboarding can only be completed from ONBOARDING_PENDING status');
-    }
-
-    return prisma.$transaction(async (tx) => {
-      // 1. Tandai onboarding history sebagai diterima.
-      const onboarding = await tx.onboardingHistory.findFirst({
-        where: { internshipId: id },
-      });
-
-      if (onboarding) {
-        await tx.onboardingHistory.update({
-          where: { id: onboarding.id },
-          data: {
-            accepted: true,
-            acceptedAt: new Date(),
-            ipAddress: meta.ipAddress ?? null,
-            userAgent: meta.userAgent ?? null,
-          },
-        });
-      }
-
-      // 2. Pindahkan status internship ke ONBOARDING_COMPLETED.
-      const updated = await tx.internship.update({
-        where: { id },
-        data: {
-          status: InternshipStatus.ONBOARDING_COMPLETED,
-          onboardingCompleted: true,
-        },
-      });
-
-      // 3. Catat histori status.
-      await this.recordStatusHistory(
-        tx,
-        id,
-        internship.status,
-        InternshipStatus.ONBOARDING_COMPLETED,
-        userId,
-        'Onboarding completed by intern',
+    // Jika supervisor (dan bukan hr_admin), pastikan internship ini berada di bawah bimbingannya.
+    if (
+      roles &&
+      !roles.some((r) => r.toLowerCase() === 'hr_admin') &&
+      roles.some((r) => r.toLowerCase() === 'supervisor')
+    ) {
+      const isSupervising = internship.supervisorAssignments?.some(
+        (sa) => sa.supervisor?.id === userId,
       );
+      if (!isSupervising) {
+        throw new AppError(403, 'Access denied. You can only view internships assigned to you');
+      }
+    }
 
-      // 4. Audit log (BR-AUDIT-001/003).
-      await createAuditLog(tx, {
-        userId,
-        module: 'INTERNSHIP',
-        action: 'COMPLETE_ONBOARDING',
-        tableName: 'internships',
-        recordId: id,
-        oldData: {
-          status: internship.status,
-          onboardingCompleted: internship.onboardingCompleted,
-        },
-        newData: {
-          status: InternshipStatus.ONBOARDING_COMPLETED,
-          onboardingCompleted: true,
-        },
-        ipAddress: meta.ipAddress ?? null,
-        userAgent: meta.userAgent ?? null,
-      });
-
-      return updated;
-    });
+    return internship;
   }
 
   // ─── 15.3 Start Internship (HR_ADMIN) ───────────────────────
@@ -286,24 +296,8 @@ class InternshipService {
   public async start(id: string, userId: string) {
     const internship = await this.findById(id);
 
-    if (
-      internship.status !== InternshipStatus.ONBOARDING_PENDING &&
-      internship.status !== InternshipStatus.ONBOARDING_COMPLETED
-    ) {
-      throw new AppError(
-        400,
-        'Internship can only be started from ONBOARDING_PENDING or ONBOARDING_COMPLETED status',
-      );
-    }
-
-    // If onboarding is pending, check that it has been accepted
-    if (internship.status === InternshipStatus.ONBOARDING_PENDING) {
-      const onboarding = await prisma.onboardingHistory.findFirst({
-        where: { internshipId: id, accepted: true },
-      });
-      if (!onboarding) {
-        throw new AppError(400, 'Onboarding must be completed before starting the internship');
-      }
+    if (internship.status !== InternshipStatus.PENDING) {
+      throw new AppError(400, 'Internship can only be started from PENDING status');
     }
 
     const actualStartDate = internship.actualStartDate ?? new Date();
@@ -353,9 +347,8 @@ class InternshipService {
    * Automatically start internships whose determined start date
    * (actualStartDate) has arrived.
    *
-   * Only ONBOARDING_COMPLETED internships are considered — the onboarding
-   * flow must be finished before an internship may become ACTIVE
-   * (docs/05-state-machine.md §9). Called by the daily cron job
+   * Only PENDING internships are considered.
+   * Called by the daily cron job
    * (src/cron/internship.cron.ts); transitions are recorded with
    * changedById = null (system-triggered).
    */
@@ -364,7 +357,7 @@ class InternshipService {
 
     const dueInternships = await prisma.internship.findMany({
       where: {
-        status: InternshipStatus.ONBOARDING_COMPLETED,
+        status: InternshipStatus.PENDING,
         actualStartDate: { lte: now },
       },
       select: {
@@ -428,6 +421,95 @@ class InternshipService {
     return { processed: dueInternships.length, started };
   }
 
+  /**
+   * Automatically transition ACTIVE internships to COMPLETED when their end date
+   * (actualEndDate or application.requestedEndDate) has arrived or passed.
+   *
+   * Only ACTIVE internships are considered.
+   * Transitions are recorded with changedById = null (system-triggered).
+   */
+  public async autoCompleteDueInternships() {
+    const now = new Date();
+
+    const dueInternships = await prisma.internship.findMany({
+      where: {
+        status: InternshipStatus.ACTIVE,
+        OR: [
+          { actualEndDate: { lte: now } },
+          {
+            actualEndDate: null,
+            application: { requestedEndDate: { lte: now } },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        status: true,
+        actualStartDate: true,
+        actualEndDate: true,
+        application: { select: { requestedEndDate: true } },
+      },
+    });
+
+    let completed = 0;
+    for (const internship of dueInternships) {
+      try {
+        const resolvedEndDate =
+          internship.actualEndDate ?? internship.application?.requestedEndDate ?? now;
+
+        await prisma.$transaction(
+          async (tx) => {
+            await tx.internship.update({
+              where: { id: internship.id },
+              data: {
+                status: InternshipStatus.COMPLETED,
+                completedAt: now,
+                ...(internship.actualEndDate ? {} : { actualEndDate: resolvedEndDate }),
+              },
+            });
+
+            await this.recordStatusHistory(
+              tx,
+              internship.id,
+              internship.status,
+              InternshipStatus.COMPLETED,
+              null,
+              'Auto-completed by scheduled job (end date reached)',
+            );
+          },
+          { timeout: 30000, maxWait: 10000 },
+        );
+        completed += 1;
+      } catch (error) {
+        getLogger().error(
+          { err: error, internshipId: internship.id },
+          '[internship-cron] Failed to auto-complete internship',
+        );
+      }
+    }
+
+    return { processed: dueInternships.length, completed };
+  }
+
+  /**
+   * Execute both auto-start for due PENDING internships and auto-complete
+   * for due ACTIVE internships in a single cron run.
+   */
+  public async runInternshipCronAutomations() {
+    const startResult = await this.autoStartDueInternships();
+    const completeResult = await this.autoCompleteDueInternships();
+
+    return {
+      processed: startResult.processed + completeResult.processed,
+      started: startResult.started,
+      completed: completeResult.completed,
+      details: {
+        autoStart: startResult,
+        autoComplete: completeResult,
+      },
+    };
+  }
+
   // ─── 15.4 Finish Internship (HR_ADMIN) ──────────────────────
 
   public async finish(id: string, userId: string) {
@@ -464,8 +546,11 @@ class InternshipService {
   public async extend(id: string, userId: string, input: ExtendInternshipBody) {
     const internship = await this.findById(id);
 
-    if (internship.status !== InternshipStatus.ACTIVE) {
-      throw new AppError(400, 'Only ACTIVE internships can be extended');
+    if (
+      internship.status !== InternshipStatus.ACTIVE &&
+      internship.status !== InternshipStatus.COMPLETED
+    ) {
+      throw new AppError(400, 'Only ACTIVE or COMPLETED internships can be extended');
     }
 
     const newEndDate = new Date(input.newEndDate);
@@ -477,23 +562,58 @@ class InternshipService {
       throw new AppError(400, 'New end date must be after the current end date');
     }
 
-    return prisma.$transaction(async (tx) => {
-      const updated = await tx.internship.update({
-        where: { id },
-        data: { actualEndDate: newEndDate },
-      });
+    const currentEndDate = internship.actualEndDate ?? internship.application?.requestedEndDate;
+    const extensionStartDate = currentEndDate
+      ? new Date(currentEndDate.getTime() + 24 * 60 * 60 * 1000)
+      : (internship.actualStartDate ?? newEndDate);
 
-      await this.recordStatusHistory(
-        tx,
-        id,
-        InternshipStatus.ACTIVE,
-        InternshipStatus.ACTIVE,
-        userId,
-        `Internship extended to ${input.newEndDate}. ${input.reason || ''}`.trim(),
+    // Build initial attendance records for the extended period outside transaction to avoid holding DB connection
+    const extendedAttendances =
+      extensionStartDate <= newEndDate
+        ? await attendanceService.buildInitialAttendances(id, extensionStartDate, newEndDate)
+        : [];
+
+    const updated = await prisma.$transaction(
+      async (tx) => {
+        const res = await tx.internship.update({
+          where: { id },
+          data: {
+            actualEndDate: newEndDate,
+            status: InternshipStatus.ACTIVE,
+            completedAt: null,
+          },
+        });
+
+        if (extendedAttendances.length > 0) {
+          await tx.attendance.createMany({
+            data: extendedAttendances,
+            skipDuplicates: true,
+          });
+        }
+
+        await this.recordStatusHistory(
+          tx,
+          id,
+          internship.status,
+          InternshipStatus.ACTIVE,
+          userId,
+          `Internship extended to ${input.newEndDate}. ${input.reason || ''}`.trim(),
+        );
+
+        return res;
+      },
+      { timeout: 30000, maxWait: 10000 },
+    );
+
+    // Synchronize certificate if already exists
+    await certificateService.syncCertificateEndDate(id, newEndDate, userId).catch((err) => {
+      getLogger().warn(
+        { err, internshipId: id },
+        '[internship-extend] Failed to sync certificate end date',
       );
-
-      return updated;
     });
+
+    return updated;
   }
 
   // ─── 15.6 Assign Supervisor (HR_ADMIN) ──────────────────────

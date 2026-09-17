@@ -4,6 +4,7 @@ import { Button } from '@/components/atoms/button';
 import { ApplicationDetailField } from '@/components/organisms/application/ApplicationDetailField';
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
 import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
+import { getFilePreviewUrl } from '@/utils/file-preview';
 import { formatDate } from '@/utils/string.format';
 import {
   CalendarCheck,
@@ -107,48 +108,54 @@ export function ApplicationReviewDetail({
         </div>
       )}
 
-      {app.introductionLetterFile && (
-        <div className="flex flex-col gap-3 rounded-lg border p-4 bg-card">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <FileText className="size-5 shrink-0 text-primary" />
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="truncate text-sm font-semibold">
-                  {app.introductionLetterFile.originalName}
-                </span>
-                <span className="text-xs text-muted-foreground">Surat Pengantar Universitas</span>
+      {app.introductionLetterFile &&
+        (() => {
+          const previewUrl = getFilePreviewUrl(app.introductionLetterFile);
+          return (
+            <div className="flex flex-col gap-3 rounded-lg border p-4 bg-card">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <FileText className="size-5 shrink-0 text-primary" />
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate text-sm font-semibold">
+                      {app.introductionLetterFile.originalName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Surat Pengantar Universitas
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPdfPreview((prev) => !prev)}
+                  >
+                    {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
+                  </Button>
+                  {previewUrl && (
+                    <Button asChild variant="outline" size="sm">
+                      <a href={previewUrl} target="_blank" rel="noreferrer">
+                        Buka di Tab Baru
+                      </a>
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPdfPreview((prev) => !prev)}
-              >
-                {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
-              </Button>
-              {app.introductionLetterFile.url && (
-                <Button asChild variant="outline" size="sm">
-                  <a href={app.introductionLetterFile.url} target="_blank" rel="noreferrer">
-                    Buka di Tab Baru
-                  </a>
-                </Button>
+
+              {showPdfPreview && previewUrl && (
+                <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
+                  <iframe
+                    src={previewUrl}
+                    className="h-[520px] w-full border-0"
+                    title={`Preview ${app.introductionLetterFile.originalName}`}
+                  />
+                </div>
               )}
             </div>
-          </div>
-
-          {showPdfPreview && app.introductionLetterFile.url && (
-            <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
-              <iframe
-                src={app.introductionLetterFile.url}
-                className="h-[520px] w-full border-0"
-                title={`Preview ${app.introductionLetterFile.originalName}`}
-              />
-            </div>
-          )}
-        </div>
-      )}
+          );
+        })()}
 
       {app.status === 'REJECTED' && app.rejectionReason && (
         <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">

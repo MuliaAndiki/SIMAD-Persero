@@ -10,20 +10,22 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**',
       },
-      // Tambahkan pattern spesifik untuk R2 jika ada
-      ...(process.env.NEXT_PUBLIC_R2_URL
-        ? [
-            {
-              protocol: 'https' as const,
-              hostname: new URL(process.env.NEXT_PUBLIC_R2_URL).hostname,
-            },
-          ]
-        : []),
+      {
+        protocol: 'https',
+        hostname: '*.r2.dev',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.cloudflarestorage.com',
+      },
     ],
     // Tambahkan domain R2 ke allowed domains
-    domains: process.env.NEXT_PUBLIC_R2_URL
-      ? [new URL(process.env.NEXT_PUBLIC_R2_URL).hostname]
-      : [],
+    domains: [
+      'pub-2f811af54c344a96ad45cb28d7493156.r2.dev',
+      ...(process.env.NEXT_PUBLIC_R2_URL
+        ? [new URL(process.env.NEXT_PUBLIC_R2_URL).hostname]
+        : [])
+    ],
   },
   redirects: async () => {
     return [

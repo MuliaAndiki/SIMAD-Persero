@@ -8,10 +8,18 @@ import {
   type ReceptionistFormType,
 } from '@/components/organisms/receptionist/ReceptionistFormDialog';
 import { ReceptionistTable } from '@/components/organisms/receptionist/ReceptionistTable';
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/atoms/select';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { ReceptionistResponse } from '@/types/api/receptionist.types';
 import type { AlertContexType } from '@/types/ui';
-import { AlertCircle, Loader2, Plus, Search } from 'lucide-react';
+import { AlertCircle, Loader2, RotateCcw, Search } from 'lucide-react';
 import { useState } from 'react';
 
 export interface ReceptionistsSectionProps {
@@ -22,6 +30,10 @@ export interface ReceptionistsSectionProps {
     errorMessage?: string;
     receptionists: ReceptionistResponse[];
     offices: OfficeResponse[];
+    selectedOfficeId?: string;
+    page?: number;
+    totalPages?: number;
+    total?: number;
     keyword: string;
     formOpen: boolean;
     isSaving: boolean;
@@ -33,6 +45,9 @@ export interface ReceptionistsSectionProps {
   };
   actions: {
     onKeywordChange: (val: string) => void;
+    onSelectOffice?: (id: string) => void;
+    onResetFilter?: () => void;
+    onPageChange?: (page: number) => void;
     onOpenCreate: () => void;
     onOpenEdit: (id: string) => void;
     onCloseForm: () => void;
@@ -61,19 +76,58 @@ export function ReceptionistsSection({ state, actions }: ReceptionistsSectionPro
         </Button>
       </header>
 
-      <div className="relative flex-1 max-w-sm">
-        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            actions.onKeywordChange(e.target.value);
-          }}
-          placeholder="Cari nama / email resepsionis…"
-          className="pl-9 pr-9"
-        />
-        {state.isFetching && (
-          <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
+      {/* Bar Pencarian dan Filter Kantor */}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              actions.onKeywordChange(e.target.value);
+            }}
+            placeholder="Cari nama / email resepsionis…"
+            className="pl-9 pr-9"
+          />
+          {state.isFetching && (
+            <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
+          )}
+        </div>
+
+        {/* Filter Kantor */}
+        <div className="w-full sm:w-[220px]">
+          <Select
+            value={state.selectedOfficeId || '__all__'}
+            onValueChange={(val) => actions.onSelectOffice?.(val === '__all__' ? '' : val)}
+          >
+            <SelectTrigger className="w-full h-9">
+              <SelectValue placeholder="Semua Kantor" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Semua Kantor</SelectItem>
+              {state.offices.map((office) => (
+                <SelectItem key={office.id} value={office.id}>
+                  {office.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {(state.selectedOfficeId || query) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setQuery('');
+              actions.onKeywordChange('');
+              actions.onResetFilter?.();
+            }}
+            className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <RotateCcw className="mr-1.5 size-3.5" />
+            Reset
+          </Button>
         )}
       </div>
 
@@ -91,6 +145,10 @@ export function ReceptionistsSection({ state, actions }: ReceptionistsSectionPro
         <ReceptionistTable
           receptionists={state.receptionists}
           offices={state.offices}
+          page={state.page}
+          totalPages={state.totalPages}
+          total={state.total}
+          onPageChange={actions.onPageChange}
           onEdit={actions.onOpenEdit}
           onDelete={actions.onDelete}
           alert={state.alert}

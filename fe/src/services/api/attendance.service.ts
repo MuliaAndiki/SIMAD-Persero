@@ -15,6 +15,7 @@ import type {
   CheckOutBody,
   OverrideAttendanceBody,
   OverrideAttendanceResponse,
+  SupervisorAttendanceQuery,
 } from '@/types/api/attendance.types';
 import { buildQueryString } from '@/utils/query-string';
 import { toServiceResponse } from '@/utils/service-response';
@@ -94,9 +95,12 @@ class AttendanceService {
    * GET /attendance/supervisor
    * Mengambil dashboard kehadiran supervisor (SUPERVISOR).
    */
-  public async Supervisor(): Promise<TResponse<AttendanceSupervisorRow[]>> {
+  public async Supervisor(
+    query?: SupervisorAttendanceQuery,
+  ): Promise<TResponse<AttendanceSupervisorRow[]>> {
+    const qs = buildQueryString(query as Record<string, string | number | boolean>);
     const res = await client.GetResponse<AttendanceSupervisorRow[]>(
-      ATTENDANCE_ENDPOINTS.SUPERVISOR,
+      `${ATTENDANCE_ENDPOINTS.SUPERVISOR}${qs}`,
     );
     return toServiceResponse(res, {
       message: 'Dashboard supervisor berhasil dimuat',
@@ -183,7 +187,7 @@ class AttendanceService {
    */
   public async Override(
     params: Pick<AttendanceParams, 'attendanceId'>,
-    body: Pick<OverrideAttendanceBody, 'status' | 'reason'>,
+    body: Pick<OverrideAttendanceBody, 'type' | 'time' | 'reason'>,
   ): Promise<TResponse<OverrideAttendanceResponse>> {
     const res = await client.PatchResponse<OverrideAttendanceResponse>(
       ATTENDANCE_ENDPOINTS.OVERRIDE(params.attendanceId),

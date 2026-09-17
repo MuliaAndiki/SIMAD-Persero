@@ -10,6 +10,7 @@ import type {
   CreateSkillBody,
   ExtendInternshipBody,
   InternshipParams,
+  InternshipQuery,
   InternshipResponse,
   MyInternProfileResponse,
   PickMergeInternship,
@@ -35,8 +36,9 @@ class InternshipService {
    * GET /internships
    * Mengambil daftar semua magang (HR_ADMIN).
    */
-  public async List(): Promise<TResponse<InternshipResponse[]>> {
-    const res = await client.GetResponse<InternshipResponse[]>(INTERNSHIP_ENDPOINTS.BASE);
+  public async List(query?: InternshipQuery): Promise<TResponse<InternshipResponse[]>> {
+    const qs = query ? buildQueryString(query as Record<string, string | number | boolean>) : '';
+    const res = await client.GetResponse<InternshipResponse[]>(`${INTERNSHIP_ENDPOINTS.BASE}${qs}`);
     return toServiceResponse(res, { message: 'Daftar magang berhasil dimuat' });
   }
 
@@ -47,22 +49,6 @@ class InternshipService {
   public async My(): Promise<TResponse<InternshipResponse>> {
     const res = await client.GetResponse<InternshipResponse>(INTERNSHIP_ENDPOINTS.MY);
     return toServiceResponse(res, { message: 'Data magang berhasil dimuat' });
-  }
-
-  /**
-   * PATCH /internships/:id/onboarding
-   * Menyelesaikan onboarding magang (INTERN).
-   */
-  public async CompleteOnboarding(
-    params: Pick<InternshipParams, 'id'>,
-  ): Promise<TResponse<InternshipResponse>> {
-    const res = await client.PatchResponse<InternshipResponse>(
-      INTERNSHIP_ENDPOINTS.ONBOARDING(params.id),
-      {},
-    );
-    return toServiceResponse(res, {
-      message: 'Onboarding berhasil diselesaikan',
-    });
   }
 
   /**

@@ -21,7 +21,7 @@ import type { DepartmentResponse } from '@/types/api/department.types';
 import type { InternshipResponse } from '@/types/api/internship.types';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { SupervisorResponse } from '@/types/api/supervisor.types';
-import { AlertCircle, Loader2, Search } from 'lucide-react';
+import { AlertCircle, Loader2, RotateCcw, Search } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
@@ -33,15 +33,24 @@ export interface InternshipsSectionState {
   errorMessage?: string;
   internships: InternshipResponse[];
   statusFilter: string;
+  officeFilter?: string;
+  departmentFilter?: string;
   keyword: string;
   departments?: DepartmentResponse[];
   offices?: OfficeResponse[];
   supervisors?: SupervisorResponse[];
+  page?: number;
+  totalPages?: number;
+  total?: number;
 }
 
 export interface InternshipsSectionActions {
   onStatusChange: (status: string) => void;
+  onOfficeChange?: (officeId: string) => void;
+  onDepartmentChange?: (deptId: string) => void;
+  onResetFilters?: () => void;
   onKeywordChange: (keyword: string) => void;
+  onPageChange?: (page: number) => void;
   onSearch: () => void;
   // Control actions
   onStart?: (id: string) => void;
@@ -63,8 +72,7 @@ export interface InternshipsSectionProps {
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'all', label: 'Semua Status' },
-  { value: 'ONBOARDING_PENDING', label: 'Menunggu Onboarding' },
-  { value: 'ONBOARDING_COMPLETED', label: 'Onboarding Selesai' },
+  { value: 'PENDING', label: 'Pending' },
   { value: 'ACTIVE', label: 'Aktif' },
   { value: 'COMPLETED', label: 'Selesai' },
   { value: 'CERTIFICATE_GENERATED', label: 'Sertifikat Dibuat' },
@@ -101,6 +109,10 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
     setGenerateCertOpen(true);
   };
 
+  const hasActiveFilter = Boolean(
+    state.statusFilter || state.officeFilter || state.departmentFilter || query,
+  );
+
   const isInitialLoading = state.isPending && state.internships.length === 0;
 
   return (
@@ -113,7 +125,8 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
         </p>
       </header>
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        {/* Search Input */}
         <div className="flex flex-1 items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -123,7 +136,7 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
                 setQuery(e.target.value);
                 actions.onKeywordChange(e.target.value);
               }}
-              placeholder="Cari nama / email / NIM…"
+              placeholder="Cari nama, NIM, email, kantor, departemen, dsb…"
               className="pl-9 pr-9"
             />
             {state.isFetching && (
@@ -131,11 +144,49 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
             )}
           </div>
         </div>
+
+        {/* Filter Kantor */}
+        <Select
+          value={state.officeFilter || 'all'}
+          onValueChange={(value) => actions.onOfficeChange?.(value === 'all' ? '' : value)}
+        >
+          <SelectTrigger className="w-full lg:w-48">
+            <SelectValue placeholder="Semua Kantor" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Kantor</SelectItem>
+            {state.offices?.map((office) => (
+              <SelectItem key={office.id} value={office.id}>
+                {office.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Filter Departemen */}
+        <Select
+          value={state.departmentFilter || 'all'}
+          onValueChange={(value) => actions.onDepartmentChange?.(value === 'all' ? '' : value)}
+        >
+          <SelectTrigger className="w-full lg:w-48">
+            <SelectValue placeholder="Semua Departemen" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Departemen</SelectItem>
+            {state.departments?.map((dept) => (
+              <SelectItem key={dept.id} value={dept.id}>
+                {dept.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Filter Status */}
         <Select
           value={state.statusFilter || 'all'}
           onValueChange={(value) => actions.onStatusChange(value === 'all' ? '' : value)}
         >
-          <SelectTrigger className="w-full md:w-52">
+          <SelectTrigger className="w-full lg:w-44">
             <SelectValue placeholder="Semua Status" />
           </SelectTrigger>
           <SelectContent>
@@ -146,6 +197,23 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
             ))}
           </SelectContent>
         </Select>
+
+        {/* Reset Filter Button */}
+        {hasActiveFilter && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setQuery('');
+              actions.onResetFilters?.();
+            }}
+            className="text-xs text-muted-foreground hover:text-foreground h-9"
+          >
+            <RotateCcw className="mr-1.5 size-3.5" />
+            Reset
+          </Button>
+        )}
       </div>
 
       {isInitialLoading ? (
@@ -161,6 +229,10 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
       ) : (
         <InternshipsTable
           internships={state.internships}
+          page={state.page}
+          totalPages={state.totalPages}
+          total={state.total}
+          onPageChange={actions.onPageChange}
           onStart={actions.onStart}
           onFinish={actions.onFinish}
           onOpenExtend={handleOpenExtend}

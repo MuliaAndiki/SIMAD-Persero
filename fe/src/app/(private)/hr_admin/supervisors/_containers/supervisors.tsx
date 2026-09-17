@@ -17,6 +17,8 @@ export default function HrSupervisorsContainer() {
   const ns = useAppNameSpace();
 
   const [keyword, setKeyword] = useState('');
+  const [selectedOfficeId, setSelectedOfficeId] = useState<string>('');
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [assignOpen, setAssignOpen] = useState(false);
   const [internshipId, setInternshipId] = useState('');
@@ -36,6 +38,8 @@ export default function HrSupervisorsContainer() {
 
   const list = api.supervisor.query.list({
     keyword: debouncedKeyword || undefined,
+    officeId: selectedOfficeId || undefined,
+    departmentId: selectedDepartmentId || undefined,
     limit: 100,
   });
 
@@ -196,6 +200,17 @@ export default function HrSupervisorsContainer() {
     [sendNotification],
   );
 
+  const handleSelectOffice = useCallback((officeId: string) => {
+    setSelectedOfficeId(officeId);
+    setSelectedDepartmentId('');
+  }, []);
+
+  const handleResetFilter = useCallback(() => {
+    setSelectedOfficeId('');
+    setSelectedDepartmentId('');
+    setKeyword('');
+  }, []);
+
   return (
     <SupervisorsSection
       state={{
@@ -205,6 +220,8 @@ export default function HrSupervisorsContainer() {
         errorMessage: list.error?.message,
         supervisors: list.data ?? [],
         keyword,
+        selectedOfficeId,
+        selectedDepartmentId,
         setShowPassword,
         showPassword,
         alert: ns.alert,
@@ -229,6 +246,9 @@ export default function HrSupervisorsContainer() {
       actions={{
         onKeywordChange: setKeyword,
         onSearch: () => {},
+        onSelectOffice: handleSelectOffice,
+        onSelectDepartment: setSelectedDepartmentId,
+        onResetFilter: handleResetFilter,
         onSelectSupervisor: setSelectedId,
         onCloseDetail: () => setSelectedId(null),
         onOpenAssign: handleOpenAssign,

@@ -28,7 +28,7 @@ export function AppShell({ children }: AppShellProps) {
   const api = useApi();
 
   const useProfile = api.user.query.profile();
-  const { data: profile, isLoading } = useProfile;
+  const { data: profile } = useProfile;
 
   console.log(profile?.profilePhoto);
 
@@ -70,15 +70,8 @@ export function AppShell({ children }: AppShellProps) {
               }
             /> */}
             <ThemeToggle />
-            <LanguageDropdown />
+
             <NotificationDropdownContainer />
-            <Image
-              src={profile?.profilePhoto ? profile.profilePhoto : '/avatars/4.png'}
-              alt="Avatar"
-              height={38}
-              width={38}
-              className="rounded-full border border-border/60 size-[38px] object-cover"
-            />
           </div>
         </header>
 

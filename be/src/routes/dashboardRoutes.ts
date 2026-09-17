@@ -1,6 +1,6 @@
 import type { AppContext } from '@/contex';
 import dashboardController from '@/controllers/DashboardController';
-import { RecentActivityQuery } from '@/dtos/dashboard.dto';
+import { RecentActivityQuery, SupervisorAttendanceTrendQuery } from '@/dtos/dashboard.dto';
 import { requireRole, verifyToken } from '@/middlewares/auth';
 import Elysia from 'elysia';
 
@@ -39,6 +39,16 @@ class DashboardRouter {
     supervisorRouter.get('/', (c: AppContext) => dashboardController.supervisorDashboard(c), {
       beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
     });
+
+    // 19.3a GET /supervisor/dashboard/attendance-trend (SUPERVISOR)
+    supervisorRouter.get(
+      '/attendance-trend',
+      (c: AppContext) => dashboardController.supervisorAttendanceTrend(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
+        query: SupervisorAttendanceTrendQuery,
+      },
+    );
 
     // GET /receptionist/dashboard (RECEPTIONIST)
     receptionistRouter.get('/', (c: AppContext) => dashboardController.receptionistDashboard(c), {

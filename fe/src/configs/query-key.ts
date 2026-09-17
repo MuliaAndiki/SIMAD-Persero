@@ -64,7 +64,7 @@ export const queryKey = {
     my: (query?: Record<string, any>) => ['attendance', 'my', query] as const,
     today: () => ['attendance', 'today'] as const,
     summary: (query?: Record<string, any>) => ['attendance', 'summary', query] as const,
-    supervisor: () => ['attendance', 'supervisor'] as const,
+    supervisor: (query?: Record<string, any>) => ['attendance', 'supervisor', query] as const,
     history: (query?: Record<string, any>) => ['attendance', 'history', query] as const,
     export: (query?: Record<string, any>) => ['attendance', 'export', query] as const,
     detail: (attendanceId: string) => ['attendance', 'detail', attendanceId] as const,
@@ -119,6 +119,8 @@ export const queryKey = {
     intern: () => ['dashboard', 'intern'] as const,
     hr: () => ['dashboard', 'hr'] as const,
     supervisor: () => ['dashboard', 'supervisor'] as const,
+    supervisorAttendanceTrend: (query?: Record<string, any>) =>
+      ['dashboard', 'supervisorAttendanceTrend', query] as const,
     receptionist: () => ['dashboard', 'receptionist'] as const,
     statistics: () => ['dashboard', 'statistics'] as const,
     charts: () => ['dashboard', 'charts'] as const,

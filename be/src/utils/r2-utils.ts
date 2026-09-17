@@ -1,5 +1,10 @@
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { env } from '@/config/env.config';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 const bucketName = 'simad';
@@ -17,6 +22,39 @@ const R2 = new S3Client({
     secretAccessKey: env.SECRET_ACCESS_KEY,
   },
 });
+
+/**
+ * Mengekstrak object key dari URL R2 atau path.
+ */
+export function extractR2Key(fileUrlOrKey: string): string {
+  if (!fileUrlOrKey) return '';
+  try {
+    if (!fileUrlOrKey.startsWith('http://') && !fileUrlOrKey.startsWith('https://')) {
+      return fileUrlOrKey.replace(/^\/+/, '');
+    }
+    const parsed = new URL(fileUrlOrKey);
+    let key = parsed.pathname.replace(/^\/+/, '');
+    if (key.startsWith(`${bucketName}/`)) {
+      key = key.substring(`${bucketName}/`.length);
+    }
+    return decodeURIComponent(key);
+  } catch {
+    return fileUrlOrKey.replace(/^\/+/, '');
+  }
+}
+
+/**
+ * Mengambil file object dari R2 via S3 API.
+ */
+export async function getR2Object(key: string) {
+  const cleanKey = extractR2Key(key);
+  return await R2.send(
+    new GetObjectCommand({
+      Bucket: bucketName,
+      Key: cleanKey,
+    }),
+  );
+}
 
 /**
  * Upload a buffer to Cloudflare R2.

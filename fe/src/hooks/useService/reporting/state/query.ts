@@ -4,13 +4,14 @@ import Api from '@/services/props.service';
 import type { ReportingQuery } from '@/types/api/reporting.types';
 import { useQuery } from '@tanstack/react-query';
 
-export function useAttendanceReport(query?: ReportingQuery) {
+export function useAttendanceReport(query?: ReportingQuery, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKey.reporting.attendance(query),
     queryFn: async () => {
       const res = await Api.Reporting.Attendance(query);
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }
 

@@ -14,11 +14,12 @@ import {
 } from '@/components/organisms/attendance/OverrideAttendanceDialog';
 import { formatDateTime, formatMinutes } from '@/components/organisms/attendance/attendance-format';
 import type { AttendanceDetailResponse } from '@/types/api/attendance.types';
-import { AlertCircle, ArrowLeft, SlidersHorizontal } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Download, Loader2, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 
 export interface AttendanceDetailSectionState {
   isPending: boolean;
+  isExportPending?: boolean;
   isError: boolean;
   errorMessage?: string;
   detail: AttendanceDetailResponse | null;
@@ -29,6 +30,7 @@ export interface AttendanceDetailSectionState {
 
 export interface AttendanceDetailSectionActions {
   onRetry?: () => void;
+  onExport?: () => void;
   onOpenOverride: () => void;
   onCloseOverride: () => void;
   onOverrideFieldChange: (field: OverrideAttendanceFormField, value: string) => void;
@@ -51,17 +53,35 @@ export function AttendanceDetailSection({ state, actions }: AttendanceDetailSect
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <Button asChild variant="ghost" size="sm" className="w-fit -ml-2">
-          <Link href="/supervisor/interns">
-            <ArrowLeft className="size-4" />
-            Kembali ke Peserta Bimbingan
-          </Link>
-        </Button>
-        <h1 className="text-2xl font-bold text-foreground">Detail Absensi</h1>
-        <p className="text-sm text-muted-foreground">
-          Review absensi peserta dan lakukan override bila diperlukan.
-        </p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <Button asChild variant="ghost" size="sm" className="w-fit -ml-2">
+            <Link href="/supervisor/attendance">
+              <ArrowLeft className="size-4" />
+              Kembali ke Daftar Absensi
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold text-foreground">Detail Absensi</h1>
+          <p className="text-sm text-muted-foreground">
+            Review absensi peserta dan lakukan override bila diperlukan.
+          </p>
+        </div>
+        {actions.onExport && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={actions.onExport}
+            disabled={state.isExportPending || state.isPending}
+            className="shrink-0 self-start"
+          >
+            {state.isExportPending ? (
+              <Loader2 className="mr-1.5 size-4 animate-spin" />
+            ) : (
+              <Download className="mr-1.5 size-4" />
+            )}
+            Ekspor Excel
+          </Button>
+        )}
       </header>
 
       {state.isPending ? (

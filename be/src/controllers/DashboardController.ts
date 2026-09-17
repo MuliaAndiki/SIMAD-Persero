@@ -2,7 +2,6 @@ import type { AppContext } from '@/contex';
 import { HttpResponse, handleAppError } from '@/http';
 import dashboardService from '@/services/dashboard.service';
 import type { RecentActivityQuery } from '@/types/dashboard.types';
-
 /**
  * Thin controller modul Dashboard.
  * Seluruh logika bisnis didelegasikan ke DashboardService.
@@ -43,10 +42,22 @@ class DashboardController {
     }
   }
 
+  // GET /supervisor/dashboard/attendance-trend
+  public async supervisorAttendanceTrend(c: AppContext) {
+    try {
+      const query = (c.query ?? {}) as { days?: number };
+      const days = Math.min(Math.max(query.days ?? 7, 1), 90);
+      const data = await dashboardService.getSupervisorAttendanceTrend(c.user!.id, days);
+      return HttpResponse(c).ok(data);
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
   // GET /receptionist/dashboard
   public async receptionistDashboard(c: AppContext) {
     try {
-      const data = await dashboardService.getReceptionistDashboard();
+      const data = await dashboardService.getReceptionistDashboard(c.user?.id);
       return HttpResponse(c).ok(data);
     } catch (error) {
       return this.handleError(c, error);

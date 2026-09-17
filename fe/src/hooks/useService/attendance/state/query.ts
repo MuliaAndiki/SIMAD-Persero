@@ -6,6 +6,7 @@ import type {
   AttendanceHistoryQuery,
   AttendanceParams,
   AttendanceQuery,
+  SupervisorAttendanceQuery,
 } from '@/types/api/attendance.types';
 import { useQuery } from '@tanstack/react-query';
 
@@ -39,11 +40,11 @@ export function useAttendanceSummary(query?: AttendanceQuery) {
   });
 }
 
-export function useAttendanceSupervisor() {
+export function useAttendanceSupervisor(query?: SupervisorAttendanceQuery) {
   return useQuery({
-    queryKey: queryKey.attendance.supervisor(),
+    queryKey: queryKey.attendance.supervisor(query),
     queryFn: async () => {
-      const res = await Api.Attendance.Supervisor();
+      const res = await Api.Attendance.Supervisor(query);
       return res.data;
     },
   });

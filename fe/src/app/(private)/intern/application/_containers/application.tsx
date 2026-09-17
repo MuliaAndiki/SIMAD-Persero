@@ -3,6 +3,7 @@
 import { ApplicationSection } from '@/components/page/application/ApplicationSection';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useApi } from '@/hooks/useService/useApi';
+import { getFilePreviewUrl } from '@/utils/file-preview';
 import { useEffect, useRef } from 'react';
 
 /**
@@ -16,6 +17,7 @@ export default function ApplicationContainer() {
 
   // Queries
   const myApps = api.application.query.my();
+  const officesQuery = api.office.query.list({ limit: 100 });
 
   // Profil intern belum lengkap (422 "Intern profile not found ...") —
   // arahkan ke halaman profil agar user melengkapi data terlebih dahulu.
@@ -65,8 +67,8 @@ export default function ApplicationContainer() {
 
   // Handle preview PDF file
   const handlePreviewFile = (fileUrl: string) => {
-    // Open PDF in new tab for preview
-    window.open(fileUrl, '_blank', 'noopener,noreferrer');
+    const previewUrl = getFilePreviewUrl(fileUrl);
+    window.open(previewUrl, '_blank', 'noopener,noreferrer');
   };
 
   // Actions
@@ -75,6 +77,7 @@ export default function ApplicationContainer() {
     requestedEndDate: string;
     motivation?: string;
     coverLetterFileId: string;
+    officeLocationId: string;
   }) => {
     try {
       await createMutation.mutateAsync(data);
@@ -183,6 +186,8 @@ export default function ApplicationContainer() {
         isError: myApps.isError,
         errorMessage: myApps.error?.message,
         applications: myApps.data ?? [],
+        offices: officesQuery.data ?? [],
+        isOfficesPending: officesQuery.isPending,
         isSubmitting:
           createMutation.isPending ||
           updateMutation.isPending ||

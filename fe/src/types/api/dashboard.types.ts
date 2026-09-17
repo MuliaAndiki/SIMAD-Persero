@@ -27,10 +27,17 @@ export type DashboardRole = 'INTERN' | 'HR_ADMIN' | 'SUPERVISOR' | 'RECEPTIONIST
 // ---------- Response (data dari backend) ----------
 
 /** Respons dashboard receptionist (GET /receptionist/dashboard). */
+export interface ReceptionistDepartmentAttendance {
+  department: string;
+  hadir: number;
+  tidakHadir: number;
+}
+
 export interface ReceptionistDashboardData {
   activeInternsCount: number;
   presentTodayCount: number;
   pendingCheckInCount: number;
+  departmentAttendance: ReceptionistDepartmentAttendance[];
   recentAttendances: Array<{
     id: string;
     internName: string;
@@ -99,6 +106,18 @@ export interface SupervisorDashboardData {
   notCheckedIn: number;
   present: number;
   invalidAttendance: number;
+}
+
+/** Titik tren absensi harian supervisor (GET /supervisor/dashboard/attendance-trend). */
+export interface SupervisorAttendanceTrendPoint {
+  date: string;
+  hadir: number;
+  tidakHadir: number;
+}
+
+/** Query tren absensi supervisor. */
+export interface SupervisorAttendanceTrendQuery {
+  days?: number;
 }
 
 /** Statistik dashboard (GET /dashboard/statistics). */

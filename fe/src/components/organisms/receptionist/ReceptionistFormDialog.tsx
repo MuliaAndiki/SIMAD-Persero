@@ -16,7 +16,11 @@ import type { CreateReceptionistBody } from '@/types/api/receptionist.types';
 import { Eye, EyeOff } from 'lucide-react';
 import type { FormEvent } from 'react';
 
-export type ReceptionistFormType = CreateReceptionistBody & {
+export type ReceptionistFormType = {
+  fullName: string;
+  email: string;
+  officeId: string;
+  password?: string;
   isActive?: boolean;
 };
 
@@ -49,10 +53,6 @@ export function ReceptionistFormDialog({
     e.preventDefault();
     await onSubmit();
   };
-
-  const filteredDepartments = formData.officeId
-    ? (offices.find((o) => o.id === formData.officeId)?.departments ?? [])
-    : [];
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
@@ -94,12 +94,12 @@ export function ReceptionistFormDialog({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="officeId" className="text-sm font-medium">
-                Kantor
+                Kantor Penugasan
               </label>
               <select
                 id="officeId"
                 value={formData.officeId ?? ''}
-                onChange={(e) => onChange({ officeId: e.target.value, departmentId: '' })}
+                onChange={(e) => onChange({ officeId: e.target.value })}
                 required
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -112,29 +112,12 @@ export function ReceptionistFormDialog({
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Resepsionis bertugas dan memiliki akses untuk seluruh departemen di lokasi kantor
+                ini.
+              </p>
             </div>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="departmentId" className="text-sm font-medium">
-                Departemen
-              </label>
-              <select
-                id="departmentId"
-                value={formData.departmentId}
-                onChange={(e) => onChange({ departmentId: e.target.value })}
-                required
-                disabled={!formData.officeId}
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="" disabled>
-                  {formData.officeId ? 'Pilih departemen...' : 'Pilih kantor terlebih dahulu'}
-                </option>
-                {filteredDepartments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+
             <div className="flex flex-col gap-2">
               <label htmlFor="password" className="text-sm font-medium">
                 Password {isEditing && '(Opsional)'}

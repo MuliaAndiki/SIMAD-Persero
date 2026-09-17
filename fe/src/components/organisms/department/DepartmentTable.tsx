@@ -3,31 +3,28 @@
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/atoms/dropdown-menu';
 import type { DepartmentResponse } from '@/types/api/department.types';
-import type { AlertContexType } from '@/types/ui';
-import { Building2, Pencil, Trash2 } from 'lucide-react';
+import { Building2, MoreHorizontal, Pencil, Power } from 'lucide-react';
 
 export interface DepartmentTableProps {
   departments: DepartmentResponse[];
-  isDeleting: boolean;
   onOpenEdit: (department: DepartmentResponse) => void;
   onToggleActive: (department: DepartmentResponse) => void;
-  onDelete: (id: string) => void;
-  alert: AlertContexType;
 }
 
 /**
  * DepartmentTable — organism tabel daftar departemen (HR Admin).
  * Presentasi murni; data & handler disuplai container/section.
  */
-export function DepartmentTable({
-  departments,
-  isDeleting,
-  onOpenEdit,
-  onToggleActive,
-  onDelete,
-  alert,
-}: DepartmentTableProps) {
+export function DepartmentTable({ departments, onOpenEdit, onToggleActive }: DepartmentTableProps) {
   return (
     <Card>
       <CardHeader className="border-b">
@@ -70,40 +67,26 @@ export function DepartmentTable({
                         {department.isActive ? 'Aktif' : 'Nonaktif'}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => onOpenEdit(department)}>
-                          <Pencil className="size-4" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled={isDeleting}
-                          onClick={() => onToggleActive(department)}
-                        >
-                          {department.isActive ? 'Nonaktifkan' : 'Aktifkan'}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          disabled={isDeleting}
-                          onClick={() =>
-                            alert.confirm({
-                              title: 'Hapus Departemen?',
-                              deskripsi: 'Apakah Anda yakin ingin menghapus departemen ini?',
-                              icon: 'question',
-                              confirmButtonText: 'Hapus',
-                              onConfirm: () => {
-                                onDelete(department.id);
-                              },
-                            })
-                          }
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </div>
+                    <td className="px-6 py-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="size-8 p-0">
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => onOpenEdit(department)}>
+                            <Pencil className="size-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onToggleActive(department)}>
+                            <Power className="size-4" />
+                            {department.isActive ? 'Nonaktifkan' : 'Aktifkan'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}

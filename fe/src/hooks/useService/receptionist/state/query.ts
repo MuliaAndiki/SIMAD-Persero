@@ -8,7 +8,7 @@ export function useReceptionistList(query?: ReceptionistQuery) {
     queryKey: queryKey.receptionist.list(query),
     queryFn: async () => {
       const res = await Api.Receptionist.List(query);
-      return res.data;
+      return res;
     },
   });
 }

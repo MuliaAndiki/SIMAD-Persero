@@ -20,7 +20,7 @@ import type { InternshipResponse } from '@/types/api/internship.types';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { SupervisorResponse } from '@/types/api/supervisor.types';
 import { Building2, Calendar, Loader2, UserCheck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 // ---------- 1. Extend Modal Props & Component ----------
 
@@ -41,6 +41,13 @@ export function ExtendInternshipModal({
 }: ExtendModalProps) {
   const [newEndDate, setNewEndDate] = useState('');
   const [reason, setReason] = useState('');
+
+  const minDate = useMemo(() => {
+    if (!internship?.actualEndDate) return '';
+    const curr = new Date(internship.actualEndDate);
+    curr.setDate(curr.getDate() + 1);
+    return curr.toISOString().split('T')[0] ?? '';
+  }, [internship?.actualEndDate]);
 
   useEffect(() => {
     if (internship?.actualEndDate) {
@@ -83,10 +90,15 @@ export function ExtendInternshipModal({
             <Input
               id="extend-new-end-date"
               type="date"
+              min={minDate}
               value={newEndDate}
               onChange={(e) => setNewEndDate(e.target.value)}
               required
             />
+            <p className="text-[11px] text-muted-foreground">
+              Jadwal absensi akan otomatis dibuat bertambah hingga tanggal baru ini, dan periode
+              pada e-sertifikat langsung diperbarui otomatis.
+            </p>
           </div>
 
           <div className="flex flex-col gap-1.5">

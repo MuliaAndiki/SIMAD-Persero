@@ -26,7 +26,7 @@ class CertificateController {
   // GET /certificates/:certificateId
   public async getById(c: AppContext) {
     try {
-      const data = await certificateService.getById(c.params.certificateId);
+      const data = await certificateService.getById(c.params.certificateId, c.user!.id, c.user!.roles);
       return HttpResponse(c).ok(data);
     } catch (error) {
       return this.handleError(c, error);

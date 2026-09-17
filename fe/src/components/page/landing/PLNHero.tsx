@@ -94,7 +94,11 @@ function StatBadge({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+      transition={{
+        delay,
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+      }}
       className="flex flex-col items-center"
     >
       <span className="text-2xl md:text-3xl font-bold text-foreground">
@@ -159,7 +163,11 @@ export function PLNHero() {
               className="absolute bottom-1 left-0 right-0 h-3 bg-[#FDB913]/30 rounded-sm -z-0"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ delay: 0.8, duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+              transition={{
+                delay: 0.8,
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+              }}
               style={{ transformOrigin: 'left' }}
             />
           </span>{' '}
