@@ -5,7 +5,7 @@ import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import { OverrideAttendanceModal } from '@/components/organisms/attendance/OverrideAttendanceModal';
 import type { AttendanceSupervisorRow } from '@/types/api/attendance.types';
-import { formatDate } from '@/utils/string.format';
+import { formatDateTime } from '@/utils/string.format';
 import { AlertCircle, CheckCircle2, Clock, Download, Edit3, Users, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
@@ -67,6 +67,20 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
   const handleOpenOverride = (attendanceId: string, internName?: string) => {
     setSelectedAttendanceId(attendanceId);
     setSelectedInternName(internName);
+  };
+
+  const renderTimeBlock = (dateString: string | null | undefined) => {
+    if (!dateString) return <span className="text-muted-foreground">-</span>;
+    const formatted = formatDateTime(dateString);
+    const [datePart, timePart] = formatted.split(', ');
+    if (!timePart) return <span>{formatted}</span>;
+    
+    return (
+      <div className="flex flex-col">
+        <span className="font-semibold text-foreground">{timePart}</span>
+        <span className="text-xs text-muted-foreground">{datePart}</span>
+      </div>
+    );
   };
 
   return (
@@ -141,10 +155,10 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
                           </td>
                           <td className="px-6 py-4">{row.internship.department?.name ?? '-'}</td>
                           <td className="px-6 py-4">
-                            {att?.checkInAt ? formatDate(att.checkInAt) : '-'}
+                            {renderTimeBlock(att?.checkInAt)}
                           </td>
                           <td className="px-6 py-4">
-                            {att?.checkOutAt ? formatDate(att.checkOutAt) : '-'}
+                            {renderTimeBlock(att?.checkOutAt)}
                           </td>
                           <td className="px-6 py-4">
                             <AttendanceStatusBadge status={att?.attendanceStatus ?? null} />
