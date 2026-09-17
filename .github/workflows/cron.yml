@@ -2,8 +2,9 @@ name: SIMAD Cron Automation
 
 on:
   schedule:
-    # 07:15 WIB (Asia/Jakarta) is 00:15 UTC (Menghindari delay antrean panjang di jam 00:00 GitHub Actions)
-    - cron: '15 0 * * *'
+    # 07:13 WIB (Asia/Jakarta) is 00:13 UTC 
+    # Menggunakan menit ganjil (13) sangat penting karena GitHub Actions sering 'membuang' jadwal di menit genap (00, 15, 30, 45) akibat antrean server global yang penuh.
+    - cron: '13 0 * * *'
   workflow_dispatch:
 
 jobs:
