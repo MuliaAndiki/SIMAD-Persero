@@ -303,10 +303,9 @@ function ProfileIdentityCard({
       <CardContent className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
         <Avatar className="size-24 text-2xl font-semibold">
           {profile.profilePhoto ? (
-            <img src={profile.profilePhoto} alt={profile.fullName || 'User'} className="aspect-square size-full object-cover" />
-          ) : (
-            <AvatarFallback>{getInitials(profile.fullName) || '?'}</AvatarFallback>
-          )}
+            <AvatarImage key={profile.profilePhoto} src={profile.profilePhoto} alt={profile.fullName} />
+          ) : null}
+          <AvatarFallback>{getInitials(profile.fullName) || '?'}</AvatarFallback>
         </Avatar>
 
         <div className="flex flex-1 flex-col gap-1.5">
