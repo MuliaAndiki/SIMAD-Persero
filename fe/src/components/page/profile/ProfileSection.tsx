@@ -65,8 +65,23 @@ export interface ProfileSectionProps {
   service: ProfileSectionService;
 }
 
-const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
+const ALLOWED_PHOTO_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/heic',
+  'image/heif',
+  'image/webp',
+];
+const ALLOWED_PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'png', 'heic', 'heif', 'webp'];
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5 MB
+
+/** Validasi foto — fallback ke ekstensi karena browser HP sering melaporkan MIME kosong/heic/webp. */
+function isValidPhoto(file: File): boolean {
+  if (file.type && ALLOWED_PHOTO_TYPES.includes(file.type.toLowerCase())) return true;
+  const ext = file.name.split('.').pop()?.toLowerCase();
+  return ext ? ALLOWED_PHOTO_EXTENSIONS.includes(ext) : false;
+}
 
 /** Inisial nama untuk fallback avatar. */
 function getInitials(name: string): string {
@@ -283,7 +298,7 @@ function ProfileIdentityCard({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+    if (!isValidPhoto(file)) {
       setLocalError('Format foto harus JPG, JPEG, atau PNG.');
       e.target.value = '';
       return;
@@ -303,7 +318,11 @@ function ProfileIdentityCard({
       <CardContent className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
         <Avatar className="size-24 text-2xl font-semibold">
           {profile.profilePhoto ? (
-            <AvatarImage key={profile.profilePhoto} src={profile.profilePhoto} alt={profile.fullName} />
+            <AvatarImage
+              key={profile.profilePhoto}
+              src={profile.profilePhoto}
+              alt={profile.fullName}
+            />
           ) : null}
           <AvatarFallback>{getInitials(profile.fullName) || '?'}</AvatarFallback>
         </Avatar>
@@ -341,7 +360,7 @@ function ProfileIdentityCard({
           <input
             ref={fileInputRef}
             type="file"
-            accept={ALLOWED_PHOTO_TYPES.join(',')}
+            accept="image/*"
             className="hidden"
             onChange={handleFileChange}
           />
