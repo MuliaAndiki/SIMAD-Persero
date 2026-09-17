@@ -5,7 +5,10 @@ import { Button } from '@/components/atoms/button';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/atoms/select';
@@ -46,6 +49,134 @@ export interface ApplicationApproveFormProps {
   onFieldChange: (field: ApproveApplicationFormField, value: string) => void;
   onBack: () => void;
   onSubmit: () => void | Promise<void>;
+}
+
+/**
+ * Logika sinkronisasi dua arah antara Departemen, Kantor, dan Supervisor:
+ * 1. Pindah Departemen:
+ *    - Supervisor otomatis disinkronkan ke supervisor di departemen tersebut.
+ *    - Jika ada 1 supervisor: otomatis terpilih.
+ *    - Jika ada 2 atau lebih supervisor (bisa lebih dari 1 di departemen/kantor yang sama):
+ *      dikosongkan agar HR memilih salah satunya, dan jika supervisor saat ini memang sudah di departemen itu, tetap dipertahankan.
+ * 2. Pindah Supervisor:
+ *    - Otomatis memindahkan departemen ke departemen supervisor tersebut.
+ *    - Jika pindah ke supervisor lain yang berada di departemen yang sama (misal ada 2 supervisor di kantor/departemen yang sama),
+ *      departemen tetap sama (tidak berubah).
+ *    - Otomatis memindahkan kantor penempatan ke kantor supervisor tersebut.
+ */
+export function syncApproveFormField(
+  prev: ApproveApplicationFormState,
+  field: ApproveApplicationFormField,
+  value: string,
+  context: {
+    departments?: DepartmentResponse[];
+    offices?: OfficeResponse[];
+    supervisors?: SupervisorResponse[];
+  },
+): ApproveApplicationFormState {
+  const { departments: _departments = [], offices = [], supervisors = [] } = context;
+  const next: ApproveApplicationFormState = { ...prev, [field]: value };
+
+  if (field === 'departmentId') {
+    const newDeptId = value;
+
+    // 1. Validasi / sesuaikan kantor terhadap departemen baru
+    if (next.officeLocationId) {
+      const currentOffice = offices.find((o) => o.id === next.officeLocationId);
+      const officeSupportsDept = currentOffice?.departments?.some((d) => d.id === newDeptId);
+      if (
+        currentOffice?.departments &&
+        currentOffice.departments.length > 0 &&
+        !officeSupportsDept
+      ) {
+        const matchingOffice = offices.find((o) => o.departments?.some((d) => d.id === newDeptId));
+        next.officeLocationId = matchingOffice ? matchingOffice.id : '';
+      }
+    } else {
+      const matchingOffice = offices.find((o) => o.departments?.some((d) => d.id === newDeptId));
+      if (matchingOffice) {
+        next.officeLocationId = matchingOffice.id;
+      }
+    }
+
+    // 2. Sinkronisasi Supervisor terhadap Departemen baru
+    const currentSup = supervisors.find((s) => s.id === next.supervisorId);
+    // Jika supervisor saat ini sudah berada di departemen baru ini, pertahankan
+    if (!currentSup || currentSup.departmentId !== newDeptId) {
+      const deptSups = supervisors.filter((s) => s.departmentId === newDeptId);
+      const officeMatchingSups = deptSups.filter((s) => {
+        if (next.officeLocationId && s.officeId && s.officeId !== next.officeLocationId) {
+          return false;
+        }
+        return true;
+      });
+
+      if (officeMatchingSups.length === 1) {
+        // Tepat 1 supervisor di departemen & kantor ini -> otomatis pilih
+        next.supervisorId = officeMatchingSups[0].id;
+        if (!next.officeLocationId && officeMatchingSups[0].officeId) {
+          next.officeLocationId = officeMatchingSups[0].officeId;
+        }
+      } else if (officeMatchingSups.length === 0 && deptSups.length === 1) {
+        // Tepat 1 supervisor di departemen ini secara keseluruhan
+        next.supervisorId = deptSups[0].id;
+        if (deptSups[0].officeId) {
+          next.officeLocationId = deptSups[0].officeId;
+        }
+      } else {
+        // Jika ada 2 atau lebih supervisor (atau tidak ada), kosongkan agar user memilih
+        next.supervisorId = '';
+      }
+    }
+  } else if (field === 'supervisorId') {
+    const newSupId = value;
+    const selectedSup = supervisors.find((s) => s.id === newSupId);
+
+    if (selectedSup) {
+      // Sinkronkan departemen ke departemen supervisor terpilih
+      if (selectedSup.departmentId) {
+        next.departmentId = selectedSup.departmentId;
+      }
+
+      // Sinkronkan kantor ke kantor supervisor terpilih
+      if (selectedSup.officeId) {
+        next.officeLocationId = selectedSup.officeId;
+      }
+    }
+  } else if (field === 'officeLocationId') {
+    const newOfficeId = value;
+    const selectedOffice = offices.find((o) => o.id === newOfficeId);
+
+    if (next.departmentId && selectedOffice?.departments && selectedOffice.departments.length > 0) {
+      const officeSupportsDept = selectedOffice.departments.some((d) => d.id === next.departmentId);
+      if (!officeSupportsDept) {
+        next.departmentId = selectedOffice.departments[0]?.id ?? '';
+        next.supervisorId = '';
+      }
+    }
+
+    const currentSup = supervisors.find((s) => s.id === next.supervisorId);
+    if (currentSup?.officeId && currentSup.officeId !== newOfficeId) {
+      const matchingSups = supervisors.filter((s) => {
+        if (s.officeId !== newOfficeId) return false;
+        if (next.departmentId && s.departmentId && s.departmentId !== next.departmentId) {
+          return false;
+        }
+        return true;
+      });
+
+      if (matchingSups.length === 1) {
+        next.supervisorId = matchingSups[0].id;
+        if (matchingSups[0].departmentId) {
+          next.departmentId = matchingSups[0].departmentId;
+        }
+      } else {
+        next.supervisorId = '';
+      }
+    }
+  }
+
+  return next;
 }
 
 /**
@@ -92,14 +223,11 @@ export function ApplicationApproveForm({
   };
 
   // 1. Pengecekan Kantor & Departemen yang ter-embed:
-  // Cari kantor yang memiliki departemen terpilih di dalam daftar departemennya
   const compatibleOffices = useMemo(() => {
     if (!form.departmentId) return safeOffices;
     const matched = safeOffices.filter((office) =>
       office.departments?.some((d) => d?.id === form.departmentId),
     );
-    // Jika ada kantor yang secara spesifik menautkan departemen ini, tampilkan yang cocok.
-    // Jika tidak ada data tautan, fallback ke seluruh kantor agar tidak buntu.
     return matched.length > 0 ? matched : safeOffices;
   }, [safeOffices, form.departmentId]);
 
@@ -117,15 +245,12 @@ export function ApplicationApproveForm({
     return selectedOffice.departments.some((d) => d.id === form.departmentId);
   }, [selectedOffice, form.departmentId]);
 
-  // 2. Pengecekan Supervisor:
-  // Filter supervisor berdasarkan Departemen dan Kantor
-  const compatibleSupervisors = useMemo(() => {
+  // 2. Pengelompokan Supervisor:
+  // Supervisor di departemen yang dipilih saat ini (bisa 1 atau lebih supervisor)
+  const currentDeptSupervisors = useMemo(() => {
+    if (!form.departmentId) return [];
     return safeSupervisors.filter((sup) => {
-      // Jika departemen dipilih: supervisor harus berada di departemen yang sama
-      if (form.departmentId && sup.departmentId && sup.departmentId !== form.departmentId) {
-        return false;
-      }
-      // Jika kantor dipilih: supervisor harus berada di kantor yang sama
+      if (sup.departmentId !== form.departmentId) return false;
       if (form.officeLocationId && sup.officeId && sup.officeId !== form.officeLocationId) {
         return false;
       }
@@ -133,12 +258,19 @@ export function ApplicationApproveForm({
     });
   }, [safeSupervisors, form.departmentId, form.officeLocationId]);
 
+  // Supervisor lainnya (departemen lain atau kantor lain) agar HR bisa langsung pindah supervisor
+  const otherSupervisors = useMemo(() => {
+    if (!form.departmentId) return safeSupervisors;
+    return safeSupervisors.filter((sup) => {
+      return !currentDeptSupervisors.some((cs) => cs.id === sup.id);
+    });
+  }, [safeSupervisors, form.departmentId, currentDeptSupervisors]);
+
   const selectedSupervisor = useMemo(() => {
     return safeSupervisors.find((s) => s.id === form.supervisorId) ?? null;
   }, [safeSupervisors, form.supervisorId]);
 
   // Validasi tombol submit:
-  // Departemen dan Supervisor wajib. Kantor wajib jika master kantor tersedia (mencegah crash absensi).
   const isOfficeRequired = safeOffices.length > 0;
   const canSubmit = Boolean(
     form.departmentId &&
@@ -285,28 +417,72 @@ export function ApplicationApproveForm({
           <Select
             value={form.supervisorId || undefined}
             onValueChange={(v) => onFieldChange('supervisorId', v)}
-            disabled={compatibleSupervisors.length === 0 && safeSupervisors.length > 0}
+            disabled={safeSupervisors.length === 0}
           >
             <SelectTrigger className="w-full">
               <SelectValue
                 placeholder={
-                  compatibleSupervisors.length === 0
-                    ? 'Tidak ada supervisor yang cocok'
-                    : 'Pilih supervisor bimbingan'
+                  safeSupervisors.length === 0
+                    ? 'Belum ada supervisor terdaftar'
+                    : form.departmentId && currentDeptSupervisors.length > 1 && !form.supervisorId
+                      ? `Pilih salah satu (${currentDeptSupervisors.length} supervisor di departemen ini)`
+                      : form.departmentId && currentDeptSupervisors.length === 0
+                        ? 'Pilih supervisor dari departemen lain'
+                        : 'Pilih supervisor bimbingan'
                 }
               />
             </SelectTrigger>
             <SelectContent>
-              {compatibleSupervisors.map((sup) => {
-                const deptName = getDepartmentName(sup.departmentId);
-                const offName = getOfficeName(sup.officeId);
-                return (
-                  <SelectItem key={sup.id} value={sup.id}>
-                    {sup.fullName} — {deptName} • {offName} ({sup.activeAssignmentsCount ?? 0}{' '}
-                    intern)
-                  </SelectItem>
-                );
-              })}
+              {/* Jika departemen terpilih dan memiliki supervisor */}
+              {form.departmentId && currentDeptSupervisors.length > 0 && (
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold text-primary">
+                    Supervisor di {getDepartmentName(form.departmentId)} (
+                    {currentDeptSupervisors.length} supervisor)
+                  </SelectLabel>
+                  {currentDeptSupervisors.map((sup) => {
+                    const offName = getOfficeName(sup.officeId);
+                    return (
+                      <SelectItem key={sup.id} value={sup.id}>
+                        {sup.fullName} • {offName} ({sup.activeAssignmentsCount ?? 0} intern)
+                      </SelectItem>
+                    );
+                  })}
+                </SelectGroup>
+              )}
+
+              {/* Jika departemen terpilih namun belum ada supervisor di departemen ini */}
+              {form.departmentId && currentDeptSupervisors.length === 0 && (
+                <SelectGroup>
+                  <SelectLabel className="text-xs text-muted-foreground italic">
+                    Tidak ada supervisor di {getDepartmentName(form.departmentId)}
+                  </SelectLabel>
+                </SelectGroup>
+              )}
+
+              {/* Supervisor departemen lain (memungkinkan langsung pindah supervisor & departemen) */}
+              {otherSupervisors.length > 0 && (
+                <>
+                  {form.departmentId && <SelectSeparator />}
+                  <SelectGroup>
+                    <SelectLabel className="text-xs font-semibold text-muted-foreground">
+                      {form.departmentId
+                        ? 'Pindah ke Supervisor Departemen Lain:'
+                        : 'Daftar Semua Supervisor:'}
+                    </SelectLabel>
+                    {otherSupervisors.map((sup) => {
+                      const deptName = getDepartmentName(sup.departmentId);
+                      const offName = getOfficeName(sup.officeId);
+                      return (
+                        <SelectItem key={sup.id} value={sup.id}>
+                          {sup.fullName} — {deptName} • {offName} ({sup.activeAssignmentsCount ?? 0}{' '}
+                          intern)
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectGroup>
+                </>
+              )}
             </SelectContent>
           </Select>
 
@@ -329,20 +505,44 @@ export function ApplicationApproveForm({
                   {getOfficeName(selectedSupervisor.officeId)}
                 </div>
               </div>
+              {currentDeptSupervisors.length > 1 && (
+                <div className="mt-1 text-[11px] text-muted-foreground flex items-center gap-1 border-t border-border/50 pt-1.5">
+                  <Info className="size-3 text-primary shrink-0" />
+                  <span>
+                    Departemen ini memiliki {currentDeptSupervisors.length} supervisor di kantor
+                    yang sama. Anda dapat memilih supervisor lain di departemen ini tanpa mengubah
+                    departemen.
+                  </span>
+                </div>
+              )}
             </div>
           ) : (
-            compatibleSupervisors.length === 0 &&
-            safeSupervisors.length > 0 && (
-              <div className="flex items-start gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
-                <AlertCircle className="size-4 shrink-0 mt-0.5" />
+            form.departmentId &&
+            currentDeptSupervisors.length > 1 && (
+              <div className="flex items-start gap-1.5 rounded-md border border-primary/30 bg-primary/10 p-2 text-xs text-primary dark:text-primary">
+                <Info className="size-4 shrink-0 mt-0.5" />
                 <span>
-                  Tidak ada supervisor yang terdaftar di departemen atau kantor yang dipilih.
-                  Silakan sesuaikan departemen/kantor atau daftarkan supervisor baru terlebih
-                  dahulu.
+                  Departemen {getDepartmentName(form.departmentId)} memiliki{' '}
+                  {currentDeptSupervisors.length} supervisor. Silakan pilih salah satu supervisor di
+                  atas.
                 </span>
               </div>
             )
           )}
+
+          {!selectedSupervisor &&
+            form.departmentId &&
+            currentDeptSupervisors.length === 0 &&
+            safeSupervisors.length > 0 && (
+              <div className="flex items-start gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
+                <AlertCircle className="size-4 shrink-0 mt-0.5" />
+                <span>
+                  Tidak ada supervisor yang terdaftar di departemen ini pada kantor terpilih.
+                  Silakan pilih supervisor dari opsi departemen lain pada dropdown di atas
+                  (departemen dan kantor akan otomatis disesuaikan).
+                </span>
+              </div>
+            )}
         </div>
 
         {/* --- FIELD CATATAN --- */}

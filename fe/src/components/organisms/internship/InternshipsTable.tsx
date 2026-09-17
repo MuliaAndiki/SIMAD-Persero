@@ -19,6 +19,8 @@ import {
   Building2,
   Calendar,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   MoreHorizontal,
   Play,
   UserCheck,
@@ -27,6 +29,10 @@ import {
 
 export interface InternshipsTableProps {
   internships: InternshipResponse[];
+  page?: number;
+  totalPages?: number;
+  total?: number;
+  onPageChange?: (page: number) => void;
   onStart?: (id: string) => void;
   onFinish?: (id: string) => void;
   onOpenExtend?: (internship: InternshipResponse) => void;
@@ -41,6 +47,10 @@ export interface InternshipsTableProps {
  */
 export function InternshipsTable({
   internships,
+  page = 1,
+  totalPages = 1,
+  total = internships.length,
+  onPageChange,
   onStart,
   onFinish,
   onOpenExtend,
@@ -53,7 +63,10 @@ export function InternshipsTable({
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Daftar Magang</CardTitle>
-        <CardDescription>{internships.length} magang ditemukan</CardDescription>
+        <CardDescription>
+          {total} magang ditemukan
+          {totalPages > 1 ? ` • Halaman ${page} dari ${totalPages}` : ''}
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         {internships.length === 0 ? (
@@ -71,6 +84,7 @@ export function InternshipsTable({
                   <th className="px-6 py-3 font-medium">Peserta</th>
                   <th className="px-6 py-3 font-medium">Instansi</th>
                   <th className="px-6 py-3 font-medium">Jurusan</th>
+                  <th className="px-6 py-3 font-medium">Kantor</th>
                   <th className="px-6 py-3 font-medium">Departemen</th>
                   <th className="px-6 py-3 font-medium">Supervisor</th>
                   <th className="px-6 py-3 font-medium">Periode</th>
@@ -103,6 +117,7 @@ export function InternshipsTable({
                         {internship.internProfile?.institution?.name ?? '-'}
                       </td>
                       <td className="px-6 py-4">{internship.internProfile?.major?.name ?? '-'}</td>
+                      <td className="px-6 py-4">{internship.officeLocation?.name ?? '-'}</td>
                       <td className="px-6 py-4">{internship.department?.name ?? '-'}</td>
                       <td className="px-6 py-4">{supervisor}</td>
                       <td className="px-6 py-4">
@@ -194,6 +209,37 @@ export function InternshipsTable({
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {Boolean(totalPages && totalPages > 1 && onPageChange) && (
+          <div className="flex items-center justify-between border-t px-6 py-4">
+            <p className="text-xs text-muted-foreground">
+              Menampilkan {internships.length} dari {total} magang (Halaman {page} dari {totalPages}
+              )
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={Number(page) <= 1}
+                onClick={() => onPageChange?.(Number(page) - 1)}
+                className="h-8 gap-1 text-xs"
+              >
+                <ChevronLeft className="size-3.5" />
+                Sebelumnya
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={Number(page) >= Number(totalPages)}
+                onClick={() => onPageChange?.(Number(page) + 1)}
+                className="h-8 gap-1 text-xs"
+              >
+                Selanjutnya
+                <ChevronRight className="size-3.5" />
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>

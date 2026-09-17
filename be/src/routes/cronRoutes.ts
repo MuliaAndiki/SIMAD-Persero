@@ -47,7 +47,7 @@ class CronRouter {
       return cronController.PingService(c);
     });
 
-    // Existing internship auto-start
+    // Internship automation: auto-start (PENDING -> ACTIVE) and auto-complete (ACTIVE -> COMPLETED)
     this.cronRouter.get('/internship', async (c: AppContext) => {
       return cronController.autoStartInternships(c);
     });

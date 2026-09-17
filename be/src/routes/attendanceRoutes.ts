@@ -8,6 +8,7 @@ import {
   CheckInDto,
   CheckOutDto,
   OverrideAttendanceDto,
+  SupervisorAttendanceQuery,
 } from '@/dtos/attendance.dto';
 import { requireRole, verifyToken } from '@/middlewares/auth';
 import { idempotency } from '@/middlewares/idempotency';
@@ -81,14 +82,18 @@ class AttendanceRouter {
       (c: AppContext) => attendanceController.getSupervisorDashboard(c),
       {
         beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
+        query: SupervisorAttendanceQuery,
       },
     );
 
     // ─── HR Admin Routes ───────────────────────────────────────
 
-    // 16.9 GET /attendance/history (HR_ADMIN)
+    // 16.9 GET /attendance/history (HR_ADMIN, SUPERVISOR)
     this.attendanceRouter.get('/history', (c: AppContext) => attendanceController.getHistory(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+      beforeHandle: [
+        verifyToken().beforeHandle,
+        requireRole(['hr_admin', 'supervisor']).beforeHandle,
+      ],
       query: AttendanceHistoryQuery,
     });
 

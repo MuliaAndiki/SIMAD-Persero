@@ -6,6 +6,7 @@ import { InternshipsSection } from '@/components/page/hr/InternshipsSection';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useApi } from '@/hooks/useService/useApi';
+import type { InternshipStatusValue } from '@/types/api/internship.types';
 
 /**
  * Container halaman Magang (HR Admin) — Pusat Kontrol Magang.
@@ -16,12 +17,29 @@ export default function HrInternshipsContainer() {
 
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [officeFilter, setOfficeFilter] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
+  const [page, setPage] = useState(1);
 
-  // Queries
-  const list = api.internship.query.list();
-  const departments = api.department.query.list();
-  const offices = api.office.query.list();
-  const supervisors = api.supervisor.query.list();
+  const debouncedKeyword = useDebounce(keyword, 400);
+
+  // Queries dengan server-side filtering & pagination
+  const list = api.internship.query.list({
+    page,
+    limit: 10,
+    keyword: debouncedKeyword.trim() || undefined,
+    status: (statusFilter as InternshipStatusValue) || undefined,
+    officeLocationId: officeFilter || undefined,
+    departmentId: departmentFilter || undefined,
+  });
+  const departments = api.department.query.list({ limit: 100 });
+  const offices = api.office.query.list({ limit: 100 });
+  const supervisors = api.supervisor.query.list({ limit: 100 });
+
+  const internships = list.data?.data ?? (Array.isArray(list.data) ? list.data : []);
+  const meta = list.data?.meta as
+    | { page?: number; limit?: number; totalPages?: number; total?: number }
+    | undefined;
 
   // Mutations
   const startMutation = api.internship.mutate.start();
@@ -41,22 +59,33 @@ export default function HrInternshipsContainer() {
     archiveMutation.isPending ||
     generateCertMutation.isPending;
 
-  const debouncedKeyword = useDebounce(keyword, 400);
+  const handleKeywordChange = (val: string) => {
+    setKeyword(val);
+    setPage(1);
+  };
 
-  const filteredInternships = useMemo(() => {
-    const keywordLower = debouncedKeyword.trim().toLowerCase();
-    return (list.data ?? []).filter((internship) => {
-      if (statusFilter && internship.status !== statusFilter) return false;
-      if (!keywordLower) return true;
+  const handleStatusChange = (val: string) => {
+    setStatusFilter(val);
+    setPage(1);
+  };
 
-      const name = internship.internProfile?.user.fullName?.toLowerCase() ?? '';
-      const email = internship.internProfile?.user.email?.toLowerCase() ?? '';
-      const nim = internship.internProfile?.studentNumber?.toLowerCase() ?? '';
-      return (
-        name.includes(keywordLower) || email.includes(keywordLower) || nim.includes(keywordLower)
-      );
-    });
-  }, [list.data, debouncedKeyword, statusFilter]);
+  const handleOfficeChange = (val: string) => {
+    setOfficeFilter(val);
+    setPage(1);
+  };
+
+  const handleDepartmentChange = (val: string) => {
+    setDepartmentFilter(val);
+    setPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setKeyword('');
+    setStatusFilter('');
+    setOfficeFilter('');
+    setDepartmentFilter('');
+    setPage(1);
+  };
 
   // Handlers
   const handleStart = async (id: string) => {
@@ -136,16 +165,25 @@ export default function HrInternshipsContainer() {
         isActionPending,
         isError: list.isError,
         errorMessage: list.error?.message,
-        internships: filteredInternships,
+        internships,
         statusFilter,
+        officeFilter,
+        departmentFilter,
         keyword,
+        page,
+        totalPages: Number(meta?.totalPages) || 1,
+        total: Number(meta?.total) || internships.length,
         departments: departments.data ?? [],
         offices: offices.data ?? [],
         supervisors: supervisors.data ?? [],
       }}
       actions={{
-        onStatusChange: setStatusFilter,
-        onKeywordChange: setKeyword,
+        onStatusChange: handleStatusChange,
+        onOfficeChange: handleOfficeChange,
+        onDepartmentChange: handleDepartmentChange,
+        onResetFilters: handleResetFilters,
+        onKeywordChange: handleKeywordChange,
+        onPageChange: setPage,
         onSearch: () => {},
         onStart: handleStart,
         onFinish: handleFinish,

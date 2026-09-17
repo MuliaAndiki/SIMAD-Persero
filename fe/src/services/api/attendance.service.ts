@@ -15,6 +15,7 @@ import type {
   CheckOutBody,
   OverrideAttendanceBody,
   OverrideAttendanceResponse,
+  SupervisorAttendanceQuery,
 } from '@/types/api/attendance.types';
 import { buildQueryString } from '@/utils/query-string';
 import { toServiceResponse } from '@/utils/service-response';
@@ -94,9 +95,12 @@ class AttendanceService {
    * GET /attendance/supervisor
    * Mengambil dashboard kehadiran supervisor (SUPERVISOR).
    */
-  public async Supervisor(): Promise<TResponse<AttendanceSupervisorRow[]>> {
+  public async Supervisor(
+    query?: SupervisorAttendanceQuery,
+  ): Promise<TResponse<AttendanceSupervisorRow[]>> {
+    const qs = buildQueryString(query as Record<string, string | number | boolean>);
     const res = await client.GetResponse<AttendanceSupervisorRow[]>(
-      ATTENDANCE_ENDPOINTS.SUPERVISOR,
+      `${ATTENDANCE_ENDPOINTS.SUPERVISOR}${qs}`,
     );
     return toServiceResponse(res, {
       message: 'Dashboard supervisor berhasil dimuat',

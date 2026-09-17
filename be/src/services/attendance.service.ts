@@ -1,5 +1,4 @@
 import { AppError } from '@/http/error';
-import calendarService from './calendar.service';
 import type {
   AttendanceExportQuery,
   AttendanceHistoryQuery,
@@ -21,6 +20,7 @@ import { checkInsideGeofence } from '@/utils/geofence.util';
 import type { Decimal } from '@prisma/client/runtime/library';
 import ExcelJS from 'exceljs';
 import prisma from '../../prisma/client';
+import calendarService from './calendar.service';
 
 /**
  * Attendance service — 10 endpoints.
@@ -713,7 +713,7 @@ class AttendanceService {
 
   // ── 16.7 Supervisor Attendance Dashboard ────────────────────────────
 
-  public async getSupervisorDashboard(userId: string) {
+  public async getSupervisorDashboard(userId: string, dateStr?: string) {
     // Get active supervisor assignments
     const assignments = await prisma.supervisorAssignment.findMany({
       where: {
@@ -722,7 +722,11 @@ class AttendanceService {
       },
       include: {
         internship: {
-          include: {
+          select: {
+            id: true,
+            status: true,
+            actualStartDate: true,
+            actualEndDate: true,
             internProfile: {
               include: {
                 user: {
@@ -736,7 +740,13 @@ class AttendanceService {
       },
     });
 
-    const { todayDate } = this.getTodayRange();
+    let targetDate: Date;
+    if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr.slice(0, 10))) {
+      targetDate = new Date(`${dateStr.slice(0, 10)}T00:00:00.000Z`);
+    } else {
+      const { todayDate } = this.getTodayRange();
+      targetDate = todayDate;
+    }
 
     const internshipIds = assignments
       .map((a: (typeof assignments)[number]) => a.internship?.id)
@@ -745,7 +755,7 @@ class AttendanceService {
     const todayAttendances = await prisma.attendance.findMany({
       where: {
         internshipId: { in: internshipIds },
-        attendanceDate: todayDate,
+        attendanceDate: targetDate,
       },
       include: {
         attendanceLogs: { orderBy: { createdAt: 'asc' } },
@@ -763,6 +773,9 @@ class AttendanceService {
           id: assignment.internship?.id,
           intern: assignment.internship?.internProfile?.user,
           department: assignment.internship?.department,
+          status: assignment.internship?.status ?? null,
+          startDate: assignment.internship?.actualStartDate?.toISOString() ?? null,
+          endDate: assignment.internship?.actualEndDate?.toISOString() ?? null,
         },
         todayAttendance: att ? this.serializeAttendance(att) : null,
       };
@@ -838,14 +851,25 @@ class AttendanceService {
 
   // ── 16.9 Get Attendance History (admin) ─────────────────────────────
 
-  public async getHistory(query: AttendanceHistoryQuery) {
+  public async getHistory(query: AttendanceHistoryQuery, user?: { id: string; roles?: string[] }) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
 
-    if (query.internshipId) {
+    const roles = (user?.roles ?? []).map((r) => r.toLowerCase());
+    if (roles.includes('supervisor') && !roles.includes('hr_admin')) {
+      const internshipWhere: Record<string, unknown> = {
+        supervisorAssignments: {
+          some: { supervisorId: user!.id, isActive: true },
+        },
+      };
+      if (query.internshipId) {
+        internshipWhere.id = query.internshipId;
+      }
+      where.internship = internshipWhere;
+    } else if (query.internshipId) {
       where.internshipId = query.internshipId;
     }
     if (query.status) {
@@ -907,20 +931,28 @@ class AttendanceService {
     // Role-based filtering
     const roles = (user.roles ?? []).map((r) => r.toLowerCase());
     if (roles.includes('hr_admin')) {
-      // HR_ADMIN can see all, apply optional department filter
-      if (query.departmentId) {
-        where.internship = { departmentId: query.departmentId };
+      // HR_ADMIN can see all, apply optional filters
+      const internshipWhere: Record<string, unknown> = {};
+      if (query.internshipId) internshipWhere.id = query.internshipId;
+      if (query.departmentId) internshipWhere.departmentId = query.departmentId;
+      if (query.officeLocationId) internshipWhere.officeLocationId = query.officeLocationId;
+      if (Object.keys(internshipWhere).length > 0) {
+        where.internship = internshipWhere;
       }
     } else if (roles.includes('supervisor')) {
       // SUPERVISOR can see interns they supervise
-      where.internship = {
+      const internshipWhere: Record<string, unknown> = {
         supervisorAssignments: {
           some: { supervisorId: user.id, isActive: true },
         },
       };
-      if (query.departmentId) {
-        (where.internship as any).departmentId = query.departmentId;
+      if (query.internshipId) {
+        internshipWhere.id = query.internshipId;
       }
+      if (query.departmentId) {
+        internshipWhere.departmentId = query.departmentId;
+      }
+      where.internship = internshipWhere;
     } else if (roles.includes('intern')) {
       // INTERN can only see their own attendance
       where.internship = {

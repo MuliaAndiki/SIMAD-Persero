@@ -121,9 +121,20 @@ export function useExtendInternship() {
       body: Pick<ExtendInternshipBody, 'newEndDate' | 'reason'>;
     }) => Api.Internship.Extend(params, body),
     onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
+      await Promise.all([
+        ns.queryClient.invalidateQueries({
+          queryKey: queryKey.internshipRoot(),
+        }),
+        ns.queryClient.invalidateQueries({
+          queryKey: queryKey.attendanceRoot(),
+        }),
+        ns.queryClient.invalidateQueries({
+          queryKey: queryKey.certificateRoot(),
+        }),
+        ns.queryClient.invalidateQueries({
+          queryKey: queryKey.reportingRoot(),
+        }),
+      ]);
     },
     onMutate: async () => {
       await ns.queryClient.cancelQueries({

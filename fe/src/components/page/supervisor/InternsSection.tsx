@@ -1,13 +1,12 @@
 'use client';
 
+import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card';
-import { AttendanceStatusBadge } from '@/components/organisms/attendance/AttendanceStatusBadge';
-import Api from '@/services/props.service';
 import type { AttendanceSupervisorRow } from '@/types/api/attendance.types';
-import { AlertCircle, CalendarCheck2, Download, UsersRound } from 'lucide-react';
+import { formatDate } from '@/utils/string.format';
+import { AlertCircle, CalendarDays, Eye, UsersRound } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 
 export interface InternsSectionState {
   isPending: boolean;
@@ -25,40 +24,44 @@ export interface InternsSectionProps {
   service: InternsSectionService;
 }
 
+function InternshipStatusBadge({ status }: { status?: string | null }) {
+  switch (status) {
+    case 'ACTIVE':
+      return (
+        <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-200 hover:bg-emerald-500/25">
+          Aktif
+        </Badge>
+      );
+    case 'COMPLETED':
+    case 'CERTIFICATE_GENERATED':
+      return (
+        <Badge className="bg-blue-500/15 text-blue-600 border-blue-200 hover:bg-blue-500/25">
+          Selesai
+        </Badge>
+      );
+    default:
+      return (
+        <Badge variant="outline" className="text-muted-foreground">
+          {status ?? '-'}
+        </Badge>
+      );
+  }
+}
+
 /**
- * InternsSection — daftar peserta magang yang ditugaskan ke supervisor
- * (GET /attendance/supervisor). Presentasi murni; data disuplai container
- * `/SUPERVISOR/dashboard/interns`.
+ * InternsSection — daftar peserta magang yang ditugaskan ke supervisor.
+ * Menampilkan info magang (departemen, periode) dengan aksi "Lihat Detail Intern".
  */
 export function InternsSection({ state, service }: InternsSectionProps) {
-  const [isExporting, setIsExporting] = useState(false);
-
-  const handleExport = async () => {
-    try {
-      setIsExporting(true);
-      await Api.Attendance.DownloadExcel();
-    } catch (error) {
-      console.error('Failed to export:', error);
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   return (
     <section className="flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">Peserta Bimbingan</h1>
-          <p className="text-sm text-muted-foreground">
-            Daftar peserta magang yang ditugaskan kepada Anda beserta status absensi hari ini.
-          </p>
-        </header>
-
-        <Button variant="outline" onClick={handleExport} disabled={isExporting}>
-          <Download className="mr-2 size-4" />
-          {isExporting ? 'Mengekspor...' : 'Export Excel'}
-        </Button>
-      </div>
+      <header className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold text-foreground">Peserta Bimbingan</h1>
+        <p className="text-sm text-muted-foreground">
+          Daftar peserta magang yang ditugaskan kepada Anda. Klik "Lihat Detail" untuk melihat
+          profil dan riwayat absensi lengkap.
+        </p>
+      </header>
 
       {state.isPending ? (
         <Card className="h-64" />
@@ -78,7 +81,7 @@ export function InternsSection({ state, service }: InternsSectionProps) {
       ) : (
         <Card>
           <CardHeader className="border-b">
-            <CardTitle>Absensi Hari Ini</CardTitle>
+            <CardTitle>Daftar Peserta ({state.rows.length})</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {state.rows.length === 0 ? (
@@ -96,7 +99,8 @@ export function InternsSection({ state, service }: InternsSectionProps) {
                     <tr className="border-b text-left text-xs uppercase text-muted-foreground">
                       <th className="px-6 py-3 font-medium">Peserta</th>
                       <th className="px-6 py-3 font-medium">Departemen</th>
-                      <th className="px-6 py-3 font-medium">Status Hari Ini</th>
+                      <th className="px-6 py-3 font-medium">Periode Magang</th>
+                      <th className="px-6 py-3 font-medium">Status</th>
                       <th className="px-6 py-3 text-right font-medium">Aksi</th>
                     </tr>
                   </thead>
@@ -104,15 +108,18 @@ export function InternsSection({ state, service }: InternsSectionProps) {
                     {state.rows.map((row) => {
                       const intern = row.internship.intern;
                       const department = row.internship.department;
-                      const today = row.todayAttendance;
+                      const internshipId = row.internship.id;
+
                       return (
                         <tr
-                          key={row.internship.id ?? intern?.id ?? 'unknown'}
-                          className="border-b last:border-0"
+                          key={internshipId ?? intern?.id ?? 'unknown'}
+                          className="border-b transition-colors last:border-0 hover:bg-muted/40"
                         >
                           <td className="px-6 py-4">
                             <div className="flex flex-col">
-                              <span className="font-medium">{intern?.fullName ?? '-'}</span>
+                              <span className="font-medium text-foreground">
+                                {intern?.fullName ?? '-'}
+                              </span>
                               <span className="text-xs text-muted-foreground">
                                 {intern?.email ?? '-'}
                               </span>
@@ -120,20 +127,32 @@ export function InternsSection({ state, service }: InternsSectionProps) {
                           </td>
                           <td className="px-6 py-4">{department?.name ?? '-'}</td>
                           <td className="px-6 py-4">
-                            {today ? (
-                              <AttendanceStatusBadge status={today.attendanceStatus} />
+                            {row.internship.startDate || row.internship.endDate ? (
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <CalendarDays className="size-3.5 shrink-0" />
+                                <span>
+                                  {row.internship.startDate
+                                    ? formatDate(row.internship.startDate)
+                                    : '?'}{' '}
+                                  &ndash;{' '}
+                                  {row.internship.endDate
+                                    ? formatDate(row.internship.endDate)
+                                    : '?'}
+                                </span>
+                              </div>
                             ) : (
-                              <span className="text-xs text-muted-foreground">
-                                Belum absen hari ini
-                              </span>
+                              <span className="text-xs text-muted-foreground">-</span>
                             )}
                           </td>
+                          <td className="px-6 py-4">
+                            <InternshipStatusBadge status={row.internship.status} />
+                          </td>
                           <td className="px-6 py-4 text-right">
-                            {today ? (
+                            {internshipId ? (
                               <Button asChild variant="outline" size="sm">
-                                <Link href={`/supervisor/attendance/${today.id}`}>
-                                  <CalendarCheck2 className="size-4" />
-                                  Lihat Absensi
+                                <Link href={`/supervisor/interns/${internshipId}`}>
+                                  <Eye className="mr-1.5 size-3.5" />
+                                  Lihat Detail
                                 </Link>
                               </Button>
                             ) : (

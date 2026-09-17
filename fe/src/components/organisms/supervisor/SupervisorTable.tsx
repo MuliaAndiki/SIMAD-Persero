@@ -11,12 +11,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/atoms/dropdown-menu';
+import type { DepartmentResponse } from '@/types/api/department.types';
+import type { OfficeResponse } from '@/types/api/office.types';
 import type { SupervisorResponse } from '@/types/api/supervisor.types';
 import type { AlertContexType } from '@/types/ui';
-import { Eye, MoreHorizontal, Trash, UserCheck } from 'lucide-react';
+import { Briefcase, Building2, Eye, MoreHorizontal, Trash, UserCheck } from 'lucide-react';
 
 export interface SupervisorTableProps {
   supervisors: SupervisorResponse[];
+  offices?: OfficeResponse[];
+  departments?: DepartmentResponse[];
   onSelectSupervisor: (id: string) => void;
   onEditSupervisor?: (id: string) => void;
   onDeleteSupervisor?: (id: string) => void;
@@ -29,11 +33,31 @@ export interface SupervisorTableProps {
  */
 export function SupervisorTable({
   supervisors,
+  offices,
+  departments,
   onEditSupervisor,
   onDeleteSupervisor,
   onViewAuditLog,
   alert,
 }: SupervisorTableProps) {
+  const getOfficeName = (supervisor: SupervisorResponse) => {
+    if (supervisor.officeLocation?.name) return supervisor.officeLocation.name;
+    if (supervisor.officeId && offices) {
+      const found = offices.find((o) => o.id === supervisor.officeId);
+      if (found) return found.name;
+    }
+    return '-';
+  };
+
+  const getDeptName = (supervisor: SupervisorResponse) => {
+    if (supervisor.department?.name) return supervisor.department.name;
+    if (supervisor.departmentId && departments) {
+      const found = departments.find((d) => d.id === supervisor.departmentId);
+      if (found) return found.name;
+    }
+    return '-';
+  };
+
   return (
     <Card>
       <CardHeader className="border-b">
@@ -55,6 +79,8 @@ export function SupervisorTable({
                 <tr className="border-b text-left text-xs uppercase text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Nama</th>
                   <th className="px-6 py-3 font-medium">Email</th>
+                  <th className="px-6 py-3 font-medium">Kantor</th>
+                  <th className="px-6 py-3 font-medium">Departemen</th>
                   <th className="px-6 py-3 font-medium">Status</th>
                   <th className="px-6 py-3 font-medium">Bimbingan Aktif</th>
                   <th className="px-6 py-3 text-right font-medium">Aksi</th>
@@ -69,11 +95,24 @@ export function SupervisorTable({
                     <td className="px-6 py-4 font-medium">{supervisor.fullName}</td>
                     <td className="px-6 py-4 text-muted-foreground">{supervisor.email}</td>
                     <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5">
+                        <Building2 className="size-3.5 text-muted-foreground shrink-0" />
+                        <span>{getOfficeName(supervisor)}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5">
+                        <Briefcase className="size-3.5 text-muted-foreground shrink-0" />
+                        <span>{getDeptName(supervisor)}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
                       <Badge variant={supervisor.isActive ? 'default' : 'secondary'}>
                         {supervisor.isActive ? 'Aktif' : 'Nonaktif'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">{supervisor.activeAssignmentsCount}</td>
+
                     <td className="flex justify-center ">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild className="mt-2">

@@ -17,25 +17,28 @@ export default function HrReceptionistsContainer() {
   const ns = useAppNameSpace();
 
   const [keyword, setKeyword] = useState('');
+  const [selectedOfficeId, setSelectedOfficeId] = useState<string>('');
+  const [page, setPage] = useState<number>(1);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [formData, setFormData] = useState<ReceptionistFormType>({
     fullName: '',
     email: '',
     officeId: '',
-    departmentId: '',
     password: '',
     isActive: true,
   });
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  const debouncedKeyword = useDebounce(keyword, 1000);
+  const debouncedKeyword = useDebounce(keyword, 500);
 
   // ── Queries ──────────────────────────────────────────────────────────────
   const list = api.receptionist.query.list({
     keyword: debouncedKeyword || undefined,
-    limit: 100,
+    officeId: selectedOfficeId || undefined,
+    page,
+    limit: 10,
   });
 
   const offices = api.office.query.list({ limit: 100 });
@@ -57,7 +60,6 @@ export default function HrReceptionistsContainer() {
         fullName: editingDetail.data.fullName,
         email: editingDetail.data.email,
         officeId: editingDetail.data.officeId ?? '',
-        departmentId: editingDetail.data.departmentId ?? '',
         password: '',
         isActive: editingDetail.data.isActive,
       });
@@ -71,7 +73,6 @@ export default function HrReceptionistsContainer() {
       fullName: '',
       email: '',
       officeId: '',
-      departmentId: '',
       password: '',
       isActive: true,
     });
@@ -98,7 +99,6 @@ export default function HrReceptionistsContainer() {
         fullName: formData.fullName,
         email: formData.email,
         officeId: formData.officeId,
-        departmentId: formData.departmentId,
         isActive: formData.isActive,
       };
       if (formData.password) body.password = formData.password;
@@ -120,6 +120,27 @@ export default function HrReceptionistsContainer() {
     [deleteMutation],
   );
 
+  const handleSelectOffice = useCallback((officeId: string) => {
+    setSelectedOfficeId(officeId);
+    setPage(1);
+  }, []);
+
+  const handleResetFilter = useCallback(() => {
+    setSelectedOfficeId('');
+    setKeyword('');
+    setPage(1);
+  }, []);
+
+  const handleKeywordChange = useCallback((val: string) => {
+    setKeyword(val);
+    setPage(1);
+  }, []);
+
+  const receptionists = list.data?.data ?? [];
+  const meta = list.data?.meta as
+    | { page?: number; limit?: number; total?: number; totalPages?: number }
+    | undefined;
+
   return (
     <ReceptionistsSection
       state={{
@@ -129,8 +150,12 @@ export default function HrReceptionistsContainer() {
         setShowPassword,
         showPassword,
         errorMessage: list.error?.message,
-        receptionists: list.data ?? [],
+        receptionists,
         offices: offices.data ?? [],
+        selectedOfficeId,
+        page,
+        totalPages: meta?.totalPages ?? 1,
+        total: meta?.total ?? 0,
         keyword,
         formOpen,
         isSaving:
@@ -142,7 +167,10 @@ export default function HrReceptionistsContainer() {
         alert: ns.alert,
       }}
       actions={{
-        onKeywordChange: setKeyword,
+        onKeywordChange: handleKeywordChange,
+        onSelectOffice: handleSelectOffice,
+        onResetFilter: handleResetFilter,
+        onPageChange: setPage,
         onOpenCreate: handleOpenCreate,
         onOpenEdit: handleOpenEdit,
         onCloseForm: handleCloseForm,

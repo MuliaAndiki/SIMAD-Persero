@@ -3,6 +3,7 @@
 import { ApplicationSection } from '@/components/page/application/ApplicationSection';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useApi } from '@/hooks/useService/useApi';
+import { getFilePreviewUrl } from '@/utils/file-preview';
 import { useEffect, useRef } from 'react';
 
 /**
@@ -65,8 +66,8 @@ export default function ApplicationContainer() {
 
   // Handle preview PDF file
   const handlePreviewFile = (fileUrl: string) => {
-    // Open PDF in new tab for preview
-    window.open(fileUrl, '_blank', 'noopener,noreferrer');
+    const previewUrl = getFilePreviewUrl(fileUrl);
+    window.open(previewUrl, '_blank', 'noopener,noreferrer');
   };
 
   // Actions

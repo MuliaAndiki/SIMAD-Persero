@@ -203,13 +203,30 @@ class DashboardService {
 
   // ── Receptionist Dashboard ─────────────────────────────────────────
 
-  public async getReceptionistDashboard(): Promise<ReceptionistDashboardData> {
+  public async getReceptionistDashboard(userId?: string): Promise<ReceptionistDashboardData> {
     const todayDate = this.getTodayDate();
 
+    let officeId: string | null = null;
+    if (userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { officeId: true },
+      });
+      officeId = user?.officeId ?? null;
+    }
+
+    const internshipWhere: Record<string, unknown> = { status: 'ACTIVE' };
+    const attendanceWhere: Record<string, unknown> = { attendanceDate: todayDate };
+
+    if (officeId) {
+      internshipWhere.officeLocationId = officeId;
+      attendanceWhere.internship = { officeLocationId: officeId };
+    }
+
     const [activeInternsCount, attendancesToday] = await Promise.all([
-      prisma.internship.count({ where: { status: 'ACTIVE' } }),
+      prisma.internship.count({ where: internshipWhere }),
       prisma.attendance.findMany({
-        where: { attendanceDate: todayDate },
+        where: attendanceWhere,
         include: {
           internship: {
             include: {

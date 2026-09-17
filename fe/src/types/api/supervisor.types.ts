@@ -14,6 +14,8 @@ export interface SupervisorQuery {
   page?: number;
   limit?: number;
   keyword?: string;
+  officeId?: string;
+  departmentId?: string;
 }
 
 export interface AssignInternBody {
@@ -42,6 +44,8 @@ export interface SupervisorResponse
   activeAssignmentsCount: number;
   departmentId: string | null;
   officeId: string | null;
+  department?: { id: string; name: string; code?: string } | null;
+  officeLocation?: { id: string; name: string } | null;
 }
 
 /** Data satu penugasan supervisor ke internship. */

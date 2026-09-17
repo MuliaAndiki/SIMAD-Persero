@@ -18,13 +18,60 @@ export default function HrReportsContainer() {
 
   const [activeTab, setActiveTab] = useState<ReportsTab>('attendance');
 
-  const attendance = api.reporting.query.attendance();
+  // Staged filter state untuk Laporan Absensi
+  const [selectedOfficeId, setSelectedOfficeId] = useState<string>('');
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>('');
+  const [selectedInternshipId, setSelectedInternshipId] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<number | undefined>(undefined);
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
+
+  // Muat daftar kantor dan internship untuk cascading selector
+  const offices = api.office.query.list({ limit: 100 });
+  const allInternships = api.internship.query.list({ limit: 200 });
+
+  // Absensi HANYA di-query jika peserta magang sudah dipilih
+  const attendance = api.reporting.query.attendance(
+    selectedInternshipId
+      ? {
+          officeLocationId: selectedOfficeId || undefined,
+          departmentId: selectedDepartmentId || undefined,
+          internshipId: selectedInternshipId,
+          month: selectedMonth,
+          year: selectedYear,
+        }
+      : undefined,
+    { enabled: Boolean(selectedInternshipId) },
+  );
+
   const internships = api.reporting.query.internships();
   const certificates = api.reporting.query.certificates();
   const dashboard = api.reporting.query.dashboard();
 
   const handleTabChange = useCallback((tab: ReportsTab) => {
     setActiveTab(tab);
+  }, []);
+
+  const handleSelectOffice = useCallback((officeId: string) => {
+    setSelectedOfficeId(officeId);
+    setSelectedDepartmentId('');
+    setSelectedInternshipId('');
+  }, []);
+
+  const handleSelectDepartment = useCallback((departmentId: string) => {
+    setSelectedDepartmentId(departmentId);
+    setSelectedInternshipId('');
+  }, []);
+
+  const handleSelectInternship = useCallback((internshipId: string) => {
+    setSelectedInternshipId(internshipId);
+  }, []);
+
+  const handleResetAttendanceFilter = useCallback(() => {
+    setSelectedOfficeId('');
+    setSelectedDepartmentId('');
+    setSelectedInternshipId('');
+    setSelectedMonth(undefined);
+    setSelectedYear(undefined);
   }, []);
 
   const handleRetry = useCallback(
@@ -57,8 +104,26 @@ export default function HrReportsContainer() {
         isDashboardPending: dashboard.isPending,
         isDashboardError: dashboard.isError,
         dashboardErrorMessage: dashboard.error?.message,
+        offices: offices.data ?? [],
+        allInternships:
+          allInternships.data?.data ??
+          (Array.isArray(allInternships.data) ? allInternships.data : []),
+        selectedOfficeId,
+        selectedDepartmentId,
+        selectedInternshipId,
+        selectedMonth,
+        selectedYear,
       }}
-      actions={{ onTabChange: handleTabChange, onRetry: handleRetry }}
+      actions={{
+        onTabChange: handleTabChange,
+        onRetry: handleRetry,
+        onSelectOffice: handleSelectOffice,
+        onSelectDepartment: handleSelectDepartment,
+        onSelectInternship: handleSelectInternship,
+        onSelectMonth: setSelectedMonth,
+        onSelectYear: setSelectedYear,
+        onResetAttendanceFilter: handleResetAttendanceFilter,
+      }}
     />
   );
 }

@@ -5,7 +5,9 @@ import type { IAttendance, ICertificate, IDepartment, IInternship } from './mode
 
 /** GET /reports/attendance query (BR-REPORT-003 / BR-REPORT-004). */
 export type ReportingQuery = Partial<{
+  officeLocationId: string;
   departmentId: IDepartment['id'];
+  internshipId: IInternship['id'];
   month: number;
   year: number;
   format: string;

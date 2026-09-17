@@ -49,6 +49,9 @@ export interface InternshipQuery {
   limit?: number;
   status?: InternshipStatusValue;
   keyword?: string;
+  departmentId?: string;
+  officeLocationId?: string;
+  officeId?: string;
 }
 
 /** POST /internships/profile — Simpan data profil peserta magang (INTERN). */
@@ -110,6 +113,16 @@ export interface InternshipResponse extends Omit<IInternship, 'status'> {
     id: string;
     supervisor: InternshipUserRef;
     assignedAt: string | null;
+  }[];
+  attendances?: {
+    id: string;
+    attendanceDate: string;
+    checkInAt: string | null;
+    checkOutAt: string | null;
+    checkInStatus: string | null;
+    checkOutStatus: string | null;
+    attendanceStatus: string | null;
+    notes?: string | null;
   }[];
 }
 

@@ -22,9 +22,20 @@ class ReportingService {
   public async getAttendanceReport(query: ReportingQuery): Promise<AttendanceReportRow[]> {
     const where: Record<string, unknown> = {};
 
-    if (query.departmentId) {
-      where.internship = { departmentId: query.departmentId };
+    const internshipWhere: Record<string, unknown> = {};
+    if (query.internshipId) {
+      internshipWhere.id = query.internshipId;
     }
+    if (query.departmentId) {
+      internshipWhere.departmentId = query.departmentId;
+    }
+    if (query.officeLocationId) {
+      internshipWhere.officeLocationId = query.officeLocationId;
+    }
+    if (Object.keys(internshipWhere).length > 0) {
+      where.internship = internshipWhere;
+    }
+
     if (query.month || query.year) {
       const now = new Date();
       const year = query.year ?? now.getFullYear();

@@ -327,9 +327,13 @@ class CertificateService {
 
   public async getById(id: string, userId?: string, roles?: string[]) {
     const certificate = await this.findById(id);
-    
+
     // Intern hanya dapat melihat sertifikat miliknya sendiri.
-    if (roles && !roles.some((r) => r.toLowerCase() === 'hr_admin') && roles.some((r) => r.toLowerCase() === 'intern')) {
+    if (
+      roles &&
+      !roles.some((r) => r.toLowerCase() === 'hr_admin') &&
+      roles.some((r) => r.toLowerCase() === 'intern')
+    ) {
       const ownerId = certificate.internship?.internProfile?.user?.id ?? null;
       if (ownerId !== userId) {
         throw new AppError(403, 'Access denied. You can only view your own certificate');
@@ -587,6 +591,90 @@ class CertificateService {
 
     const saved = await this.findById(updated.id);
     return this.serializeDetail(saved);
+  }
+
+  /**
+   * Synchronize existing certificate's PDF with the new internship end date.
+   * If no certificate exists yet for this internship, does nothing.
+   */
+  public async syncCertificateEndDate(internshipId: string, newEndDate: Date, userId: string) {
+    const certificate = await prisma.certificate.findUnique({
+      where: { internshipId },
+      include: {
+        internship: {
+          include: {
+            internProfile: {
+              include: {
+                user: { select: { id: true, fullName: true, email: true } },
+                institution: { select: { id: true, name: true, shortName: true } },
+              },
+            },
+            department: { select: { id: true, code: true, name: true } },
+            officeLocation: { select: { id: true, name: true } },
+          },
+        },
+      },
+    });
+
+    if (!certificate) {
+      return null;
+    }
+
+    const template = await this.getActiveTemplate();
+    const internName = certificate.internship?.internProfile?.user?.fullName ?? '-';
+    const studentNumber = certificate.internship?.internProfile?.studentNumber ?? '-';
+    const institutionName = certificate.internship?.internProfile?.institution?.name ?? '-';
+    const departmentName = certificate.internship?.department?.name ?? '-';
+    const cityName = certificate.internship?.officeLocation?.name ?? 'Jakarta';
+    const settings = this.getSettings();
+
+    const pdfBuffer = generateCertificatePdf({
+      certificateNumber: certificate.certificateNumber ?? '-',
+      internName,
+      studentNumber,
+      institutionName,
+      departmentName,
+      startDate: this.formatDate(certificate.internship?.actualStartDate ?? null),
+      endDate: this.formatDate(newEndDate),
+      verificationToken: certificate.verificationToken ?? '-',
+      cityName,
+      signerName: settings.signerName,
+      signerRole: settings.signerRole,
+      signatureUrl: settings.signatureUrl,
+    });
+
+    const file = await this.createPdfFile(
+      userId,
+      `${certificate.certificateNumber ?? 'certificate'}.pdf`,
+      pdfBuffer,
+    );
+
+    const oldFileId = certificate.fileId;
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const updatedCert = await tx.certificate.update({
+        where: { id: certificate.id },
+        data: {
+          fileId: file.id,
+          templateId: template?.id ?? certificate.templateId,
+          generatedAt: new Date(),
+        },
+      });
+
+      await createAuditLog(tx, {
+        userId,
+        module: 'CERTIFICATE',
+        action: 'UPDATE_END_DATE',
+        tableName: 'certificates',
+        recordId: certificate.id,
+        ...(oldFileId ? { oldData: { fileId: oldFileId } } : {}),
+        newData: { fileId: file.id, endDate: newEndDate.toISOString() },
+      });
+
+      return updatedCert;
+    });
+
+    return updated;
   }
 }
 

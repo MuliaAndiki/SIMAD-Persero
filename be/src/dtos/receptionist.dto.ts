@@ -20,8 +20,8 @@ export const ReceptionistListQuery = Type.Object({
 export const CreateReceptionistDto = Type.Object({
   fullName: Type.String({ minLength: 1, maxLength: 150 }),
   email: Type.String({ format: 'email', maxLength: 150 }),
-  departmentId: Type.String({ format: 'uuid' }),
   officeId: Type.String({ format: 'uuid' }),
+  departmentId: Type.Optional(Type.String({ format: 'uuid' })),
   password: Type.Optional(Type.String({ minLength: 6 })),
 });
 

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { ApplicationSectionService } from '@/components/page/application/ApplicationSection';
 import type { ApplicationResponse, UpdateApplicationBody } from '@/types/api/application.types';
 import { cn } from '@/utils/classname';
+import { getFilePreviewUrl } from '@/utils/file-preview';
 import { AlertCircle, Eye, EyeOff, FileText, UploadCloud } from 'lucide-react';
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
@@ -153,25 +154,32 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({ app, service, isSubmittin
                       {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                       {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
                     </Button>
-                    {app.introductionLetterFile.url && (
-                      <Button asChild variant="outline" size="sm">
-                        <a href={app.introductionLetterFile.url} target="_blank" rel="noreferrer">
-                          Buka di Tab Baru
-                        </a>
-                      </Button>
-                    )}
+                    {(() => {
+                      const previewUrl = getFilePreviewUrl(app.introductionLetterFile);
+                      return previewUrl ? (
+                        <Button asChild variant="outline" size="sm">
+                          <a href={previewUrl} target="_blank" rel="noreferrer">
+                            Buka di Tab Baru
+                          </a>
+                        </Button>
+                      ) : null;
+                    })()}
                   </div>
                 </div>
 
-                {showPdfPreview && app.introductionLetterFile.url && (
-                  <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
-                    <iframe
-                      src={app.introductionLetterFile.url}
-                      className="h-[400px] w-full border-0"
-                      title={`Preview ${app.introductionLetterFile.originalName}`}
-                    />
-                  </div>
-                )}
+                {showPdfPreview &&
+                  (() => {
+                    const previewUrl = getFilePreviewUrl(app.introductionLetterFile);
+                    return previewUrl ? (
+                      <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
+                        <iframe
+                          src={previewUrl}
+                          className="h-[400px] w-full border-0"
+                          title={`Preview ${app.introductionLetterFile.originalName}`}
+                        />
+                      </div>
+                    ) : null;
+                  })()}
               </div>
               <Button
                 type="button"

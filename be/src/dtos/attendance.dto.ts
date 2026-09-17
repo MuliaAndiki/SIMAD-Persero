@@ -55,7 +55,15 @@ export const AttendanceHistoryQuery = Type.Object({
 
 export const AttendanceExportQuery = Type.Object({
   departmentId: Type.Optional(Type.String({ format: 'uuid' })),
+  officeLocationId: Type.Optional(Type.String({ format: 'uuid' })),
+  internshipId: Type.Optional(Type.String({ format: 'uuid' })),
   month: Type.Optional(Type.Number({ minimum: 1, maximum: 12 })),
   year: Type.Optional(Type.Number({ minimum: 2020 })),
   format: Type.Optional(Type.String({ default: 'json' })),
+});
+
+// ── Supervisor Attendance query ─────────────────────────────────────────
+
+export const SupervisorAttendanceQuery = Type.Object({
+  date: Type.Optional(Type.String()),
 });

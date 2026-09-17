@@ -11,7 +11,9 @@ import type { IAttendance, ICertificate, IInternship } from './model.type';
 // ---------- Payload (query) ----------
 
 export interface ReportingQuery {
+  officeLocationId?: string;
   departmentId?: string;
+  internshipId?: string;
   month?: number;
   year?: number;
   format?: string;

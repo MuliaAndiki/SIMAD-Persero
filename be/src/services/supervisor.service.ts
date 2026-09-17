@@ -1,5 +1,5 @@
-import { AppError } from "@/http/error";
-import { InternshipStatus } from "@/types/internship.types";
+import { AppError } from '@/http/error';
+import { InternshipStatus } from '@/types/internship.types';
 import type {
   AssignInternBody,
   CreateSupervisorBody,
@@ -8,10 +8,10 @@ import type {
   SupervisorQuery,
   SupervisorResponse,
   UpdateSupervisorBody,
-} from "@/types/supervisor.types";
-import { createAuditLog } from "@/utils/audit.util";
-import * as bcryptjs from "bcryptjs";
-import prisma from "../../prisma/client";
+} from '@/types/supervisor.types';
+import { createAuditLog } from '@/utils/audit.util';
+import * as bcryptjs from 'bcryptjs';
+import prisma from '../../prisma/client';
 
 /**
  * Service layer modul Supervisor.
@@ -22,7 +22,7 @@ import prisma from "../../prisma/client";
  */
 class SupervisorService {
   private readonly supervisorUserWhere = {
-    userRoles: { some: { role: { code: "supervisor" } } },
+    userRoles: { some: { role: { code: 'supervisor' } } },
   } as const;
 
   private readonly assignmentInclude = {
@@ -68,10 +68,7 @@ class SupervisorService {
     };
   }
 
-  private serializeSupervisor(
-    user: any,
-    activeAssignmentsCount = 0,
-  ): SupervisorResponse {
+  private serializeSupervisor(user: any, activeAssignmentsCount = 0): SupervisorResponse {
     return {
       id: user.id,
       fullName: user.fullName,
@@ -82,6 +79,8 @@ class SupervisorService {
       activeAssignmentsCount,
       departmentId: user.departmentId ?? null,
       officeId: user.officeId ?? null,
+      department: user.department ?? null,
+      officeLocation: user.officeLocation ?? null,
     };
   }
 
@@ -90,18 +89,18 @@ class SupervisorService {
       where: { id: supervisorId },
       include: {
         userRoles: { include: { role: { select: { code: true } } } },
+        department: { select: { id: true, name: true, code: true } },
+        officeLocation: { select: { id: true, name: true } },
       },
     });
 
     if (!user || user.deletedAt) {
-      throw new AppError(404, "Supervisor not found");
+      throw new AppError(404, 'Supervisor not found');
     }
 
-    const isSupervisor = user.userRoles.some(
-      (ur) => ur.role?.code === "supervisor",
-    );
+    const isSupervisor = user.userRoles.some((ur) => ur.role?.code === 'supervisor');
     if (!isSupervisor) {
-      throw new AppError(400, "User does not have the SUPERVISOR role");
+      throw new AppError(400, 'User does not have the SUPERVISOR role');
     }
 
     return user;
@@ -114,10 +113,16 @@ class SupervisorService {
     const limit = query.limit ?? 10;
 
     const where: any = { ...this.supervisorUserWhere, deletedAt: null };
+    if (query.officeId) {
+      where.officeId = query.officeId;
+    }
+    if (query.departmentId) {
+      where.departmentId = query.departmentId;
+    }
     if (query.keyword) {
       where.OR = [
-        { fullName: { contains: query.keyword, mode: "insensitive" } },
-        { email: { contains: query.keyword, mode: "insensitive" } },
+        { fullName: { contains: query.keyword, mode: 'insensitive' } },
+        { email: { contains: query.keyword, mode: 'insensitive' } },
       ];
     }
 
@@ -125,7 +130,7 @@ class SupervisorService {
       prisma.user.count({ where }),
       prisma.user.findMany({
         where,
-        orderBy: { fullName: "asc" },
+        orderBy: { fullName: 'asc' },
         skip: (page - 1) * limit,
         take: limit,
         select: {
@@ -137,6 +142,8 @@ class SupervisorService {
           createdAt: true,
           departmentId: true,
           officeId: true,
+          department: { select: { id: true, name: true, code: true } },
+          officeLocation: { select: { id: true, name: true } },
           _count: {
             select: {
               assignedSupervisors: { where: { isActive: true } },
@@ -167,7 +174,7 @@ class SupervisorService {
       }),
       prisma.supervisorAssignment.findMany({
         where: { supervisorId, isActive: true },
-        orderBy: { assignedAt: "desc" },
+        orderBy: { assignedAt: 'desc' },
         include: this.assignmentInclude,
       }),
     ]);
@@ -182,11 +189,7 @@ class SupervisorService {
 
   // ─── 24.3 Assign Intern (HR_ADMIN) ──────────────────────────────
 
-  public async assignIntern(
-    supervisorId: string,
-    userId: string,
-    input: AssignInternBody,
-  ) {
+  public async assignIntern(supervisorId: string, userId: string, input: AssignInternBody) {
     const supervisor = await this.findSupervisorUser(supervisorId);
 
     const internship = await prisma.internship.findUnique({
@@ -198,7 +201,7 @@ class SupervisorService {
       },
     });
     if (!internship) {
-      throw new AppError(404, "Internship not found");
+      throw new AppError(404, 'Internship not found');
     }
 
     return prisma.$transaction(async (tx) => {
@@ -221,9 +224,9 @@ class SupervisorService {
       // BR-AUDIT-001: perubahan data wajib masuk audit log.
       await createAuditLog(tx, {
         userId,
-        module: "SUPERVISOR",
-        action: "ASSIGN",
-        tableName: "supervisor_assignments",
+        module: 'SUPERVISOR',
+        action: 'ASSIGN',
+        tableName: 'supervisor_assignments',
         recordId: assignment.id,
         newData: {
           internshipId: internship.id,
@@ -237,21 +240,17 @@ class SupervisorService {
 
   // ─── 24.4 Remove Assignment (HR_ADMIN) ──────────────────────────
 
-  public async removeAssignment(
-    supervisorId: string,
-    assignmentId: string,
-    userId: string,
-  ) {
+  public async removeAssignment(supervisorId: string, assignmentId: string, userId: string) {
     await this.findSupervisorUser(supervisorId);
 
     const assignment = await prisma.supervisorAssignment.findFirst({
       where: { id: assignmentId, supervisorId },
     });
     if (!assignment) {
-      throw new AppError(404, "Supervisor assignment not found");
+      throw new AppError(404, 'Supervisor assignment not found');
     }
     if (!assignment.isActive) {
-      throw new AppError(400, "Assignment is already inactive");
+      throw new AppError(400, 'Assignment is already inactive');
     }
 
     const updated = await prisma.$transaction(async (tx) => {
@@ -262,9 +261,9 @@ class SupervisorService {
 
       await createAuditLog(tx, {
         userId,
-        module: "SUPERVISOR",
-        action: "REMOVE_ASSIGNMENT",
-        tableName: "supervisor_assignments",
+        module: 'SUPERVISOR',
+        action: 'REMOVE_ASSIGNMENT',
+        tableName: 'supervisor_assignments',
         recordId: assignment.id,
         newData: { isActive: false, endedAt: new Date() },
       });
@@ -277,12 +276,10 @@ class SupervisorService {
 
   // ─── 24.5 Supervisor Dashboard Summary (SUPERVISOR) ─────────────
 
-  public async getDashboard(
-    userId: string,
-  ): Promise<SupervisorDashboardResponse> {
+  public async getDashboard(userId: string): Promise<SupervisorDashboardResponse> {
     const assignments = await prisma.supervisorAssignment.findMany({
       where: { supervisorId: userId, isActive: true },
-      orderBy: { assignedAt: "desc" },
+      orderBy: { assignedAt: 'desc' },
       include: this.assignmentInclude,
     });
 
@@ -327,32 +324,26 @@ class SupervisorService {
   }
 
   // ─── 24.6 Create Supervisor (HR_ADMIN) ──────────────────────────
-  public async createAccount(
-    actionUserId: string,
-    input: CreateSupervisorBody,
-  ) {
+  public async createAccount(actionUserId: string, input: CreateSupervisorBody) {
     return prisma.$transaction(async (tx) => {
       // Validasi email
       const existingUser = await tx.user.findFirst({
         where: { email: input.email },
       });
       if (existingUser) {
-        throw new AppError(400, "Email sudah terdaftar");
+        throw new AppError(400, 'Email sudah terdaftar');
       }
 
       // Hash password (default: 123456 jika tidak diberikan)
-      const hashedPassword = await bcryptjs.hash(
-        input.password || "123456",
-        10,
-      );
+      const hashedPassword = await bcryptjs.hash(input.password || '123456', 10);
 
       // Cek peran Supervisor
-      const role = await tx.role.findFirst({ where: { code: "supervisor" } });
+      const role = await tx.role.findFirst({ where: { code: 'supervisor' } });
       if (!role) {
-        throw new AppError(500, "Role SUPERVISOR tidak ditemukan di sistem");
+        throw new AppError(500, 'Role SUPERVISOR tidak ditemukan di sistem');
       }
 
-      const newUserId = require("node:crypto").randomUUID();
+      const newUserId = require('node:crypto').randomUUID();
 
       const user = await tx.user.create({
         data: {
@@ -371,9 +362,9 @@ class SupervisorService {
 
       await createAuditLog(tx, {
         userId: actionUserId,
-        module: "SUPERVISOR",
-        action: "CREATE",
-        tableName: "users",
+        module: 'SUPERVISOR',
+        action: 'CREATE',
+        tableName: 'users',
         recordId: user.id,
         newData: {
           email: user.email,
@@ -399,7 +390,7 @@ class SupervisorService {
           where: { email: input.email },
         });
         if (existingUser) {
-          throw new AppError(400, "Email sudah terdaftar");
+          throw new AppError(400, 'Email sudah terdaftar');
         }
       }
 
@@ -407,8 +398,7 @@ class SupervisorService {
       if (input.fullName !== undefined) updateData.fullName = input.fullName;
       if (input.email !== undefined) updateData.email = input.email;
       if (input.isActive !== undefined) updateData.isActive = input.isActive;
-      if (input.departmentId !== undefined)
-        updateData.departmentId = input.departmentId;
+      if (input.departmentId !== undefined) updateData.departmentId = input.departmentId;
       if (input.officeId !== undefined) updateData.officeId = input.officeId;
       if (input.password) {
         updateData.password = await bcryptjs.hash(input.password, 10);
@@ -421,9 +411,9 @@ class SupervisorService {
 
       await createAuditLog(tx, {
         userId: actionUserId,
-        module: "SUPERVISOR",
-        action: "UPDATE",
-        tableName: "users",
+        module: 'SUPERVISOR',
+        action: 'UPDATE',
+        tableName: 'users',
         recordId: updatedUser.id,
         newData: updateData,
         oldData: {
@@ -455,9 +445,9 @@ class SupervisorService {
 
       await createAuditLog(tx, {
         userId: actionUserId,
-        module: "SUPERVISOR",
-        action: "DELETE",
-        tableName: "users",
+        module: 'SUPERVISOR',
+        action: 'DELETE',
+        tableName: 'users',
         recordId: deletedUser.id,
       });
       return true;

@@ -1,13 +1,13 @@
 import { AppError } from '@/http/error';
 import type { AuthUser } from '@/types/auth.types';
 import type { FileResponse, UploadFileInput } from '@/types/file.types';
+import { deleteFromR2, extractR2Key, getR2Object, uploadFile } from '@/utils/r2-utils';
 import {
   ALLOWED_UPLOAD_MIME_TYPES,
   MAX_FILE_SIZE,
   buildPublicId,
   getExtensionFromMime,
 } from '@/utils/storage.util';
-import { deleteFromR2, uploadFile } from '@/utils/r2-utils';
 import prisma from '../../prisma/client';
 
 /**
@@ -133,6 +133,40 @@ class FileService {
 
     // Kembalikan URL R2; controller akan redirect atau proxy sesuai kebutuhan.
     return { file: this.serialize(file), url: file.url };
+  }
+
+  // Stream konten file langsung dari R2 via S3 API
+  public async getFileStream(id: string) {
+    const file = await prisma.file.findUnique({ where: { id } });
+    if (!file || file.deletedAt) {
+      throw new AppError(404, 'File not found');
+    }
+    if (!file.url && !file.fileName) {
+      throw new AppError(410, 'File content is unavailable');
+    }
+
+    const key = extractR2Key(file.url || file.fileName!);
+    try {
+      const s3Response = await getR2Object(key);
+      if (!s3Response.Body) {
+        throw new AppError(404, 'File content is empty');
+      }
+
+      const stream = (s3Response.Body as any).transformToWebStream();
+      return {
+        file: this.serialize(file),
+        stream,
+        contentType: s3Response.ContentType || file.mimeType || 'application/pdf',
+        contentLength:
+          s3Response.ContentLength || (file.size != null ? Number(file.size) : undefined),
+      };
+    } catch (error: any) {
+      if (error instanceof AppError) throw error;
+      if (error?.name === 'NoSuchKey' || error?.$metadata?.httpStatusCode === 404) {
+        throw new AppError(404, 'File not found in storage');
+      }
+      throw new AppError(500, 'Failed to retrieve file from storage');
+    }
   }
 
   // DELETE /files/:fileId — soft delete + hapus dari R2.
