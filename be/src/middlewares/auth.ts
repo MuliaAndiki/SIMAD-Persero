@@ -27,7 +27,7 @@ export const verifyToken = () => ({
 
       const user = await prisma.user.findUnique({
         where: { id: decoded.id },
-        include: { userRoles: { include: { role: true } } },
+        include: { userRoles: { include: { role: true } }, avatarFile: true },
       });
 
       if (!user || user.deletedAt) {
@@ -50,6 +50,7 @@ export const verifyToken = () => ({
           user.userRoles.length > 0
             ? user.userRoles.map((ur) => ur.role.code.toLowerCase())
             : [DEFAULT_ROLE_CODE.toLowerCase()],
+        avatarUrl: user.avatarFile?.url ?? null,
       };
 
       c.user = authUser;

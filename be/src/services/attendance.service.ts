@@ -12,7 +12,9 @@ import {
   AttendanceStatus,
   CheckInStatus,
   CheckOutStatus,
-  OVERRIDE_ALLOWED_STATUSES,
+  OVERRIDE_CHECK_IN_TIME_RANGE,
+  OVERRIDE_CHECK_OUT_TIME_RANGE,
+  OverrideType,
   ViolationSeverity,
   ViolationType,
 } from '@/types/attendance.types';
@@ -171,6 +173,75 @@ class AttendanceService {
     return AttendanceStatus.PRESENT;
   }
 
+  /**
+   * Validate override time (HH:mm) is within the allowed range for its type.
+   */
+  private validateOverrideTime(
+    time: string,
+    range: { start: string; end: string },
+    label: string,
+  ) {
+    const match = /^([01]\d|2[0-3]):[0-5]\d$/.exec(time);
+    if (!match) {
+      throw new AppError(400, 'Format waktu tidak valid. Gunakan HH:mm.');
+    }
+    const minutes = Number(match[1]) * 60 + Number(match[2]);
+    const startMinutes = this.timeToMinutes(range.start);
+    const endMinutes = this.timeToMinutes(range.end);
+    if (minutes < startMinutes || minutes > endMinutes) {
+      throw new AppError(
+        400,
+        `Waktu override ${label} harus antara ${range.start} dan ${range.end} WIB.`,
+      );
+    }
+  }
+
+  private timeToMinutes(hhmm: string): number {
+    const [h, m] = hhmm.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  /**
+   * Combine an attendance date (UTC midnight of the WIB date) with an
+   * HH:mm time interpreted as WIB (UTC+7).
+   */
+  private combineDateTime(dateOnly: Date, time: string): Date {
+    const [h, m] = time.split(':').map(Number);
+    const d = new Date(dateOnly.getTime());
+    d.setUTCHours(h - 7, m, 0, 0);
+    return d;
+  }
+
+  /**
+   * Find the nearest office whose geofence contains the given coordinate.
+   * Interns may check in at any office (BR-GEO): return the closest match,
+   * or null if none.
+   */
+  private async findNearestOfficeWithinGeofence(latitude: number, longitude: number) {
+    const offices = await prisma.officeLocation.findMany({
+      where: {
+        latitude: { not: null },
+        longitude: { not: null },
+        radiusMeter: { not: null },
+      },
+    });
+
+    let best: { office: (typeof offices)[number]; distance: number } | null = null;
+    for (const office of offices) {
+      const geo = checkInsideGeofence(
+        latitude,
+        longitude,
+        Number(office.latitude),
+        Number(office.longitude),
+        office.radiusMeter ?? 0,
+      );
+      if (geo.inside && (best === null || geo.distance < best.distance)) {
+        best = { office, distance: geo.distance };
+      }
+    }
+    return best;
+  }
+
   // ── 16.1 Check In ───────────────────────────────────────────────────
 
   public async checkIn(
@@ -220,22 +291,13 @@ class AttendanceService {
       'Check In',
     );
 
-    // BR-GEO-001/002: geofence validation
-    const office = internship.officeLocation;
-    if (!office?.latitude || !office?.longitude || !office.radiusMeter) {
-      throw new AppError(400, 'Lokasi kantor belum dikonfigurasi untuk geofence.');
-    }
-
-    const geo = checkInsideGeofence(
+    // BR-GEO-001/002: geofence validation — bisa absen di kantor mana pun
+    // selama berada di dalam radius salah satu kantor.
+    const matched = await this.findNearestOfficeWithinGeofence(
       body.latitude,
       body.longitude,
-      Number(office.latitude),
-      Number(office.longitude),
-      office.radiusMeter,
     );
-
-    // BR-GEO-005: outside geofence → reject
-    if (!geo.inside) {
+    if (!matched) {
       // Record violation if attendance record exists
       if (existing) {
         await prisma.attendanceViolation.create({
@@ -243,15 +305,16 @@ class AttendanceService {
             attendanceId: existing.id,
             violationType: ViolationType.OUTSIDE_GEOFENCE,
             severity: ViolationSeverity.MEDIUM,
-            description: `Jarak ${geo.distance}m dari kantor, radius ${office.radiusMeter}m.`,
+            description: 'Berada di luar radius geofence seluruh kantor.',
           },
         });
       }
       throw new AppError(
         400,
-        `Anda berada di luar area geofence. Jarak: ${geo.distance}m, Radius: ${office.radiusMeter}m.`,
+        'Anda berada di luar area geofence seluruh kantor.',
       );
     }
+    const geo = { distance: matched.distance, inside: true };
 
     const fakeGps = body.fakeGpsDetected ?? false;
     const checkInStatus = this.determineCheckInStatus(now, setting?.lateAfter, fakeGps);
@@ -384,35 +447,26 @@ class AttendanceService {
       'Check Out',
     );
 
-    // Geofence check for check-out
-    const office = internship.officeLocation;
-    if (!office?.latitude || !office?.longitude || !office.radiusMeter) {
-      throw new AppError(400, 'Lokasi kantor belum dikonfigurasi untuk geofence.');
-    }
-
-    const geo = checkInsideGeofence(
+    // Geofence check for check-out — bisa absen di kantor mana pun.
+    const matched = await this.findNearestOfficeWithinGeofence(
       body.latitude,
       body.longitude,
-      Number(office.latitude),
-      Number(office.longitude),
-      office.radiusMeter,
     );
-
-    // BR-GEO-005: outside geofence → reject
-    if (!geo.inside) {
+    if (!matched) {
       await prisma.attendanceViolation.create({
         data: {
           attendanceId: attendance.id,
           violationType: ViolationType.OUTSIDE_GEOFENCE,
           severity: ViolationSeverity.MEDIUM,
-          description: `Jarak ${geo.distance}m dari kantor, radius ${office.radiusMeter}m.`,
+          description: 'Berada di luar radius geofence seluruh kantor.',
         },
       });
       throw new AppError(
         400,
-        `Anda berada di luar area geofence. Jarak: ${geo.distance}m, Radius: ${office.radiusMeter}m.`,
+        'Anda berada di luar area geofence seluruh kantor.',
       );
     }
+    const geo = { distance: matched.distance, inside: true };
 
     // BR-CHECKOUT-005: calculate total work minutes
     const totalWorkMinutes = Math.round((now.getTime() - attendance.checkInAt.getTime()) / 60_000);
@@ -810,15 +864,66 @@ class AttendanceService {
       throw new AppError(403, 'Anda hanya dapat override absensi peserta di departemen Anda.');
     }
 
-    // BR-OVERRIDE-001: only PRESENT or INVALID
-    if (!OVERRIDE_ALLOWED_STATUSES.includes(body.status as AttendanceStatus)) {
-      throw new AppError(
-        400,
-        `Status override harus salah satu dari: ${OVERRIDE_ALLOWED_STATUSES.join(', ')}.`,
-      );
+    // BR-OVERRIDE-001: pilih tipe override (CHECK_IN / CHECK_OUT / INVALID)
+    const type = body.type as OverrideType;
+    if (
+      type !== OverrideType.CHECK_IN &&
+      type !== OverrideType.CHECK_OUT &&
+      type !== OverrideType.INVALID
+    ) {
+      throw new AppError(400, 'Tipe override harus CHECK_IN, CHECK_OUT, atau INVALID.');
     }
 
     // BR-OVERRIDE-002: reason required (validated via DTO)
+
+    // INVALID: tandai absensi curang / dibatalkan (tanpa waktu).
+    if (type === OverrideType.INVALID) {
+      const updated = await prisma.$transaction(async (tx) => {
+        await tx.attendanceOverride.create({
+          data: {
+            attendanceId: attendance.id,
+            supervisorId: userId,
+            previousStatus: attendance.attendanceStatus,
+            newStatus: AttendanceStatus.INVALID,
+            reason: body.reason,
+          },
+        });
+        return tx.attendance.update({
+          where: { id: attendance.id },
+          data: { attendanceStatus: AttendanceStatus.INVALID },
+        });
+      });
+
+      return {
+        attendanceId: updated.id,
+        previousStatus: attendance.attendanceStatus,
+        newStatus: updated.attendanceStatus,
+      };
+    }
+
+    if (!body.time) {
+      throw new AppError(
+        400,
+        `Waktu override ${type === OverrideType.CHECK_IN ? 'Check In' : 'Check Out'} wajib diisi.`,
+      );
+    }
+    const range =
+      type === OverrideType.CHECK_IN
+        ? OVERRIDE_CHECK_IN_TIME_RANGE
+        : OVERRIDE_CHECK_OUT_TIME_RANGE;
+    const rangeLabel = type === OverrideType.CHECK_IN ? 'Check In' : 'Check Out';
+    this.validateOverrideTime(body.time, range, rangeLabel);
+
+    const ts = this.combineDateTime(attendance.attendanceDate, body.time);
+    const checkInStatus =
+      type === OverrideType.CHECK_IN
+        ? CheckInStatus.PRESENT
+        : (attendance.checkInStatus as CheckInStatus | null);
+    const checkOutStatus =
+      type === OverrideType.CHECK_OUT
+        ? CheckOutStatus.COMPLETED
+        : (attendance.checkOutStatus as CheckOutStatus | null);
+    const attendanceStatus = this.deriveAttendanceStatus(checkInStatus, checkOutStatus);
 
     const updated = await prisma.$transaction(async (tx) => {
       // BR-OVERRIDE-004: preserve previous status in override record
@@ -827,16 +932,17 @@ class AttendanceService {
           attendanceId: attendance.id,
           supervisorId: userId,
           previousStatus: attendance.attendanceStatus,
-          newStatus: body.status,
+          newStatus: attendanceStatus,
           reason: body.reason,
         },
       });
 
       const att = await tx.attendance.update({
         where: { id: attendance.id },
-        data: {
-          attendanceStatus: body.status,
-        },
+        data:
+          type === OverrideType.CHECK_IN
+            ? { checkInAt: ts, checkInStatus, attendanceStatus }
+            : { checkOutAt: ts, checkOutStatus, attendanceStatus },
       });
 
       return att;

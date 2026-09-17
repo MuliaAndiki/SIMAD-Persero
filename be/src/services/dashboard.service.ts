@@ -7,6 +7,7 @@ import type {
   RecentActivityQuery,
   RecentActivityResponse,
   ReceptionistDashboardData,
+  SupervisorAttendanceTrendPoint,
   SupervisorDashboardData,
 } from '@/types/dashboard.types';
 import prisma from '../../prisma/client';
@@ -42,6 +43,22 @@ class DashboardService {
       labels.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
     }
     return labels;
+  }
+
+  /** Label tanggal "YYYY-MM-DD" untuk n hari terakhir (dimulai hari ini). */
+  private buildDayLabels(days: number): string[] {
+    const today = this.getTodayDate();
+    const labels: string[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today.getTime() - i * 24 * 3600 * 1000);
+      labels.push(d.toISOString().slice(0, 10));
+    }
+    return labels;
+  }
+
+  /** Label tanggal "YYYY-MM-DD" untuk attendanceDate (UTC+7). */
+  private dayLabelOf(date: Date): string {
+    return new Date(date.getTime() + 7 * 3600 * 1000).toISOString().slice(0, 10);
   }
 
   // ── 19.1 Intern Dashboard ───────────────────────────────────────────
@@ -201,6 +218,56 @@ class DashboardService {
     };
   }
 
+  // ── 19.3a Supervisor Attendance Trend (7/30 hari) ───────────────────
+
+  public async getSupervisorAttendanceTrend(
+    userId: string,
+    days: number,
+  ): Promise<SupervisorAttendanceTrendPoint[]> {
+    const assignments = await prisma.supervisorAssignment.findMany({
+      where: { supervisorId: userId, isActive: true },
+      select: { internshipId: true },
+    });
+    const internshipIds = assignments
+      .map((a) => a.internshipId)
+      .filter((id): id is string => Boolean(id));
+    const totalInterns = internshipIds.length;
+
+    const labels = this.buildDayLabels(days);
+    const start = new Date(`${labels[0]}T00:00:00.000Z`);
+    const end = new Date(`${labels[labels.length - 1]}T23:59:59.999Z`);
+
+    const attendances = internshipIds.length
+      ? await prisma.attendance.findMany({
+          where: {
+            internshipId: { in: internshipIds },
+            attendanceDate: { gte: start, lte: end },
+          },
+          select: { attendanceDate: true, attendanceStatus: true },
+        })
+      : [];
+
+    const hadirPerDay: Record<string, number> = {};
+    for (const label of labels) hadirPerDay[label] = 0;
+    for (const a of attendances) {
+      const day = this.dayLabelOf(a.attendanceDate);
+      if (!(day in hadirPerDay)) continue;
+      if (
+        a.attendanceStatus === 'PRESENT' ||
+        a.attendanceStatus === 'LATE' ||
+        a.attendanceStatus === 'COMPLETED'
+      ) {
+        hadirPerDay[day] += 1;
+      }
+    }
+
+    return labels.map((label) => ({
+      date: label,
+      hadir: hadirPerDay[label],
+      tidakHadir: Math.max(totalInterns - hadirPerDay[label], 0),
+    }));
+  }
+
   // ── Receptionist Dashboard ─────────────────────────────────────────
 
   public async getReceptionistDashboard(userId?: string): Promise<ReceptionistDashboardData> {
@@ -216,44 +283,81 @@ class DashboardService {
     }
 
     const internshipWhere: Record<string, unknown> = { status: 'ACTIVE' };
-    const attendanceWhere: Record<string, unknown> = { attendanceDate: todayDate };
-
     if (officeId) {
       internshipWhere.officeLocationId = officeId;
-      attendanceWhere.internship = { officeLocationId: officeId };
     }
 
-    const [activeInternsCount, attendancesToday] = await Promise.all([
-      prisma.internship.count({ where: internshipWhere }),
-      prisma.attendance.findMany({
-        where: attendanceWhere,
-        include: {
-          internship: {
+    const activeInternships = await prisma.internship.findMany({
+      where: internshipWhere,
+      select: {
+        id: true,
+        departmentId: true,
+        department: { select: { name: true } },
+      },
+    });
+    const internshipIds = activeInternships.map((i) => i.id);
+    const activeInternsCount = activeInternships.length;
+
+    const [todayAttendances, recentAttendancesRaw] = await Promise.all([
+      internshipIds.length
+        ? prisma.attendance.findMany({
+            where: { internshipId: { in: internshipIds }, attendanceDate: todayDate },
+            select: { internshipId: true, attendanceStatus: true },
+          })
+        : Promise.resolve([]),
+      internshipIds.length
+        ? prisma.attendance.findMany({
+            where: { internshipId: { in: internshipIds }, attendanceDate: todayDate },
             include: {
-              internProfile: {
+              internship: {
                 include: {
-                  user: { select: { fullName: true, email: true } },
+                  internProfile: {
+                    include: {
+                      user: { select: { fullName: true, email: true } },
+                    },
+                  },
+                  department: { select: { name: true } },
+                  officeLocation: { select: { name: true } },
                 },
               },
-              department: { select: { name: true } },
-              officeLocation: { select: { name: true } },
             },
-          },
-        },
-        orderBy: { checkInAt: 'desc' },
-        take: 20,
-      }),
+            orderBy: { checkInAt: 'desc' },
+            take: 20,
+          })
+        : Promise.resolve([]),
     ]);
 
-    const presentTodayCount = attendancesToday.filter(
-      (a) =>
-        a.attendanceStatus === 'PRESENT' ||
-        a.attendanceStatus === 'LATE' ||
-        a.attendanceStatus === 'COMPLETED',
-    ).length;
+    const presentInternshipIds = new Set(
+      todayAttendances
+        .filter(
+          (a) =>
+            a.attendanceStatus === 'PRESENT' ||
+            a.attendanceStatus === 'LATE' ||
+            a.attendanceStatus === 'COMPLETED',
+        )
+        .map((a) => a.internshipId),
+    );
+    const presentTodayCount = presentInternshipIds.size;
     const pendingCheckInCount = Math.max(activeInternsCount - presentTodayCount, 0);
 
-    const recentAttendances = attendancesToday.map((a) => ({
+    // Ringkasan hadir/tidak hadir per departemen.
+    const deptMap = new Map<string, { department: string; total: number; hadir: number }>();
+    for (const intern of activeInternships) {
+      const name = intern.department?.name ?? 'Tanpa Departemen';
+      const entry = deptMap.get(name) ?? { department: name, total: 0, hadir: 0 };
+      entry.total += 1;
+      if (presentInternshipIds.has(intern.id)) entry.hadir += 1;
+      deptMap.set(name, entry);
+    }
+    const departmentAttendance = Array.from(deptMap.values())
+      .map((entry) => ({
+        department: entry.department,
+        hadir: entry.hadir,
+        tidakHadir: Math.max(entry.total - entry.hadir, 0),
+      }))
+      .sort((a, b) => b.hadir - a.hadir || a.department.localeCompare(b.department));
+
+    const recentAttendances = recentAttendancesRaw.map((a) => ({
       id: a.id,
       internName: a.internship?.internProfile?.user?.fullName ?? 'Peserta Magang',
       internEmail: a.internship?.internProfile?.user?.email ?? '',
@@ -268,6 +372,7 @@ class DashboardService {
       activeInternsCount,
       presentTodayCount,
       pendingCheckInCount,
+      departmentAttendance,
       recentAttendances,
     };
   }

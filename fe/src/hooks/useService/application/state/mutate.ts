@@ -26,14 +26,22 @@ export function useCreateApplication() {
     Error,
     Pick<
       CreateApplicationBody,
-      'requestedStartDate' | 'requestedEndDate' | 'motivation' | 'coverLetterFileId'
+      | 'requestedStartDate'
+      | 'requestedEndDate'
+      | 'motivation'
+      | 'coverLetterFileId'
+      | 'officeLocationId'
     >,
     ApplicationCacheContext
   >({
     mutationFn: (
       body: Pick<
         CreateApplicationBody,
-        'requestedStartDate' | 'requestedEndDate' | 'motivation' | 'coverLetterFileId'
+        | 'requestedStartDate'
+        | 'requestedEndDate'
+        | 'motivation'
+        | 'coverLetterFileId'
+        | 'officeLocationId'
       >,
     ) => Api.Application.Create(body),
     onSettled: async () => {

@@ -303,7 +303,7 @@ function ProfileIdentityCard({
       <CardContent className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
         <Avatar className="size-24 text-2xl font-semibold">
           {profile.profilePhoto ? (
-            <AvatarImage src={profile.profilePhoto} alt={profile.fullName} />
+            <AvatarImage key={profile.profilePhoto} src={profile.profilePhoto} alt={profile.fullName} />
           ) : null}
           <AvatarFallback>{getInitials(profile.fullName) || '?'}</AvatarFallback>
         </Avatar>

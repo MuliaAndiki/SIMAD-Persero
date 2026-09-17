@@ -41,8 +41,11 @@ export interface CheckOutBody {
   accuracy: number;
 }
 
+export type OverrideType = 'CHECK_IN' | 'CHECK_OUT' | 'INVALID';
+
 export interface OverrideAttendanceBody {
-  status: 'PRESENT' | 'INVALID';
+  type: OverrideType;
+  time?: string;
   reason: string;
 }
 

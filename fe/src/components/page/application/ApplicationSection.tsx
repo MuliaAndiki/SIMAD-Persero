@@ -15,9 +15,10 @@ import type {
   CreateApplicationBody,
   UpdateApplicationBody,
 } from '@/types/api/application.types';
+import type { OfficeResponse } from '@/types/api/office.types';
 import { cn } from '@/utils/classname';
 import { formatDate } from '@/utils/string.format';
-import { AlertCircle, UploadCloud } from 'lucide-react';
+import { AlertCircle, Building2, UploadCloud } from 'lucide-react';
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 export interface ApplicationSectionState {
@@ -25,6 +26,8 @@ export interface ApplicationSectionState {
   isError: boolean;
   errorMessage?: string;
   applications: ApplicationResponse[];
+  offices: OfficeResponse[];
+  isOfficesPending: boolean;
   isSubmitting: boolean;
   isUploading: boolean;
 }
@@ -33,7 +36,11 @@ export interface ApplicationSectionService {
   onCreate: (
     data: Pick<
       CreateApplicationBody,
-      'requestedStartDate' | 'requestedEndDate' | 'motivation' | 'coverLetterFileId'
+      | 'requestedStartDate'
+      | 'requestedEndDate'
+      | 'motivation'
+      | 'coverLetterFileId'
+      | 'officeLocationId'
     >,
   ) => Promise<void>;
   onUpdateDraft: (id: string, data: UpdateApplicationBody) => Promise<void>;
@@ -90,11 +97,15 @@ export function ApplicationSection({ state, service }: ApplicationSectionProps) 
         <ApplicationStatusCard
           app={activeApp}
           service={service}
+          offices={state.offices}
+          isOfficesPending={state.isOfficesPending}
           isSubmitting={state.isSubmitting}
         />
       ) : (
         <NewApplicationForm
           service={service}
+          offices={state.offices}
+          isOfficesPending={state.isOfficesPending}
           isSubmitting={state.isSubmitting}
           isUploading={state.isUploading}
         />
@@ -128,10 +139,14 @@ function calculateEndDate(startIsoDate: string, monthsStr: string): string {
 
 function NewApplicationForm({
   service,
+  offices,
+  isOfficesPending,
   isSubmitting,
   isUploading,
 }: {
   service: ApplicationSectionService;
+  offices: OfficeResponse[];
+  isOfficesPending: boolean;
   isSubmitting: boolean;
   isUploading: boolean;
 }) {
@@ -139,6 +154,7 @@ function NewApplicationForm({
   const [startDate, setStartDate] = useState('');
   const [durationMonths, setDurationMonths] = useState('2');
   const [endDate, setEndDate] = useState('');
+  const [officeId, setOfficeId] = useState('');
   const [motivation, setMotivation] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -178,6 +194,10 @@ function NewApplicationForm({
       setLocalError('Surat pengantar wajib diunggah.');
       return;
     }
+    if (!officeId) {
+      setLocalError('Lokasi kantor tujuan wajib dipilih.');
+      return;
+    }
     if (!startDate || !endDate) {
       setLocalError('Tanggal mulai dan durasi magang harus diisi.');
       return;
@@ -199,6 +219,7 @@ function NewApplicationForm({
       requestedEndDate: new Date(endDate).toISOString(),
       motivation: motivation.trim() || undefined,
       coverLetterFileId: upload.fileId,
+      officeLocationId: officeId,
     });
   };
 
@@ -255,6 +276,32 @@ function NewApplicationForm({
           </div>
 
           <div className="flex flex-col gap-2">
+            <label htmlFor="office" className="text-sm font-medium">
+              Lokasi Kantor Tujuan *
+            </label>
+            <Select value={officeId} onValueChange={setOfficeId} disabled={isOfficesPending}>
+              <SelectTrigger id="office" className="w-full border-input border rounded-md">
+                <SelectValue
+                  placeholder={
+                    isOfficesPending ? 'Memuat daftar kantor…' : 'Pilih kantor tujuan magang'
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {offices.map((office) => (
+                  <SelectItem key={office.id} value={office.id}>
+                    {office.name ?? 'Kantor'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Building2 className="size-3.5" />
+              Anda dapat absen di kantor cabang mana pun yang berada dalam radius geofence.
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-2">
             <label htmlFor="motivation" className="text-sm font-medium">
               Motivasi <span className="text-muted-foreground">(opsional)</span>
             </label>
@@ -301,7 +348,7 @@ function NewApplicationForm({
           <div className="flex justify-end border-t pt-4">
             <Button
               type="submit"
-              disabled={isSubmitting || isUploading || !file || !startDate || !endDate}
+              disabled={isSubmitting || isUploading || !file || !officeId || !startDate || !endDate}
             >
               {isUploading
                 ? 'Mengunggah File…'

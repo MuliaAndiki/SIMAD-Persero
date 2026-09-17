@@ -89,7 +89,7 @@ export default function SupervisorAttendanceContainer() {
 
   const handleOverrideSubmit = async (
     attendanceId: string,
-    data: { status: 'PRESENT' | 'INVALID'; reason: string },
+    data: { type: 'CHECK_IN' | 'CHECK_OUT' | 'INVALID'; time?: string; reason: string },
   ) => {
     await overrideMutation.mutateAsync({
       params: { attendanceId },

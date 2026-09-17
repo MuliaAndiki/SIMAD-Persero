@@ -80,12 +80,27 @@ export type SupervisorDashboardData = {
   invalidAttendance: number;
 };
 
+/** Titik tren absensi harian supervisor (GET /supervisor/dashboard/attendance-trend). */
+export type SupervisorAttendanceTrendPoint = {
+  date: string;
+  hadir: number;
+  tidakHadir: number;
+};
+
 // ── Receptionist Dashboard ─────────────────────────────────────────────
+
+/** Ringkasan absensi hari ini per departemen (receptionist). */
+export type ReceptionistDepartmentAttendance = {
+  department: string;
+  hadir: number;
+  tidakHadir: number;
+};
 
 export type ReceptionistDashboardData = {
   activeInternsCount: number;
   presentTodayCount: number;
   pendingCheckInCount: number;
+  departmentAttendance: ReceptionistDepartmentAttendance[];
   recentAttendances: Array<{
     id: string;
     internName: string;

@@ -2,9 +2,11 @@ import { Button } from '@/components/atoms';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { ApplicationSectionService } from '@/components/page/application/ApplicationSection';
 import type { ApplicationResponse } from '@/types/api/application.types';
+import type { OfficeResponse } from '@/types/api/office.types';
 import { getFilePreviewUrl } from '@/utils/file-preview';
 import { formatDate } from '@/utils/string.format';
 import {
+  Building2,
   CalendarCheck,
   CalendarClock,
   Edit,
@@ -22,11 +24,15 @@ import { ApplicationStatusBadge } from './ApplicationStatusBadge';
 interface ApplicationStatusCardProps {
   app: ApplicationResponse;
   service: ApplicationSectionService;
+  offices: OfficeResponse[];
+  isOfficesPending: boolean;
   isSubmitting: boolean;
 }
 const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
   app,
   service,
+  offices,
+  isOfficesPending,
   isSubmitting,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -40,6 +46,8 @@ const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
       <EditDraftForm
         app={app}
         service={service}
+        offices={offices}
+        isOfficesPending={isOfficesPending}
         isSubmitting={isSubmitting}
         onCancel={() => setIsEditing(false)}
       />
@@ -75,6 +83,16 @@ const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
             </div>
           </div>
         </div>
+
+        {app.officeLocation && (
+          <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4">
+            <Building2 className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs text-muted-foreground">Lokasi Kantor Tujuan</span>
+              <span className="text-sm font-medium">{app.officeLocation.name ?? '-'}</span>
+            </div>
+          </div>
+        )}
 
         {app.motivation && (
           <div className="flex flex-col gap-1.5">

@@ -2,11 +2,19 @@
 
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/atoms/dropdown-menu';
 import { REVIEWABLE_STATUSES } from '@/components/organisms/application/ApplicationReviewDetail';
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
 import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
 import { formatDate } from '@/utils/string.format';
-import { CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, FileText, MoreHorizontal, XCircle } from 'lucide-react';
 
 export interface ApplicationTableProps {
   applications: ApplicationResponse[];
@@ -84,37 +92,41 @@ export function ApplicationTable({
                       <ApplicationStatusBadge status={app.status} />
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {REVIEWABLE_STATUSES.includes(app.status as ApplicationStatusValue) && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => onReject(app)}
-                              disabled={isApproving || isRejecting}
-                            >
-                              <XCircle className="size-4" />
-                              Tolak
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => onApprove(app)}
-                              disabled={isApproving || isRejecting}
-                            >
-                              <CheckCircle2 className="size-4" />
-                              Setujui
-                            </Button>
-                          </>
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onSelectApplication(app.id)}
-                        >
-                          <Eye className="size-4" />
-                          Review
-                        </Button>
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="size-8 p-0">
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => onSelectApplication(app.id)}>
+                            <Eye className="size-4" />
+                            Review
+                          </DropdownMenuItem>
+                          {REVIEWABLE_STATUSES.includes(app.status as ApplicationStatusValue) && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => onApprove(app)}
+                                disabled={isApproving || isRejecting}
+                              >
+                                <CheckCircle2 className="size-4 text-emerald-500" />
+                                Setujui
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => onReject(app)}
+                                disabled={isApproving || isRejecting}
+                              >
+                                <XCircle className="size-4" />
+                                Tolak
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}

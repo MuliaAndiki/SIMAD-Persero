@@ -26,8 +26,6 @@ export interface DepartmentsSectionState {
   editing: DepartmentResponse | null;
   form: DepartmentFormState;
   isSaving: boolean;
-  isDeleting: boolean;
-  alert: AlertContexType;
 }
 
 export interface DepartmentsSectionActions {
@@ -38,7 +36,6 @@ export interface DepartmentsSectionActions {
   onCloseForm: () => void;
   onFieldChange: (field: DepartmentFormField, value: string) => void;
   onSubmit: () => void | Promise<void>;
-  onDelete: (id: string) => void | Promise<void>;
   onToggleActive: (department: DepartmentResponse) => void | Promise<void>;
 }
 
@@ -98,11 +95,8 @@ export function DepartmentsSection({ state, actions }: DepartmentsSectionProps) 
       ) : (
         <DepartmentTable
           departments={state.departments}
-          isDeleting={state.isDeleting}
           onOpenEdit={actions.onOpenEdit}
           onToggleActive={actions.onToggleActive}
-          onDelete={actions.onDelete}
-          alert={state.alert}
         />
       )}
 

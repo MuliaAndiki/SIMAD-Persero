@@ -3,6 +3,14 @@
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/atoms/dropdown-menu';
 import { Input } from '@/components/atoms/input';
 import {
   Select,
@@ -22,6 +30,7 @@ import {
   Clock,
   Edit3,
   Loader2,
+  MoreHorizontal,
   RefreshCw,
   RotateCcw,
   Search,
@@ -55,7 +64,7 @@ export interface SupervisorAttendanceSectionActions {
   onRefresh?: () => void;
   onOverrideSubmit: (
     attendanceId: string,
-    data: { status: 'PRESENT' | 'INVALID'; reason: string },
+    data: { type: 'CHECK_IN' | 'CHECK_OUT' | 'INVALID'; time?: string; reason: string },
   ) => Promise<void>;
 }
 
@@ -82,7 +91,7 @@ function AttendanceStatusBadge({ status }: { status: string | null }) {
     case 'ABSENT':
       return (
         <Badge className="bg-rose-500/15 text-rose-600 hover:bg-rose-500/25 border-rose-200">
-          <XCircle className="mr-1 size-3" /> Tidak Hadir / Invalid
+          <XCircle className="mr-1 size-3" /> Tidak Hadir
         </Badge>
       );
     default:
@@ -303,26 +312,31 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
                             <AttendanceStatusBadge status={att?.attendanceStatus ?? null} />
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {att?.id && (
-                                <Button asChild variant="outline" size="sm">
-                                  <Link href={`/supervisor/attendance/${att.id}`}>
-                                    <CalendarCheck2 className="mr-1.5 size-3.5" />
-                                    Lihat Absen
-                                  </Link>
-                                </Button>
-                              )}
-                              {att?.id && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleOpenOverride(att.id, internName)}
-                                >
-                                  <Edit3 className="mr-1.5 size-3.5" />
-                                  Override
-                                </Button>
-                              )}
-                            </div>
+                            {att?.id && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="size-8 p-0">
+                                    <MoreHorizontal className="size-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-44">
+                                  <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem asChild>
+                                    <Link href={`/supervisor/attendance/${att.id}`}>
+                                      <CalendarCheck2 className="size-4" />
+                                      Lihat Absen
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleOpenOverride(att.id, internName)}
+                                  >
+                                    <Edit3 className="size-4" />
+                                    Override
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
                           </td>
                         </tr>
                       );

@@ -187,7 +187,7 @@ class AttendanceService {
    */
   public async Override(
     params: Pick<AttendanceParams, 'attendanceId'>,
-    body: Pick<OverrideAttendanceBody, 'status' | 'reason'>,
+    body: Pick<OverrideAttendanceBody, 'type' | 'time' | 'reason'>,
   ): Promise<TResponse<OverrideAttendanceResponse>> {
     const res = await client.PatchResponse<OverrideAttendanceResponse>(
       ATTENDANCE_ENDPOINTS.OVERRIDE(params.attendanceId),

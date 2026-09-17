@@ -6,6 +6,7 @@ import {
   useDashboardStatistics,
   useDashboardSupervisor,
   useRecentActivities,
+  useSupervisorAttendanceTrend,
 } from './state/query';
 
 export const useDashboard = () => {
@@ -14,6 +15,7 @@ export const useDashboard = () => {
       intern: useDashboardIntern,
       hr: useDashboardHr,
       supervisor: useDashboardSupervisor,
+      supervisorAttendanceTrend: useSupervisorAttendanceTrend,
       receptionist: useDashboardReceptionist,
       statistics: useDashboardStatistics,
       charts: useCharts,

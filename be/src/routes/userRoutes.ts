@@ -70,7 +70,7 @@ class UserRouter {
         body: UploadProfilePhotoDto,
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(["intern", "hr_admin", "supervisor"]).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"]).beforeHandle,
           rateLimit({ ...RateLimitRule.UPLOAD, keyGenerator: keyByUser })
             .beforeHandle,
         ],

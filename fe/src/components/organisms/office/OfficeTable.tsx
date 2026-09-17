@@ -1,10 +1,18 @@
 'use client';
 
-import { MapPin, Pencil, Settings2, Trash2 } from 'lucide-react';
+import { MapPin, MoreHorizontal, Pencil, Settings2 } from 'lucide-react';
 
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/atoms/dropdown-menu';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { AlertContexType } from '@/types/ui';
 
@@ -74,21 +82,26 @@ export function OfficeTable({ offices, onOpenEdit, onManageDepartments }: Office
                       {office.address}
                     </td>
                     <td className="px-6 py-4">{office.radiusMeter} m</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onManageDepartments(office)}
-                        >
-                          <Settings2 className="size-4" />
-                          Departemen
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => onOpenEdit(office)}>
-                          <Pencil className="size-4" />
-                          Edit
-                        </Button>
-                      </div>
+                    <td className="px-6 py-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="size-8 p-0">
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => onManageDepartments(office)}>
+                            <Settings2 className="size-4" />
+                            Kelola Departemen
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onOpenEdit(office)}>
+                            <Pencil className="size-4" />
+                            Edit
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </tr>
                 ))}

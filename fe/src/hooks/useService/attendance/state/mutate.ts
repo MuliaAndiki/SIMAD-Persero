@@ -103,7 +103,7 @@ export function useOverrideAttendance() {
     Error,
     {
       params: Pick<AttendanceParams, 'attendanceId'>;
-      body: Pick<OverrideAttendanceBody, 'status' | 'reason'>;
+      body: Pick<OverrideAttendanceBody, 'type' | 'time' | 'reason'>;
     },
     AttendanceCacheContext
   >({
@@ -112,7 +112,7 @@ export function useOverrideAttendance() {
       body,
     }: {
       params: Pick<AttendanceParams, 'attendanceId'>;
-      body: Pick<OverrideAttendanceBody, 'status' | 'reason'>;
+      body: Pick<OverrideAttendanceBody, 'type' | 'time' | 'reason'>;
     }) => Api.Attendance.Override(params, body),
     onSettled: async () => {
       await ns.queryClient.invalidateQueries({

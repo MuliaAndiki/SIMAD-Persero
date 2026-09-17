@@ -1,8 +1,16 @@
 import { Button } from '@/components/atoms';
 import { Input } from '@/components/atoms';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/atoms/select';
 import type { ApplicationSectionService } from '@/components/page/application/ApplicationSection';
 import type { ApplicationResponse, UpdateApplicationBody } from '@/types/api/application.types';
+import type { OfficeResponse } from '@/types/api/office.types';
 import { cn } from '@/utils/classname';
 import { getFilePreviewUrl } from '@/utils/file-preview';
 import { AlertCircle, Eye, EyeOff, FileText, UploadCloud } from 'lucide-react';
@@ -12,10 +20,19 @@ import type { ChangeEvent, FormEvent } from 'react';
 interface EditDraftFormProps {
   app: ApplicationResponse;
   service: ApplicationSectionService;
+  offices: OfficeResponse[];
+  isOfficesPending: boolean;
   isSubmitting: boolean;
   onCancel: () => void;
 }
-const EditDraftForm: React.FC<EditDraftFormProps> = ({ app, service, isSubmitting, onCancel }) => {
+const EditDraftForm: React.FC<EditDraftFormProps> = ({
+  app,
+  service,
+  offices,
+  isOfficesPending,
+  isSubmitting,
+  onCancel,
+}) => {
   // Initialize dengan data dari app yang ada
   const [file, setFile] = useState<File | null>(null);
   const [showPdfPreview, setShowPdfPreview] = useState(false);
@@ -25,6 +42,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({ app, service, isSubmittin
   const [endDate, setEndDate] = useState(
     app.requestedEndDate ? new Date(app.requestedEndDate).toISOString().split('T')[0] : '',
   );
+  const [officeId, setOfficeId] = useState(app.officeLocationId ?? '');
   const [motivation, setMotivation] = useState(app.motivation ?? '');
   const [localError, setLocalError] = useState<string | null>(null);
   const [willChangeFile, setWillChangeFile] = useState(false);
@@ -50,6 +68,10 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({ app, service, isSubmittin
       setLocalError('Tanggal mulai dan selesai harus diisi.');
       return;
     }
+    if (!officeId) {
+      setLocalError('Lokasi kantor tujuan wajib dipilih.');
+      return;
+    }
     if (new Date(startDate) >= new Date(endDate)) {
       setLocalError('Tanggal mulai harus sebelum tanggal selesai.');
       return;
@@ -59,6 +81,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({ app, service, isSubmittin
       requestedStartDate: new Date(startDate).toISOString(),
       requestedEndDate: new Date(endDate).toISOString(),
       motivation: motivation.trim() || undefined,
+      officeLocationId: officeId,
     };
 
     // Jika ada file baru, upload dulu
@@ -113,6 +136,28 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({ app, service, isSubmittin
                 onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="edit-office" className="text-sm font-medium">
+              Lokasi Kantor Tujuan *
+            </label>
+            <Select value={officeId} onValueChange={setOfficeId} disabled={isOfficesPending}>
+              <SelectTrigger id="edit-office" className="w-full border-input border rounded-md">
+                <SelectValue
+                  placeholder={
+                    isOfficesPending ? 'Memuat daftar kantor…' : 'Pilih kantor tujuan magang'
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {offices.map((office) => (
+                  <SelectItem key={office.id} value={office.id}>
+                    {office.name ?? 'Kantor'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex flex-col gap-2">
