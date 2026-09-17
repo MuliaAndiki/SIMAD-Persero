@@ -29,7 +29,6 @@ export interface SupervisorTableProps {
  */
 export function SupervisorTable({
   supervisors,
-  onSelectSupervisor,
   onEditSupervisor,
   onDeleteSupervisor,
   onViewAuditLog,

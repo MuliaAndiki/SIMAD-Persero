@@ -53,7 +53,7 @@ export function useProfileLogic() {
         handleLogout();
       },
     });
-  }, [deleteAccount]);
+  }, [deleteAccount, handleLogout]);
 
   const handleOpenChangeEmail = useCallback(() => {
     setChangeEmailModalOpen(true);

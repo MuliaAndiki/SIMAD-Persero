@@ -23,14 +23,7 @@ export interface OfficeTableProps {
  * Departemen ditampilkan sebagai badge karena satu kantor melayani
  * banyak departemen (many-to-many).
  */
-export function OfficeTable({
-  offices,
-  isDeleting,
-  onOpenEdit,
-  onManageDepartments,
-
-  alert,
-}: OfficeTableProps) {
+export function OfficeTable({ offices, onOpenEdit, onManageDepartments }: OfficeTableProps) {
   return (
     <Card>
       <CardHeader className="border-b">

@@ -90,7 +90,7 @@ export function UniversityFormDialog({
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Logo Field */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Logo Universitas</label>
+            <div className="text-xs font-medium text-muted-foreground">Logo Universitas</div>
             <div className="flex items-center gap-3">
               <div className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/30">
                 {form.logo ? (
@@ -139,9 +139,9 @@ export function UniversityFormDialog({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">
+            <div className="text-xs font-medium text-muted-foreground">
               Nama Universitas / Perguruan Tinggi <span className="text-destructive">*</span>
-            </label>
+            </div>
             <Input
               value={form.name}
               onChange={(e) => onFieldChange('name', e.target.value)}
@@ -152,9 +152,7 @@ export function UniversityFormDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                Singkatan / Akronim
-              </label>
+              <div className="text-xs font-medium text-muted-foreground">Singkatan / Akronim</div>
               <Input
                 value={form.shortName}
                 onChange={(e) => onFieldChange('shortName', e.target.value)}
@@ -162,9 +160,7 @@ export function UniversityFormDialog({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground">
-                Tingkat Pendidikan
-              </label>
+              <div className="text-xs font-medium text-muted-foreground">Tingkat Pendidikan</div>
               <select
                 value={form.educationLevelId}
                 onChange={(e) => onFieldChange('educationLevelId', e.target.value)}
@@ -182,7 +178,7 @@ export function UniversityFormDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Provinsi</label>
+              <div className="text-xs font-medium text-muted-foreground">Provinsi</div>
               <Input
                 value={form.province}
                 onChange={(e) => onFieldChange('province', e.target.value)}
@@ -190,7 +186,7 @@ export function UniversityFormDialog({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Kota / Kabupaten</label>
+              <div className="text-xs font-medium text-muted-foreground">Kota / Kabupaten</div>
               <Input
                 value={form.city}
                 onChange={(e) => onFieldChange('city', e.target.value)}

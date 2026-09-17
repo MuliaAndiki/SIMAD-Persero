@@ -54,6 +54,7 @@ export function SupervisorAttendanceChart({
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
+                // @ts-expect-error recharts type issue
                 activeIndex={activeIndex}
                 activeShape={renderActiveShape}
                 data={items}

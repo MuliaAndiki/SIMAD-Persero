@@ -58,7 +58,7 @@ export function LandingBenefits() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {benefits.map((b, i) => (
-            <div key={i} className="benefit-item flex flex-col items-center text-center">
+            <div key={b.title} className="benefit-item flex flex-col items-center text-center">
               <div className="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mb-6 text-2xl font-serif text-primary">
                 {String(i + 1).padStart(2, '0')}
               </div>

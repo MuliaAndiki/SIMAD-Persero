@@ -1,9 +1,9 @@
 import { StatCard } from '@/components/organisms/dashboard/StatCard';
 import type { SupervisorDashboardData } from '@/types/api/dashboard.types';
-import { motion } from 'framer-motion';
+import { type Variants, motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, Clock, Users } from 'lucide-react';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -13,7 +13,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,

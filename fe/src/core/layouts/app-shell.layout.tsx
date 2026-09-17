@@ -28,7 +28,7 @@ export function AppShell({ children }: AppShellProps) {
   const api = useApi();
 
   const useProfile = api.user.query.profile();
-  const { data: profile, isLoading } = useProfile;
+  const { data: profile } = useProfile;
 
   console.log(profile?.profilePhoto);
 

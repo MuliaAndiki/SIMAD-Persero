@@ -35,28 +35,32 @@ export function PLNDivisions() {
       <div className="relative flex flex-col gap-6 group">
         {/* Row 1 - Left to Right */}
         <div className="flex w-fit animate-marquee hover:[animation-play-state:paused]">
-          {[...departmentsRow1, ...departmentsRow1, ...departmentsRow1].map((dept, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: Marquee items are static and order doesn't change
-            <div
-              key={`r1-${i}`}
-              className="flex-none mx-3 px-6 py-3 rounded-full bg-card border border-border text-foreground font-medium shadow-sm hover:border-[#00A2E9]/50 hover:text-[#00A2E9] transition-colors cursor-default"
-            >
-              {dept}
-            </div>
-          ))}
+          {[...departmentsRow1, ...departmentsRow1, ...departmentsRow1].map((dept, i) => {
+            const keyId = `r1-${dept.replace(/\s+/g, '-')}-${i}`;
+            return (
+              <div
+                key={keyId}
+                className="flex-none mx-3 px-6 py-3 rounded-full bg-card border border-border text-foreground font-medium shadow-sm hover:border-[#00A2E9]/50 hover:text-[#00A2E9] transition-colors cursor-default"
+              >
+                {dept}
+              </div>
+            );
+          })}
         </div>
 
         {/* Row 2 - Right to Left */}
         <div className="flex w-fit animate-marquee-reverse hover:[animation-play-state:paused] ml-[-50%]">
-          {[...departmentsRow2, ...departmentsRow2, ...departmentsRow2].map((dept, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: Marquee items are static and order doesn't change
-            <div
-              key={`r2-${i}`}
-              className="flex-none mx-3 px-6 py-3 rounded-full bg-card border border-border text-foreground font-medium shadow-sm hover:border-[#FDB913]/80 hover:text-amber-600 dark:hover:text-[#FDB913] transition-colors cursor-default"
-            >
-              {dept}
-            </div>
-          ))}
+          {[...departmentsRow2, ...departmentsRow2, ...departmentsRow2].map((dept, i) => {
+            const keyId = `r2-${dept.replace(/\s+/g, '-')}-${i}`;
+            return (
+              <div
+                key={keyId}
+                className="flex-none mx-3 px-6 py-3 rounded-full bg-card border border-border text-foreground font-medium shadow-sm hover:border-[#FDB913]/80 hover:text-amber-600 dark:hover:text-[#FDB913] transition-colors cursor-default"
+              >
+                {dept}
+              </div>
+            );
+          })}
         </div>
 
         {/* Gradient fades for edges */}

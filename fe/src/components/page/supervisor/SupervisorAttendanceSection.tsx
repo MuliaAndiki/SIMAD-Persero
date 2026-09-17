@@ -74,7 +74,7 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
     const formatted = formatDateTime(dateString);
     const [datePart, timePart] = formatted.split(', ');
     if (!timePart) return <span>{formatted}</span>;
-    
+
     return (
       <div className="flex flex-col">
         <span className="font-semibold text-foreground">{timePart}</span>
@@ -154,12 +154,8 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
                             </div>
                           </td>
                           <td className="px-6 py-4">{row.internship.department?.name ?? '-'}</td>
-                          <td className="px-6 py-4">
-                            {renderTimeBlock(att?.checkInAt)}
-                          </td>
-                          <td className="px-6 py-4">
-                            {renderTimeBlock(att?.checkOutAt)}
-                          </td>
+                          <td className="px-6 py-4">{renderTimeBlock(att?.checkInAt)}</td>
+                          <td className="px-6 py-4">{renderTimeBlock(att?.checkOutAt)}</td>
                           <td className="px-6 py-4">
                             <AttendanceStatusBadge status={att?.attendanceStatus ?? null} />
                           </td>

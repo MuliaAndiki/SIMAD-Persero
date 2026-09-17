@@ -108,6 +108,7 @@ export function AttendanceDetailFallback() {
       <Card>
         <CardContent className="flex flex-col gap-4 p-6">
           {Array.from({ length: 6 }, (_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton items are static
             <div key={`detail-skeleton-${i}`} className="h-4 rounded bg-muted" />
           ))}
         </CardContent>
