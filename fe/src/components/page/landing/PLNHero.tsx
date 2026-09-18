@@ -142,15 +142,7 @@ export function PLNHero() {
         animate="visible"
       >
         {/* Eyebrow badge */}
-        <motion.div
-          variants={fadeUp}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00A2E9]/10 border border-[#00A2E9]/20 mb-8"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-[#00A2E9] animate-pulse" />
-          <span className="text-xs font-medium text-[#00A2E9] tracking-wide uppercase">
-            Pendaftaran Periode 2026 Dibuka
-          </span>
-        </motion.div>
+       
 
         {/* Headline */}
         <motion.h1
