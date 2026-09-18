@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/atoms/avatar';
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/atoms/dialog';
 import type { MyInternProfileResponse } from '@/types/api/internship.types';
 import type { ProfileResponse } from '@/types/api/user.types';
 import type { AlertContexType } from '@/types/ui';
@@ -25,6 +26,7 @@ import type { ChangeEvent } from 'react';
 
 import { ActiveSessionsCard } from '@/components/organisms/profile/ActiveSessionsCard';
 import { ChangeEmailModal } from '@/components/organisms/profile/ChangeEmailModal';
+import { PhotoCropper } from './PhotoCropper';
 import type { AuthSession } from '@/types/api/auth.types';
 
 /** State yang disuplai container — section murni presentasi. */
@@ -293,6 +295,10 @@ function ProfileIdentityCard({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [viewPhotoOpen, setViewPhotoOpen] = useState(false);
+  const [photoToCrop, setPhotoToCrop] = useState<string | null>(null);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const service = { onUploadPhoto };
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -310,13 +316,30 @@ function ProfileIdentityCard({
     }
 
     setLocalError(null);
-    onUploadPhoto(file);
+    
+    // Open cropper
+    const objectUrl = URL.createObjectURL(file);
+    setPhotoToCrop(objectUrl);
+    setCropModalOpen(true);
+    e.target.value = '';
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    const newFile = new File([croppedBlob], 'profile-photo.jpg', { type: 'image/jpeg' });
+    await service.onUploadPhoto(newFile);
+    setCropModalOpen(false);
+    setPhotoToCrop(null);
   };
 
   return (
     <Card>
       <CardContent className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-        <Avatar className="size-24 text-2xl font-semibold">
+        <Avatar 
+          className="size-24 text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity ring-2 ring-transparent hover:ring-[#00A2E9]/50"
+          onClick={() => {
+            if (profile.profilePhoto) setViewPhotoOpen(true);
+          }}
+        >
           {profile.profilePhoto ? (
             <AvatarImage
               key={profile.profilePhoto}
@@ -381,6 +404,40 @@ function ProfileIdentityCard({
           {localError && <p className="text-sm text-destructive">{localError}</p>}
         </div>
       </CardContent>
+
+      <Dialog open={viewPhotoOpen} onOpenChange={setViewPhotoOpen}>
+        <DialogContent className="sm:max-w-md flex flex-col items-center justify-center p-6 bg-transparent border-none shadow-none [&>button]:text-white">
+          {profile.profilePhoto && (
+            <img 
+              src={profile.profilePhoto} 
+              alt={profile.fullName} 
+              className="max-w-full max-h-[80vh] rounded-lg object-contain shadow-2xl" 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={cropModalOpen} onOpenChange={(open) => {
+        setCropModalOpen(open);
+        if (!open) setPhotoToCrop(null);
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Sesuaikan Foto</DialogTitle>
+          </DialogHeader>
+          {photoToCrop && (
+            <PhotoCropper
+              imageSrc={photoToCrop}
+              onCropComplete={handleCropComplete}
+              onCancel={() => {
+                setCropModalOpen(false);
+                setPhotoToCrop(null);
+              }}
+              isUploading={isUploading}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
