@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/atoms';
 import {
@@ -17,12 +17,21 @@ import {
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 
 interface PWAInstallDialogProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
 }
 
 export const PWAInstallDialog = ({ trigger }: PWAInstallDialogProps) => {
   const { canInstall, promptInstall, isStandalone } = usePWAInstall();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('pwa') === 'install' && !isStandalone) {
+        setOpen(true);
+      }
+    }
+  }, [isStandalone]);
 
   const handleInstall = async () => {
     await promptInstall();
@@ -31,7 +40,7 @@ export const PWAInstallDialog = ({ trigger }: PWAInstallDialogProps) => {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+      {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent className="w-full max-w-sm">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg">Download SIMAD</AlertDialogTitle>

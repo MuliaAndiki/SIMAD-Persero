@@ -4,6 +4,7 @@ import { type Variants, motion, useMotionValue, useTransform } from 'framer-moti
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { PWAInstallQR } from '@/components/pwa/PWAInstallQR';
 
 /* ─── Animated counter ─── */
 function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
@@ -239,6 +240,16 @@ export function PLNHero() {
         >
           <ChevronDown className="w-5 h-5 text-muted-foreground/50" />
         </motion.div>
+      </motion.div>
+
+      {/* PWA QR Code - Desktop Only */}
+      <motion.div 
+        className="hidden lg:block absolute bottom-8 right-8 z-50"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 2, duration: 0.8 }}
+      >
+        <PWAInstallQR />
       </motion.div>
     </section>
   );
