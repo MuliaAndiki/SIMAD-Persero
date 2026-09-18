@@ -3,6 +3,7 @@ import { PLNLandingSection } from '@/components/page/landing/PLNLandingSection';
 import NavLayout from '@/core/layouts/nav.layout';
 import Lenis from 'lenis';
 import React, { useEffect } from 'react';
+import { PWAInstallDialog } from '@/components/pwa/PWAInstallDialog';
 
 export default function ContainerHome() {
   // Setup smooth scrolling with Lenis
@@ -27,6 +28,7 @@ export default function ContainerHome() {
   return (
     <NavLayout>
       <PLNLandingSection />
+      <PWAInstallDialog />
     </NavLayout>
   );
 }
