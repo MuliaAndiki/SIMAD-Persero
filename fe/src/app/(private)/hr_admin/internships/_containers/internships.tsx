@@ -21,7 +21,7 @@ export default function HrInternshipsContainer() {
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  const debouncedKeyword = useDebounce(keyword, 400);
+  const debouncedKeyword = useDebounce(keyword, 2000);
 
   // Queries dengan server-side filtering & pagination
   const list = api.internship.query.list({
@@ -32,6 +32,9 @@ export default function HrInternshipsContainer() {
     officeLocationId: officeFilter || undefined,
     departmentId: departmentFilter || undefined,
   });
+
+  const isSearching = list.isFetching || keyword !== debouncedKeyword;
+
   const departments = api.department.query.list({ limit: 100 });
   const offices = api.office.query.list({ limit: 100 });
   const supervisors = api.supervisor.query.list({ limit: 100 });
@@ -161,7 +164,7 @@ export default function HrInternshipsContainer() {
     <InternshipsSection
       state={{
         isPending: list.isPending,
-        isFetching: list.isFetching,
+        isFetching: isSearching,
         isActionPending,
         isError: list.isError,
         errorMessage: list.error?.message,

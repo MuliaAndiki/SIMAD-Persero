@@ -68,4 +68,5 @@ export type ApplicationQuery = Partial<{
   status: ApplicationStatusValue;
   keyword: string;
   institution: string;
+  departmentId: string;
 }>;

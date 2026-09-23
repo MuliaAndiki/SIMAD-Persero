@@ -31,7 +31,7 @@ export default function HrReceptionistsContainer() {
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  const debouncedKeyword = useDebounce(keyword, 500);
+  const debouncedKeyword = useDebounce(keyword, 2000);
 
   // ── Queries ──────────────────────────────────────────────────────────────
   const list = api.receptionist.query.list({
@@ -40,6 +40,8 @@ export default function HrReceptionistsContainer() {
     page,
     limit: 10,
   });
+
+  const isSearching = list.isFetching || keyword !== debouncedKeyword;
 
   const offices = api.office.query.list({ limit: 100 });
 
@@ -145,7 +147,7 @@ export default function HrReceptionistsContainer() {
     <ReceptionistsSection
       state={{
         isPending: list.isPending,
-        isFetching: list.isFetching,
+        isFetching: isSearching,
         isError: list.isError,
         setShowPassword,
         showPassword,

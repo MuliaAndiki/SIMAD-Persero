@@ -4,7 +4,15 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/atoms/select';
 import { ReceptionistDepartmentChart } from '@/components/organisms/dashboard/ReceptionistDepartmentChart';
+import { useDebounce } from '@/hooks/useDebounce';
 import type { ReceptionistDashboardData } from '@/types/api/dashboard.types';
 import {
   AlertCircle,
@@ -38,21 +46,38 @@ export function ReceptionistDashboardSection({
   onRefresh,
 }: ReceptionistDashboardSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 2000);
+
+  const departmentOptions = useMemo(() => {
+    const list = data?.departmentAttendance?.map((d) => d.department) ?? [];
+    const set = new Set(list);
+    for (const item of data?.recentAttendances ?? []) {
+      if (item.departmentName) set.add(item.departmentName);
+    }
+    return Array.from(set).filter(Boolean);
+  }, [data?.departmentAttendance, data?.recentAttendances]);
 
   const filteredAttendances = useMemo(() => {
-    const list = data?.recentAttendances ?? [];
-    if (!searchQuery.trim()) return list;
-    const queryLower = searchQuery.trim().toLowerCase();
+    let list = data?.recentAttendances ?? [];
+    if (departmentFilter && departmentFilter !== 'all') {
+      list = list.filter((item) => item.departmentName === departmentFilter);
+    }
+    if (!debouncedSearch.trim()) return list;
+    const queryLower = debouncedSearch.trim().toLowerCase();
     return list.filter(
       (item) =>
-        item.internName.toLowerCase().includes(queryLower) ||
-        item.internEmail.toLowerCase().includes(queryLower) ||
+        item.internName?.toLowerCase().includes(queryLower) ||
+        item.internEmail?.toLowerCase().includes(queryLower) ||
         item.departmentName?.toLowerCase().includes(queryLower) ||
-        item.officeName?.toLowerCase().includes(queryLower),
+        item.officeName?.toLowerCase().includes(queryLower) ||
+        item.checkInStatus?.toLowerCase().includes(queryLower) ||
+        item.attendanceStatus?.toLowerCase().includes(queryLower),
     );
-  }, [data?.recentAttendances, searchQuery]);
+  }, [data?.recentAttendances, debouncedSearch, departmentFilter]);
 
   const isInitialLoading = isPending && !data;
+  const isSearching = isFetching || searchQuery !== debouncedSearch;
 
   return (
     <section className="flex flex-col gap-6">
@@ -132,18 +157,37 @@ export function ReceptionistDashboardSection({
           <ReceptionistDepartmentChart data={data.departmentAttendance} />
         ) : null}
 
-        {/* Search Input */}
-        <div className="relative max-w-md">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama intern, email, atau departemen…"
-            className="pl-9 pr-9"
-          />
-          {isFetching && (
-            <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
-          )}
+        {/* Toolbar Pencarian & Filter Departemen */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative flex-1 sm:max-w-full">
+            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari nama intern, email, departemen, atau status…"
+              className="pl-9 pr-9"
+            />
+            {isSearching && (
+              <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
+            )}
+          </div>
+
+          <Select
+            value={departmentFilter || 'all'}
+            onValueChange={(val) => setDepartmentFilter(val === 'all' ? '' : val)}
+          >
+            <SelectTrigger className="w-full sm:w-56">
+              <SelectValue placeholder="Semua Departemen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Departemen</SelectItem>
+              {departmentOptions.map((dept) => (
+                <SelectItem key={dept} value={dept}>
+                  {dept}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Table / List */}
