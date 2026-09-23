@@ -50,6 +50,7 @@ export interface ApplicationQuery {
   status?: ApplicationStatusValue;
   keyword?: string;
   institution?: string;
+  departmentId?: string;
 }
 
 // ---------- Response (data dari backend) ----------
@@ -93,7 +94,11 @@ export interface ApplicationResponse extends Omit<IInternshipApplication, 'statu
   internProfile?: ApplicationInternProfile | null;
   reviewedBy?: ApplicationUserRef | null;
   officeLocation?: ApplicationOfficeRef | null;
-  internship?: { id: string; status: string | null } | null;
+  internship?: {
+    id: string;
+    status: string | null;
+    department?: { id: string; name: string; code?: string } | null;
+  } | null;
 }
 
 /** Hasil approve aplikasi — aplikasi ter-update + internship baru dibuat. */

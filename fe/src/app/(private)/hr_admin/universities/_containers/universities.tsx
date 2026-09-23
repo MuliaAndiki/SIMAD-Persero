@@ -36,7 +36,7 @@ export default function HrUniversitiesContainer() {
   const [editing, setEditing] = useState<InstitutionResponse | null>(null);
   const [form, setForm] = useState<UniversityFormState>(EMPTY_FORM);
 
-  const debouncedKeyword = useDebounce(keyword, 400);
+  const debouncedKeyword = useDebounce(keyword, 2000);
 
   const list = api.institution.query.list({
     keyword: debouncedKeyword || undefined,
@@ -44,6 +44,8 @@ export default function HrUniversitiesContainer() {
     page,
     limit: 10,
   });
+
+  const isSearching = list.isFetching || keyword !== debouncedKeyword;
 
   const educationLevelsQuery = api.institution.query.educationLevels();
 
@@ -107,7 +109,7 @@ export default function HrUniversitiesContainer() {
     <UniversitiesSection
       state={{
         isPending: list.isPending,
-        isFetching: list.isFetching,
+        isFetching: isSearching,
         isError: list.isError,
         errorMessage: list.error?.message,
         universities: list.data?.data ?? [],

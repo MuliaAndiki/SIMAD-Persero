@@ -261,16 +261,69 @@ class ApplicationService {
     }
 
     if (query.keyword) {
+      const kw = query.keyword.trim();
       where.OR = [
-        { applicationNumber: { contains: query.keyword, mode: "insensitive" } },
+        { applicationNumber: { contains: kw, mode: "insensitive" } },
         {
           internProfile: {
             user: {
-              fullName: { contains: query.keyword, mode: "insensitive" },
+              fullName: { contains: kw, mode: "insensitive" },
+            },
+          },
+        },
+        {
+          internProfile: {
+            user: {
+              email: { contains: kw, mode: "insensitive" },
+            },
+          },
+        },
+        {
+          internProfile: {
+            studentNumber: { contains: kw, mode: "insensitive" },
+          },
+        },
+        {
+          internProfile: {
+            institution: {
+              name: { contains: kw, mode: "insensitive" },
+            },
+          },
+        },
+        {
+          internProfile: {
+            major: {
+              name: { contains: kw, mode: "insensitive" },
+            },
+          },
+        },
+        {
+          officeLocation: {
+            name: { contains: kw, mode: "insensitive" },
+          },
+        },
+        {
+          internship: {
+            department: {
+              name: { contains: kw, mode: "insensitive" },
+            },
+          },
+        },
+        {
+          internship: {
+            department: {
+              code: { contains: kw, mode: "insensitive" },
             },
           },
         },
       ];
+    }
+
+    if (query.departmentId) {
+      where.internship = {
+        ...(where.internship as Record<string, unknown> | undefined),
+        departmentId: query.departmentId,
+      };
     }
 
     if (query.institution) {
@@ -302,6 +355,13 @@ class ApplicationService {
             select: { id: true, originalName: true, mimeType: true, url: true },
           },
           officeLocation: { select: { id: true, name: true } },
+          internship: {
+            select: {
+              id: true,
+              status: true,
+              department: { select: { id: true, name: true, code: true } },
+            },
+          },
         },
       }),
       prisma.internshipApplication.count({ where }),
@@ -344,7 +404,13 @@ class ApplicationService {
         },
         reviewedBy: { select: { id: true, fullName: true, email: true } },
         officeLocation: { select: { id: true, name: true } },
-        internship: { select: { id: true, status: true } },
+        internship: {
+          select: {
+            id: true,
+            status: true,
+            department: { select: { id: true, name: true, code: true } },
+          },
+        },
       },
     });
 

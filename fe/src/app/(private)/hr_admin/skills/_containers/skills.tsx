@@ -11,12 +11,14 @@ export default function SkillsContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
   const [keyword, setKeyword] = useState('');
-  const debouncedKeyword = useDebounce(keyword, 400);
+  const debouncedKeyword = useDebounce(keyword, 2000);
 
   const skillsQuery = api.internship.query.skills({
     search: debouncedKeyword,
     limit: 50,
   });
+
+  const isSearching = skillsQuery.isFetching || keyword !== debouncedKeyword;
 
   const createSkill = api.internship.mutate.createSkill();
   const updateSkill = api.internship.mutate.updateSkill();
@@ -51,7 +53,7 @@ export default function SkillsContainer() {
     <SkillsSection
       state={{
         isPending: skillsQuery.isPending,
-        isFetching: skillsQuery.isFetching,
+        isFetching: isSearching,
         isError: skillsQuery.isError,
         errorMessage: skillsQuery.error?.message,
         skills: skillsQuery.data ?? [],

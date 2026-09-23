@@ -40,12 +40,15 @@ export default function HrOfficesContainer() {
   const [deptTarget, setDeptTarget] = useState<OfficeResponse | null>(null);
   const [selectedDeptIds, setSelectedDeptIds] = useState<string[]>([]);
 
-  const debouncedKeyword = useDebounce(keyword, 400);
+  const debouncedKeyword = useDebounce(keyword, 2000);
 
   const list = api.office.query.list({
     keyword: debouncedKeyword || undefined,
     limit: 100,
   });
+
+  const isSearching = list.isFetching || keyword !== debouncedKeyword;
+
   const departments = api.department.query.list({ limit: 100 });
   const create = api.office.mutate.create();
   const update = api.office.mutate.update();
@@ -133,7 +136,7 @@ export default function HrOfficesContainer() {
     <OfficesSection
       state={{
         isPending: list.isPending,
-        isFetching: list.isFetching,
+        isFetching: isSearching,
         isError: list.isError,
         errorMessage: list.error?.message,
         offices: list.data ?? [],

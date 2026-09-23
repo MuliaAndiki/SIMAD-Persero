@@ -26,7 +26,7 @@ export default function ProfileSkillsContainer() {
   const [search, setSearch] = useState('');
   const [proficiency, setProficiency] = useState<ProficiencyValue>('BEGINNER');
   const [selectedSkills, setSelectedSkills] = useState<SelectedSkill[]>([]);
-  const debouncedSearch = useDebounce(search, 400);
+  const debouncedSearch = useDebounce(search, 2000);
 
   const myProfile = api.internship.query.myProfile();
   const skills = api.internship.query.skills({
@@ -35,6 +35,8 @@ export default function ProfileSkillsContainer() {
   });
   const addSkill = api.internship.mutate.addSkill();
   const removeSkill = api.internship.mutate.removeSkill();
+
+  const isSearching = skills.isFetching || search !== debouncedSearch;
 
   const addedSkillIds = useMemo(
     () => new Set((myProfile.data?.profileSkills ?? []).map((ps) => ps.skillId)),
@@ -85,6 +87,7 @@ export default function ProfileSkillsContainer() {
         proficiency,
         skills: skills.data ?? [],
         isLoading: skills.isLoading,
+        isSearching,
         isError: skills.isError,
         errorMessage: (skills.error as Error | undefined)?.message,
         addedSkillIds,

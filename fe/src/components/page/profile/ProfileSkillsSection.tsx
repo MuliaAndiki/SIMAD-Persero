@@ -51,6 +51,7 @@ export interface ProfileSkillsSectionProps {
     proficiency: ProficiencyValue;
     skills: SkillResponse[];
     isLoading: boolean;
+    isSearching?: boolean;
     isError: boolean;
     errorMessage?: string;
     addedSkillIds: Set<string>;
@@ -133,12 +134,18 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Input
-              value={state.search}
-              onChange={(e) => service.onSearchChange(e.target.value)}
-              placeholder="Cari skill…"
-              className="sm:flex-1"
-            />
+            <div className="relative sm:flex-1">
+              <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={state.search}
+                onChange={(e) => service.onSearchChange(e.target.value)}
+                placeholder="Cari skill…"
+                className="pl-9 pr-9"
+              />
+              {(state.isSearching || state.isLoading) && (
+                <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-primary" />
+              )}
+            </div>
             <Select
               value={state.proficiency}
               onValueChange={(value) => service.onProficiencyChange(value as ProficiencyValue)}

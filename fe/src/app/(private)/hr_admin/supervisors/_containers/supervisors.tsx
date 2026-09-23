@@ -34,7 +34,7 @@ export default function HrSupervisorsContainer() {
     isActive: true,
   });
 
-  const debouncedKeyword = useDebounce(keyword, 1000);
+  const debouncedKeyword = useDebounce(keyword, 2000);
 
   const list = api.supervisor.query.list({
     keyword: debouncedKeyword || undefined,
@@ -42,6 +42,8 @@ export default function HrSupervisorsContainer() {
     departmentId: selectedDepartmentId || undefined,
     limit: 100,
   });
+
+  const isSearching = list.isFetching || keyword !== debouncedKeyword;
 
   const detail = api.supervisor.query.detail(
     { supervisorId: selectedId ?? '' },
@@ -215,7 +217,7 @@ export default function HrSupervisorsContainer() {
     <SupervisorsSection
       state={{
         isPending: list.isPending,
-        isFetching: list.isFetching,
+        isFetching: isSearching,
         isError: list.isError,
         errorMessage: list.error?.message,
         supervisors: list.data ?? [],
