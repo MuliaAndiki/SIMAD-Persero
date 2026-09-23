@@ -1,6 +1,7 @@
 'use client';
 
 import { ReceptionistInternsSection } from '@/components/page/receptionist/ReceptionistInternsSection';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useApi } from '@/hooks/useService/useApi';
 import type { InternshipResponse } from '@/types/api/internship.types';
 import { useMemo, useState } from 'react';
@@ -25,6 +26,8 @@ export function ReceptionistInternsContainer() {
     'all',
   );
   const [customDate, setCustomDate] = useState('');
+
+  const debouncedSearch = useDebounce(search, 2000);
 
   const { data, isPending, isFetching, isError, error, refetch } = api.internship.query.list({
     limit: 100,
@@ -67,7 +70,7 @@ export function ReceptionistInternsContainer() {
   // Filter magang berdasarkan departemen, tanggal/hari, dan pencarian kata kunci
   const filteredInternships = useMemo(() => {
     const list = internshipsList;
-    const queryLower = search.trim().toLowerCase();
+    const queryLower = debouncedSearch.trim().toLowerCase();
 
     // Deteksi pencarian kata kunci khusus hari ("kemarin" / "hari ini")
     let keywordDate: string | null = null;
@@ -144,7 +147,7 @@ export function ReceptionistInternsContainer() {
         Boolean(matchesAttendanceDate)
       );
     });
-  }, [internshipsList, departmentFilter, activeDate, search]);
+  }, [internshipsList, departmentFilter, activeDate, debouncedSearch]);
 
   const handleResetFilters = () => {
     setSearch('');
@@ -153,11 +156,13 @@ export function ReceptionistInternsContainer() {
     setCustomDate('');
   };
 
+  const isSearching = isFetching || search !== debouncedSearch;
+
   return (
     <ReceptionistInternsSection
       interns={filteredInternships}
       isPending={isPending}
-      isFetching={isFetching}
+      isFetching={isSearching}
       isError={isError}
       errorMessage={error?.message}
       searchQuery={search}

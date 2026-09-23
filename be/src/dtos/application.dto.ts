@@ -47,4 +47,5 @@ export const ApplicationListQuery = t.Object({
   status: t.Optional(t.String()),
   keyword: t.Optional(t.String()),
   institution: t.Optional(t.String()),
+  departmentId: t.Optional(t.String()),
 });

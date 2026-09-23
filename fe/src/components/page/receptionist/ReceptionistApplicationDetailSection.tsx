@@ -6,8 +6,17 @@ import { ApplicationDetailField } from '@/components/organisms/application/Appli
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
 import type { ApplicationResponse } from '@/types/api/application.types';
 import { getFilePreviewUrl } from '@/utils/file-preview';
-import { AlertCircle, ArrowLeft, FileText, Loader2 } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  FileText,
+  Loader2,
+} from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export interface ReceptionistApplicationDetailSectionProps {
   application?: ApplicationResponse;
@@ -22,6 +31,7 @@ export function ReceptionistApplicationDetailSection({
   isError,
   errorMessage,
 }: ReceptionistApplicationDetailSectionProps) {
+  const [showPdfPreview, setShowPdfPreview] = useState(true);
   if (isPending) {
     return (
       <section className="flex flex-col gap-6">
@@ -146,6 +156,19 @@ export function ReceptionistApplicationDetailSection({
                 : undefined
             }
           />
+          <ApplicationDetailField
+            label="Lokasi Kantor"
+            value={application.officeLocation?.name || '-'}
+          />
+          <ApplicationDetailField
+            label="Departemen"
+            value={
+              application.internship?.department?.name ||
+              (application.status === 'APPROVED'
+                ? '-'
+                : 'Belum Ditentukan (Menunggu Persetujuan)')
+            }
+          />
         </div>
         {application.motivation && (
           <div className="flex flex-col gap-2">
@@ -158,25 +181,56 @@ export function ReceptionistApplicationDetailSection({
       </Card>
 
       {/* Documents */}
-      {application.introductionLetterFile?.url && (
-        <Card className="flex flex-col gap-4 p-6">
-          <h2 className="text-lg font-semibold text-foreground">Dokumen</h2>
-          <div className="flex items-center gap-3">
-            <FileText className="size-5 text-muted-foreground" />
-            <div className="flex flex-1 flex-col gap-1">
-              <span className="text-sm font-medium text-foreground">Surat Pengantar</span>
-              <Link
-                href={getFilePreviewUrl(application.introductionLetterFile)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
-              >
-                Lihat Dokumen
-              </Link>
-            </div>
-          </div>
-        </Card>
-      )}
+      {application.introductionLetterFile &&
+        (() => {
+          const previewUrl = getFilePreviewUrl(application.introductionLetterFile);
+          return (
+            <Card className="flex flex-col gap-4 p-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <FileText className="size-5 shrink-0 text-primary" />
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate text-base font-semibold text-foreground">
+                      {application.introductionLetterFile.originalName || 'Surat Pengantar'}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Surat Pengantar Universitas
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() => setShowPdfPreview((prev) => !prev)}
+                  >
+                    {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {showPdfPreview ? 'Tutup Preview' : 'Preview Dokumen'}
+                  </Button>
+                  {previewUrl && (
+                    <Button asChild variant="outline" size="sm">
+                      <a href={previewUrl} target="_blank" rel="noreferrer">
+                        <ExternalLink className="mr-1.5 size-4" />
+                        Buka di Tab Baru
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {showPdfPreview && previewUrl && (
+                <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
+                  <iframe
+                    src={previewUrl}
+                    className="h-[560px] w-full border-0"
+                    title={`Preview ${application.introductionLetterFile.originalName || 'Surat Pengantar'}`}
+                  />
+                </div>
+              )}
+            </Card>
+          );
+        })()}
 
       {/* Review Information (if reviewed) */}
       {application.reviewedAt && (

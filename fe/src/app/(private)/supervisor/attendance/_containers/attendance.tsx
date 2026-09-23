@@ -4,6 +4,7 @@ import {
   type DateFilterMode,
   SupervisorAttendanceSection,
 } from '@/components/page/supervisor/SupervisorAttendanceSection';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useApi } from '@/hooks/useService/useApi';
 import type { AttendanceSupervisorRow } from '@/types/api/attendance.types';
 import { useMemo, useState } from 'react';
@@ -26,9 +27,11 @@ export default function SupervisorAttendanceContainer() {
   const [dateFilterMode, setDateFilterMode] = useState<DateFilterMode>('today');
   const [customDate, setCustomDate] = useState('');
 
+  const debouncedSearch = useDebounce(search, 2000);
+
   // Resolusi string tanggal aktif (YYYY-MM-DD)
   const activeDate = useMemo(() => {
-    const queryLower = search.trim().toLowerCase();
+    const queryLower = debouncedSearch.trim().toLowerCase();
     if (queryLower === 'kemarin') return getLocalDateString(-1);
     if (queryLower === 'hari ini') return getLocalDateString(0);
 
@@ -36,7 +39,7 @@ export default function SupervisorAttendanceContainer() {
     if (dateFilterMode === 'yesterday') return getLocalDateString(-1);
     if (dateFilterMode === 'custom') return customDate;
     return getLocalDateString(0);
-  }, [search, dateFilterMode, customDate]);
+  }, [debouncedSearch, dateFilterMode, customDate]);
 
   // Panggil query attendance supervisor berdasarkan tanggal aktif
   const supervisorQuery = api.attendance.query.supervisor(
@@ -50,7 +53,7 @@ export default function SupervisorAttendanceContainer() {
 
   // Filter kata kunci pencarian (nama, email, departemen, status)
   const filteredRows = useMemo(() => {
-    const queryLower = search.trim().toLowerCase();
+    const queryLower = debouncedSearch.trim().toLowerCase();
     if (!queryLower || queryLower === 'kemarin' || queryLower === 'hari ini') {
       return allRows;
     }
@@ -79,7 +82,7 @@ export default function SupervisorAttendanceContainer() {
         indonesianStatus.includes(queryLower)
       );
     });
-  }, [allRows, search]);
+  }, [allRows, debouncedSearch]);
 
   const handleResetFilters = () => {
     setSearch('');
@@ -97,11 +100,13 @@ export default function SupervisorAttendanceContainer() {
     });
   };
 
+  const isSearching = supervisorQuery.isFetching || search !== debouncedSearch;
+
   return (
     <SupervisorAttendanceSection
       state={{
         isPending: supervisorQuery.isPending,
-        isFetching: supervisorQuery.isFetching,
+        isFetching: isSearching,
         isOverridePending: overrideMutation.isPending,
         isError: supervisorQuery.isError,
         errorMessage: supervisorQuery.error?.message,

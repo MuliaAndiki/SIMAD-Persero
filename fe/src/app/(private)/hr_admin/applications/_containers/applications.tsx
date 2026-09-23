@@ -44,13 +44,15 @@ export default function HrApplicationsContainer() {
   const [approveForm, setApproveForm] = useState<ApproveApplicationFormState>(EMPTY_APPROVE_FORM);
   const [rejectForm, setRejectForm] = useState<RejectApplicationFormState>(EMPTY_REJECT_FORM);
 
-  const debouncedKeyword = useDebounce(keyword, 1000);
+  const debouncedKeyword = useDebounce(keyword, 2000);
 
   const list = api.application.query.list({
     status: (statusFilter || undefined) as ApplicationStatusValue | undefined,
     keyword: debouncedKeyword || undefined,
     limit: 100,
   });
+
+  const isSearching = list.isFetching || keyword !== debouncedKeyword;
 
   const departments = api.department.query.list({ limit: 100 });
   const offices = api.office.query.list({ limit: 100 });
@@ -134,7 +136,7 @@ export default function HrApplicationsContainer() {
     <ApplicationsSection
       state={{
         isPending: list.isPending,
-        isFetching: list.isFetching,
+        isFetching: isSearching,
         isError: list.isError,
         errorMessage: list.error?.message,
         applications: list.data ?? [],

@@ -26,7 +26,7 @@ export default function HrDepartmentsContainer() {
   const [editing, setEditing] = useState<DepartmentResponse | null>(null);
   const [form, setForm] = useState<DepartmentFormState>(EMPTY_FORM);
 
-  const debouncedKeyword = useDebounce(keyword, 1000);
+  const debouncedKeyword = useDebounce(keyword, 2000);
 
   const list = api.department.query.list({
     keyword: debouncedKeyword || undefined,
@@ -34,6 +34,8 @@ export default function HrDepartmentsContainer() {
   });
   const create = api.department.mutate.create();
   const update = api.department.mutate.update();
+
+  const isSearching = list.isFetching || keyword !== debouncedKeyword;
 
   const handleFieldChange = useCallback((field: DepartmentFormField, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -97,7 +99,7 @@ export default function HrDepartmentsContainer() {
     <DepartmentsSection
       state={{
         isPending: list.isPending,
-        isFetching: list.isFetching,
+        isFetching: isSearching,
         isError: list.isError,
         errorMessage: list.error?.message,
         departments: list.data ?? [],
