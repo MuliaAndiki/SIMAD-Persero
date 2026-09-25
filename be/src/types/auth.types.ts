@@ -15,6 +15,10 @@ export type AuthUser = JwtPayload &
   Pick<IUser, 'emailVerified' | 'isActive'> & {
     roles: string[];
     avatarUrl?: string | null;
+    officeId?: string | null;
+    departmentId?: string | null;
+    officeLocation?: { id: string; name: string | null } | null;
+    department?: { id: string; name: string | null } | null;
   };
 
 export type RegisterBody = Pick<IUser, 'fullName' | 'email'> & {

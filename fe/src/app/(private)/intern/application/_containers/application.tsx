@@ -76,7 +76,7 @@ export default function ApplicationContainer() {
     requestedStartDate: string;
     requestedEndDate: string;
     motivation?: string;
-    coverLetterFileId: string;
+    coverLetterFileId?: string;
     officeLocationId: string;
   }) => {
     try {

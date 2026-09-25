@@ -104,11 +104,14 @@ export interface AttendanceOfficeInfo {
 }
 
 export interface AttendanceSettingInfo {
+  id?: string;
+  officeLocationId?: string;
   checkInStart: string | null;
   checkInEnd: string | null;
   checkOutStart: string | null;
   checkOutEnd: string | null;
   lateAfter: string | null;
+  allowWeekend?: boolean;
 }
 
 /** Data satu absensi (GET /attendance/me, GET /attendance/today, GET /attendance/:attendanceId). */

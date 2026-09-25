@@ -1,22 +1,14 @@
 'use client';
 
-import { AlertCircle, Loader2, Plus, Search } from 'lucide-react';
-import type { FormEvent } from 'react';
+import { AlertCircle, Building2, Loader2, Plus, Search } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
-import { OfficeDepartmentDialog } from '@/components/organisms/office/OfficeDepartmentDialog';
-import {
-  OfficeFormDialog,
-  type OfficeFormField,
-  type OfficeFormState,
-} from '@/components/organisms/office/OfficeFormDialog';
 import { OfficeTable } from '@/components/organisms/office/OfficeTable';
-import type { DepartmentResponse } from '@/types/api/department.types';
 import type { OfficeResponse } from '@/types/api/office.types';
-import type { AlertContexType } from '@/types/ui';
 
 export interface OfficesSectionState {
   isPending: boolean;
@@ -25,32 +17,12 @@ export interface OfficesSectionState {
   errorMessage?: string;
   offices: OfficeResponse[];
   keyword: string;
-  formOpen: boolean;
-  editing: OfficeResponse | null;
-  form: OfficeFormState;
-  isSaving: boolean;
   isDeleting: boolean;
-  departments: DepartmentResponse[];
-  deptDialogOpen: boolean;
-  deptTarget: OfficeResponse | null;
-  selectedDeptIds: string[];
-  isSavingDepartments: boolean;
-  alert: AlertContexType;
 }
 
 export interface OfficesSectionActions {
   onKeywordChange: (keyword: string) => void;
-  onSearch: () => void;
-  onOpenCreate: () => void;
-  onOpenEdit: (office: OfficeResponse) => void;
-  onCloseForm: () => void;
-  onFieldChange: (field: OfficeFormField, value: string) => void;
-  onSubmit: () => void | Promise<void>;
-
-  onOpenManageDepartments: (office: OfficeResponse) => void;
-  onCloseManageDepartments: () => void;
-  onToggleDepartment: (departmentId: string) => void;
-  onSubmitDepartments: () => void | Promise<void>;
+  onDelete: (office: OfficeResponse) => void;
 }
 
 export interface OfficesSectionProps {
@@ -66,15 +38,17 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">Kantor</h1>
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Building2 className="size-6 text-primary" />
+          Manajemen Lokasi Kantor & Jadwal Presensi
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Kelola lokasi kantor dan titik koordinat absensi. Satu kantor dapat melayani banyak
-          departemen.
+          Kelola lokasi unit kantor PLN, titik geofence absensi, departemen yang dinaungi, serta aturan jam masuk (maksimal jam 08:00 WIB) dan jam pulang.
         </p>
       </header>
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <div className="flex flex-1 items-center gap-2">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center justify-between">
+        <div className="flex flex-1 items-center gap-2 max-w-md">
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -83,7 +57,7 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
                 setQuery(e.target.value);
                 actions.onKeywordChange(e.target.value);
               }}
-              placeholder="Cari nama / alamat kantor…"
+              placeholder="Cari nama atau alamat kantor…"
               className="pl-9 pr-9"
             />
             {state.isFetching && (
@@ -91,9 +65,12 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
             )}
           </div>
         </div>
-        <Button onClick={actions.onOpenCreate}>
-          <Plus className="size-4" />
-          Tambah Kantor
+
+        <Button asChild className="gap-2 shrink-0">
+          <Link href="/hr_admin/offices/create">
+            <Plus className="size-4" />
+            Tambah Kantor Baru
+          </Link>
         </Button>
       </div>
 
@@ -111,32 +88,9 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
         <OfficeTable
           offices={state.offices}
           isDeleting={state.isDeleting}
-          onOpenEdit={actions.onOpenEdit}
-          onManageDepartments={actions.onOpenManageDepartments}
-          alert={state.alert}
+          onDelete={actions.onDelete}
         />
       )}
-
-      <OfficeFormDialog
-        open={state.formOpen}
-        editing={state.editing}
-        form={state.form}
-        isSaving={state.isSaving}
-        onFieldChange={actions.onFieldChange}
-        onClose={actions.onCloseForm}
-        onSubmit={actions.onSubmit}
-      />
-
-      <OfficeDepartmentDialog
-        open={state.deptDialogOpen}
-        office={state.deptTarget}
-        departments={state.departments}
-        selectedIds={state.selectedDeptIds}
-        isSaving={state.isSavingDepartments}
-        onToggle={actions.onToggleDepartment}
-        onClose={actions.onCloseManageDepartments}
-        onSubmit={actions.onSubmitDepartments}
-      />
     </section>
   );
 }

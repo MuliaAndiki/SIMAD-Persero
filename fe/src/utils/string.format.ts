@@ -32,3 +32,13 @@ export function formatDateTime(value: string | null): string {
   });
   return `${dateStr}, ${timeStr.replace('.', ':')} WIB`;
 }
+
+export function formatTime(value: string | null): string {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}

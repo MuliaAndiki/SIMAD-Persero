@@ -3,13 +3,17 @@ import { useAttendance } from './attendance/useAttendance';
 import { useAuditLog } from './auditLog/useAuditLog';
 import { useAuth } from './auth/useAuth';
 import { useCertificate } from './certificate/useCertificate';
+import { useCorrection } from './correction/useCorrection';
 import { useDashboard } from './dashboard/useDashboard';
 import { useDepartment } from './department/useDepartment';
+import { useEvaluation } from './evaluation/useEvaluation';
 import { useFile } from './file/useFile';
+import { useGuide } from './guide/useGuide';
 import { useInstitution } from './institution/useInstitution';
 import { useInternship } from './internship/useInternship';
 import { useNotification } from './notification/useNotification';
 import { useOffice } from './office/useOffice';
+import { useQuota } from './quota/useQuota';
 import { useReceptionist } from './receptionist/useReceptionist';
 import { useReporting } from './reporting/useReporting';
 import { useSupervisor } from './supervisor/useSupervisor';
@@ -35,6 +39,10 @@ export function useApi() {
     auth: useAuth(),
     dashboard: useDashboard(),
     attendance: useAttendance(),
+    correction: useCorrection(),
+    evaluation: useEvaluation(),
+    quota: useQuota(),
+    guide: useGuide(),
     application: useApplication(),
     department: useDepartment(),
     office: useOffice(),
@@ -50,3 +58,4 @@ export function useApi() {
     notification: useNotification(),
   };
 }
+

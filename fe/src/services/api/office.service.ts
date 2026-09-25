@@ -48,10 +48,7 @@ class OfficeService {
    * Membuat lokasi kantor baru.
    */
   public async Create(
-    body: Pick<
-      CreateOfficeBody,
-      'name' | 'address' | 'latitude' | 'longitude' | 'radiusMeter' | 'departmentIds'
-    >,
+    body: CreateOfficeBody,
   ): Promise<TResponse<OfficeResponse>> {
     const res = await client.PostResponse<OfficeResponse>(OFFICE_ENDPOINTS.CREATE, body);
     return toServiceResponse(res, {

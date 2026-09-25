@@ -13,10 +13,7 @@ import type {
 export function useCreateOffice() {
   return useAppMutation<
     OfficeResponse,
-    Pick<
-      CreateOfficeBody,
-      'name' | 'address' | 'latitude' | 'longitude' | 'radiusMeter' | 'departmentIds'
-    >,
+    CreateOfficeBody,
     OfficeCacheContext
   >({
     mutationFn: (body) => Api.Office.Create(body),

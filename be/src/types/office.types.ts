@@ -6,6 +6,15 @@
  */
 import type { IDepartment, IOfficeLocation } from "./models.types";
 
+export interface AttendanceSettingInput {
+  checkInStart?: string | null;
+  checkInEnd?: string | null;
+  checkOutStart?: string | null;
+  checkOutEnd?: string | null;
+  lateAfter?: string | null;
+  allowWeekend?: boolean;
+}
+
 export type OfficeQuery = Partial<{
   page: number;
   limit: number;
@@ -21,6 +30,7 @@ export type CreateOfficeBody = {
   latitude: number;
   longitude: number;
   radiusMeter: number;
+  attendanceSetting?: AttendanceSettingInput;
 };
 
 export type UpdateOfficeBody = Partial<CreateOfficeBody>;

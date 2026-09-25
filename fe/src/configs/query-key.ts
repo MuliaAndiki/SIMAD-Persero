@@ -74,8 +74,43 @@ export const queryKey = {
   certificate: {
     verify: (verificationCode: string) => ['certificate', 'verify', verificationCode] as const,
     my: () => ['certificate', 'my'] as const,
+    list: (query?: Record<string, any>) => ['certificate', 'list', query] as const,
+    pendingApprovals: (query?: Record<string, any>) =>
+      ['certificate', 'pendingApprovals', query] as const,
     detail: (certificateId: string) => ['certificate', 'detail', certificateId] as const,
     settings: () => ['certificate', 'settings'] as const,
+    officeSettings: () => ['certificate', 'officeSettings'] as const,
+    officeSetting: (officeLocationId: string) =>
+      ['certificate', 'officeSetting', officeLocationId] as const,
+  },
+
+  quotaRoot: () => ['quota'] as const,
+  quota: {
+    list: (query?: Record<string, any>) => ['quota', 'list', query] as const,
+    availability: (query?: Record<string, any>) => ['quota', 'availability', query] as const,
+    detail: (id: string) => ['quota', 'detail', id] as const,
+  },
+
+  correctionRoot: () => ['correction'] as const,
+  correction: {
+    myList: (query?: Record<string, any>) => ['correction', 'myList', query] as const,
+    supervisorList: (query?: Record<string, any>) =>
+      ['correction', 'supervisorList', query] as const,
+    hrList: (query?: Record<string, any>) => ['correction', 'hrList', query] as const,
+    detail: (id: string) => ['correction', 'detail', id] as const,
+  },
+
+  evaluationRoot: () => ['evaluation'] as const,
+  evaluation: {
+    byInternship: (internshipId: string) => ['evaluation', 'byInternship', internshipId] as const,
+    hrList: (query?: Record<string, any>) => ['evaluation', 'hrList', query] as const,
+    detail: (id: string) => ['evaluation', 'detail', id] as const,
+  },
+
+  guideRoot: () => ['guide'] as const,
+  guide: {
+    list: (query?: Record<string, any>) => ['guide', 'list', query] as const,
+    detail: (slug: string) => ['guide', 'detail', slug] as const,
   },
 
   notificationRoot: () => ['notification'] as const,

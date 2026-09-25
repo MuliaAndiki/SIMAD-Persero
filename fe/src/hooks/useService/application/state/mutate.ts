@@ -90,10 +90,7 @@ export function useApproveApplication() {
     ApproveApplicationResponse,
     {
       params: Pick<ApplicationParams, 'id'>;
-      body: Pick<
-        ApproveApplicationBody,
-        'departmentId' | 'officeLocationId' | 'supervisorId' | 'notes'
-      >;
+      body: ApproveApplicationBody;
     },
     ApplicationCacheContext
   >({

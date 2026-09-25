@@ -1,6 +1,7 @@
 import { AppError } from "@/http/error";
 import {
   ACTIVE_APPLICATION_STATUSES,
+  ApplicationDocumentType,
   type ApplicationQuery,
   ApplicationStatus,
   type ApproveApplicationBody,
@@ -83,14 +84,14 @@ class ApplicationService {
     }
   }
 
-  /** Validate that the cover letter file exists and is not deleted. */
-  private async assertFileExists(fileId: string) {
+  /** Validate that a file exists and is not deleted. */
+  private async assertFileExists(fileId: string, label = "File") {
     const file = await prisma.file.findUnique({
       where: { id: fileId },
       select: { id: true, deletedAt: true },
     });
     if (!file || file.deletedAt) {
-      throw new AppError(404, "Cover letter file not found");
+      throw new AppError(404, `${label} not found`);
     }
   }
 
@@ -111,20 +112,80 @@ class ApplicationService {
     const internProfileId = await this.getInternProfileId(userId);
     await this.assertNoActiveApplication(internProfileId);
     this.validateDates(input.requestedStartDate, input.requestedEndDate);
-    await this.assertFileExists(input.coverLetterFileId);
     await this.assertOfficeExists(input.officeLocationId);
 
-    return prisma.internshipApplication.create({
-      data: {
-        internProfileId,
-        applicationNumber: this.generateApplicationNumber(),
-        introductionLetterFileId: input.coverLetterFileId,
-        requestedStartDate: new Date(input.requestedStartDate),
-        requestedEndDate: new Date(input.requestedEndDate),
-        motivation: input.motivation?.trim() || null,
-        officeLocationId: input.officeLocationId,
-        status: ApplicationStatus.DRAFT,
-      },
+    // Resolve primary introduction letter file (for backwards compatibility)
+    const introFileId =
+      input.facultyLetterFileId || input.coverLetterFileId || input.cvFileId;
+
+    if (!introFileId) {
+      throw new AppError(
+        400,
+        "Dokumen pengajuan magang (CV / Surat Permohonan) wajib dilampirkan.",
+      );
+    }
+
+    await this.assertFileExists(introFileId, "Dokumen pengajuan");
+
+    if (input.cvFileId) {
+      await this.assertFileExists(input.cvFileId, "CV File");
+    }
+    if (input.facultyLetterFileId) {
+      await this.assertFileExists(input.facultyLetterFileId, "Surat Permohonan Fakultas");
+    }
+
+    return prisma.$transaction(async (tx) => {
+      const app = await tx.internshipApplication.create({
+        data: {
+          internProfileId,
+          applicationNumber: this.generateApplicationNumber(),
+          introductionLetterFileId: introFileId,
+          requestedStartDate: new Date(input.requestedStartDate),
+          requestedEndDate: new Date(input.requestedEndDate),
+          motivation: input.motivation?.trim() || null,
+          officeLocationId: input.officeLocationId,
+          status: ApplicationStatus.DRAFT,
+        },
+      });
+
+      // Simpan dokumen CV jika ada
+      if (input.cvFileId) {
+        await tx.applicationDocument.create({
+          data: {
+            applicationId: app.id,
+            fileId: input.cvFileId,
+            type: ApplicationDocumentType.CV,
+          },
+        });
+      }
+
+      // Simpan dokumen Surat Permohonan Fakultas jika ada
+      if (input.facultyLetterFileId) {
+        await tx.applicationDocument.create({
+          data: {
+            applicationId: app.id,
+            fileId: input.facultyLetterFileId,
+            type: ApplicationDocumentType.FACULTY_REQUEST_LETTER,
+          },
+        });
+      }
+
+      return tx.internshipApplication.findUnique({
+        where: { id: app.id },
+        include: {
+          documents: {
+            include: {
+              file: {
+                select: { id: true, originalName: true, mimeType: true, url: true, size: true },
+              },
+            },
+          },
+          introductionLetterFile: {
+            select: { id: true, originalName: true, mimeType: true, url: true },
+          },
+          officeLocation: { select: { id: true, name: true } },
+        },
+      });
     });
   }
 
@@ -137,6 +198,13 @@ class ApplicationService {
       where: { internProfileId },
       orderBy: { createdAt: "desc" },
       include: {
+        documents: {
+          include: {
+            file: {
+              select: { id: true, originalName: true, mimeType: true, url: true, size: true },
+            },
+          },
+        },
         introductionLetterFile: {
           select: { id: true, originalName: true, mimeType: true, url: true },
         },
@@ -184,7 +252,7 @@ class ApplicationService {
     }
 
     if (input.coverLetterFileId !== undefined) {
-      await this.assertFileExists(input.coverLetterFileId);
+      await this.assertFileExists(input.coverLetterFileId, "Cover letter");
       data.introductionLetterFileId = input.coverLetterFileId;
     }
 
@@ -193,7 +261,68 @@ class ApplicationService {
       data.officeLocationId = input.officeLocationId;
     }
 
-    return prisma.internshipApplication.update({ where: { id }, data });
+    return prisma.$transaction(async (tx) => {
+      if (Object.keys(data).length > 0) {
+        await tx.internshipApplication.update({ where: { id }, data });
+      }
+
+      if (input.cvFileId) {
+        await this.assertFileExists(input.cvFileId, "CV File");
+        await tx.applicationDocument.upsert({
+          where: {
+            applicationId_type: {
+              applicationId: id,
+              type: ApplicationDocumentType.CV,
+            },
+          },
+          update: { fileId: input.cvFileId },
+          create: {
+            applicationId: id,
+            fileId: input.cvFileId,
+            type: ApplicationDocumentType.CV,
+          },
+        });
+      }
+
+      if (input.facultyLetterFileId) {
+        await this.assertFileExists(input.facultyLetterFileId, "Surat Permohonan Fakultas");
+        await tx.applicationDocument.upsert({
+          where: {
+            applicationId_type: {
+              applicationId: id,
+              type: ApplicationDocumentType.FACULTY_REQUEST_LETTER,
+            },
+          },
+          update: { fileId: input.facultyLetterFileId },
+          create: {
+            applicationId: id,
+            fileId: input.facultyLetterFileId,
+            type: ApplicationDocumentType.FACULTY_REQUEST_LETTER,
+          },
+        });
+        await tx.internshipApplication.update({
+          where: { id },
+          data: { introductionLetterFileId: input.facultyLetterFileId },
+        });
+      }
+
+      return tx.internshipApplication.findUnique({
+        where: { id },
+        include: {
+          documents: {
+            include: {
+              file: {
+                select: { id: true, originalName: true, mimeType: true, url: true, size: true },
+              },
+            },
+          },
+          introductionLetterFile: {
+            select: { id: true, originalName: true, mimeType: true, url: true },
+          },
+          officeLocation: { select: { id: true, name: true } },
+        },
+      });
+    });
   }
 
   // ─── 14.4 Submit Application ────────────────────────────────
@@ -211,23 +340,42 @@ class ApplicationService {
       );
     }
 
-    // Validate completeness
-    if (!app.introductionLetterFileId) {
-      throw new AppError(
-        400,
-        "Cover letter file is required before submitting",
-      );
-    }
     if (!app.requestedStartDate || !app.requestedEndDate) {
       throw new AppError(
         400,
-        "Start and end dates are required before submitting",
+        "Tanggal mulai dan tanggal selesai magang wajib diisi sebelum mengajukan",
+      );
+    }
+
+    // Validasi kelengkapan dokumen wajib v1.0.1 (CV dan Surat Permohonan Fakultas)
+    const docs = await prisma.applicationDocument.findMany({
+      where: { applicationId: id },
+    });
+
+    const hasCv = docs.some((d) => d.type === ApplicationDocumentType.CV);
+    const hasFacultyLetter =
+      docs.some((d) => d.type === ApplicationDocumentType.FACULTY_REQUEST_LETTER) ||
+      Boolean(app.introductionLetterFileId);
+
+    if (!hasCv || !hasFacultyLetter) {
+      throw new AppError(
+        400,
+        "Dokumen CV dan Surat Permohonan Fakultas wajib diunggah sebelum mengajukan permohonan magang.",
       );
     }
 
     return prisma.internshipApplication.update({
       where: { id },
       data: { status: ApplicationStatus.SUBMITTED },
+      include: {
+        documents: {
+          include: {
+            file: {
+              select: { id: true, originalName: true, mimeType: true, url: true },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -240,9 +388,6 @@ class ApplicationService {
       throw new AppError(400, "Cannot cancel an already approved application");
     }
 
-    // Soft delete — set status to a terminal-like state. Since the schema
-    // lacks a dedicated CANCELLED status, we just hard-delete the draft/submitted
-    // application so the intern can create a new one.
     await prisma.internshipApplication.delete({ where: { id } });
     return { message: "Application cancelled and removed" };
   }
@@ -258,6 +403,10 @@ class ApplicationService {
 
     if (query.status) {
       where.status = query.status;
+    }
+
+    if (query.officeLocationId) {
+      where.officeLocationId = query.officeLocationId;
     }
 
     if (query.keyword) {
@@ -351,6 +500,13 @@ class ApplicationService {
               major: { select: { id: true, name: true } },
             },
           },
+          documents: {
+            include: {
+              file: {
+                select: { id: true, originalName: true, mimeType: true, url: true, size: true },
+              },
+            },
+          },
           introductionLetterFile: {
             select: { id: true, originalName: true, mimeType: true, url: true },
           },
@@ -396,6 +552,13 @@ class ApplicationService {
               select: {
                 skill: { select: { id: true, name: true, category: true } },
               },
+            },
+          },
+        },
+        documents: {
+          include: {
+            file: {
+              select: { id: true, originalName: true, mimeType: true, url: true, size: true },
             },
           },
         },
@@ -499,13 +662,86 @@ class ApplicationService {
       );
     }
 
-    // Transactional: update application + create internship + create supervisor assignment
+    // Tentukan tanggal aktual yang disetujui HR
+    const actualStart = input.actualStartDate
+      ? new Date(input.actualStartDate)
+      : (app.requestedStartDate ?? new Date());
+    const actualEnd = input.actualEndDate
+      ? new Date(input.actualEndDate)
+      : (app.requestedEndDate ?? new Date());
+
+    if (actualStart >= actualEnd) {
+      throw new AppError(400, "Tanggal mulai aktual harus sebelum tanggal selesai aktual");
+    }
+
+    // Transactional: quota validation + update application + create internship + supervisor assignment
     const result = await prisma.$transaction(async (tx) => {
+      let quotaId: string | null = null;
+
+      if (officeLocationId && input.departmentId) {
+        // Cari kuota aktif kantor
+        const quota = await tx.internshipQuota.findUnique({
+          where: {
+            officeLocationId,
+          },
+          include: {
+            departmentAllocations: true,
+          },
+        });
+
+        if (quota && quota.isActive) {
+          quotaId = quota.id;
+
+          // 1. Validasi kapasitas total kantor
+          const officeOccupied = await tx.internship.count({
+            where: {
+              officeLocationId,
+              status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+              actualStartDate: { lte: actualEnd },
+              actualEndDate: { gte: actualStart },
+            },
+          });
+
+          if (officeOccupied >= quota.totalCapacity) {
+            throw new AppError(
+              400,
+              `Total kuota kantor untuk periode tersebut sudah penuh (Kapasitas Kantor: ${quota.totalCapacity}, Terisi: ${officeOccupied})`,
+            );
+          }
+
+          // 2. Validasi alokasi kuota departemen
+          const deptAlloc = quota.departmentAllocations.find(
+            (a) => a.departmentId === input.departmentId,
+          );
+
+          if (deptAlloc) {
+            const deptOccupied = await tx.internship.count({
+              where: {
+                officeLocationId,
+                departmentId: input.departmentId,
+                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                actualStartDate: { lte: actualEnd },
+                actualEndDate: { gte: actualStart },
+              },
+            });
+
+            if (deptOccupied >= deptAlloc.capacity) {
+              throw new AppError(
+                400,
+                `Alokasi kuota magang untuk departemen ini pada periode tersebut sudah penuh (Alokasi: ${deptAlloc.capacity}, Terisi: ${deptOccupied})`,
+              );
+            }
+          }
+        }
+      }
+
       // 1. Update application status to APPROVED
       const updatedApp = await tx.internshipApplication.update({
         where: { id },
         data: {
           status: ApplicationStatus.APPROVED,
+          actualStartDate: actualStart,
+          actualEndDate: actualEnd,
           reviewedById: reviewerId,
           reviewedAt: new Date(),
           rejectionReason: null,
@@ -519,8 +755,9 @@ class ApplicationService {
           internProfileId: app.internProfileId,
           departmentId: input.departmentId,
           officeLocationId,
-          actualStartDate: app.requestedStartDate,
-          actualEndDate: app.requestedEndDate,
+          quotaId,
+          actualStartDate: actualStart,
+          actualEndDate: actualEnd,
           status: InternshipStatus.PENDING,
           onboardingCompleted: false,
         },
@@ -552,7 +789,7 @@ class ApplicationService {
           oldStatus: null,
           newStatus: InternshipStatus.PENDING,
           changedById: reviewerId,
-          notes: input.notes || "Application approved, internship created.",
+          notes: input.notes || "Application approved, internship created with quota allocation.",
         },
       });
 
