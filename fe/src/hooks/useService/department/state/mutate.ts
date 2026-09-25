@@ -1,12 +1,10 @@
-import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useAppMutation } from '@/hooks/useService/_shared/useAppMutation';
 import Api from '@/services/props.service';
 import {
   type DepartmentCacheContext,
   readDepartmentSnapshot,
 } from '@/utils/cache/department.cache';
-import { ResponseTitles } from '@/utils/response-titles';
 
 import type {
   CreateDepartmentBody,
@@ -14,119 +12,35 @@ import type {
   DepartmentResponse,
   UpdateDepartmentBody,
 } from '@/types/api/department.types';
-import { useMutation } from '@tanstack/react-query';
 
 export function useCreateDepartment() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<DepartmentResponse>,
-    Error,
+  return useAppMutation<
+    DepartmentResponse,
     Pick<CreateDepartmentBody, 'code' | 'name' | 'description'>,
     DepartmentCacheContext
   >({
-    mutationFn: (body: Pick<CreateDepartmentBody, 'code' | 'name' | 'description'>) =>
-      Api.Department.Create(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.departmentRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.departmentRoot() });
-      const previousData = readDepartmentSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (body) => Api.Department.Create(body),
+    invalidateKeys: [queryKey.departmentRoot()],
+    optimistic: (ns) => ({ previousData: readDepartmentSnapshot(ns) }),
   });
 }
 
 export function useUpdateDepartment() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<DepartmentResponse>,
-    Error,
+  return useAppMutation<
+    DepartmentResponse,
     { params: Pick<DepartmentParams, 'departmentId'>; body: UpdateDepartmentBody },
     DepartmentCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<DepartmentParams, 'departmentId'>;
-      body: UpdateDepartmentBody;
-    }) => Api.Department.Update(params, body),
-    onSettled: async (_, __, _variables) => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.departmentRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.departmentRoot() });
-      const previousData = readDepartmentSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Department.Update(params, body),
+    invalidateKeys: [queryKey.departmentRoot()],
+    optimistic: (ns) => ({ previousData: readDepartmentSnapshot(ns) }),
   });
 }
 
 export function useDeleteDepartment() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<null>,
-    Error,
-    Pick<DepartmentParams, 'departmentId'>,
-    DepartmentCacheContext
-  >({
-    mutationFn: (params: Pick<DepartmentParams, 'departmentId'>) => Api.Department.Delete(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.departmentRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.departmentRoot() });
-      const previousData = readDepartmentSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<null, Pick<DepartmentParams, 'departmentId'>, DepartmentCacheContext>({
+    mutationFn: (params) => Api.Department.Delete(params),
+    invalidateKeys: [queryKey.departmentRoot()],
+    optimistic: (ns) => ({ previousData: readDepartmentSnapshot(ns) }),
   });
 }

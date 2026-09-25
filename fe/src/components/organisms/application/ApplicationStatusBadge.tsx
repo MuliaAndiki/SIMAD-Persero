@@ -1,25 +1,9 @@
 import { Badge } from '@/components/atoms/badge';
 import { cn } from '@/utils/classname';
+import { getApplicationStatusLabel as applicationStatusLabel } from '@/utils/status-labels';
 import { CheckCircle2, FileText, Send, XCircle } from 'lucide-react';
 
-function applicationStatusLabel(status: string | null): string {
-  switch (status) {
-    case 'DRAFT':
-      return 'Draft';
-    case 'SUBMITTED':
-      return 'Diajukan';
-    case 'UNDER_REVIEW':
-      return 'Sedang Direview';
-    case 'RESUBMITTED':
-      return 'Diajukan Ulang';
-    case 'APPROVED':
-      return 'Disetujui';
-    case 'REJECTED':
-      return 'Ditolak';
-    default:
-      return status ?? '-';
-  }
-}
+export { applicationStatusLabel };
 
 /**
  * ApplicationStatusBadge — badge status pengajuan magang

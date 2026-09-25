@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { ReceptionistApplicationDetailSection } from "@/components/page/receptionist/ReceptionistApplicationDetailSection";
-import { useApi } from "@/hooks/useService/useApi";
+import { ReceptionistApplicationDetailSection } from '@/components/page/receptionist/ReceptionistApplicationDetailSection';
+import { useApi } from '@/hooks/useService/useApi';
 
 interface ReceptionistApplicationDetailContainerProps {
   applicationId: string;

@@ -1,24 +1,9 @@
 import { Badge } from '@/components/atoms/badge';
 import { cn } from '@/utils/classname';
+import { getInternshipStatusLabel as internshipStatusLabel } from '@/utils/status-labels';
 import { Archive, CheckCircle2, CircleDashed, FileBadge, Loader, PlayCircle } from 'lucide-react';
 
-/** Label status magang — cocok dengan docs/05-state-machine.md §9. */
-export function internshipStatusLabel(status: string | null): string {
-  switch (status) {
-    case 'PENDING':
-      return 'Pending';
-    case 'ACTIVE':
-      return 'Aktif';
-    case 'COMPLETED':
-      return 'Selesai';
-    case 'CERTIFICATE_GENERATED':
-      return 'Sertifikat Dibuat';
-    case 'ARCHIVED':
-      return 'Diarsipkan';
-    default:
-      return status ?? '-';
-  }
-}
+export { internshipStatusLabel };
 
 /**
  * InternshipStatusBadge — badge status magang

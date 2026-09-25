@@ -11,7 +11,12 @@ interface PhotoCropperProps {
   isUploading?: boolean;
 }
 
-export function PhotoCropper({ imageSrc, onCropComplete, onCancel, isUploading }: PhotoCropperProps) {
+export function PhotoCropper({
+  imageSrc,
+  onCropComplete,
+  onCancel,
+  isUploading,
+}: PhotoCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
