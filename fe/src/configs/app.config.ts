@@ -1,6 +1,7 @@
 import {
   Award,
   BarChart3,
+  BookOpen,
   BriefcaseBusiness,
   Building2,
   ClipboardCheck,
@@ -180,6 +181,11 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
     icon: Award,
     requiresInternship: true,
   },
+  {
+    name: 'Panduan',
+    url: '/intern/guide',
+    icon: BookOpen,
+  },
 ];
 
 /** Menu sidebar khusus HR_ADMIN dengan struktur terkelompok (grouped/dropdown). */
@@ -199,6 +205,16 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
         name: 'Magang',
         url: '/hr_admin/internships',
         icon: BriefcaseBusiness,
+      },
+      {
+        name: 'Kuota Magang',
+        url: '/hr_admin/quotas',
+        icon: Users,
+      },
+      {
+        name: 'Persetujuan Sertifikat',
+        url: '/hr_admin/certificates/approvals',
+        icon: Award,
       },
     ],
   },
@@ -240,6 +256,11 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
         icon: BarChart3,
       },
       {
+        name: 'Penilaian Intern',
+        url: '/hr_admin/evaluations',
+        icon: ClipboardCheck,
+      },
+      {
         name: 'Audit Log',
         url: '/hr_admin/audit-logs',
         icon: ScrollText,
@@ -266,6 +287,11 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
         url: '/hr_admin/certificate-setting',
         icon: Award,
       },
+      {
+        name: 'Panduan',
+        url: '/hr_admin/guides',
+        icon: BookOpen,
+      },
     ],
   },
 ];
@@ -285,11 +311,29 @@ export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
     icon: Clock,
     subMenu: [],
   },
+  {
+    name: 'Koreksi Absensi',
+    url: '/supervisor/attendance-corrections',
+    icon: Clock,
+    subMenu: [],
+  },
+  {
+    name: 'Penilaian Magang',
+    url: '/supervisor/evaluations',
+    icon: ClipboardCheck,
+    subMenu: [],
+  },
 ];
 
 /** Menu sidebar khusus RECEPTIONIST. */
 export const SIDEBAR_MENU_RECEPTIONIST: SidebarMenuItem[] = [
   { name: 'Beranda', url: '/receptionist/dashboard', icon: Home, subMenu: [] },
+  {
+    name: 'Cek Ketersediaan Slot',
+    url: '/receptionist/availability',
+    icon: Building2,
+    subMenu: [],
+  },
   {
     name: 'Pengajuan',
     url: '/receptionist/applications',

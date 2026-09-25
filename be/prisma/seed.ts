@@ -186,6 +186,46 @@ const PERMISSIONS = [
     name: "Upload File",
     description: "Mengunggah berkas.",
   },
+  {
+    code: "QUOTA_MANAGE",
+    name: "Kelola Kuota",
+    description: "CRUD alokasi kuota magang.",
+  },
+  {
+    code: "QUOTA_VIEW",
+    name: "Lihat Kuota",
+    description: "Melihat data ketersediaan kuota magang.",
+  },
+  {
+    code: "CORRECTION_SUBMIT",
+    name: "Ajukan Koreksi Absen",
+    description: "Mengajukan permohonan koreksi absensi.",
+  },
+  {
+    code: "CORRECTION_REVIEW",
+    name: "Review Koreksi Absen",
+    description: "Menyetujui atau menolak koreksi absensi.",
+  },
+  {
+    code: "EVALUATION_SUBMIT",
+    name: "Beri Nilai Magang",
+    description: "Memberikan evaluasi dan penilaian magang.",
+  },
+  {
+    code: "EVALUATION_VIEW",
+    name: "Lihat Nilai Magang",
+    description: "Melihat evaluasi dan nilai magang peserta.",
+  },
+  {
+    code: "CERTIFICATE_APPROVE",
+    name: "Approve Sertifikat",
+    description: "Menyetujui penerbitan sertifikat magang.",
+  },
+  {
+    code: "GUIDE_MANAGE",
+    name: "Kelola Panduan",
+    description: "Mengelola materi panduan dan video tutorial.",
+  },
 ] as const;
 
 // Role → permission codes
@@ -196,7 +236,9 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "ATTENDANCE_CHECK_IN",
     "ATTENDANCE_CHECK_OUT",
     "ATTENDANCE_VIEW",
+    "CORRECTION_SUBMIT",
     "INTERNSHIP_VIEW",
+    "EVALUATION_VIEW",
     "CERTIFICATE_VIEW",
     "DASHBOARD_VIEW",
     "FILE_UPLOAD",
@@ -206,9 +248,13 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "APPLICATION_VIEW",
     "ATTENDANCE_VIEW",
     "ATTENDANCE_OVERRIDE",
+    "CORRECTION_REVIEW",
     "INTERNSHIP_VIEW",
     "SUPERVISOR_VIEW",
     "SUPERVISOR_ASSIGN",
+    "EVALUATION_SUBMIT",
+    "EVALUATION_VIEW",
+    "QUOTA_VIEW",
     "DEPARTMENT_MANAGE",
     "OFFICE_MANAGE",
     "CERTIFICATE_VIEW",
@@ -218,6 +264,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "APPLICATION_VIEW",
     "ATTENDANCE_VIEW",
     "INTERNSHIP_VIEW",
+    "QUOTA_VIEW",
     "DASHBOARD_VIEW",
   ],
 };
@@ -886,6 +933,131 @@ async function main() {
     });
   }
   console.log(`  ✓ Admin user: ${adminEmail} (HR_ADMIN)`);
+
+  // 11. Internship Quotas (v1.0.1)
+  const allOffices = await prisma.officeLocation.findMany();
+  const allDepartments = await prisma.department.findMany();
+  let seededQuotasCount = 0;
+  for (const office of allOffices) {
+    const totalOfficeCap = allDepartments.length * 5; // e.g. 5 slot per department
+    const existing = await prisma.internshipQuota.findUnique({
+      where: {
+        officeLocationId: office.id,
+      },
+      include: { departmentAllocations: true },
+    });
+
+    if (!existing) {
+      await prisma.internshipQuota.create({
+        data: {
+          officeLocationId: office.id,
+          totalCapacity: totalOfficeCap,
+          isActive: true,
+          notes: `Kapasitas kuota kantor ${office.name}`,
+          createdBy: admin.id,
+          departmentAllocations: {
+            create: allDepartments.map((dept) => ({
+              departmentId: dept.id,
+              capacity: 5,
+              notes: `Alokasi bidang ${dept.name}`,
+            })),
+          },
+        },
+      });
+      seededQuotasCount++;
+    }
+  }
+  console.log(`  ✓ InternshipQuota: ${seededQuotasCount} master kuota kantor & alokasi departemen`);
+
+  // 12. Multi-Office Certificate Settings (v1.0.1)
+  for (const office of allOffices) {
+    const officeCode = (office.name ?? "OFFICE")
+      .replace(/[^A-Za-z0-9]/g, "")
+      .slice(0, 4)
+      .toUpperCase();
+
+    await findOrCreate(
+      () =>
+        prisma.certificateSetting.findFirst({
+          where: { officeLocationId: office.id },
+        }),
+      () =>
+        prisma.certificateSetting.create({
+          data: {
+            officeLocationId: office.id,
+            signerName: `Pimpinan ${office.name ?? "Kantor"}`,
+            signerRole: `Kepala ${office.name ?? "Kantor Cabang"}`,
+            certificateNumberFormat: `SIMAD/${officeCode}/{YEAR}/{NUM}`,
+            isActive: true,
+          },
+        }),
+    );
+  }
+  console.log(`  ✓ CertificateSetting: ${allOffices.length} setting kantor`);
+
+  // 13. Guide & Tutorial Contents (v1.0.1)
+  const GUIDES = [
+    {
+      title: "Panduan Alur Pendaftaran & Dokumen Wajib",
+      slug: "panduan-pendaftaran-magang",
+      description: "Tata cara mendaftar magang di SIMAD dan melampirkan berkas wajib CV serta Surat Permohonan Fakultas.",
+      category: "REGISTRATION",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      content: `# Panduan Pendaftaran Magang SIMAD\n\n1. Registrasi akun dan lengkapi data profil mahasiswa.\n2. Wajib mengunggah **Curriculum Vitae (CV)** dan **Surat Permohonan dari Fakultas**.\n3. Pilih kantor dan departemen peminatan.\n4. Kirim pengajuan dan pantau status review oleh tim HR.`,
+      displayOrder: 1,
+      isPublished: true,
+    },
+    {
+      title: "Tata Tertib & Batas Waktu Absensi Masuk (Maks 08:00 WIB)",
+      slug: "tata-tertib-jam-absensi",
+      description: "Ketentuan jam masuk tepat waktu dan geofence lokasi kantor.",
+      category: "ATTENDANCE",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      content: `# Tata Tertib Absensi Harian\n\n- Absensi masuk tepat waktu maksimal adalah pukul **08:00 WIB**.\n- Check-in setelah pukul 08:00 WIB akan otomatis tercatat sebagai **Terlambat (LATE)**.\n- Pastikan izin GPS aktif dan berada di dalam radius kantor saat absen masuk dan pulang.`,
+      displayOrder: 2,
+      isPublished: true,
+    },
+    {
+      title: "Prosedur Pengajuan Koreksi Absensi",
+      slug: "prosedur-koreksi-absensi",
+      description: "Cara mengajukan permohonan koreksi absensi yang terkendala ke Supervisor.",
+      category: "CORRECTION",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      content: `# Prosedur Koreksi Absensi\n\n1. Buka menu Riwayat Absensi dan klik tombol **Ajukan Koreksi** pada tanggal terkait.\n2. Pilih jenis koreksi (Check-in / Check-out) dan sertakan alasan serta file bukti foto kendala.\n3. Supervisor Anda akan meninjau dan memberikan persetujuan jika permohonan valid.`,
+      displayOrder: 3,
+      isPublished: true,
+    },
+    {
+      title: "Ketentuan Penilaian & Penerbitan Sertifikat Magang",
+      slug: "penilaian-dan-sertifikat-magang",
+      description: "Syarat penerbitan sertifikat magang resmi SIMAD.",
+      category: "CERTIFICATE",
+      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      content: `# Sertifikat Magang Digital\n\n- Sertifikat resmi hanya dapat diterbitkan setelah status magang **Selesai (COMPLETED)**.\n- Supervisor wajib memberikan **Nilai Akhir Evaluasi (FINAL)** terlebih dahulu.\n- Tim HR Admin akan melakukan persetujuan akhir sebelum PDF Sertifikat ber-QR Code dapat diunduh.`,
+      displayOrder: 4,
+      isPublished: true,
+    },
+  ];
+
+  for (const guide of GUIDES) {
+    await prisma.guideContent.upsert({
+      where: { slug: guide.slug },
+      update: {
+        title: guide.title,
+        description: guide.description,
+        category: guide.category,
+        videoUrl: guide.videoUrl,
+        content: guide.content,
+        displayOrder: guide.displayOrder,
+        isPublished: guide.isPublished,
+      },
+      create: {
+        ...guide,
+        createdById: admin.id,
+      },
+    });
+  }
+  console.log(`  ✓ GuideContent: ${GUIDES.length} materi panduan & tutorial`);
 
   console.log("✅ Seed selesai.");
 }

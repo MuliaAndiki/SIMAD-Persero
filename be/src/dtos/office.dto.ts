@@ -26,6 +26,15 @@ export const OfficeParamsDto = t.Object({
   officeId: t.String({ description: 'ID lokasi kantor' }),
 });
 
+export const AttendanceSettingDto = t.Object({
+  checkInStart: t.Optional(t.Union([t.String(), t.Null()])),
+  checkInEnd: t.Optional(t.Union([t.String(), t.Null()])),
+  checkOutStart: t.Optional(t.Union([t.String(), t.Null()])),
+  checkOutEnd: t.Optional(t.Union([t.String(), t.Null()])),
+  lateAfter: t.Optional(t.Union([t.String(), t.Null()])),
+  allowWeekend: t.Optional(t.Boolean()),
+});
+
 // POST /offices
 export const CreateOfficeDto = t.Object({
   departmentIds: t.Optional(t.Array(t.String({ description: 'ID departemen (banyak-ke-banyak)' }))),
@@ -38,6 +47,7 @@ export const CreateOfficeDto = t.Object({
   latitude: t.Number({ description: 'Garis lintang' }),
   longitude: t.Number({ description: 'Garis bujur' }),
   radiusMeter: t.Number({ minimum: 1, description: 'Radius geofence (meter)' }),
+  attendanceSetting: t.Optional(AttendanceSettingDto),
 });
 
 // PATCH /offices/:officeId
@@ -56,5 +66,6 @@ export const UpdateOfficeDto = t.Partial(
       minimum: 1,
       description: 'Radius geofence (meter)',
     }),
+    attendanceSetting: AttendanceSettingDto,
   }),
 );

@@ -3,13 +3,17 @@ import attendanceService from '@/services/api/attendance.service';
 import auditLogService from '@/services/api/auditLog.service';
 import authService from '@/services/api/auth.service';
 import certificateService from '@/services/api/certificate.service';
+import correctionService from '@/services/api/correction.service';
 import dashboardService from '@/services/api/dashboard.service';
 import departmentService from '@/services/api/department.service';
+import evaluationService from '@/services/api/evaluation.service';
 import fileService from '@/services/api/file.service';
+import guideService from '@/services/api/guide.service';
 import institutionService from '@/services/api/institution.service';
 import internshipService from '@/services/api/internship.service';
 import notificationService from '@/services/api/notification.service';
 import officeService from '@/services/api/office.service';
+import quotaService from '@/services/api/quota.service';
 import receptionistService from '@/services/api/receptionist.service';
 import reportingService from '@/services/api/reporting.service';
 import supervisorService from '@/services/api/supervisor.service';
@@ -28,6 +32,10 @@ class Api {
   static Application = WrapApi(applicationService);
   static Internship = WrapApi(internshipService);
   static Attendance = WrapApi(attendanceService);
+  static Correction = WrapApi(correctionService);
+  static Evaluation = WrapApi(evaluationService);
+  static Guide = WrapApi(guideService);
+  static Quota = WrapApi(quotaService);
   static Certificate = WrapApi(certificateService);
   static Notification = WrapApi(notificationService);
   static Supervisor = WrapApi(supervisorService);
@@ -38,3 +46,4 @@ class Api {
 }
 
 export default Api;
+

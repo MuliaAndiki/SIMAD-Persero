@@ -1,6 +1,4 @@
 // Types for the Certificate module.
-// Diturunkan dari base model (models.types.ts) memakai Utility Types.
-// Source: docs/07-api-specification.md §17, docs/04-business-rules.md §23
 import type {
   ICertificate,
   ICertificateTemplate,
@@ -11,15 +9,53 @@ import type {
   IUser,
 } from './models.types';
 
+export const CertificateApprovalStatus = {
+  WAITING_EVALUATION: 'WAITING_EVALUATION',
+  WAITING_APPROVAL: 'WAITING_APPROVAL',
+  APPROVED: 'APPROVED',
+  GENERATED: 'GENERATED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type CertificateApprovalStatusValue =
+  (typeof CertificateApprovalStatus)[keyof typeof CertificateApprovalStatus];
+
 /** POST /certificates/generate body */
 export type GenerateCertificateBody = {
   internshipId: IInternship['id'];
+};
+
+/** PATCH /certificates/:id/approve */
+export type ApproveCertificateBody = {
+  notes?: string;
+};
+
+/** PATCH /certificates/:id/reject */
+export type RejectCertificateBody = {
+  reason: string;
+};
+
+/** POST/PATCH /certificate-settings body */
+export type UpsertCertificateSettingBody = {
+  officeLocationId: string;
+  signerName: string;
+  signerRole: string;
+  signatureFileId?: string;
+  stampFileId?: string;
+  templateFileId?: string;
+  certificateNumberFormat?: string;
+  isActive?: boolean;
 };
 
 /** GET /certificates query */
 export type CertificateQuery = Partial<{
   page: number;
   limit: number;
+  status: string;
+  approvalStatus: CertificateApprovalStatusValue;
+  officeLocationId: string;
+  departmentId: string;
+  keyword: string;
 }>;
 
 /** Serialized certificate returned to clients. */
@@ -30,6 +66,11 @@ export type CertificateResponse = {
   templateId: ICertificate['templateId'];
   fileId: ICertificate['fileId'];
   fileUrl: string | null;
+  approvalStatus?: CertificateApprovalStatusValue | string;
+  approvedById?: string | null;
+  approvedAt?: Date | null;
+  rejectionReason?: string | null;
+  evaluationId?: string | null;
   generatedById: ICertificate['generatedById'];
   generatedBy: string | null;
   generatedAt: ICertificate['generatedAt'];
@@ -41,11 +82,18 @@ export type CertificateResponse = {
     actualStartDate: IInternship['actualStartDate'];
     actualEndDate: IInternship['actualEndDate'];
     department: Pick<IDepartment, 'id' | 'code' | 'name'> | null;
+    officeLocation?: { id: string; name: string } | null;
     intern: {
       id: IUser['id'];
       fullName: IUser['fullName'];
       email: IUser['email'];
       studentNumber: IInternProfile['studentNumber'] | null;
+    } | null;
+    evaluation?: {
+      id: string;
+      finalScore: number;
+      grade: string;
+      status: string;
     } | null;
   } | null;
 };

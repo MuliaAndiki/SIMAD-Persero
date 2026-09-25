@@ -9,14 +9,25 @@ import {
   CardTitle,
 } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import { Label } from '@/components/atoms/label';
+import type { OfficeResponse } from '@/types/api/office.types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/atoms/select';
 import {
   Award,
+  Building2,
   CheckCircle2,
   ExternalLink,
   FileCheck,
   FileText,
   Image as ImageIcon,
   LayoutTemplate,
+  MapPin,
   RotateCcw,
   Save,
   Trash2,
@@ -27,8 +38,11 @@ import { type FormEvent, useEffect, useState } from 'react';
 
 export interface CertificateSettingSectionState {
   isPending: boolean;
+  offices?: OfficeResponse[];
+  selectedOfficeId?: string;
   signerName: string;
   signerRole: string;
+  certificateNumberFormat?: string;
   signatureUrl?: string;
   signatureFileName?: string;
   templateUrl?: string;
@@ -36,9 +50,12 @@ export interface CertificateSettingSectionState {
 }
 
 export interface CertificateSettingSectionService {
+  onSelectOffice?: (officeId: string) => void;
   onSaveSettings: (data: {
+    officeLocationId?: string;
     signerName: string;
     signerRole: string;
+    certificateNumberFormat?: string;
     signatureFile?: File;
     templateFile?: File;
   }) => Promise<void>;
@@ -51,9 +68,13 @@ export interface CertificateSettingSectionProps {
   service: CertificateSettingSectionService;
 }
 
+
 export function CertificateSettingSection({ state, service }: CertificateSettingSectionProps) {
   const [signerName, setSignerName] = useState(state.signerName);
   const [signerRole, setSignerRole] = useState(state.signerRole);
+  const [certificateNumberFormat, setCertificateNumberFormat] = useState(
+    state.certificateNumberFormat || 'SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}',
+  );
   const [signatureFile, setSignatureFile] = useState<File | undefined>();
   const [templateFile, setTemplateFile] = useState<File | undefined>();
   const [signaturePreviewUrl, setSignaturePreviewUrl] = useState<string | null>(null);
@@ -67,6 +88,12 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
   useEffect(() => {
     setSignerRole(state.signerRole);
   }, [state.signerRole]);
+
+  useEffect(() => {
+    if (state.certificateNumberFormat) {
+      setCertificateNumberFormat(state.certificateNumberFormat);
+    }
+  }, [state.certificateNumberFormat]);
 
   // Handle signature file change and create temporary preview
   const handleSignatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,8 +140,10 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
     setIsSaving(true);
     try {
       await service.onSaveSettings({
+        officeLocationId: state.selectedOfficeId === 'ALL' ? undefined : state.selectedOfficeId,
         signerName,
         signerRole,
+        certificateNumberFormat,
         signatureFile,
         templateFile,
       });
@@ -138,7 +167,7 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
           <h1 className="text-2xl font-semibold tracking-tight">Pengaturan Sertifikat</h1>
           <p className="text-sm text-muted-foreground">
             Kelola template sertifikat A4 (29,7 cm × 21 cm) di Cloudflare R2, tanda tangan digital,
-            dan data penandatangan.
+            dan data penandatangan per unit/kantor cabang PLN.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -154,14 +183,49 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Kolom Kiri: Form Pengaturan */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Card Kantor Penempatan */}
+          {state.offices && state.offices.length > 0 && service.onSelectOffice && (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <MapPin className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground">Lokasi Kantor Target</h4>
+                    <p className="text-xs text-muted-foreground">Pilih kantor untuk konfigurasi sertifikat spesifik atau default.</p>
+                  </div>
+                </div>
+                <div className="w-full sm:w-64">
+                  <Select
+                    value={state.selectedOfficeId || 'ALL'}
+                    onValueChange={service.onSelectOffice}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih Kantor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">Pengaturan Umum (Default PLN)</SelectItem>
+                      {state.offices.map((office) => (
+                        <SelectItem key={office.id} value={office.id}>
+                          {office.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Card 1: Identitas Penandatangan */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Identitas Penandatangan</CardTitle>
                 <CardDescription>
-                  Informasi ini akan tercetak pada bagian tanda tangan di semua sertifikat magang
-                  yang diterbitkan.
+                  Informasi ini akan tercetak pada bagian tanda tangan di sertifikat magang
+                  yang diterbitkan untuk unit kantor ini.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
@@ -195,6 +259,25 @@ export function CertificateSettingSection({ state, service }: CertificateSetting
                     placeholder="Contoh: Senior Manager Keuangan, Komunikasi & Umum"
                     disabled={state.isPending || isSaving}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    htmlFor="certFormat"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Format Nomor Sertifikat
+                  </label>
+                  <Input
+                    id="certFormat"
+                    value={certificateNumberFormat}
+                    onChange={(e) => setCertificateNumberFormat(e.target.value)}
+                    placeholder="Contoh: SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}"
+                    disabled={state.isPending || isSaving}
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Variabel dinamis yang didukung: <code>{'{YEAR}'}</code>, <code>{'{MONTH}'}</code>, <code>{'{NUM}'}</code>, <code>{'{OFFICE_CODE}'}</code>.
+                  </p>
                 </div>
               </CardContent>
             </Card>

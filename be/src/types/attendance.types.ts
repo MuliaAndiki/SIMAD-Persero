@@ -41,6 +41,7 @@ export type AttendanceStatus = (typeof AttendanceStatus)[keyof typeof Attendance
 export const AttendanceLogAction = {
   CHECK_IN: 'CHECK_IN',
   CHECK_OUT: 'CHECK_OUT',
+  OVERRIDE: 'OVERRIDE',
 } as const;
 export type AttendanceLogAction = (typeof AttendanceLogAction)[keyof typeof AttendanceLogAction];
 

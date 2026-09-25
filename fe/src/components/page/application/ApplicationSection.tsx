@@ -150,7 +150,8 @@ function NewApplicationForm({
   isSubmitting: boolean;
   isUploading: boolean;
 }) {
-  const [file, setFile] = useState<File | null>(null);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [facultyFile, setFacultyFile] = useState<File | null>(null);
   const [startDate, setStartDate] = useState('');
   const [durationMonths, setDurationMonths] = useState('2');
   const [endDate, setEndDate] = useState('');
@@ -174,15 +175,27 @@ function NewApplicationForm({
     }
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleCvChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] ?? null;
     if (selected && selected.size > 5 * 1024 * 1024) {
-      setLocalError('Ukuran file maksimal 5MB.');
-      setFile(null);
+      setLocalError('Ukuran CV maksimal 5MB.');
+      setCvFile(null);
       e.target.value = '';
       return;
     }
-    setFile(selected);
+    setCvFile(selected);
+    setLocalError(null);
+  };
+
+  const handleFacultyFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] ?? null;
+    if (selected && selected.size > 5 * 1024 * 1024) {
+      setLocalError('Ukuran Surat Permohonan Fakultas maksimal 5MB.');
+      setFacultyFile(null);
+      e.target.value = '';
+      return;
+    }
+    setFacultyFile(selected);
     setLocalError(null);
   };
 
@@ -190,8 +203,8 @@ function NewApplicationForm({
     e.preventDefault();
     setLocalError(null);
 
-    if (!file) {
-      setLocalError('Surat pengantar wajib diunggah.');
+    if (!cvFile && !facultyFile) {
+      setLocalError('Curriculum Vitae (CV) dan Surat Permohonan Fakultas wajib diunggah.');
       return;
     }
     if (!officeId) {
@@ -206,12 +219,11 @@ function NewApplicationForm({
       setLocalError('Tanggal mulai harus sebelum tanggal selesai.');
       return;
     }
-    if (new Date(startDate) <= new Date()) {
-      setLocalError('Tanggal mulai harus di masa depan.');
-      return;
-    }
 
-    const upload = await service.onUploadFile(file);
+    const primaryFile = facultyFile || cvFile;
+    if (!primaryFile) return;
+
+    const upload = await service.onUploadFile(primaryFile);
     if (!upload) return;
 
     await service.onCreate({
@@ -231,7 +243,7 @@ function NewApplicationForm({
       <CardHeader>
         <CardTitle>Buat Pengajuan Baru</CardTitle>
         <CardDescription>
-          Lengkapi detail magang dan unggah surat pengantar dari instansi pendidikan Anda.
+          Lengkapi detail magang dan unggah dokumen wajib (CV & Surat Permohonan Fakultas/Kampus).
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -307,7 +319,7 @@ function NewApplicationForm({
             </label>
             <textarea
               id="motivation"
-              rows={4}
+              rows={3}
               placeholder="Ceritakan alasan dan tujuan Anda mengikuti magang…"
               className={cn(fieldClass, 'h-auto py-2')}
               value={motivation}
@@ -315,27 +327,53 @@ function NewApplicationForm({
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium">Surat Pengantar (PDF, maks 5MB) *</span>
-            <label
-              htmlFor="coverLetter"
-              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 text-center transition-colors hover:border-primary/50 hover:bg-muted/40"
-            >
-              <UploadCloud className="size-8 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                {file ? file.name : 'Klik untuk memilih file'}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {file ? 'File siap diunggah' : 'Unggah surat pengantar dalam format PDF'}
-              </span>
-              <input
-                id="coverLetter"
-                type="file"
-                accept=".pdf,application/pdf"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-            </label>
+          {/* Upload CV & Surat Fakultas Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium">1. Curriculum Vitae (CV) *</span>
+              <label
+                htmlFor="cvUpload"
+                className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors hover:border-primary/50 hover:bg-muted/40"
+              >
+                <UploadCloud className="size-6 text-primary" />
+                <span className="text-xs font-semibold">
+                  {cvFile ? cvFile.name : 'Pilih File CV (PDF)'}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {cvFile ? 'CV siap diunggah' : 'Format PDF, maks. 5MB'}
+                </span>
+                <input
+                  id="cvUpload"
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="hidden"
+                  onChange={handleCvChange}
+                />
+              </label>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-medium">2. Surat Permohonan Fakultas *</span>
+              <label
+                htmlFor="facultyUpload"
+                className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition-colors hover:border-primary/50 hover:bg-muted/40"
+              >
+                <UploadCloud className="size-6 text-primary" />
+                <span className="text-xs font-semibold">
+                  {facultyFile ? facultyFile.name : 'Pilih Surat Fakultas (PDF)'}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {facultyFile ? 'Surat siap diunggah' : 'Format PDF, maks. 5MB'}
+                </span>
+                <input
+                  id="facultyUpload"
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="hidden"
+                  onChange={handleFacultyFileChange}
+                />
+              </label>
+            </div>
           </div>
 
           {localError && (
@@ -348,10 +386,10 @@ function NewApplicationForm({
           <div className="flex justify-end border-t pt-4">
             <Button
               type="submit"
-              disabled={isSubmitting || isUploading || !file || !officeId || !startDate || !endDate}
+              disabled={isSubmitting || isUploading || (!cvFile && !facultyFile) || !officeId || !startDate || !endDate}
             >
               {isUploading
-                ? 'Mengunggah File…'
+                ? 'Mengunggah Dokumen…'
                 : isSubmitting
                   ? 'Menyimpan…'
                   : 'Simpan Draft Pengajuan'}
@@ -362,3 +400,4 @@ function NewApplicationForm({
     </Card>
   );
 }
+

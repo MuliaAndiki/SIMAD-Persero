@@ -8,44 +8,38 @@ import { toast } from 'sonner';
 
 export default function CertificateSettingContainer() {
   const api = useApi();
+  const [selectedOfficeId, setSelectedOfficeId] = useState('ALL');
   const [signerName, setSignerName] = useState('NURLANA');
   const [signerRole, setSignerRole] = useState('Senior Manager Keuangan, Komunikasi & Umum');
+  const [certificateNumberFormat, setCertificateNumberFormat] = useState('SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}');
   const [signatureUrl, setSignatureUrl] = useState('');
   const [signatureFileName, setSignatureFileName] = useState('');
   const [templateUrl, setTemplateUrl] = useState('');
   const [templateFileName, setTemplateFileName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  const officesQuery = api.office.query.list();
   const uploadFile = api.file.mutate.upload();
   const settingsQuery = api.certificate.query.settings();
   const saveSettingsMutation = api.certificate.mutate.saveSettings();
+  const createOfficeSettingMutation = api.certificate.mutate.createOfficeSetting();
+  const updateOfficeSettingMutation = api.certificate.mutate.updateOfficeSetting();
 
+  // Load general settings or office specific settings
   useEffect(() => {
     if (settingsQuery.data) {
       if (settingsQuery.data.signerName) setSignerName(settingsQuery.data.signerName);
       if (settingsQuery.data.signerRole) setSignerRole(settingsQuery.data.signerRole);
       if (settingsQuery.data.signatureUrl) setSignatureUrl(settingsQuery.data.signatureUrl);
       if (settingsQuery.data.templateUrl) setTemplateUrl(settingsQuery.data.templateUrl);
-    } else if (typeof window !== 'undefined') {
-      const savedName = localStorage.getItem('simad_cert_signer_name');
-      const savedRole = localStorage.getItem('simad_cert_signer_role');
-      const savedSigUrl = localStorage.getItem('simad_cert_signature_url');
-      const savedSigName = localStorage.getItem('simad_cert_signature_name');
-      const savedTplUrl = localStorage.getItem('simad_cert_template_url');
-      const savedTplName = localStorage.getItem('simad_cert_template_name');
-
-      if (savedName) setSignerName(savedName);
-      if (savedRole) setSignerRole(savedRole);
-      if (savedSigUrl) setSignatureUrl(savedSigUrl);
-      if (savedSigName) setSignatureFileName(savedSigName);
-      if (savedTplUrl) setTemplateUrl(savedTplUrl);
-      if (savedTplName) setTemplateFileName(savedTplName);
     }
   }, [settingsQuery.data]);
 
   const handleSaveSettings = async (data: {
+    officeLocationId?: string;
     signerName: string;
     signerRole: string;
+    certificateNumberFormat?: string;
     signatureFile?: File;
     templateFile?: File;
   }) => {
@@ -101,35 +95,27 @@ export default function CertificateSettingContainer() {
       }
 
       // Simpan konfigurasi ke backend
-      await saveSettingsMutation.mutateAsync({
-        signerName: data.signerName,
-        signerRole: data.signerRole,
-        signatureUrl: updatedSigUrl,
-        templateUrl: updatedTplUrl,
-      });
-
-      // Simpan konfigurasi ke localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('simad_cert_signer_name', data.signerName);
-        localStorage.setItem('simad_cert_signer_role', data.signerRole);
-        if (updatedSigUrl) {
-          localStorage.setItem('simad_cert_signature_url', updatedSigUrl);
-          localStorage.setItem('simad_cert_signature_name', updatedSigName);
-        } else {
-          localStorage.removeItem('simad_cert_signature_url');
-          localStorage.removeItem('simad_cert_signature_name');
-        }
-        if (updatedTplUrl) {
-          localStorage.setItem('simad_cert_template_url', updatedTplUrl);
-          localStorage.setItem('simad_cert_template_name', updatedTplName);
-        } else {
-          localStorage.removeItem('simad_cert_template_url');
-          localStorage.removeItem('simad_cert_template_name');
-        }
+      if (data.officeLocationId && data.officeLocationId !== 'ALL') {
+        await createOfficeSettingMutation.mutateAsync({
+          officeLocationId: data.officeLocationId,
+          signerName: data.signerName,
+          signerRole: data.signerRole,
+          certificateNumberFormat: data.certificateNumberFormat || 'SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}',
+        });
+      } else {
+        await saveSettingsMutation.mutateAsync({
+          signerName: data.signerName,
+          signerRole: data.signerRole,
+          signatureUrl: updatedSigUrl,
+          templateUrl: updatedTplUrl,
+        });
       }
 
       setSignerName(data.signerName);
       setSignerRole(data.signerRole);
+      if (data.certificateNumberFormat) {
+        setCertificateNumberFormat(data.certificateNumberFormat);
+      }
 
       toast.success('Pengaturan sertifikat berhasil disimpan', {
         id: 'save-cert-setting',
@@ -145,10 +131,6 @@ export default function CertificateSettingContainer() {
   };
 
   const handleResetTemplate = async () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('simad_cert_template_url');
-      localStorage.removeItem('simad_cert_template_name');
-    }
     setTemplateUrl('');
     setTemplateFileName('');
     try {
@@ -165,10 +147,6 @@ export default function CertificateSettingContainer() {
   };
 
   const handleResetSignature = async () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('simad_cert_signature_url');
-      localStorage.removeItem('simad_cert_signature_name');
-    }
     setSignatureUrl('');
     setSignatureFileName('');
     try {
@@ -188,14 +166,18 @@ export default function CertificateSettingContainer() {
     <CertificateSettingSection
       state={{
         isPending: uploadFile.isPending || isSaving,
+        offices: officesQuery.data ?? [],
+        selectedOfficeId,
         signerName,
         signerRole,
+        certificateNumberFormat,
         signatureUrl,
         signatureFileName,
         templateUrl,
         templateFileName,
       }}
       service={{
+        onSelectOffice: setSelectedOfficeId,
         onSaveSettings: handleSaveSettings,
         onResetTemplate: handleResetTemplate,
         onResetSignature: handleResetSignature,

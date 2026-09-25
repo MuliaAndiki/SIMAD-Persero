@@ -4,11 +4,13 @@ import {
   CalendarCheck,
   CheckCircle2,
   Clock,
+  Loader2,
   LogIn,
   LogOut,
   MapPin,
   XCircle,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 
 import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
@@ -16,6 +18,19 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { AttendanceDetailResponse } from '@/types/api/attendance.types';
+
+const AttendanceMap = dynamic(
+  () => import('@/components/organisms/attendance/AttendanceMap').then((mod) => mod.AttendanceMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 text-sm text-muted-foreground sm:h-72">
+        <Loader2 className="size-6 animate-spin text-primary" />
+        <span>Memuat peta interaktif…</span>
+      </div>
+    ),
+  },
+);
 
 /** State yang disuplai container — section murni presentasi. */
 export interface AttendanceDetailSectionState {
@@ -187,14 +202,19 @@ function CheckPointCard({
   );
 }
 
+import { AttendanceCorrectionDialog } from '@/components/organisms/attendance/AttendanceCorrectionDialog';
+import { FileEdit } from 'lucide-react';
+import { useState } from 'react';
+
 export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps) {
   const { detail } = state;
+  const [isCorrectionOpen, setIsCorrectionOpen] = useState(false);
   const checkInLog = detail?.logs?.find((log) => log.action === 'CHECK_IN');
   const checkOutLog = detail?.logs?.find((log) => log.action === 'CHECK_OUT');
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild aria-label="Kembali ke riwayat">
             <Link href="/intern/history">
@@ -208,6 +228,17 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
             </p>
           </div>
         </div>
+
+        {detail && (
+          <Button
+            variant="outline"
+            className="flex items-center gap-1.5"
+            onClick={() => setIsCorrectionOpen(true)}
+          >
+            <FileEdit className="size-4" />
+            Ajukan Koreksi Hari Ini
+          </Button>
+        )}
       </header>
 
       {state.isPending ? (
@@ -269,6 +300,39 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
               log={checkOutLog}
             />
           </div>
+
+          {/* Peta Lokasi Geofence jika data kantor tersedia */}
+          {detail.office && detail.office.latitude != null && detail.office.longitude != null && (
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <MapPin className="size-4 text-primary" />
+                    Peta Validasi Lokasi Presensi
+                  </CardTitle>
+                  <Badge variant="outline" className="text-xs">
+                    {detail.office.name}
+                  </Badge>
+                </div>
+                <CardDescription>
+                  Visualisasi titik lokasi kantor PLN ({detail.office.radiusMeter} m) dan koordinat GPS saat presensi dilakukan.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AttendanceMap
+                  officeLatitude={detail.office.latitude}
+                  officeLongitude={detail.office.longitude}
+                  officeRadiusMeter={detail.office.radiusMeter}
+                  officeName={detail.office.name}
+                  userLatitude={checkInLog?.latitude ?? checkOutLog?.latitude}
+                  userLongitude={checkInLog?.longitude ?? checkOutLog?.longitude}
+                  userAccuracyMeter={checkInLog?.accuracyMeter ?? checkOutLog?.accuracyMeter}
+                  isInsideGeofence={checkInLog?.insideGeofence ?? checkOutLog?.insideGeofence ?? false}
+                  distanceMeter={checkInLog?.distanceMeter ?? checkOutLog?.distanceMeter}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Riwayat log */}
           <Card>
@@ -336,6 +400,15 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
             </CardContent>
           </Card>
         </>
+      )}
+
+      {detail && (
+        <AttendanceCorrectionDialog
+          open={isCorrectionOpen}
+          onOpenChange={setIsCorrectionOpen}
+          initialAttendanceId={detail.id}
+          initialDate={detail.attendanceDate}
+        />
       )}
     </section>
   );

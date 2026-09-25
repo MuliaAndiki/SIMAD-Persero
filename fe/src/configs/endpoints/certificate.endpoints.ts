@@ -1,10 +1,5 @@
 /**
  * Daftar endpoint modul Certificate.
- *
- * Path relatif terhadap base URL API yang dibangun di lapisan fetch
- * (fe/src/api/client/client-http.ts & fe/src/api/server/server-fetch.ts,
- * dari NEXT_PUBLIC_BACKEND_URL + NEXT_PUBLIC_GATE_API + NEXT_PUBLIC_VERSION_API).
- * Disamakan dengan rute backend (be/src/routes/certificateRoutes.ts).
  */
 
 export const CERTIFICATE_ENDPOINTS = {
@@ -12,16 +7,28 @@ export const CERTIFICATE_ENDPOINTS = {
   VERIFY: (verificationCode: string) => `/certificates/verify/${verificationCode}`,
   /** GET /certificates/me — Sertifikat milik intern (INTERN) */
   MY: '/certificates/me',
+  /** GET /certificates — List all certificates (HR_ADMIN) */
+  LIST: '/certificates',
+  /** GET /certificates/pending-approval — Pending approval list (HR_ADMIN) */
+  PENDING_APPROVAL: '/certificates/pending-approval',
+  /** PATCH /certificates/:id/approve — Approve certificate (HR_ADMIN) */
+  APPROVE: (id: string) => `/certificates/${id}/approve`,
+  /** PATCH /certificates/:id/reject — Reject certificate (HR_ADMIN) */
+  REJECT: (id: string) => `/certificates/${id}/reject`,
   /** POST /certificates/generate — Generate sertifikat (HR_ADMIN) */
   GENERATE: '/certificates/generate',
   /** GET /certificates/:certificateId/download — Unduh sertifikat */
   DOWNLOAD: (certificateId: string) => `/certificates/${certificateId}/download`,
   /** GET /certificates/:certificateId — Detail sertifikat */
   DETAIL: (certificateId: string) => `/certificates/${certificateId}`,
-  /** POST /certificates/:certificateId/regenerate — Regenerate sertifikat (HR_ADMIN) */
-  REGENERATE: (certificateId: string) => `/certificates/${certificateId}/regenerate`,
-  /** GET /certificates/settings & PUT /certificates/settings — Pengaturan sertifikat (HR_ADMIN & Authenticated) */
-  SETTINGS: '/certificates/settings',
   /** GET /certificates/me/download — Unduh sertifikat milik intern langsung */
   DOWNLOAD_MY: '/certificates/me/download',
+  /** Certificate Settings (general / per-office) */
+  SETTINGS: '/certificate-settings',
+  /** CRUD Office Certificate Settings */
+  OFFICE_SETTINGS_LIST: '/certificate-settings',
+  OFFICE_SETTING_DETAIL: (officeLocationId: string) => `/certificate-settings/${officeLocationId}`,
+  OFFICE_SETTING_CREATE: '/certificate-settings',
+  OFFICE_SETTING_UPDATE: (id: string) => `/certificate-settings/${id}`,
 } as const;
+

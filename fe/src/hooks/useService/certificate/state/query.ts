@@ -1,7 +1,11 @@
 import { queryKey } from '@/configs/query-key';
 import Api from '@/services/props.service';
 
-import type { CertificateParams, CertificateVerifyParams } from '@/types/api/certificate.types';
+import type {
+  CertificateParams,
+  CertificateQuery,
+  CertificateVerifyParams,
+} from '@/types/api/certificate.types';
 import { useQuery } from '@tanstack/react-query';
 
 export function useVerifyCertificate(
@@ -42,6 +46,56 @@ export function useCertificateDetail(
   });
 }
 
+export function useCertificateList(query?: CertificateQuery, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: queryKey.certificate.list(query),
+    queryFn: async () => {
+      const res = await Api.Certificate.List(query);
+      return res.data;
+    },
+    enabled: options?.enabled,
+  });
+}
+
+export function usePendingCertificateApprovals(
+  query?: CertificateQuery,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: queryKey.certificate.pendingApprovals(query),
+    queryFn: async () => {
+      const res = await Api.Certificate.PendingApprovals(query);
+      return res.data;
+    },
+    enabled: options?.enabled,
+  });
+}
+
+export function useOfficeCertificateSettingsList(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: queryKey.certificate.officeSettings(),
+    queryFn: async () => {
+      const res = await Api.Certificate.ListOfficeSettings();
+      return res.data;
+    },
+    enabled: options?.enabled,
+  });
+}
+
+export function useOfficeCertificateSettingDetail(
+  officeLocationId: string,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: queryKey.certificate.officeSetting(officeLocationId),
+    queryFn: async () => {
+      const res = await Api.Certificate.GetOfficeSetting(officeLocationId);
+      return res.data;
+    },
+    enabled: options?.enabled && !!officeLocationId,
+  });
+}
+
 export function useCertificateSettings() {
   return useQuery({
     queryKey: queryKey.certificate.settings(),
@@ -51,3 +105,6 @@ export function useCertificateSettings() {
     },
   });
 }
+
+
+

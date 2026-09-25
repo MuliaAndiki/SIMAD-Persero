@@ -14,7 +14,9 @@ import type {
   CertificateResponse,
   CertificateSettingsResponse,
   GenerateCertificateBody,
+  OfficeCertificateSettingResponse,
   UpdateCertificateSettingsBody,
+  UpsertOfficeCertificateSettingBody,
 } from '@/types/api/certificate.types';
 
 export function useGenerateCertificate() {
@@ -24,6 +26,22 @@ export function useGenerateCertificate() {
     CertificateCacheContext
   >({
     mutationFn: (body) => Api.Certificate.Generate(body),
+    invalidateKeys: [queryKey.certificateRoot()],
+    optimistic: (ns) => ({ previousData: readCertificateSnapshot(ns) }),
+  });
+}
+
+export function useApproveCertificate() {
+  return useAppMutation<CertificateResponse, string, CertificateCacheContext>({
+    mutationFn: (id) => Api.Certificate.Approve(id),
+    invalidateKeys: [queryKey.certificateRoot()],
+    optimistic: (ns) => ({ previousData: readCertificateSnapshot(ns) }),
+  });
+}
+
+export function useRejectCertificate() {
+  return useAppMutation<any, { id: string; reason: string }, CertificateCacheContext>({
+    mutationFn: ({ id, reason }) => Api.Certificate.Reject(id, reason),
     invalidateKeys: [queryKey.certificateRoot()],
     optimistic: (ns) => ({ previousData: readCertificateSnapshot(ns) }),
   });
@@ -45,6 +63,23 @@ export function useSaveCertificateSettings() {
   return useAppMutation<CertificateSettingsResponse, UpdateCertificateSettingsBody>({
     mutationFn: (body) => Api.Certificate.SaveSettings(body),
     invalidateKeys: [queryKey.certificate.settings()],
+  });
+}
+
+export function useCreateOfficeCertificateSetting() {
+  return useAppMutation<OfficeCertificateSettingResponse, UpsertOfficeCertificateSettingBody>({
+    mutationFn: (body) => Api.Certificate.CreateOfficeSetting(body),
+    invalidateKeys: [queryKey.certificate.officeSettings()],
+  });
+}
+
+export function useUpdateOfficeCertificateSetting() {
+  return useAppMutation<
+    OfficeCertificateSettingResponse,
+    { id: string; body: UpsertOfficeCertificateSettingBody }
+  >({
+    mutationFn: ({ id, body }) => Api.Certificate.UpdateOfficeSetting(id, body),
+    invalidateKeys: [queryKey.certificate.officeSettings()],
   });
 }
 
@@ -82,3 +117,4 @@ export function useDownloadMyCertificate() {
     },
   });
 }
+

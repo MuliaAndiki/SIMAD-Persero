@@ -8,40 +8,47 @@ datasource db {
 }
 
 model User {
-  id                        String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  fullName                  String                    @map("full_name") @db.VarChar(150)
-  email                     String                    @unique @db.VarChar(150)
-  password                  String?                   @db.VarChar
-  avatarFileId              String?                   @map("avatar_file_id") @db.Uuid
-  emailVerified             Boolean                   @default(false) @map("email_verified")
-  emailVerifiedAt           DateTime?                 @map("email_verified_at") @db.Timestamp(6)
-  lastLoginAt               DateTime?                 @map("last_login_at") @db.Timestamp(6)
-  isActive                  Boolean                   @default(true) @map("is_active")
-  createdAt                 DateTime?                 @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt                 DateTime?                 @updatedAt @map("updated_at") @db.Timestamp(6)
-  deletedAt                 DateTime?                 @map("deleted_at") @db.Timestamp(6)
-  departmentId              String?                   @map("department_id") @db.Uuid
-  officeId                  String?                   @map("office_id") @db.Uuid
-  department                Department?               @relation(fields: [departmentId], references: [id], onDelete: Restrict)
-  officeLocation            OfficeLocation?           @relation(fields: [officeId], references: [id], onDelete: Restrict)
+  id                        String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName                  String                        @map("full_name") @db.VarChar(150)
+  email                     String                        @unique @db.VarChar(150)
+  password                  String?                       @db.VarChar
+  avatarFileId              String?                       @map("avatar_file_id") @db.Uuid
+  emailVerified             Boolean                       @default(false) @map("email_verified")
+  emailVerifiedAt           DateTime?                     @map("email_verified_at") @db.Timestamp(6)
+  lastLoginAt               DateTime?                     @map("last_login_at") @db.Timestamp(6)
+  isActive                  Boolean                       @default(true) @map("is_active")
+  createdAt                 DateTime?                     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt                 DateTime?                     @updatedAt @map("updated_at") @db.Timestamp(6)
+  deletedAt                 DateTime?                     @map("deleted_at") @db.Timestamp(6)
+  departmentId              String?                       @map("department_id") @db.Uuid
+  officeId                  String?                       @map("office_id") @db.Uuid
+  department                Department?                   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  officeLocation            OfficeLocation?               @relation(fields: [officeId], references: [id], onDelete: Restrict)
   activityLogs              ActivityLog[]
   trustedDevices            AttendanceDevice[]
   overriddenAttendances     AttendanceOverride[]
   resolvedViolations        AttendanceViolation[]
   auditLogs                 AuditLog[]
-  generatedCertificates     Certificate[]             @relation("CertificateGeneratedBy")
-  uploadedFiles             File[]                    @relation("FileUploadedBy")
+  generatedCertificates     Certificate[]                 @relation("CertificateGeneratedBy")
+  approvedCertificates      Certificate[]                 @relation("CertificateApprovedBy")
+  uploadedFiles             File[]                        @relation("FileUploadedBy")
   internProfile             InternProfile?
-  reviewedApplications      InternshipApplication[]   @relation("ReviewedBy")
+  reviewedApplications      InternshipApplication[]       @relation("ReviewedBy")
   changedInternshipStatuses InternshipStatusHistory[]
   readNotifications         NotificationRead[]
-  sentNotifications         Notification[]            @relation("NotificationSender")
+  sentNotifications         Notification[]                @relation("NotificationSender")
   refreshTokens             RefreshToken[]
-  createdSupervisors        SupervisorAssignment[]    @relation("SupervisorAssignedBy")
-  assignedSupervisors       SupervisorAssignment[]    @relation("SupervisorUser")
-  assignedUserRoles         UserRole[]                @relation("UserRoleAssignedBy")
-  userRoles                 UserRole[]                @relation("UserRoleUser")
-  avatarFile                File?                     @relation("UserAvatar", fields: [avatarFileId], references: [id], onDelete: Restrict)
+  createdSupervisors        SupervisorAssignment[]        @relation("SupervisorAssignedBy")
+  assignedSupervisors       SupervisorAssignment[]        @relation("SupervisorUser")
+  assignedUserRoles         UserRole[]                    @relation("UserRoleAssignedBy")
+  userRoles                 UserRole[]                    @relation("UserRoleUser")
+  avatarFile                File?                         @relation("UserAvatar", fields: [avatarFileId], references: [id], onDelete: Restrict)
+  createdQuotas             InternshipQuota[]             @relation("QuotaCreatedBy")
+  requestedCorrections      AttendanceCorrectionRequest[] @relation("CorrectionRequestedBy")
+  supervisedCorrections     AttendanceCorrectionRequest[] @relation("CorrectionSupervisor")
+  reviewedCorrections       AttendanceCorrectionRequest[] @relation("CorrectionReviewedBy")
+  supervisedEvaluations     InternshipEvaluation[]        @relation("EvaluationSupervisor")
+  createdGuides             GuideContent[]                @relation("GuideCreatedBy")
 
   @@index([avatarFileId])
   @@map("users")
@@ -161,16 +168,17 @@ model Skill {
 }
 
 model Department {
-  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code            String           @unique @db.VarChar(50)
-  name            String?          @db.VarChar(150)
-  description     String?
-  isActive        Boolean          @default(true) @map("is_active")
-  createdAt       DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt       DateTime?        @updatedAt @map("updated_at") @db.Timestamp(6)
-  internships     Internship[]
-  officeLocations OfficeLocation[]
-  users           User[]
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String            @unique @db.VarChar(50)
+  name             String?           @db.VarChar(150)
+  description      String?
+  isActive         Boolean           @default(true) @map("is_active")
+  createdAt        DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime?         @updatedAt @map("updated_at") @db.Timestamp(6)
+  internships      Internship[]
+  officeLocations  OfficeLocation[]
+  users            User[]
+  quotaAllocations QuotaDepartmentAllocation[]
 
   @@map("departments")
 }
@@ -189,6 +197,8 @@ model OfficeLocation {
   internships            Internship[]
   internshipApplications InternshipApplication[]
   users                  User[]
+  internshipQuotas       InternshipQuota[]
+  certificateSettings    CertificateSetting[]
 
   @@map("office_locations")
 }
@@ -222,6 +232,27 @@ model CertificateTemplate {
 
   @@index([templateFileId])
   @@map("certificate_templates")
+}
+
+model CertificateSetting {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  officeLocationId        String?   @unique @map("office_location_id") @db.Uuid
+  signerName              String    @map("signer_name") @db.VarChar(150)
+  signerRole              String    @map("signer_role") @db.VarChar(150)
+  signatureFileId         String?   @map("signature_file_id") @db.Uuid
+  stampFileId             String?   @map("stamp_file_id") @db.Uuid
+  templateFileId          String?   @map("template_file_id") @db.Uuid
+  certificateNumberFormat String    @default("SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}") @map("certificate_number_format") @db.VarChar(100)
+  isActive                Boolean   @default(true) @map("is_active")
+  createdAt               DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt               DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  officeLocation OfficeLocation? @relation(fields: [officeLocationId], references: [id], onDelete: Cascade)
+  signatureFile  File?           @relation("CertificateSettingSignature", fields: [signatureFileId], references: [id], onDelete: Restrict)
+  stampFile      File?           @relation("CertificateSettingStamp", fields: [stampFileId], references: [id], onDelete: Restrict)
+  templateFile   File?           @relation("CertificateSettingTemplate", fields: [templateFileId], references: [id], onDelete: Restrict)
+
+  @@map("certificate_settings")
 }
 
 model InternProfile {
@@ -266,28 +297,30 @@ model InternProfileSkill {
 }
 
 model InternshipApplication {
-  id                       String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  internProfileId          String          @map("intern_profile_id") @db.Uuid
-  applicationNumber        String?         @unique @map("application_number") @db.VarChar(100)
-  introductionLetterFileId String          @map("introduction_letter_file_id") @db.Uuid
-  requestedStartDate       DateTime?       @map("requested_start_date") @db.Date
-  requestedEndDate         DateTime?       @map("requested_end_date") @db.Date
+  id                       String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  internProfileId          String                @map("intern_profile_id") @db.Uuid
+  applicationNumber        String?               @unique @map("application_number") @db.VarChar(100)
+  introductionLetterFileId String                @map("introduction_letter_file_id") @db.Uuid
+  requestedStartDate       DateTime?             @map("requested_start_date") @db.Date
+  requestedEndDate         DateTime?             @map("requested_end_date") @db.Date
+  actualStartDate          DateTime?             @map("actual_start_date") @db.Date
+  actualEndDate            DateTime?             @map("actual_end_date") @db.Date
   motivation               String?
-  officeLocationId         String?         @map("office_location_id") @db.Uuid
+  officeLocationId         String?               @map("office_location_id") @db.Uuid
   /// Application status (ApplicationStatus) — enforced via TS enum in service layer.
   /// Allowed values: DRAFT | SUBMITTED | UNDER_REVIEW | APPROVED | REJECTED | RESUBMITTED
-  /// Source: docs/05-state-machine.md §8, docs/04-business-rules.md §11
-  status                   String?         @db.VarChar(50)
-  reviewedById             String?         @map("reviewed_by") @db.Uuid
-  reviewedAt               DateTime?       @map("reviewed_at") @db.Timestamp(6)
-  rejectionReason          String?         @map("rejection_reason")
-  createdAt                DateTime?       @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt                DateTime?       @updatedAt @map("updated_at") @db.Timestamp(6)
-  internProfile            InternProfile   @relation(fields: [internProfileId], references: [id])
-  introductionLetterFile   File            @relation("IntroductionLetterFile", fields: [introductionLetterFileId], references: [id])
-  reviewedBy               User?           @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: Restrict)
-  officeLocation           OfficeLocation? @relation(fields: [officeLocationId], references: [id], onDelete: Restrict)
+  status                   String?               @db.VarChar(50)
+  reviewedById             String?               @map("reviewed_by") @db.Uuid
+  reviewedAt               DateTime?             @map("reviewed_at") @db.Timestamp(6)
+  rejectionReason          String?               @map("rejection_reason")
+  createdAt                DateTime?             @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt                DateTime?             @updatedAt @map("updated_at") @db.Timestamp(6)
+  internProfile            InternProfile         @relation(fields: [internProfileId], references: [id])
+  introductionLetterFile   File                  @relation("IntroductionLetterFile", fields: [introductionLetterFileId], references: [id])
+  reviewedBy               User?                 @relation("ReviewedBy", fields: [reviewedById], references: [id], onDelete: Restrict)
+  officeLocation           OfficeLocation?       @relation(fields: [officeLocationId], references: [id], onDelete: Restrict)
   internship               Internship?
+  documents                ApplicationDocument[]
 
   @@index([internProfileId])
   @@index([introductionLetterFileId])
@@ -296,36 +329,90 @@ model InternshipApplication {
   @@map("internship_applications")
 }
 
+model ApplicationDocument {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId String    @map("application_id") @db.Uuid
+  fileId        String    @map("file_id") @db.Uuid
+  /// Document type — CV | FACULTY_REQUEST_LETTER | OTHER
+  type          String    @db.VarChar(50)
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+
+  application InternshipApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  file        File                  @relation("ApplicationDocumentFile", fields: [fileId], references: [id], onDelete: Restrict)
+
+  @@unique([applicationId, type])
+  @@index([fileId])
+  @@map("application_documents")
+}
+
+model InternshipQuota {
+  id                    String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  officeLocationId      String                      @unique @map("office_location_id") @db.Uuid
+  totalCapacity         Int                         @default(0) @map("total_capacity")
+  isActive              Boolean                     @default(true) @map("is_active")
+  notes                 String?
+  createdBy             String?                     @map("created_by") @db.Uuid
+  createdAt             DateTime?                   @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt             DateTime?                   @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  officeLocation        OfficeLocation              @relation(fields: [officeLocationId], references: [id], onDelete: Restrict)
+  createdByUser         User?                       @relation("QuotaCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  departmentAllocations QuotaDepartmentAllocation[]
+  internships           Internship[]
+
+  @@map("internship_quotas")
+}
+
+model QuotaDepartmentAllocation {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quotaId      String          @map("quota_id") @db.Uuid
+  departmentId String          @map("department_id") @db.Uuid
+  capacity     Int
+  notes        String?
+  createdAt    DateTime?       @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime?       @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  quota        InternshipQuota @relation(fields: [quotaId], references: [id], onDelete: Cascade)
+  department   Department      @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+
+  @@unique([quotaId, departmentId])
+  @@index([departmentId])
+  @@map("quota_department_allocations")
+}
+
 model Internship {
-  id                    String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  applicationId         String?                   @unique @map("application_id") @db.Uuid
-  internProfileId       String?                   @map("intern_profile_id") @db.Uuid
-  departmentId          String?                   @map("department_id") @db.Uuid
-  officeLocationId      String?                   @map("office_location_id") @db.Uuid
-  actualStartDate       DateTime?                 @map("actual_start_date") @db.Date
-  actualEndDate         DateTime?                 @map("actual_end_date") @db.Date
-  /// Internship status (InternshipStatus) — enforced via TS enum in service layer.
-  /// Allowed values: PENDING | ACTIVE | COMPLETED | CERTIFICATE_GENERATED | ARCHIVED
-  /// Source: docs/05-state-machine.md §9, docs/04-business-rules.md §11
-  status                String?                   @db.VarChar(50)
-  onboardingCompleted   Boolean                   @default(false) @map("onboarding_completed")
-  completedAt           DateTime?                 @map("completed_at") @db.Timestamp(6)
-  createdAt             DateTime?                 @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt             DateTime?                 @updatedAt @map("updated_at") @db.Timestamp(6)
+  id                    String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId         String?                       @unique @map("application_id") @db.Uuid
+  internProfileId       String?                       @map("intern_profile_id") @db.Uuid
+  departmentId          String?                       @map("department_id") @db.Uuid
+  officeLocationId      String?                       @map("office_location_id") @db.Uuid
+  quotaId               String?                       @map("quota_id") @db.Uuid
+  actualStartDate       DateTime?                     @map("actual_start_date") @db.Date
+  actualEndDate         DateTime?                     @map("actual_end_date") @db.Date
+  /// Internship status (InternshipStatus) — PENDING | ACTIVE | COMPLETED | CERTIFICATE_GENERATED | ARCHIVED
+  status                String?                       @db.VarChar(50)
+  onboardingCompleted   Boolean                       @default(false) @map("onboarding_completed")
+  completedAt           DateTime?                     @map("completed_at") @db.Timestamp(6)
+  createdAt             DateTime?                     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt             DateTime?                     @updatedAt @map("updated_at") @db.Timestamp(6)
   reminders             AttendanceReminder[]
   attendances           Attendance[]
   certificate           Certificate?
   statusHistories       InternshipStatusHistory[]
-  application           InternshipApplication?    @relation(fields: [applicationId], references: [id], onDelete: Restrict)
-  department            Department?               @relation(fields: [departmentId], references: [id], onDelete: Restrict)
-  internProfile         InternProfile?            @relation(fields: [internProfileId], references: [id], onDelete: Restrict)
-  officeLocation        OfficeLocation?           @relation(fields: [officeLocationId], references: [id], onDelete: Restrict)
+  application           InternshipApplication?        @relation(fields: [applicationId], references: [id], onDelete: Restrict)
+  department            Department?                   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  internProfile         InternProfile?                @relation(fields: [internProfileId], references: [id], onDelete: Restrict)
+  officeLocation        OfficeLocation?               @relation(fields: [officeLocationId], references: [id], onDelete: Restrict)
+  quota                 InternshipQuota?              @relation(fields: [quotaId], references: [id], onDelete: Restrict)
   onboardingHistories   OnboardingHistory[]
   supervisorAssignments SupervisorAssignment[]
+  correctionRequests    AttendanceCorrectionRequest[]
+  evaluation            InternshipEvaluation?
 
   @@index([internProfileId])
   @@index([departmentId])
   @@index([officeLocationId])
+  @@index([quotaId])
   @@map("internships")
 }
 
@@ -363,9 +450,7 @@ model OnboardingHistory {
 model InternshipStatusHistory {
   id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   internshipId String?     @map("internship_id") @db.Uuid
-  /// Previous internship status — same value vocabulary as Internship.status
   oldStatus    String?     @map("old_status") @db.VarChar(50)
-  /// New internship status — same value vocabulary as Internship.status
   newStatus    String?     @map("new_status") @db.VarChar(50)
   changedById  String?     @map("changed_by") @db.Uuid
   notes        String?
@@ -379,29 +464,23 @@ model InternshipStatusHistory {
 }
 
 model Attendance {
-  id                   String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  internshipId         String                @map("internship_id") @db.Uuid
-  attendanceDate       DateTime              @map("attendance_date") @db.Date
-  checkInAt            DateTime?             @map("check_in_at") @db.Timestamp(6)
-  checkOutAt           DateTime?             @map("check_out_at") @db.Timestamp(6)
-  /// Check-in result — subset of attendance status vocabulary (PRESENT | LATE | PENDING_REVIEW | INVALID | ABSENT).
-  /// Source: docs/05-state-machine.md §14/§18, docs/04-business-rules.md §19
-  checkInStatus        String?               @map("check_in_status") @db.VarChar(30)
-  /// Check-out result — subset of attendance status vocabulary (COMPLETED | PENDING_REVIEW | INVALID | ABSENT).
-  /// Source: docs/05-state-machine.md §15/§18, docs/04-business-rules.md §19
-  checkOutStatus       String?               @map("check_out_status") @db.VarChar(30)
-  /// Attendance status (AttendanceStatus) — enforced via TS enum in service layer.
-  /// Allowed values: PRESENT | LATE | COMPLETED | PENDING_REVIEW | INVALID | ABSENT
-  /// Source: docs/04-business-rules.md §19, docs/05-state-machine.md §18
-  attendanceStatus     String?               @map("attendance_status") @db.VarChar(30)
-  totalWorkMinutes     Int?                  @map("total_work_minutes")
+  id                   String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  internshipId         String                        @map("internship_id") @db.Uuid
+  attendanceDate       DateTime                      @map("attendance_date") @db.Date
+  checkInAt            DateTime?                     @map("check_in_at") @db.Timestamp(6)
+  checkOutAt           DateTime?                     @map("check_out_at") @db.Timestamp(6)
+  checkInStatus        String?                       @map("check_in_status") @db.VarChar(30)
+  checkOutStatus       String?                       @map("check_out_status") @db.VarChar(30)
+  attendanceStatus     String?                       @map("attendance_status") @db.VarChar(30)
+  totalWorkMinutes     Int?                          @map("total_work_minutes")
   notes                String?
-  createdAt            DateTime?             @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt            DateTime?             @updatedAt @map("updated_at") @db.Timestamp(6)
+  createdAt            DateTime?                     @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt            DateTime?                     @updatedAt @map("updated_at") @db.Timestamp(6)
   attendanceLogs       AttendanceLog[]
   attendanceOverrides  AttendanceOverride[]
   attendanceViolations AttendanceViolation[]
-  internship           Internship            @relation(fields: [internshipId], references: [id])
+  correctionRequests   AttendanceCorrectionRequest[]
+  internship           Internship                    @relation(fields: [internshipId], references: [id])
 
   @@unique([internshipId, attendanceDate])
   @@map("attendances")
@@ -410,8 +489,6 @@ model Attendance {
 model AttendanceLog {
   id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   attendanceId    String     @map("attendance_id") @db.Uuid
-  /// Attendance log action — enforced via TS enum in service layer.
-  /// Allowed values: CHECK_IN | CHECK_OUT (derived from attendance workflow docs/05-state-machine.md §14-15)
   action          String?    @db.VarChar(50)
   latitude        Decimal?   @db.Decimal(10, 7)
   longitude       Decimal?   @db.Decimal(10, 7)
@@ -434,13 +511,44 @@ model AttendanceLog {
   @@map("attendance_logs")
 }
 
+model AttendanceCorrectionRequest {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  attendanceId      String    @map("attendance_id") @db.Uuid
+  internshipId      String    @map("internship_id") @db.Uuid
+  internId          String    @map("intern_id") @db.Uuid
+  supervisorId      String?   @map("supervisor_id") @db.Uuid
+  /// Correction type — CHECK_IN | CHECK_OUT | BOTH | INVALID_OVERRIDE
+  correctionType    String    @map("correction_type") @db.VarChar(50)
+  requestedCheckIn  DateTime? @map("requested_check_in") @db.Timestamp(6)
+  requestedCheckOut DateTime? @map("requested_check_out") @db.Timestamp(6)
+  reason            String
+  evidenceFileId    String?   @map("evidence_file_id") @db.Uuid
+  /// Status — PENDING | APPROVED | REJECTED | CANCELLED
+  status            String    @default("PENDING") @db.VarChar(50)
+  supervisorNotes   String?   @map("supervisor_notes")
+  reviewedById      String?   @map("reviewed_by_id") @db.Uuid
+  reviewedAt        DateTime? @map("reviewed_at") @db.Timestamp(6)
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt         DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  attendance   Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  internship   Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  intern       User       @relation("CorrectionRequestedBy", fields: [internId], references: [id], onDelete: Restrict)
+  supervisor   User?      @relation("CorrectionSupervisor", fields: [supervisorId], references: [id], onDelete: Restrict)
+  reviewedBy   User?      @relation("CorrectionReviewedBy", fields: [reviewedById], references: [id], onDelete: Restrict)
+  evidenceFile File?      @relation("CorrectionEvidenceFile", fields: [evidenceFileId], references: [id], onDelete: SetNull)
+
+  @@index([internshipId, status])
+  @@index([supervisorId, status])
+  @@index([internId])
+  @@map("attendance_correction_requests")
+}
+
 model AttendanceOverride {
   id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   attendanceId   String     @map("attendance_id") @db.Uuid
   supervisorId   String     @map("supervisor_id") @db.Uuid
-  /// Previous attendance status — same value vocabulary as Attendance.attendanceStatus
   previousStatus String?    @map("previous_status") @db.VarChar(50)
-  /// New attendance status after override (per BR-OVERRIDE-001: PRESENT | INVALID)
   newStatus      String?    @map("new_status") @db.VarChar(50)
   reason         String?
   createdAt      DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
@@ -472,11 +580,7 @@ model AttendanceDevice {
 model AttendanceViolation {
   id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   attendanceId  String     @map("attendance_id") @db.Uuid
-  /// Violation type (ViolationType) — enforced via TS enum in service layer.
-  /// Allowed values: FAKE_GPS | OUTSIDE_GEOFENCE | MULTIPLE_CHECK_IN | MULTIPLE_DEVICE_LOGIN | LATE_ATTENDANCE | EARLY_CHECK_OUT | DEVICE_MANIPULATION
-  /// Source: docs/04-business-rules.md §21, docs/05-state-machine.md §20
   violationType String?    @map("violation_type") @db.VarChar(50)
-  /// Severity level — enforced via TS enum in service layer (nilai tidak dieksplisitkan di docs)
   severity      String?    @db.VarChar(20)
   description   String?
   resolved      Boolean    @default(false)
@@ -494,11 +598,9 @@ model AttendanceViolation {
 model AttendanceReminder {
   id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   internshipId String     @map("internship_id") @db.Uuid
-  /// Reminder type — enforced via TS enum in service layer (CHECK_IN | CHECK_OUT, derived from attendance workflow)
   reminderType String?    @map("reminder_type") @db.VarChar(30)
   scheduledAt  DateTime?  @map("scheduled_at") @db.Timestamp(6)
   sentAt       DateTime?  @map("sent_at") @db.Timestamp(6)
-  /// Reminder delivery status — enforced via TS enum in service layer (PENDING | SENT, derived from scheduled_at/sent_at)
   status       String?    @db.VarChar(30)
   createdAt    DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
   internship   Internship @relation(fields: [internshipId], references: [id])
@@ -508,48 +610,109 @@ model AttendanceReminder {
 }
 
 model File {
-  id                   String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  originalName         String?                 @map("original_name") @db.VarChar(255)
-  fileName             String?                 @map("file_name") @db.VarChar(255)
-  mimeType             String?                 @map("mime_type") @db.VarChar(100)
-  extension            String?                 @db.VarChar(20)
-  size                 BigInt?
-  storageProvider      String?                 @map("storage_provider") @db.VarChar(50)
-  publicId             String?                 @map("public_id") @db.VarChar(255)
-  url                  String?
-  uploadedById         String?                 @map("uploaded_by") @db.Uuid
-  createdAt            DateTime?               @default(now()) @map("created_at") @db.Timestamp(6)
-  deletedAt            DateTime?               @map("deleted_at") @db.Timestamp(6)
-  attendancePhotos     AttendanceLog[]         @relation("AttendancePhoto")
-  certificateTemplates CertificateTemplate[]
-  certificates         Certificate[]           @relation("CertificateFile")
-  uploadedBy           User?                   @relation("FileUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
-  applicationLetters   InternshipApplication[] @relation("IntroductionLetterFile")
-  avatarUsers          User[]                  @relation("UserAvatar")
+  id                          String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  originalName                String?                       @map("original_name") @db.VarChar(255)
+  fileName                    String?                       @map("file_name") @db.VarChar(255)
+  mimeType                    String?                       @map("mime_type") @db.VarChar(100)
+  extension                   String?                       @db.VarChar(20)
+  size                        BigInt?
+  storageProvider             String?                       @map("storage_provider") @db.VarChar(50)
+  publicId                    String?                       @map("public_id") @db.VarChar(255)
+  url                         String?
+  uploadedById                String?                       @map("uploaded_by") @db.Uuid
+  createdAt                   DateTime?                     @default(now()) @map("created_at") @db.Timestamp(6)
+  deletedAt                   DateTime?                     @map("deleted_at") @db.Timestamp(6)
+  attendancePhotos            AttendanceLog[]               @relation("AttendancePhoto")
+  certificateTemplates        CertificateTemplate[]
+  certificates                Certificate[]                 @relation("CertificateFile")
+  uploadedBy                  User?                         @relation("FileUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)
+  applicationLetters          InternshipApplication[]       @relation("IntroductionLetterFile")
+  avatarUsers                 User[]                        @relation("UserAvatar")
+  applicationDocuments        ApplicationDocument[]         @relation("ApplicationDocumentFile")
+  correctionEvidenceFiles     AttendanceCorrectionRequest[] @relation("CorrectionEvidenceFile")
+  certificateSignatures       CertificateSetting[]          @relation("CertificateSettingSignature")
+  certificateStamps           CertificateSetting[]          @relation("CertificateSettingStamp")
+  certificateSettingTemplates CertificateSetting[]          @relation("CertificateSettingTemplate")
 
   @@index([uploadedById])
   @@map("files")
 }
 
+model InternshipEvaluation {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  internshipId        String    @unique @map("internship_id") @db.Uuid
+  supervisorId        String    @map("supervisor_id") @db.Uuid
+  disciplineScore     Decimal   @default(0) @map("discipline_score") @db.Decimal(5, 2)
+  responsibilityScore Decimal   @default(0) @map("responsibility_score") @db.Decimal(5, 2)
+  teamworkScore       Decimal   @default(0) @map("teamwork_score") @db.Decimal(5, 2)
+  communicationScore  Decimal   @default(0) @map("communication_score") @db.Decimal(5, 2)
+  technicalScore      Decimal   @default(0) @map("technical_score") @db.Decimal(5, 2)
+  initiativeScore     Decimal   @default(0) @map("initiative_score") @db.Decimal(5, 2)
+  finalScore          Decimal   @default(0) @map("final_score") @db.Decimal(5, 2)
+  grade               String?   @db.VarChar(10)
+  comments            String?
+  /// Status — DRAFT | SUBMITTED | REVISION_REQUIRED | FINAL
+  status              String    @default("DRAFT") @db.VarChar(50)
+  submittedAt         DateTime? @map("submitted_at") @db.Timestamp(6)
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt           DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  internship   Internship    @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  supervisor   User          @relation("EvaluationSupervisor", fields: [supervisorId], references: [id], onDelete: Restrict)
+  certificates Certificate[]
+
+  @@index([supervisorId, status])
+  @@map("internship_evaluations")
+}
+
 model Certificate {
-  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  internshipId      String?              @unique @map("internship_id") @db.Uuid
-  templateId        String?              @map("template_id") @db.Uuid
-  certificateNumber String?              @unique @map("certificate_number") @db.VarChar(100)
-  fileId            String?              @map("file_id") @db.Uuid
-  generatedById     String?              @map("generated_by") @db.Uuid
-  generatedAt       DateTime?            @map("generated_at") @db.Timestamp(6)
-  verificationToken String?              @map("verification_token") @db.VarChar(255)
-  createdAt         DateTime?            @default(now()) @map("created_at") @db.Timestamp(6)
-  file              File?                @relation("CertificateFile", fields: [fileId], references: [id], onDelete: Restrict)
-  generatedBy       User?                @relation("CertificateGeneratedBy", fields: [generatedById], references: [id], onDelete: Restrict)
-  internship        Internship?          @relation(fields: [internshipId], references: [id], onDelete: Restrict)
-  template          CertificateTemplate? @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  internshipId      String?               @unique @map("internship_id") @db.Uuid
+  templateId        String?               @map("template_id") @db.Uuid
+  certificateNumber String?               @unique @map("certificate_number") @db.VarChar(100)
+  fileId            String?               @map("file_id") @db.Uuid
+  generatedById     String?               @map("generated_by") @db.Uuid
+  generatedAt       DateTime?             @map("generated_at") @db.Timestamp(6)
+  verificationToken String?               @map("verification_token") @db.VarChar(255)
+  /// Approval status — WAITING_EVALUATION | WAITING_APPROVAL | APPROVED | GENERATED | REJECTED
+  approvalStatus    String?               @default("WAITING_EVALUATION") @map("approval_status") @db.VarChar(50)
+  approvedById      String?               @map("approved_by_id") @db.Uuid
+  approvedAt        DateTime?             @map("approved_at") @db.Timestamp(6)
+  rejectionReason   String?               @map("rejection_reason")
+  evaluationId      String?               @map("evaluation_id") @db.Uuid
+  createdAt         DateTime?             @default(now()) @map("created_at") @db.Timestamp(6)
+  file              File?                 @relation("CertificateFile", fields: [fileId], references: [id], onDelete: Restrict)
+  generatedBy       User?                 @relation("CertificateGeneratedBy", fields: [generatedById], references: [id], onDelete: Restrict)
+  approvedBy        User?                 @relation("CertificateApprovedBy", fields: [approvedById], references: [id], onDelete: Restrict)
+  internship        Internship?           @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+  template          CertificateTemplate?  @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  evaluation        InternshipEvaluation? @relation(fields: [evaluationId], references: [id], onDelete: Restrict)
 
   @@index([templateId])
   @@index([fileId])
   @@index([generatedById])
+  @@index([approvedById])
+  @@index([evaluationId])
   @@map("certificates")
+}
+
+model GuideContent {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String    @db.VarChar(200)
+  slug         String    @unique @db.VarChar(200)
+  description  String?
+  videoUrl     String?   @map("video_url") @db.VarChar(500)
+  content      String
+  category     String    @default("GENERAL") @db.VarChar(50)
+  displayOrder Int       @default(0) @map("display_order")
+  isPublished  Boolean   @default(true) @map("is_published")
+  createdById  String?   @map("created_by_id") @db.Uuid
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+  createdBy    User?     @relation("GuideCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([category, isPublished])
+  @@map("guide_contents")
 }
 
 model NotificationType {
