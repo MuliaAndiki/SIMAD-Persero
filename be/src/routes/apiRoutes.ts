@@ -5,17 +5,21 @@ import attendanceRoutes from './attendanceRoutes';
 import auditLogRoutes from './auditLogRoutes';
 import authRoutes from './authRoutes';
 import certificateRoutes from './certificateRoutes';
+import correctionRoutes from './correctionRoutes';
 import cronRoutes from './cronRoutes';
 import dashboardRoutes from './dashboardRoutes';
 import departmentRoutes from './departmentRoutes';
+import evaluationRoutes from './evaluationRoutes';
 import fileRoutes from './fileRoutes';
+import guideRoutes from './guideRoutes';
 import institutionRoutes from './institutionRoutes';
 import internshipRoutes from './internshipRoutes';
 import notificationRoutes from './notificationRoutes';
 import officeRoutes from './officeRoutes';
+import quotaRoutes from './quotaRoutes';
+import receptionistRoutes from './receptionistRoutes';
 import reportingRoutes from './reportingRoutes';
 import supervisorRoutes from './supervisorRoutes';
-import receptionistRoutes from './receptionistRoutes';
 import userRoutes from './userRoutes';
 
 class ApiRouter {
@@ -44,8 +48,12 @@ class ApiRouter {
       .use(institutionRoutes)
       .use(applicationRoutes)
       .use(internshipRoutes)
+      .use(quotaRoutes)
       .use(attendanceRoutes)
+      .use(correctionRoutes)
+      .use(evaluationRoutes)
       .use(certificateRoutes)
+      .use(guideRoutes)
       .use(notificationRoutes)
       .use(supervisorRoutes)
       .use(receptionistRoutes)

@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/atoms/card';
 import { CertificateActions } from '@/components/organisms/certificate/CertificateActions';
 import { CertificateEmpty } from '@/components/organisms/certificate/CertificateEmpty';
 import { CertificatePreview } from '@/components/organisms/certificate/CertificatePreview';
+import { CertificateStatusTracker } from '@/components/organisms/certificate/CertificateStatusTracker';
 import type { CertificateResponse } from '@/types/api/certificate.types';
 import { AlertTriangle } from 'lucide-react';
 
@@ -62,12 +63,27 @@ export function CertificateSection({ state, service }: CertificateSectionProps) 
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">E-Certificate</h1>
-        <p className="text-muted-foreground">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight">E-Certificate</h1>
+        <p className="text-sm text-muted-foreground">
           Unduh dan verifikasi sertifikat kelulusan magang Anda secara digital.
         </p>
       </header>
+
+      {/* 4-Step Certificate Status Stepper Tracker */}
+      <CertificateStatusTracker
+        internshipStatus={state.internshipStatus}
+        certificateNumber={certificate?.certificateNumber}
+        generatedAt={certificate?.generatedAt}
+        hasCertificate={!!certificate}
+        certificateId={certificate?.id}
+        onDownload={() => {
+          if (certificate) {
+            service.onDownload(certificate.id, certificate.certificateNumber);
+          }
+        }}
+        isDownloading={state.isDownloading}
+      />
 
       {state.isPending ? (
         <CertificateLoading />

@@ -1,0 +1,12 @@
+fe/node_modules
+fe/.env
+fe/.next
+fe/next-env.d.ts
+
+be/node_modules
+be/.env
+
+**/.env
+.env
+.env.*
+!.env.example

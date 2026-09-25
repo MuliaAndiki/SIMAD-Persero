@@ -70,7 +70,12 @@ export default function HrApplicationsContainer() {
 
   const handleOpenApprove = useCallback((app: ApplicationResponse) => {
     setModalTarget(app);
-    setApproveForm(EMPTY_APPROVE_FORM);
+    setApproveForm({
+      ...EMPTY_APPROVE_FORM,
+      officeLocationId: app.officeLocation?.id ?? (app as any).officeLocationId ?? '',
+      actualStartDate: app.requestedStartDate ? app.requestedStartDate.split('T')[0] : '',
+      actualEndDate: app.requestedEndDate ? app.requestedEndDate.split('T')[0] : '',
+    });
     setRejectForm(EMPTY_REJECT_FORM);
     setModalMode('approve');
   }, []);
@@ -117,6 +122,8 @@ export default function HrApplicationsContainer() {
         departmentId: approveForm.departmentId,
         officeLocationId: approveForm.officeLocationId || undefined,
         supervisorId: approveForm.supervisorId,
+        actualStartDate: approveForm.actualStartDate || undefined,
+        actualEndDate: approveForm.actualEndDate || undefined,
         notes: approveForm.notes || undefined,
       },
     });
@@ -143,6 +150,7 @@ export default function HrApplicationsContainer() {
         statusFilter,
         keyword,
         modalMode,
+        targetApplication: modalTarget,
         approveForm,
         rejectForm,
         isApproving: approve.isPending,

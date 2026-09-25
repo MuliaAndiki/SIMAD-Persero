@@ -27,7 +27,12 @@ export const verifyToken = () => ({
 
       const user = await prisma.user.findUnique({
         where: { id: decoded.id },
-        include: { userRoles: { include: { role: true } }, avatarFile: true },
+        include: {
+          userRoles: { include: { role: true } },
+          avatarFile: true,
+          officeLocation: { select: { id: true, name: true } },
+          department: { select: { id: true, name: true } },
+        },
       });
 
       if (!user || user.deletedAt) {
@@ -51,6 +56,10 @@ export const verifyToken = () => ({
             ? user.userRoles.map((ur) => ur.role.code.toLowerCase())
             : [DEFAULT_ROLE_CODE.toLowerCase()],
         avatarUrl: user.avatarFile?.url ?? null,
+        officeId: user.officeId ?? null,
+        departmentId: user.departmentId ?? null,
+        officeLocation: user.officeLocation ?? null,
+        department: user.department ?? null,
       };
 
       c.user = authUser;
@@ -76,6 +85,39 @@ export const verifyToken = () => ({
  * dari daftar yang diizinkan. Role dicek terhadap `c.user.roles`
  * (kode role, bukan id) yang sudah dilampirkan oleh `verifyToken`.
  */
+export const optionalAuth = () => ({
+  async beforeHandle(c: AppContext) {
+    try {
+      const authHeader = c.request.headers.get('authorization');
+      const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+      if (!token) return;
+
+      const decoded = verifyJwtToken(token);
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        include: { userRoles: { include: { role: true } }, avatarFile: true },
+      });
+
+      if (!user || user.deletedAt || !user.isActive) return;
+
+      c.user = {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        emailVerified: user.emailVerified,
+        isActive: user.isActive,
+        roles:
+          user.userRoles.length > 0
+            ? user.userRoles.map((ur) => ur.role.code.toLowerCase())
+            : [DEFAULT_ROLE_CODE.toLowerCase()],
+        avatarUrl: user.avatarFile?.url ?? null,
+      };
+    } catch {
+      // ignore token parse errors on optional auth
+    }
+  },
+});
+
 export const requireRole = (roles: string[]) => ({
   beforeHandle: (c: AppContext) => {
     const user = c.user;
@@ -90,3 +132,6 @@ export const requireRole = (roles: string[]) => ({
     }
   },
 });
+
+
+

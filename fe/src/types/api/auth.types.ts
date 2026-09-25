@@ -114,6 +114,11 @@ export interface RefreshTokenResponse {
 /** Data profil pengguna saat ini (GET /auth/me). */
 export interface SafeAuthUser extends Pick<IUser, 'id' | 'fullName' | 'email'> {
   role: string;
+  avatarUrl?: string | null;
+  officeId?: string | null;
+  departmentId?: string | null;
+  officeLocation?: { id: string; name: string | null } | null;
+  department?: { id: string; name: string | null } | null;
 }
 
 /** Data satu sesi aktif (GET /auth/sessions). */

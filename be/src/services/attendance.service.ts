@@ -131,11 +131,12 @@ class AttendanceService {
     // BR-FGPS-003: fake GPS → PENDING_REVIEW
     if (fakeGpsDetected) return CheckInStatus.PENDING_REVIEW;
 
-    if (!lateAfter) return CheckInStatus.PRESENT;
-
     const utc7 = new Date(now.getTime() + 7 * 60 * 60 * 1000);
     const currentMinutes = utc7.getUTCHours() * 60 + utc7.getUTCMinutes();
-    const lateMinutes = lateAfter.getUTCHours() * 60 + lateAfter.getUTCMinutes();
+    // Default batas tepat waktu: 08:00 WIB (8 * 60 = 480 menit)
+    const lateMinutes = lateAfter
+      ? lateAfter.getUTCHours() * 60 + lateAfter.getUTCMinutes()
+      : 8 * 60;
 
     return currentMinutes > lateMinutes ? CheckInStatus.LATE : CheckInStatus.PRESENT;
   }
@@ -282,7 +283,7 @@ class AttendanceService {
 
     const setting = await this.getAttendanceSetting(internship.officeLocationId ?? '');
     // BR-CHECKIN-002/004/005: validate check-in time window (default 08:00 - 10:00 WIB)
-    const defaultCheckInStart = new Date('1970-01-01T08:00:00.000Z');
+    const defaultCheckInStart = new Date('1970-01-01T06:00:00.000Z');
     const defaultCheckInEnd = new Date('1970-01-01T10:00:00.000Z');
     this.validateTimeWindow(
       now,

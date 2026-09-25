@@ -12,7 +12,9 @@ export const CreateApplicationDto = t.Object({
   requestedStartDate: t.String({ format: 'date' }),
   requestedEndDate: t.String({ format: 'date' }),
   motivation: t.Optional(t.String()),
-  coverLetterFileId: t.String({ format: 'uuid' }),
+  coverLetterFileId: t.Optional(t.String({ format: 'uuid' })),
+  cvFileId: t.Optional(t.String({ format: 'uuid' })),
+  facultyLetterFileId: t.Optional(t.String({ format: 'uuid' })),
   officeLocationId: t.String({ format: 'uuid' }),
 });
 
@@ -22,6 +24,8 @@ export const UpdateApplicationDto = t.Object({
   requestedEndDate: t.Optional(t.String({ format: 'date' })),
   motivation: t.Optional(t.String()),
   coverLetterFileId: t.Optional(t.String({ format: 'uuid' })),
+  cvFileId: t.Optional(t.String({ format: 'uuid' })),
+  facultyLetterFileId: t.Optional(t.String({ format: 'uuid' })),
   officeLocationId: t.Optional(t.String({ format: 'uuid' })),
 });
 
@@ -30,6 +34,8 @@ export const ApproveApplicationDto = t.Object({
   departmentId: t.String({ format: 'uuid' }),
   officeLocationId: t.Optional(t.String({ format: 'uuid' })),
   supervisorId: t.String({ format: 'uuid' }),
+  actualStartDate: t.Optional(t.String({ format: 'date' })),
+  actualEndDate: t.Optional(t.String({ format: 'date' })),
   notes: t.Optional(t.String()),
 });
 
@@ -48,4 +54,5 @@ export const ApplicationListQuery = t.Object({
   keyword: t.Optional(t.String()),
   institution: t.Optional(t.String()),
   departmentId: t.Optional(t.String()),
+  officeLocationId: t.Optional(t.String()),
 });

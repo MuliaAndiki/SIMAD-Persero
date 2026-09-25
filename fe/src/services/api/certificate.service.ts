@@ -4,26 +4,23 @@ import { CERTIFICATE_ENDPOINTS } from '@/configs/endpoints/certificate.endpoints
 import type {
   CertificateDetailResponse,
   CertificateParams,
+  CertificateQuery,
   CertificateResponse,
   CertificateSettingsResponse,
   CertificateVerifyParams,
   GenerateCertificateBody,
+  OfficeCertificateSettingResponse,
   UpdateCertificateSettingsBody,
+  UpsertOfficeCertificateSettingBody,
 } from '@/types/api/certificate.types';
+import { buildQueryString } from '@/utils/query-string';
 import { toServiceResponse } from '@/utils/service-response';
 
-/**
- * Service modul Certificate — 6 method, satu method per endpoint backend
- * (be/src/routes/certificateRoutes.ts).
- *
- * Semua method menggunakan `Api().client` (dieksekusi di browser).
- */
 const { client } = Api();
 
 class CertificateService {
   /**
    * GET /certificates/verify/:verificationCode
-   * Verifikasi sertifikat secara publik (tanpa auth).
    */
   public async Verify(
     params: Pick<CertificateVerifyParams, 'verificationCode'>,
@@ -38,18 +35,68 @@ class CertificateService {
 
   /**
    * GET /certificates/me
-   * Mengambil daftar sertifikat milik sendiri (INTERN).
    */
-  public async My(): Promise<TResponse<CertificateResponse[]>> {
-    const res = await client.GetResponse<CertificateResponse[]>(CERTIFICATE_ENDPOINTS.MY);
+  public async My(): Promise<TResponse<CertificateDetailResponse>> {
+    const res = await client.GetResponse<CertificateDetailResponse>(CERTIFICATE_ENDPOINTS.MY);
+    return toServiceResponse(res, {
+      message: 'Sertifikat berhasil dimuat',
+    });
+  }
+
+  /**
+   * GET /certificates (HR_ADMIN)
+   */
+  public async List(query?: CertificateQuery): Promise<TResponse<CertificateResponse[]>> {
+    const qs = buildQueryString(query as Record<string, string | number | boolean>);
+    const res = await client.GetResponse<CertificateResponse[]>(
+      `${CERTIFICATE_ENDPOINTS.LIST}${qs}`,
+    );
     return toServiceResponse(res, {
       message: 'Daftar sertifikat berhasil dimuat',
     });
   }
 
   /**
-   * POST /certificates/generate
-   * Men-generate sertifikat baru (HR_ADMIN).
+   * GET /certificates/pending-approval (HR_ADMIN)
+   */
+  public async PendingApprovals(query?: CertificateQuery): Promise<TResponse<any[]>> {
+    const qs = buildQueryString(query as Record<string, string | number | boolean>);
+    const res = await client.GetResponse<any[]>(
+      `${CERTIFICATE_ENDPOINTS.PENDING_APPROVAL}${qs}`,
+    );
+    return toServiceResponse(res, {
+      message: 'Daftar sertifikat menunggu persetujuan berhasil dimuat',
+    });
+  }
+
+  /**
+   * PATCH /certificates/:id/approve (HR_ADMIN)
+   */
+  public async Approve(id: string): Promise<TResponse<CertificateResponse>> {
+    const res = await client.PatchResponse<CertificateResponse>(
+      CERTIFICATE_ENDPOINTS.APPROVE(id),
+      {},
+    );
+    return toServiceResponse(res, {
+      message: 'Sertifikat berhasil disetujui dan diterbitkan',
+    });
+  }
+
+  /**
+   * PATCH /certificates/:id/reject (HR_ADMIN)
+   */
+  public async Reject(id: string, reason: string): Promise<TResponse<any>> {
+    const res = await client.PatchResponse<any>(
+      CERTIFICATE_ENDPOINTS.REJECT(id),
+      { reason },
+    );
+    return toServiceResponse(res, {
+      message: 'Penerbitan sertifikat telah ditolak',
+    });
+  }
+
+  /**
+   * POST /certificates/generate (HR_ADMIN)
    */
   public async Generate(
     body: Pick<GenerateCertificateBody, 'internshipId'>,
@@ -66,15 +113,62 @@ class CertificateService {
 
   /**
    * GET /certificates/:certificateId/download
-   * Mengunduh file sertifikat (mengembalikan Response mentah / binary).
    */
   public async Download(params: Pick<CertificateParams, 'certificateId'>): Promise<Response> {
     return client.DownloadResponse(CERTIFICATE_ENDPOINTS.DOWNLOAD(params.certificateId));
   }
 
   /**
+   * GET /certificates/me/download
+   */
+  public async DownloadMy(): Promise<Response> {
+    return client.DownloadResponse(CERTIFICATE_ENDPOINTS.DOWNLOAD_MY);
+  }
+
+  /**
+   * POST /certificates/:certificateId/regenerate
+   */
+  public async Regenerate(
+    params: Pick<CertificateParams, 'certificateId'>,
+  ): Promise<TResponse<CertificateResponse>> {
+    const res = await client.PostResponse<CertificateResponse>(
+      `/certificates/${params.certificateId}/regenerate`,
+      {},
+    );
+    return toServiceResponse(res, {
+      message: 'Sertifikat berhasil di-generate ulang',
+    });
+  }
+
+  /**
+   * GET /certificates/settings
+   */
+  public async GetSettings(): Promise<TResponse<CertificateSettingsResponse>> {
+    const res = await client.GetResponse<CertificateSettingsResponse>(
+      CERTIFICATE_ENDPOINTS.SETTINGS,
+    );
+    return toServiceResponse(res, {
+      message: 'Pengaturan sertifikat berhasil dimuat',
+    });
+  }
+
+  /**
+   * PATCH /certificates/settings
+   */
+  public async SaveSettings(
+    body: UpdateCertificateSettingsBody,
+  ): Promise<TResponse<CertificateSettingsResponse>> {
+    const res = await client.PatchResponse<CertificateSettingsResponse>(
+      CERTIFICATE_ENDPOINTS.SETTINGS,
+      body,
+    );
+    return toServiceResponse(res, {
+      message: 'Pengaturan sertifikat berhasil disimpan',
+    });
+  }
+
+  /**
    * GET /certificates/:certificateId
-   * Mengambil detail sertifikat.
    */
   public async Detail(
     params: Pick<CertificateParams, 'certificateId'>,
@@ -87,57 +181,64 @@ class CertificateService {
     });
   }
 
+  // ─── Multi-Office Certificate Settings ──────────────────────────────
+
   /**
-   * POST /certificates/:certificateId/regenerate
-   * Me-regenerate sertifikat (HR_ADMIN).
+   * GET /certificate-settings
    */
-  public async Regenerate(
-    params: Pick<CertificateParams, 'certificateId'>,
-  ): Promise<TResponse<CertificateResponse>> {
-    const res = await client.PostResponse<CertificateResponse>(
-      CERTIFICATE_ENDPOINTS.REGENERATE(params.certificateId),
-      {},
+  public async ListOfficeSettings(): Promise<TResponse<OfficeCertificateSettingResponse[]>> {
+    const res = await client.GetResponse<OfficeCertificateSettingResponse[]>(
+      CERTIFICATE_ENDPOINTS.OFFICE_SETTINGS_LIST,
     );
     return toServiceResponse(res, {
-      message: 'Sertifikat berhasil di-regenerate',
+      message: 'Pengaturan sertifikat kantor berhasil dimuat',
     });
   }
 
   /**
-   * GET /certificates/settings
-   * Mengambil konfigurasi sertifikat yang disimpan HR Admin.
+   * GET /certificate-settings/:officeLocationId
    */
-  public async GetSettings(): Promise<TResponse<CertificateSettingsResponse>> {
-    const res = await client.GetResponse<CertificateSettingsResponse>(
-      CERTIFICATE_ENDPOINTS.SETTINGS,
+  public async GetOfficeSetting(
+    officeLocationId: string,
+  ): Promise<TResponse<OfficeCertificateSettingResponse>> {
+    const res = await client.GetResponse<OfficeCertificateSettingResponse>(
+      CERTIFICATE_ENDPOINTS.OFFICE_SETTING_DETAIL(officeLocationId),
     );
     return toServiceResponse(res, {
-      message: 'Pengaturan sertifikat berhasil dimuat',
+      message: 'Pengaturan sertifikat kantor berhasil dimuat',
     });
   }
 
   /**
-   * PUT /certificates/settings
-   * Menyimpan konfigurasi sertifikat (HR_ADMIN).
+   * POST /certificate-settings
    */
-  public async SaveSettings(
-    body: UpdateCertificateSettingsBody,
-  ): Promise<TResponse<CertificateSettingsResponse>> {
-    const res = await client.PutResponse<CertificateSettingsResponse>(
-      CERTIFICATE_ENDPOINTS.SETTINGS,
+  public async CreateOfficeSetting(
+    body: UpsertOfficeCertificateSettingBody,
+  ): Promise<TResponse<OfficeCertificateSettingResponse>> {
+    const res = await client.PostResponse<OfficeCertificateSettingResponse>(
+      CERTIFICATE_ENDPOINTS.OFFICE_SETTING_CREATE,
       body,
     );
     return toServiceResponse(res, {
-      message: 'Pengaturan sertifikat berhasil disimpan',
+      message: 'Pengaturan sertifikat kantor berhasil disimpan',
+      statusCode: 201,
     });
   }
 
   /**
-   * GET /certificates/me/download
-   * Mengunduh file sertifikat milik intern langsung (binary response).
+   * PATCH /certificate-settings/:id
    */
-  public async DownloadMy(): Promise<Response> {
-    return client.DownloadResponse(CERTIFICATE_ENDPOINTS.DOWNLOAD_MY);
+  public async UpdateOfficeSetting(
+    id: string,
+    body: UpsertOfficeCertificateSettingBody,
+  ): Promise<TResponse<OfficeCertificateSettingResponse>> {
+    const res = await client.PatchResponse<OfficeCertificateSettingResponse>(
+      CERTIFICATE_ENDPOINTS.OFFICE_SETTING_UPDATE(id),
+      body,
+    );
+    return toServiceResponse(res, {
+      message: 'Pengaturan sertifikat kantor berhasil diperbarui',
+    });
   }
 }
 

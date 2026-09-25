@@ -12,3 +12,4 @@ export * from './command';
 export * from './sidebar';
 export * from './collapsible';
 export * from './DetailField';
+export * from './switch';

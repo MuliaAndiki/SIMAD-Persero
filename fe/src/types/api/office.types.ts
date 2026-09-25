@@ -6,7 +6,17 @@
  * (be/src/controllers/OfficeController.ts).
  */
 
+import type { AttendanceSettingInfo } from './attendance.types';
 import type { IOfficeLocation } from './model.type';
+
+export interface AttendanceSettingInput {
+  checkInStart?: string | null;
+  checkInEnd?: string | null;
+  checkOutStart?: string | null;
+  checkOutEnd?: string | null;
+  lateAfter?: string | null;
+  allowWeekend?: boolean;
+}
 
 // ---------- Payload (request body / query / path params) ----------
 
@@ -26,6 +36,7 @@ export interface CreateOfficeBody
   departmentIds?: string[];
   latitude: number;
   longitude: number;
+  attendanceSetting?: AttendanceSettingInput;
 }
 
 export type UpdateOfficeBody = Partial<CreateOfficeBody>;
@@ -40,6 +51,7 @@ export interface OfficeParams {
 export interface OfficeDepartmentRef {
   id: string;
   name: string;
+  code?: string | null;
 }
 
 /** Data satu lokasi kantor (GET /offices, GET /offices/:officeId). */
@@ -50,4 +62,6 @@ export interface OfficeResponse
   latitude: number | null;
   longitude: number | null;
   radiusMeter: number;
+  attendanceSetting?: AttendanceSettingInfo | null;
+  internshipQuotas?: any[];
 }

@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/atoms/select';
+import type { ApplicationResponse } from '@/types/api/application.types';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { SupervisorResponse } from '@/types/api/supervisor.types';
@@ -19,10 +20,13 @@ import {
   AlertCircle,
   Briefcase,
   Building2,
+  Calendar,
   CheckCircle2,
+  FileText,
   Info,
   MapPin,
   UserCheck,
+  Users,
 } from 'lucide-react';
 import { type FormEvent, useMemo } from 'react';
 
@@ -30,6 +34,8 @@ export type ApproveApplicationFormField =
   | 'departmentId'
   | 'officeLocationId'
   | 'supervisorId'
+  | 'actualStartDate'
+  | 'actualEndDate'
   | 'notes';
 
 /** Object state form approve — dimiliki container (§19.4). */
@@ -37,6 +43,8 @@ export interface ApproveApplicationFormState {
   departmentId: string;
   officeLocationId: string;
   supervisorId: string;
+  actualStartDate?: string;
+  actualEndDate?: string;
   notes: string;
 }
 
@@ -44,12 +52,14 @@ export interface ApplicationApproveFormProps {
   departments: DepartmentResponse[];
   offices: OfficeResponse[];
   supervisors: SupervisorResponse[];
+  targetApplication?: ApplicationResponse | null;
   form: ApproveApplicationFormState;
   isSubmitting: boolean;
   onFieldChange: (field: ApproveApplicationFormField, value: string) => void;
   onBack: () => void;
   onSubmit: () => void | Promise<void>;
 }
+
 
 /**
  * Logika sinkronisasi dua arah antara Departemen, Kantor, dan Supervisor:
@@ -188,6 +198,7 @@ export function ApplicationApproveForm({
   departments = [],
   offices = [],
   supervisors = [],
+  targetApplication,
   form,
   isSubmitting,
   onFieldChange,
@@ -246,7 +257,6 @@ export function ApplicationApproveForm({
   }, [selectedOffice, form.departmentId]);
 
   // 2. Pengelompokan Supervisor:
-  // Supervisor di departemen yang dipilih saat ini (bisa 1 atau lebih supervisor)
   const currentDeptSupervisors = useMemo(() => {
     if (!form.departmentId) return [];
     return safeSupervisors.filter((sup) => {
@@ -258,7 +268,6 @@ export function ApplicationApproveForm({
     });
   }, [safeSupervisors, form.departmentId, form.officeLocationId]);
 
-  // Supervisor lainnya (departemen lain atau kantor lain) agar HR bisa langsung pindah supervisor
   const otherSupervisors = useMemo(() => {
     if (!form.departmentId) return safeSupervisors;
     return safeSupervisors.filter((sup) => {
@@ -293,9 +302,49 @@ export function ApplicationApproveForm({
           Setujui & Tugaskan Pengajuan
         </h2>
         <p className="text-sm text-muted-foreground">
-          Pilih departemen, kantor penempatan, dan supervisor yang sesuai untuk peserta magang.
+          Pilih departemen, kantor penempatan, periode aktual magang, dan supervisor pembimbing.
         </p>
       </div>
+
+      {/* Dokumen Pelamar (CV & Surat Pengantar) */}
+      {targetApplication && (
+        <div className="rounded-lg border bg-muted/30 p-3 flex flex-col gap-2">
+          <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <FileText className="size-3.5 text-primary" />
+            Dokumen Persyaratan Pelamar
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {targetApplication.documents && targetApplication.documents.length > 0 ? (
+              targetApplication.documents.map((doc) => (
+                <a
+                  key={doc.id}
+                  href={doc.file?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-background border hover:bg-muted transition-colors"
+                >
+                  <FileText className="size-3 text-muted-foreground" />
+                  <span>
+                    {doc.type === 'CV' ? 'Curriculum Vitae (CV)' : doc.type === 'FACULTY_REQUEST_LETTER' ? 'Surat Permohonan Fakultas' : 'Dokumen Tambahan'}
+                  </span>
+                </a>
+              ))
+            ) : targetApplication.introductionLetterFile?.url ? (
+              <a
+                href={targetApplication.introductionLetterFile.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-background border hover:bg-muted transition-colors"
+              >
+                <FileText className="size-3 text-muted-foreground" />
+                <span>Surat Pengantar ({targetApplication.introductionLetterFile.originalName})</span>
+              </a>
+            ) : (
+              <span className="text-xs text-muted-foreground italic">Tidak ada lampiran dokumen file.</span>
+            )}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* --- FIELD DEPARTEMEN --- */}
@@ -408,6 +457,34 @@ export function ApplicationApproveForm({
           )}
         </div>
 
+        {/* --- FIELD TANGGAL AKTUAL MASUK & KELUAR MAGANG --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <Calendar className="size-3.5 text-muted-foreground" />
+              Tanggal Mulai Aktual
+            </span>
+            <input
+              type="date"
+              value={form.actualStartDate ? form.actualStartDate.split('T')[0] : ''}
+              onChange={(e) => onFieldChange('actualStartDate', e.target.value)}
+              className="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-xs shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <Calendar className="size-3.5 text-muted-foreground" />
+              Tanggal Selesai Aktual
+            </span>
+            <input
+              type="date"
+              value={form.actualEndDate ? form.actualEndDate.split('T')[0] : ''}
+              onChange={(e) => onFieldChange('actualEndDate', e.target.value)}
+              className="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-xs shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            />
+          </div>
+        </div>
+
         {/* --- FIELD SUPERVISOR --- */}
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
@@ -433,7 +510,6 @@ export function ApplicationApproveForm({
               />
             </SelectTrigger>
             <SelectContent>
-              {/* Jika departemen terpilih dan memiliki supervisor */}
               {form.departmentId && currentDeptSupervisors.length > 0 && (
                 <SelectGroup>
                   <SelectLabel className="text-xs font-semibold text-primary">
@@ -451,7 +527,6 @@ export function ApplicationApproveForm({
                 </SelectGroup>
               )}
 
-              {/* Jika departemen terpilih namun belum ada supervisor di departemen ini */}
               {form.departmentId && currentDeptSupervisors.length === 0 && (
                 <SelectGroup>
                   <SelectLabel className="text-xs text-muted-foreground italic">
@@ -460,7 +535,6 @@ export function ApplicationApproveForm({
                 </SelectGroup>
               )}
 
-              {/* Supervisor departemen lain (memungkinkan langsung pindah supervisor & departemen) */}
               {otherSupervisors.length > 0 && (
                 <>
                   {form.departmentId && <SelectSeparator />}
@@ -569,3 +643,4 @@ export function ApplicationApproveForm({
     </div>
   );
 }
+

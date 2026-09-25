@@ -22,6 +22,7 @@ export default function InternHistoryContainer() {
 
   const my = api.attendance.query.my({ page: 1, limit: 62, month, year });
   const internship = api.internship.query.my();
+  const corrections = api.correction.query.myList({ page: 1, limit: 50 });
 
   // Backend GET /internships/me mengembalikan array; tipe FE masih tunggal.
   const internshipData: InternshipResponse | null = Array.isArray(internship.data)
@@ -34,6 +35,10 @@ export default function InternHistoryContainer() {
   const myRecords: AttendanceResponse[] = Array.isArray(my.data)
     ? my.data
     : ((my.data as { data?: AttendanceResponse[] } | null)?.data ?? []);
+
+  const myCorrections = Array.isArray(corrections.data)
+    ? corrections.data
+    : ((corrections.data as any)?.data ?? []);
 
   const handlePrevMonth = useCallback(() => {
     setMonth((prev) => {
@@ -70,6 +75,8 @@ export default function InternHistoryContainer() {
         month,
         year,
         records: myRecords,
+        corrections: myCorrections,
+        isCorrectionPending: corrections.isPending,
         internshipStart: internshipData?.actualStartDate,
         internshipEnd: internshipData?.actualEndDate,
         internshipStatus: internshipData?.status,

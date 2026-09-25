@@ -34,13 +34,27 @@ export const APPLICATION_TRANSITIONS: Record<ApplicationStatusValue, Application
   [ApplicationStatus.RESUBMITTED]: [ApplicationStatus.SUBMITTED],
 };
 
+/** Application document types */
+export const ApplicationDocumentType = {
+  CV: 'CV',
+  FACULTY_REQUEST_LETTER: 'FACULTY_REQUEST_LETTER',
+  OTHER: 'OTHER',
+} as const;
+
+export type ApplicationDocumentTypeValue =
+  (typeof ApplicationDocumentType)[keyof typeof ApplicationDocumentType];
+
 /** POST /applications body — tanggal dikirim sebagai ISO string (API layer). */
 export type CreateApplicationBody = {
   requestedStartDate: string;
   requestedEndDate: string;
   /** Teks opsional di API — disimpan `null` di DB bila tidak diisi. */
   motivation?: string;
-  coverLetterFileId: IFile['id'];
+  coverLetterFileId?: IFile['id'];
+  /** File ID untuk CV (wajib pada v1.0.1) */
+  cvFileId?: IFile['id'];
+  /** File ID untuk Surat Permohonan Fakultas (wajib pada v1.0.1) */
+  facultyLetterFileId?: IFile['id'];
   /** Lokasi kantor tujuan magang (wajib dipilih oleh intern). */
   officeLocationId: IOfficeLocation['id'];
 };
@@ -53,6 +67,8 @@ export type ApproveApplicationBody = {
   departmentId: IDepartment['id'];
   officeLocationId?: IOfficeLocation['id'];
   supervisorId: IUser['id'];
+  actualStartDate?: string;
+  actualEndDate?: string;
   notes?: string;
 };
 
@@ -69,4 +85,6 @@ export type ApplicationQuery = Partial<{
   keyword: string;
   institution: string;
   departmentId: string;
+  officeLocationId: string;
 }>;
+

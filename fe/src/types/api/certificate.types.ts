@@ -1,16 +1,31 @@
 /**
  * Tipe payload & respons modul Certificate.
- *
- * Nama field payload disamakan dengan DTO backend (be/src/dtos/certificate.dto.ts).
- * Bentuk data respons disamakan dengan controller backend
- * (be/src/controllers/CertificateController.ts).
  */
 
 import type { ICertificate } from './model.type';
 
+export const CertificateApprovalStatus = {
+  WAITING_EVALUATION: 'WAITING_EVALUATION',
+  WAITING_APPROVAL: 'WAITING_APPROVAL',
+  APPROVED: 'APPROVED',
+  GENERATED: 'GENERATED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type CertificateApprovalStatusValue =
+  (typeof CertificateApprovalStatus)[keyof typeof CertificateApprovalStatus];
+
 // ---------- Payload (request body / path params) ----------
 
 export interface GenerateCertificateBody extends Pick<ICertificate, 'internshipId'> {}
+
+export interface ApproveCertificateBody {
+  notes?: string;
+}
+
+export interface RejectCertificateBody {
+  reason: string;
+}
 
 export interface CertificateParams {
   certificateId: string;
@@ -27,6 +42,44 @@ export interface CertificateSettingsResponse {
   templateUrl?: string;
 }
 
+export interface OfficeCertificateSettingResponse {
+  id: string | null;
+  officeLocationId: string | null;
+  signerName: string;
+  signerRole: string;
+  signatureFileId?: string | null;
+  stampFileId?: string | null;
+  templateFileId?: string | null;
+  certificateNumberFormat: string;
+  isActive: boolean;
+  officeLocation?: {
+    id: string;
+    name: string | null;
+    address: string | null;
+  } | null;
+  signatureFile?: {
+    id: string;
+    url: string;
+    originalName: string;
+  } | null;
+  stampFile?: {
+    id: string;
+    url: string;
+    originalName: string;
+  } | null;
+}
+
+export interface UpsertOfficeCertificateSettingBody {
+  officeLocationId: string;
+  signerName: string;
+  signerRole: string;
+  signatureFileId?: string;
+  stampFileId?: string;
+  templateFileId?: string;
+  certificateNumberFormat?: string;
+  isActive?: boolean;
+}
+
 export interface UpdateCertificateSettingsBody {
   signerName?: string;
   signerRole?: string;
@@ -34,9 +87,18 @@ export interface UpdateCertificateSettingsBody {
   templateUrl?: string;
 }
 
+export interface CertificateQuery {
+  page?: number;
+  limit?: number;
+  approvalStatus?: CertificateApprovalStatusValue | string;
+  officeLocationId?: string;
+  departmentId?: string;
+  keyword?: string;
+}
+
 // ---------- Response (data dari backend) ----------
 
-/** Sertifikat hasil serialisasi backend (GET /certificates/me, GET /certificates/:certificateId). */
+/** Sertifikat hasil serialisasi backend */
 export interface CertificateResponse
   extends Omit<
     ICertificate,
@@ -54,6 +116,11 @@ export interface CertificateResponse
   templateId: string;
   fileId: string;
   fileUrl: string | null;
+  approvalStatus?: CertificateApprovalStatusValue | string;
+  approvedById?: string | null;
+  approvedAt?: string | null;
+  rejectionReason?: string | null;
+  evaluationId?: string | null;
   generatedById: string;
   generatedBy: string | null;
   generatedAt: string;
@@ -65,11 +132,18 @@ export interface CertificateResponse
     actualStartDate: string | null;
     actualEndDate: string | null;
     department: { id: string; code: string; name: string | null } | null;
+    officeLocation?: { id: string; name: string | null } | null;
     intern: {
       id: string;
       fullName: string;
       email: string;
       studentNumber: string | null;
+    } | null;
+    evaluation?: {
+      id: string;
+      finalScore: number;
+      grade: string | null;
+      status: string;
     } | null;
   } | null;
 }

@@ -2,28 +2,53 @@ import { AppError } from '@/http/error';
 import type { CreateOfficeBody, OfficeQuery, UpdateOfficeBody } from '@/types/office.types';
 import prisma from '../../prisma/client';
 
+function parseTimeString(timeStr?: string | null): Date | null {
+  if (!timeStr) return null;
+  const parts = timeStr.trim().split(':');
+  if (parts.length < 2) return null;
+  const h = String(parseInt(parts[0], 10)).padStart(2, '0');
+  const m = String(parseInt(parts[1], 10)).padStart(2, '0');
+  const s = parts[2] ? String(parseInt(parts[2], 10)).padStart(2, '0') : '00';
+  return new Date(`1970-01-01T${h}:${m}:${s}.000Z`);
+}
+
+function formatTimeString(date?: Date | null): string | null {
+  if (!date) return null;
+  const d = new Date(date);
+  const h = String(d.getUTCHours()).padStart(2, '0');
+  const m = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
+}
+
 /**
  * Service layer modul Office (Office Location).
  * Seluruh logika bisnis (validasi, query DB) berada di sini.
- * Kegagalan bisnis dilempar sebagai `AppError(status, message)`.
- * Sumber aturan: docs/07-api-specification.md §23.
  */
 class OfficeService {
   // Proyeksi departemen yang dikembalikan bersama kantor (m2m).
   private readonly departmentSelect = {
-    select: { id: true, name: true },
+    select: { id: true, name: true, code: true },
   } as const;
 
-  // Konversi Decimal Prisma ke Number agar respons JSON ringkas (koordinat).
-  private serialize(office: {
-    latitude: unknown;
-    longitude: unknown;
-    [key: string]: unknown;
-  }) {
+  // Konversi Decimal Prisma ke Number & AttendanceSetting format string
+  private serialize(office: any) {
+    const rawSetting = office.attendanceSettings?.[0] || office.attendanceSetting || null;
     return {
       ...office,
       latitude: office.latitude != null ? Number(office.latitude) : null,
       longitude: office.longitude != null ? Number(office.longitude) : null,
+      attendanceSetting: rawSetting
+        ? {
+            id: rawSetting.id,
+            officeLocationId: rawSetting.officeLocationId,
+            checkInStart: formatTimeString(rawSetting.checkInStart),
+            checkInEnd: formatTimeString(rawSetting.checkInEnd),
+            checkOutStart: formatTimeString(rawSetting.checkOutStart),
+            checkOutEnd: formatTimeString(rawSetting.checkOutEnd),
+            lateAfter: formatTimeString(rawSetting.lateAfter),
+            allowWeekend: Boolean(rawSetting.allowWeekend),
+          }
+        : null,
     };
   }
 
@@ -53,7 +78,17 @@ class OfficeService {
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
-        include: { departments: this.departmentSelect },
+        include: {
+          departments: this.departmentSelect,
+          attendanceSettings: true,
+          internshipQuotas: {
+            include: {
+              departmentAllocations: {
+                include: { department: { select: { id: true, name: true, code: true } } },
+              },
+            },
+          },
+        },
       }),
       prisma.officeLocation.count({ where }),
     ]);
@@ -73,7 +108,17 @@ class OfficeService {
   public async getById(id: string) {
     const office = await prisma.officeLocation.findUnique({
       where: { id },
-      include: { departments: this.departmentSelect },
+      include: {
+        departments: this.departmentSelect,
+        attendanceSettings: true,
+        internshipQuotas: {
+          include: {
+            departmentAllocations: {
+              include: { department: { select: { id: true, name: true, code: true } } },
+            },
+          },
+        },
+      },
     });
     if (!office) {
       throw new AppError(404, 'Office location not found');
@@ -103,8 +148,21 @@ class OfficeService {
         departments: {
           connect: departmentIds.map((id) => ({ id })),
         },
+        attendanceSettings: {
+          create: {
+            checkInStart: parseTimeString(input.attendanceSetting?.checkInStart ?? '06:00'),
+            checkInEnd: parseTimeString(input.attendanceSetting?.checkInEnd ?? '10:00'),
+            checkOutStart: parseTimeString(input.attendanceSetting?.checkOutStart ?? '16:00'),
+            checkOutEnd: parseTimeString(input.attendanceSetting?.checkOutEnd ?? '20:00'),
+            lateAfter: parseTimeString(input.attendanceSetting?.lateAfter ?? '08:00'),
+            allowWeekend: Boolean(input.attendanceSetting?.allowWeekend),
+          },
+        },
       },
-      include: { departments: this.departmentSelect },
+      include: {
+        departments: this.departmentSelect,
+        attendanceSettings: true,
+      },
     });
 
     return this.serialize(office);
@@ -134,18 +192,68 @@ class OfficeService {
       data.name = name;
     }
     if (departmentIds !== undefined) {
-      data.departments = { set: departmentIds.map((id) => ({ id })) };
+      data.departments = { set: departmentIds.map((deptId) => ({ id: deptId })) };
     }
     if (input.address !== undefined) data.address = input.address.trim() || null;
     if (input.latitude !== undefined) data.latitude = input.latitude;
     if (input.longitude !== undefined) data.longitude = input.longitude;
     if (input.radiusMeter !== undefined) data.radiusMeter = input.radiusMeter;
 
+    // Handle attendance setting update / upsert
+    if (input.attendanceSetting !== undefined) {
+      const existingSetting = await prisma.attendanceSetting.findFirst({
+        where: { officeLocationId: id },
+      });
+
+      const settingData: any = {};
+      if (input.attendanceSetting.checkInStart !== undefined) {
+        settingData.checkInStart = parseTimeString(input.attendanceSetting.checkInStart);
+      }
+      if (input.attendanceSetting.checkInEnd !== undefined) {
+        settingData.checkInEnd = parseTimeString(input.attendanceSetting.checkInEnd);
+      }
+      if (input.attendanceSetting.checkOutStart !== undefined) {
+        settingData.checkOutStart = parseTimeString(input.attendanceSetting.checkOutStart);
+      }
+      if (input.attendanceSetting.checkOutEnd !== undefined) {
+        settingData.checkOutEnd = parseTimeString(input.attendanceSetting.checkOutEnd);
+      }
+      if (input.attendanceSetting.lateAfter !== undefined) {
+        settingData.lateAfter = parseTimeString(input.attendanceSetting.lateAfter);
+      }
+      if (input.attendanceSetting.allowWeekend !== undefined) {
+        settingData.allowWeekend = Boolean(input.attendanceSetting.allowWeekend);
+      }
+
+      if (existingSetting) {
+        await prisma.attendanceSetting.update({
+          where: { id: existingSetting.id },
+          data: settingData,
+        });
+      } else {
+        await prisma.attendanceSetting.create({
+          data: {
+            officeLocationId: id,
+            checkInStart: parseTimeString(input.attendanceSetting.checkInStart ?? '06:00'),
+            checkInEnd: parseTimeString(input.attendanceSetting.checkInEnd ?? '10:00'),
+            checkOutStart: parseTimeString(input.attendanceSetting.checkOutStart ?? '16:00'),
+            checkOutEnd: parseTimeString(input.attendanceSetting.checkOutEnd ?? '20:00'),
+            lateAfter: parseTimeString(input.attendanceSetting.lateAfter ?? '08:00'),
+            allowWeekend: Boolean(input.attendanceSetting.allowWeekend),
+          },
+        });
+      }
+    }
+
     const updated = await prisma.officeLocation.update({
       where: { id },
       data,
-      include: { departments: this.departmentSelect },
+      include: {
+        departments: this.departmentSelect,
+        attendanceSettings: true,
+      },
     });
+
     return this.serialize(updated);
   }
 
@@ -157,6 +265,8 @@ class OfficeService {
     }
 
     try {
+      // Hapus attendanceSetting terlebih dahulu jika ada
+      await prisma.attendanceSetting.deleteMany({ where: { officeLocationId: id } });
       await prisma.officeLocation.delete({ where: { id } });
     } catch (error: any) {
       if (error.code === 'P2003') {

@@ -38,6 +38,7 @@ export interface ApplicationsSectionState {
   statusFilter: string;
   keyword: string;
   modalMode: 'approve' | 'reject' | null;
+  targetApplication?: ApplicationResponse | null;
   approveForm: ApproveApplicationFormState;
   rejectForm: RejectApplicationFormState;
   isApproving: boolean;
@@ -147,12 +148,13 @@ export function ApplicationsSection({ state, actions }: ApplicationsSectionProps
       )}
 
       {state.modalMode === 'approve' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-md p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
+          <Card className="w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto shadow-xl">
             <ApplicationApproveForm
               departments={state.departments}
               offices={state.offices}
               supervisors={state.supervisors}
+              targetApplication={state.targetApplication}
               form={state.approveForm}
               isSubmitting={state.isApproving}
               onFieldChange={actions.onApproveFieldChange}

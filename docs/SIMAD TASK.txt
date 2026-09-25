@@ -1,0 +1,13 @@
+- Penambahakan Kuota Atau Slot Untuk Tiap Kantor - Done
+- Di supervisor Itu bisa menambahkan nilai anak magang - Done Not Test
+- Generator Sertifikat Itu Harus Approve Admin Dikarenakan Harus Dapat Nilai Dari Supervisor 
+- Start Absensi Masuk Peserta magang itu Mulai Jam 8 Maksimal - Done
+- Resepsinis bisa Check Slot Anak magang yang tersedia Di Depetement Yang Tersedia Dikantor
+- Tanggal Masuk Harus Ditentukan admin - karena slot kuota terbatas
+- Peserta Bisa Mengajukan Koreksi Absen - Syaratnya Ada izin ke Supervisor 
+- Tutorial Via Video
+- Tambah Menu Panduan Di Intern Agar Tidak Kebingunan
+- Setiap Bidang Kuota Tanggal Berapa Masuk Serta Tanggal Keluar 
+- CV wajib, surat permohonan dari fakultas wajib
+- Sertifikat Generator Berdaskan Kantor Berbeda Dikarenakan Beda Yang Tanda Tangan 
+

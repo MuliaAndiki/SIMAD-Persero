@@ -573,6 +573,10 @@ class AuthService {
       email: user.email,
       role: (user.roles[0] ?? DEFAULT_ROLE_CODE).toLowerCase(),
       avatarUrl: user.avatarUrl,
+      officeId: user.officeId ?? null,
+      departmentId: user.departmentId ?? null,
+      officeLocation: user.officeLocation ?? null,
+      department: user.department ?? null,
     };
   }
 

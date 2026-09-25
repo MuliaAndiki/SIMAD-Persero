@@ -1,21 +1,49 @@
+"use client";
 import {
   AlertTriangle,
   ArrowLeft,
   CalendarCheck,
   CheckCircle2,
   Clock,
+  Loader2,
   LogIn,
   LogOut,
   MapPin,
   XCircle,
-} from 'lucide-react';
-import Link from 'next/link';
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 
-import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
-import { Badge } from '@/components/atoms/badge';
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { AttendanceDetailResponse } from '@/types/api/attendance.types';
+import { PhantomSkeleton } from "@/components/atoms/PhantomSkeleton";
+import { Badge } from "@/components/atoms/badge";
+import { Button } from "@/components/atoms/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import type { AttendanceDetailResponse } from "@/types/api/attendance.types";
+import { AttendanceCorrectionDialog } from "@/components/organisms/attendance/AttendanceCorrectionDialog";
+import { FileEdit } from "lucide-react";
+import { useState } from "react";
+
+const AttendanceMap = dynamic(
+  () =>
+    import("@/components/organisms/attendance/AttendanceMap").then(
+      (mod) => mod.AttendanceMap,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 text-sm text-muted-foreground sm:h-72">
+        <Loader2 className="size-6 animate-spin text-primary" />
+        <span>Memuat peta interaktif…</span>
+      </div>
+    ),
+  },
+);
 
 /** State yang disuplai container — section murni presentasi. */
 export interface AttendanceDetailSectionState {
@@ -30,29 +58,29 @@ export interface AttendanceDetailSectionProps {
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return '-';
+  if (!value) return "-";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   });
 }
 
 function formatTime(value: string | null): string {
-  if (!value) return '-';
+  if (!value) return "-";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
 function formatMinutes(value: number | null): string {
-  if (value == null) return '-';
+  if (value == null) return "-";
   const hours = Math.floor(value / 60);
   const minutes = value % 60;
   if (hours <= 0) return `${minutes} menit`;
@@ -61,43 +89,43 @@ function formatMinutes(value: number | null): string {
 
 function attendanceStatusLabel(status: string | null): string {
   switch (status) {
-    case 'PRESENT':
-      return 'Hadir';
-    case 'LATE':
-      return 'Terlambat';
-    case 'COMPLETED':
-      return 'Selesai';
-    case 'PENDING_REVIEW':
-      return 'Menunggu Review';
-    case 'INVALID':
-      return 'Tidak Valid';
-    case 'ABSENT':
-      return 'Tidak Hadir';
+    case "PRESENT":
+      return "Hadir";
+    case "LATE":
+      return "Terlambat";
+    case "COMPLETED":
+      return "Selesai";
+    case "PENDING_REVIEW":
+      return "Menunggu Review";
+    case "INVALID":
+      return "Tidak Valid";
+    case "ABSENT":
+      return "Tidak Hadir";
     default:
-      return status ?? '-';
+      return status ?? "-";
   }
 }
 
 function attendanceStatusVariant(
   status: string | null,
-): 'default' | 'secondary' | 'destructive' | 'outline' {
+): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
-    case 'PRESENT':
-    case 'COMPLETED':
-      return 'default';
-    case 'LATE':
-    case 'PENDING_REVIEW':
-      return 'secondary';
-    case 'INVALID':
-    case 'ABSENT':
-      return 'destructive';
+    case "PRESENT":
+    case "COMPLETED":
+      return "default";
+    case "LATE":
+    case "PENDING_REVIEW":
+      return "secondary";
+    case "INVALID":
+    case "ABSENT":
+      return "destructive";
     default:
-      return 'outline';
+      return "outline";
   }
 }
 
 function formatDistance(value: number | null): string {
-  if (value == null) return '-';
+  if (value == null) return "-";
   return `${value.toFixed(0)} m`;
 }
 
@@ -109,7 +137,10 @@ export function AttendanceDetailFallback() {
         <CardContent className="flex flex-col gap-4 p-6">
           {Array.from({ length: 6 }, (_, i) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: skeleton items are static
-            <div key={`detail-skeleton-${i}`} className="h-4 rounded bg-muted" />
+            <div
+              key={`detail-skeleton-${i}`}
+              className="h-4 rounded bg-muted"
+            />
           ))}
         </CardContent>
       </Card>
@@ -122,9 +153,11 @@ function DetailError({ message }: { message?: string }) {
     <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
       <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
       <div className="flex flex-col gap-1">
-        <p className="font-medium text-destructive">Gagal memuat detail absensi</p>
+        <p className="font-medium text-destructive">
+          Gagal memuat detail absensi
+        </p>
         <p className="text-muted-foreground">
-          {message ?? 'Silakan muat ulang halaman untuk mencoba lagi.'}
+          {message ?? "Silakan muat ulang halaman untuk mencoba lagi."}
         </p>
       </div>
     </div>
@@ -148,20 +181,24 @@ function CheckPointCard({
     accuracyMeter: number | null;
   } | null;
 }) {
-  const valid = status !== 'ABSENT' && status !== 'INVALID';
+  const valid = status !== "ABSENT" && status !== "INVALID";
 
   return (
     <Card>
       <CardHeader className="space-y-0.5">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Icon className={`size-4 ${valid ? 'text-emerald-500' : 'text-red-500'}`} />
+          <Icon
+            className={`size-4 ${valid ? "text-emerald-500" : "text-red-500"}`}
+          />
           {title}
         </CardTitle>
         <CardDescription>
           {status ? (
-            <Badge variant={attendanceStatusVariant(status)}>{attendanceStatusLabel(status)}</Badge>
+            <Badge variant={attendanceStatusVariant(status)}>
+              {attendanceStatusLabel(status)}
+            </Badge>
           ) : (
-            'Belum tercatat'
+            "Belum tercatat"
           )}
         </CardDescription>
       </CardHeader>
@@ -174,10 +211,12 @@ function CheckPointCard({
           <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <MapPin className="size-3.5" />
-              {log.insideGeofence ? 'Di dalam area kantor' : 'Di luar area kantor'}
+              {log.insideGeofence
+                ? "Di dalam area kantor"
+                : "Di luar area kantor"}
             </span>
             <span className="flex items-center gap-1.5">
-              Jarak {formatDistance(log.distanceMeter)} · Akurasi{' '}
+              Jarak {formatDistance(log.distanceMeter)} · Akurasi{" "}
               {formatDistance(log.accuracyMeter)}
             </span>
           </div>
@@ -187,27 +226,50 @@ function CheckPointCard({
   );
 }
 
-export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps) {
+export function AttendanceDetailSection({
+  state,
+}: AttendanceDetailSectionProps) {
   const { detail } = state;
-  const checkInLog = detail?.logs?.find((log) => log.action === 'CHECK_IN');
-  const checkOutLog = detail?.logs?.find((log) => log.action === 'CHECK_OUT');
+  const [isCorrectionOpen, setIsCorrectionOpen] = useState(false);
+  const checkInLog = detail?.logs?.find((log) => log.action === "CHECK_IN");
+  const checkOutLog = detail?.logs?.find((log) => log.action === "CHECK_OUT");
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild aria-label="Kembali ke riwayat">
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            aria-label="Kembali ke riwayat"
+          >
             <Link href="/intern/history">
               <ArrowLeft />
             </Link>
           </Button>
           <div className="flex flex-col gap-0.5">
-            <h1 className="text-2xl font-semibold tracking-tight">Detail Absensi</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Detail Absensi
+            </h1>
             <p className="text-sm text-muted-foreground">
-              {detail ? formatDate(detail.attendanceDate) : 'Kembali ke riwayat absensi Anda.'}
+              {detail
+                ? formatDate(detail.attendanceDate)
+                : "Kembali ke riwayat absensi Anda."}
             </p>
           </div>
         </div>
+
+        {detail && (
+          <Button
+            variant="outline"
+            className="flex items-center gap-1.5"
+            onClick={() => setIsCorrectionOpen(true)}
+          >
+            <FileEdit className="size-4" />
+            Ajukan Koreksi Hari Ini
+          </Button>
+        )}
       </header>
 
       {state.isPending ? (
@@ -228,7 +290,9 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
                   <CalendarCheck className="size-4 text-primary" />
                   Ringkasan Kehadiran
                 </CardTitle>
-                <CardDescription>{formatDate(detail.attendanceDate)}</CardDescription>
+                <CardDescription>
+                  {formatDate(detail.attendanceDate)}
+                </CardDescription>
               </div>
               <Badge variant={attendanceStatusVariant(detail.attendanceStatus)}>
                 {attendanceStatusLabel(detail.attendanceStatus)}
@@ -236,18 +300,23 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
             </CardHeader>
             <CardContent className="flex flex-col gap-2 text-sm">
               <div className="flex items-center gap-2">
-                {detail.attendanceStatus === 'ABSENT' || detail.attendanceStatus === 'INVALID' ? (
+                {detail.attendanceStatus === "ABSENT" ||
+                detail.attendanceStatus === "INVALID" ? (
                   <XCircle className="size-4 text-red-500" />
                 ) : (
                   <CheckCircle2 className="size-4 text-emerald-500" />
                 )}
                 <span>
-                  Total jam kerja:{' '}
-                  <span className="font-medium">{formatMinutes(detail.totalWorkMinutes)}</span>
+                  Total jam kerja:{" "}
+                  <span className="font-medium">
+                    {formatMinutes(detail.totalWorkMinutes)}
+                  </span>
                 </span>
               </div>
               {detail.notes ? (
-                <p className="text-xs text-muted-foreground">Catatan: {detail.notes}</p>
+                <p className="text-xs text-muted-foreground">
+                  Catatan: {detail.notes}
+                </p>
               ) : null}
             </CardContent>
           </Card>
@@ -270,6 +339,53 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
             />
           </div>
 
+          {/* Peta Lokasi Geofence jika data kantor tersedia */}
+          {detail.office &&
+            detail.office.latitude != null &&
+            detail.office.longitude != null && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <MapPin className="size-4 text-primary" />
+                      Peta Validasi Lokasi Presensi
+                    </CardTitle>
+                    <Badge variant="outline" className="text-xs">
+                      {detail.office.name}
+                    </Badge>
+                  </div>
+                  <CardDescription>
+                    Visualisasi titik lokasi kantor PLN (
+                    {detail.office.radiusMeter} m) dan koordinat GPS saat
+                    presensi dilakukan.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AttendanceMap
+                    officeLatitude={detail.office.latitude}
+                    officeLongitude={detail.office.longitude}
+                    officeRadiusMeter={detail.office.radiusMeter}
+                    officeName={detail.office.name}
+                    userLatitude={checkInLog?.latitude ?? checkOutLog?.latitude}
+                    userLongitude={
+                      checkInLog?.longitude ?? checkOutLog?.longitude
+                    }
+                    userAccuracyMeter={
+                      checkInLog?.accuracyMeter ?? checkOutLog?.accuracyMeter
+                    }
+                    isInsideGeofence={
+                      checkInLog?.insideGeofence ??
+                      checkOutLog?.insideGeofence ??
+                      false
+                    }
+                    distanceMeter={
+                      checkInLog?.distanceMeter ?? checkOutLog?.distanceMeter
+                    }
+                  />
+                </CardContent>
+              </Card>
+            )}
+
           {/* Riwayat log */}
           <Card>
             <CardHeader className="space-y-0.5">
@@ -277,7 +393,9 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
                 <Clock className="size-4 text-primary" />
                 Riwayat Absen
               </CardTitle>
-              <CardDescription>Waktu dan lokasi tercatatnya aktivitas absen Anda.</CardDescription>
+              <CardDescription>
+                Waktu dan lokasi tercatatnya aktivitas absen Anda.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {detail.logs && detail.logs.length > 0 ? (
@@ -289,12 +407,12 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
                     >
                       <span
                         className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full ${
-                          log.action === 'CHECK_IN'
-                            ? 'bg-emerald-500/10 text-emerald-600'
-                            : 'bg-primary/10 text-primary'
+                          log.action === "CHECK_IN"
+                            ? "bg-emerald-500/10 text-emerald-600"
+                            : "bg-primary/10 text-primary"
                         }`}
                       >
-                        {log.action === 'CHECK_IN' ? (
+                        {log.action === "CHECK_IN" ? (
                           <LogIn className="size-3.5" />
                         ) : (
                           <LogOut className="size-3.5" />
@@ -302,26 +420,30 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
                       </span>
                       <div className="flex flex-col gap-1">
                         <p className="font-medium">
-                          {log.action === 'CHECK_IN' ? 'Check-in' : 'Check-out'}
+                          {log.action === "CHECK_IN" ? "Check-in" : "Check-out"}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(log.createdAt).toLocaleString('id-ID', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
+                          {new Date(log.createdAt).toLocaleString("id-ID", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
                           })}
                         </p>
                         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <MapPin className="size-3" />
-                            {log.insideGeofence ? 'Di dalam area' : 'Di luar area'} ·{' '}
-                            {formatDistance(log.distanceMeter)}
+                            {log.insideGeofence
+                              ? "Di dalam area"
+                              : "Di luar area"}{" "}
+                            · {formatDistance(log.distanceMeter)}
                           </span>
                           <span>
                             Akurasi {formatDistance(log.accuracyMeter)}
-                            {log.fakeGpsDetected ? ' · Terdeteksi GPS palsu' : ''}
+                            {log.fakeGpsDetected
+                              ? " · Terdeteksi GPS palsu"
+                              : ""}
                           </span>
                         </p>
                       </div>
@@ -336,6 +458,15 @@ export function AttendanceDetailSection({ state }: AttendanceDetailSectionProps)
             </CardContent>
           </Card>
         </>
+      )}
+
+      {detail && (
+        <AttendanceCorrectionDialog
+          open={isCorrectionOpen}
+          onOpenChange={setIsCorrectionOpen}
+          initialAttendanceId={detail.id}
+          initialDate={detail.attendanceDate}
+        />
       )}
     </section>
   );

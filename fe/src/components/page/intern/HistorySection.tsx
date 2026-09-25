@@ -1,9 +1,19 @@
+import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/atoms/tabs';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/atoms/tooltip';
+import { AttendanceCorrectionDialog } from '@/components/organisms/attendance/AttendanceCorrectionDialog';
+import { InternCorrectionList } from '@/components/organisms/attendance/InternCorrectionList';
+import Api from '@/services/props.service';
+import type { AttendanceResponse } from '@/types/api/attendance.types';
+import type { AttendanceCorrectionItem } from '@/types/api/correction.types';
 import {
   AlertTriangle,
   ArrowRight,
@@ -12,17 +22,11 @@ import {
   ChevronRight,
   Clock,
   Download,
+  FileEdit,
   LogIn,
   LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
-
-import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
-import { Badge } from '@/components/atoms/badge';
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import Api from '@/services/props.service';
-import type { AttendanceResponse } from '@/types/api/attendance.types';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -34,6 +38,8 @@ export interface HistorySectionState {
   month: number;
   year: number;
   records: AttendanceResponse[];
+  corrections?: AttendanceCorrectionItem[];
+  isCorrectionPending?: boolean;
   /** Periode magang (untuk menentukan hari kerja yang wajib absen). */
   internshipStart?: string | null;
   internshipEnd?: string | null;
@@ -264,6 +270,7 @@ function DayCard({
 
 export function HistorySection({ state, service }: HistorySectionProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const [isCorrectionDialogOpen, setIsCorrectionDialogOpen] = useState(false);
 
   const handleExport = async () => {
     try {
@@ -283,9 +290,8 @@ export function HistorySection({ state, service }: HistorySectionProps) {
   };
 
   const { month, year } = state;
-  // Guard: pastikan `records` selalu array meski container mengirim wrapper
-  // { data, meta } (mis. sisa cache bentuk lama).
   const records = Array.isArray(state.records) ? state.records : [];
+  const corrections = Array.isArray(state.corrections) ? state.corrections : [];
 
   const recordByKey = new Map<string, AttendanceResponse>();
   for (const record of records) {
@@ -302,99 +308,144 @@ export function HistorySection({ state, service }: HistorySectionProps) {
     <section className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Riwayat Absensi</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Riwayat & Koreksi Presensi</h1>
           <p className="text-sm text-muted-foreground">
-            Rekap kehadiran harian magang Anda. Hijau berarti masuk, merah tidak masuk, kuning belum
-            melakukan absen.
+            Rekap kehadiran harian magang dan pengajuan koreksi presensi kepada supervisor.
           </p>
         </header>
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="inline-block">
-                <Button
-                  variant="outline"
-                  onClick={handleExport}
-                  disabled={isExporting || state.internshipStatus !== 'COMPLETED'}
-                >
-                  <Download className="mr-2 size-4" />
-                  {isExporting ? 'Mengekspor...' : 'Export Excel'}
-                </Button>
-              </div>
-            </TooltipTrigger>
-            {state.internshipStatus !== 'COMPLETED' && (
-              <TooltipContent>
-                <p>
-                  Export data hanya bisa dilakukan ketika status magang telah selesai (COMPLETED).
-                </p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="default"
+            onClick={() => setIsCorrectionDialogOpen(true)}
+            className="flex items-center gap-1.5"
+          >
+            <FileEdit className="size-4" />
+            Ajukan Koreksi
+          </Button>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="inline-block">
+                  <Button
+                    variant="outline"
+                    onClick={handleExport}
+                    disabled={isExporting || state.internshipStatus !== 'COMPLETED'}
+                  >
+                    <Download className="mr-2 size-4" />
+                    {isExporting ? 'Mengekspor...' : 'Export Excel'}
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              {state.internshipStatus !== 'COMPLETED' && (
+                <TooltipContent>
+                  <p>
+                    Export data hanya bisa dilakukan ketika status magang telah selesai (COMPLETED).
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
-      {state.isPending ? (
-        <HistoryLoading />
-      ) : state.isError ? (
-        <HistoryError message={state.errorMessage} />
-      ) : (
-        <Card>
-          <CardHeader className="flex flex-col gap-3">
-            <CardTitle className="flex items-center gap-2">
-              <CalendarDays className="size-4 text-primary" />
-              {MONTH_NAME[month - 1]} {year}
-            </CardTitle>
-            <CardDescription>
-              Klik kartu berwarna hijau/merah untuk melihat detail absen harian.
-            </CardDescription>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <Legend records={records} />
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={service.onPrevMonth}
-                  aria-label="Bulan sebelumnya"
-                >
-                  <ChevronLeft />
-                </Button>
-                {!isCurrentMonth ? (
-                  <Button variant="outline" size="sm" onClick={service.onCurrentMonth}>
-                    Bulan Ini
-                  </Button>
-                ) : null}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={service.onNextMonth}
-                  aria-label="Bulan berikutnya"
-                >
-                  <ChevronRight />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {workdays.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Tidak ada hari kerja pada bulan ini dalam periode magang Anda.
-              </p>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
-                {workdays.map((day) => (
-                  <DayCard
-                    key={day.key}
-                    dayNumber={day.dayNumber}
-                    date={day.date}
-                    record={recordByKey.get(day.key)}
-                  />
-                ))}
-              </div>
+      <Tabs defaultValue="calendar" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="calendar" className="flex items-center gap-2">
+            <CalendarDays className="size-4" />
+            Kalender Presensi
+          </TabsTrigger>
+          <TabsTrigger value="corrections" className="flex items-center gap-2">
+            <Clock className="size-4" />
+            Daftar Koreksi
+            {corrections.length > 0 && (
+              <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
+                {corrections.length}
+              </Badge>
             )}
-          </CardContent>
-        </Card>
-      )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="calendar">
+          {state.isPending ? (
+            <HistoryLoading />
+          ) : state.isError ? (
+            <HistoryError message={state.errorMessage} />
+          ) : (
+            <Card>
+              <CardHeader className="flex flex-col gap-3">
+                <CardTitle className="flex items-center gap-2">
+                  <CalendarDays className="size-4 text-primary" />
+                  {MONTH_NAME[month - 1]} {year}
+                </CardTitle>
+                <CardDescription>
+                  Klik kartu berwarna hijau/merah untuk melihat detail absen harian.
+                </CardDescription>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <Legend records={records} />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={service.onPrevMonth}
+                      aria-label="Bulan sebelumnya"
+                    >
+                      <ChevronLeft />
+                    </Button>
+                    {!isCurrentMonth ? (
+                      <Button variant="outline" size="sm" onClick={service.onCurrentMonth}>
+                        Bulan Ini
+                      </Button>
+                    ) : null}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={service.onNextMonth}
+                      aria-label="Bulan berikutnya"
+                    >
+                      <ChevronRight />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {workdays.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    Tidak ada hari kerja pada bulan ini dalam periode magang Anda.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
+                    {workdays.map((day) => (
+                      <DayCard
+                        key={day.key}
+                        dayNumber={day.dayNumber}
+                        date={day.date}
+                        record={recordByKey.get(day.key)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="corrections">
+          <InternCorrectionList
+            corrections={corrections}
+            isLoading={state.isCorrectionPending}
+            onOpenNewCorrection={() => setIsCorrectionDialogOpen(true)}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Dialog Ajukan Koreksi Presensi */}
+      <AttendanceCorrectionDialog
+        open={isCorrectionDialogOpen}
+        onOpenChange={setIsCorrectionDialogOpen}
+        records={records}
+      />
     </section>
   );
 }
