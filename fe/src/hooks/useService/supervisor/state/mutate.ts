@@ -1,12 +1,10 @@
-import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useAppMutation } from '@/hooks/useService/_shared/useAppMutation';
 import Api from '@/services/props.service';
 import {
   type SupervisorCacheContext,
   readSupervisorSnapshot,
 } from '@/utils/cache/supervisor.cache';
-import { ResponseTitles } from '@/utils/response-titles';
 
 import type { IUser } from '@/types/api/model.type';
 import type {
@@ -17,96 +15,33 @@ import type {
   SupervisorParams,
   UpdateSupervisorBody,
 } from '@/types/api/supervisor.types';
-import { useMutation } from '@tanstack/react-query';
 
 export function useAssignIntern() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<SupervisorAssignmentResponse>,
-    Error,
+  return useAppMutation<
+    SupervisorAssignmentResponse,
     {
       params: Pick<SupervisorParams, 'supervisorId'>;
       body: Pick<AssignInternBody, 'internshipId'>;
     },
     SupervisorCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<SupervisorParams, 'supervisorId'>;
-      body: Pick<AssignInternBody, 'internshipId'>;
-    }) => Api.Supervisor.Assign(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-      const previousData = readSupervisorSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Supervisor.Assign(params, body),
+    invalidateKeys: [queryKey.supervisorRoot(), queryKey.internshipRoot()],
+    optimistic: (ns) => ({ previousData: readSupervisorSnapshot(ns) }),
   });
 }
 
 export function useCreateSupervisor() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<IUser>, Error, CreateSupervisorBody, SupervisorCacheContext>({
-    mutationFn: (body: CreateSupervisorBody) => Api.Supervisor.Create(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-      const previousData = readSupervisorSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<IUser, CreateSupervisorBody, SupervisorCacheContext>({
+    mutationFn: (body) => Api.Supervisor.Create(body),
+    invalidateKeys: [queryKey.supervisorRoot()],
+    optimistic: (ns) => ({ previousData: readSupervisorSnapshot(ns) }),
   });
 }
 
 export function useUpdateSupervisor() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<IUser>,
-    Error,
+  return useAppMutation<
+    IUser,
     {
       params: Pick<SupervisorParams, 'supervisorId'>;
       body: UpdateSupervisorBody;
@@ -114,111 +49,27 @@ export function useUpdateSupervisor() {
     SupervisorCacheContext
   >({
     mutationFn: ({ params, body }) => Api.Supervisor.Update(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-      const previousData = readSupervisorSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    invalidateKeys: [queryKey.supervisorRoot()],
+    optimistic: (ns) => ({ previousData: readSupervisorSnapshot(ns) }),
   });
 }
 
 export function useDeleteSupervisor() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<null>,
-    Error,
-    Pick<SupervisorParams, 'supervisorId'>,
-    SupervisorCacheContext
-  >({
-    mutationFn: (params: Pick<SupervisorParams, 'supervisorId'>) => Api.Supervisor.Delete(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-      const previousData = readSupervisorSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<null, Pick<SupervisorParams, 'supervisorId'>, SupervisorCacheContext>({
+    mutationFn: (params) => Api.Supervisor.Delete(params),
+    invalidateKeys: [queryKey.supervisorRoot()],
+    optimistic: (ns) => ({ previousData: readSupervisorSnapshot(ns) }),
   });
 }
 
 export function useRemoveAssignment() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<null>,
-    Error,
+  return useAppMutation<
+    null,
     Pick<SupervisorAssignmentParams, 'supervisorId' | 'assignmentId'>,
     SupervisorCacheContext
   >({
-    mutationFn: (params: Pick<SupervisorAssignmentParams, 'supervisorId' | 'assignmentId'>) =>
-      Api.Supervisor.RemoveAssignment(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.supervisorRoot(),
-      });
-      const previousData = readSupervisorSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (params) => Api.Supervisor.RemoveAssignment(params),
+    invalidateKeys: [queryKey.supervisorRoot(), queryKey.internshipRoot()],
+    optimistic: (ns) => ({ previousData: readSupervisorSnapshot(ns) }),
   });
 }

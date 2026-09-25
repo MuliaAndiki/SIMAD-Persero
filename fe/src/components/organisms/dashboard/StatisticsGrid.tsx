@@ -2,6 +2,7 @@
 
 import { Card } from '@/components/atoms/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/atoms/tabs';
+import { StatCard } from '@/components/organisms/dashboard/StatCard';
 import type { DashboardStatistics } from '@/types/api/dashboard.types';
 import {
   Award,
@@ -18,33 +19,6 @@ import {
   UserCog,
   Users,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-
-function StatItem({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-card p-3 shadow-sm transition-all hover:border-primary/30 hover:shadow-md sm:gap-3.5 sm:p-4">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:size-10">
-        <Icon className="size-4 sm:size-5" />
-      </div>
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate text-[11px] font-medium text-muted-foreground sm:text-xs">
-          {label}
-        </span>
-        <span className="text-base font-bold leading-tight text-foreground sm:text-xl">
-          {value.toLocaleString('id-ID')}
-        </span>
-      </div>
-    </div>
-  );
-}
 
 /**
  * StatisticsGrid — statistik sistem HR dengan Tab Aktif (GET /dashboard/statistics).
@@ -82,37 +56,85 @@ export function StatisticsGrid({ data }: { data: DashboardStatistics }) {
 
         <TabsContent value="organisasi" className="mt-2.5 sm:mt-3">
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-            <StatItem icon={Users} label="Total Pengguna" value={data.totalUsers} />
-            <StatItem icon={GraduationCap} label="Peserta Magang" value={data.totalInterns} />
-            <StatItem icon={Building2} label="Bidang / Dept" value={data.totalDepartments} />
-            <StatItem icon={MapPin} label="Lokasi Kantor" value={data.totalOffices} />
+            <StatCard
+              icon={Users}
+              label="Total Pengguna"
+              value={data.totalUsers.toLocaleString('id-ID')}
+            />
+            <StatCard
+              icon={GraduationCap}
+              label="Peserta Magang"
+              value={data.totalInterns.toLocaleString('id-ID')}
+            />
+            <StatCard
+              icon={Building2}
+              label="Bidang / Dept"
+              value={data.totalDepartments.toLocaleString('id-ID')}
+            />
+            <StatCard
+              icon={MapPin}
+              label="Lokasi Kantor"
+              value={data.totalOffices.toLocaleString('id-ID')}
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="pengajuan" className="mt-2.5 sm:mt-3">
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-            <StatItem icon={ClipboardList} label="Total Pengajuan" value={data.totalApplications} />
-            <StatItem icon={FileClock} label="Menunggu Review" value={data.pendingApplications} />
-            <StatItem icon={CheckCircle2} label="Disetujui" value={data.approvedApplications} />
+            <StatCard
+              icon={ClipboardList}
+              label="Total Pengajuan"
+              value={data.totalApplications.toLocaleString('id-ID')}
+            />
+            <StatCard
+              icon={FileClock}
+              label="Menunggu Review"
+              value={data.pendingApplications.toLocaleString('id-ID')}
+            />
+            <StatCard
+              icon={CheckCircle2}
+              label="Disetujui"
+              value={data.approvedApplications.toLocaleString('id-ID')}
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="magang" className="mt-2.5 sm:mt-3">
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2">
-            <StatItem icon={Briefcase} label="Magang Aktif" value={data.activeInternships} />
-            <StatItem icon={Award} label="Magang Selesai" value={data.completedInternships} />
+            <StatCard
+              icon={Briefcase}
+              label="Magang Aktif"
+              value={data.activeInternships.toLocaleString('id-ID')}
+            />
+            <StatCard
+              icon={Award}
+              label="Magang Selesai"
+              value={data.completedInternships.toLocaleString('id-ID')}
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="operasional" className="mt-2.5 sm:mt-3">
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-            <StatItem icon={UserCog} label="Total Supervisor" value={data.totalSupervisors} />
-            <StatItem icon={CalendarCheck} label="Total Absensi" value={data.totalAttendance} />
-            <StatItem icon={CalendarClock} label="Absensi Hari Ini" value={data.attendanceToday} />
-            <StatItem
+            <StatCard
+              icon={UserCog}
+              label="Total Supervisor"
+              value={data.totalSupervisors.toLocaleString('id-ID')}
+            />
+            <StatCard
+              icon={CalendarCheck}
+              label="Total Absensi"
+              value={data.totalAttendance.toLocaleString('id-ID')}
+            />
+            <StatCard
+              icon={CalendarClock}
+              label="Absensi Hari Ini"
+              value={data.attendanceToday.toLocaleString('id-ID')}
+            />
+            <StatCard
               icon={BadgeCheck}
               label="Sertifikat Dibuat"
-              value={data.certificatesGenerated}
+              value={data.certificatesGenerated.toLocaleString('id-ID')}
             />
           </div>
         </TabsContent>

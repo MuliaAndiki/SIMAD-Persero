@@ -17,7 +17,7 @@ export const NotFound = () => {
       {/* Background ambient lighting and grid */}
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#00A2E9]/5 via-transparent to-[#FDB913]/5" />
-        
+
         {/* Abstract gradient orbs */}
         <motion.div
           className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#00A2E9]/10 blur-3xl pointer-events-none"
@@ -27,7 +27,12 @@ export const NotFound = () => {
         <motion.div
           className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-[#FDB913]/10 blur-3xl pointer-events-none"
           animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
-          transition={{ duration: 9, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut', delay: 1 }}
+          transition={{
+            duration: 9,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: 'easeInOut',
+            delay: 1,
+          }}
         />
 
         {/* Subtle grid pattern */}
@@ -101,7 +106,8 @@ export const NotFound = () => {
             Halaman Tidak Ditemukan
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
-            Maaf, halaman yang Anda tuju tidak tersedia, telah dipindahkan, atau tautan yang dimasukkan kurang tepat.
+            Maaf, halaman yang Anda tuju tidak tersedia, telah dipindahkan, atau tautan yang
+            dimasukkan kurang tepat.
           </p>
         </motion.div>
 
@@ -147,4 +153,3 @@ export const NotFound = () => {
 };
 
 export default NotFound;
-

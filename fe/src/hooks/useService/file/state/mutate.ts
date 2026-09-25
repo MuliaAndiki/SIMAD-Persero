@@ -1,73 +1,30 @@
-import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useAppMutation } from '@/hooks/useService/_shared/useAppMutation';
 import Api from '@/services/props.service';
 import { type FileCacheContext, readFileSnapshot } from '@/utils/cache/file.cache';
 import { ResponseTitles } from '@/utils/response-titles';
-
-import type { FileParams, FileResponse } from '@/types/api/file.types';
 import { useMutation } from '@tanstack/react-query';
 
+import type { FileParams, FileResponse } from '@/types/api/file.types';
+
 export function useUploadFile() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<FileResponse>,
-    Error,
+  return useAppMutation<
+    FileResponse,
     FormData | { url: string; originalName?: string; mimeType?: string; size?: number },
     FileCacheContext
   >({
     mutationFn: (payload) => Api.File.Upload(payload),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({ queryKey: queryKey.fileRoot() });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.fileRoot() });
-      const previousData = readFileSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    invalidateKeys: [queryKey.fileRoot()],
+    optimistic: (ns) => ({ previousData: readFileSnapshot(ns) }),
   });
 }
 
 export function useDeleteFile() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<null>, Error, Pick<FileParams, 'fileId'>, FileCacheContext>({
-    mutationFn: (params: Pick<FileParams, 'fileId'>) => Api.File.Delete(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({ queryKey: queryKey.fileRoot() });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.fileRoot() });
-      const previousData = readFileSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<null, Pick<FileParams, 'fileId'>, FileCacheContext>({
+    mutationFn: (params) => Api.File.Delete(params),
+    invalidateKeys: [queryKey.fileRoot()],
+    optimistic: (ns) => ({ previousData: readFileSnapshot(ns) }),
   });
 }
 
@@ -78,7 +35,7 @@ export function useDeleteFile() {
 export function useDownloadFile() {
   const ns = useAppNameSpace();
   return useMutation<Response, Error, Pick<FileParams, 'fileId'>, FileCacheContext>({
-    mutationFn: (params: Pick<FileParams, 'fileId'>) => Api.File.Download(params),
+    mutationFn: (params) => Api.File.Download(params),
     onMutate: async () => {
       await ns.queryClient.cancelQueries({ queryKey: queryKey.fileRoot() });
       const previousData = readFileSnapshot(ns);

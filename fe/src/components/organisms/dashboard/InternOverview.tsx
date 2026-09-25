@@ -5,46 +5,10 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { InternDashboardResponse } from '@/types/api/dashboard.types';
-
-function attendanceStatusLabel(status: string | null): string {
-  switch (status) {
-    case 'ON_TIME':
-      return 'Tepat Waktu';
-    case 'LATE':
-      return 'Terlambat';
-    case 'PRESENT':
-      return 'Hadir';
-    case 'ABSENT':
-      return 'Tidak Hadir';
-    case 'INVALID':
-      return 'Tidak Valid';
-    default:
-      return status ?? '-';
-  }
-}
-
-function internshipStatusLabel(status: string | null): string {
-  switch (status) {
-    case 'DRAFT':
-      return 'Draft';
-    case 'PENDING':
-      return 'Menunggu';
-    case 'APPROVED':
-      return 'Disetujui';
-    case 'REJECTED':
-      return 'Ditolak';
-    case 'ACTIVE':
-      return 'Aktif';
-    case 'COMPLETED':
-      return 'Selesai';
-    case 'TERMINATED':
-      return 'Diakhiri';
-    case 'ARCHIVED':
-      return 'Diarsipkan';
-    default:
-      return status ?? '-';
-  }
-}
+import {
+  getAttendanceStatusLabel as attendanceStatusLabel,
+  getInternshipStatusLabel as internshipStatusLabel,
+} from '@/utils/status-labels';
 
 function formatTime(value: string | null): string {
   if (!value) return '-';

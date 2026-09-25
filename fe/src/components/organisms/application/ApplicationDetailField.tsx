@@ -1,19 +1,11 @@
 'use client';
 
-export interface ApplicationDetailFieldProps {
-  label: string;
-  value?: string | null;
-}
+import { DetailField, type DetailFieldProps } from '@/components/atoms/DetailField';
+
+export type ApplicationDetailFieldProps = DetailFieldProps;
 
 /**
- * ApplicationDetailField — organism field detail (label + nilai).
- * Dipakai di dalam dialog review pengajuan.
+ * ApplicationDetailField — alias untuk atom DetailField.
+ * @deprecated Gunakan `DetailField` dari `@/components/atoms` secara langsung.
  */
-export function ApplicationDetailField({ label, value }: ApplicationDetailFieldProps) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-medium">{value || '-'}</span>
-    </div>
-  );
-}
+export const ApplicationDetailField = DetailField;

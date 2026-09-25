@@ -1,4 +1,4 @@
-import { useCreateInstitution, useDeleteInstitution, useUpdateInstitution } from './state/mutation';
+import { useCreateInstitution, useDeleteInstitution, useUpdateInstitution } from './state/mutate';
 import { useEducationLevelList, useInstitutionDetail, useInstitutionList } from './state/query';
 
 /**

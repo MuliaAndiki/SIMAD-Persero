@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/atoms/select';
-import { UserAuditLogModal } from '@/components/organisms/auditLog/UserAuditLogModal';
+import { UserAuditLogModal } from '@/components/organisms/audit-log/UserAuditLogModal';
 import { SendNotificationModal } from '@/components/organisms/notification/SendNotificationModal';
 import { SupervisorAssignInternDialog } from '@/components/organisms/supervisor/SupervisorAssignInternDialog';
 import { SupervisorDetailDialog } from '@/components/organisms/supervisor/SupervisorDetailDialog';

@@ -1,6 +1,5 @@
-import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useAppMutation } from '@/hooks/useService/_shared/useAppMutation';
 import Api from '@/services/props.service';
 import type { IUser } from '@/types/api/model.type';
 import type {
@@ -8,87 +7,27 @@ import type {
   ReceptionistParams,
   UpdateReceptionistBody,
 } from '@/types/api/receptionist.types';
-import { ResponseTitles } from '@/utils/response-titles';
-import { useMutation } from '@tanstack/react-query';
 
 export function useCreateReceptionist() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<IUser>, Error, CreateReceptionistBody>({
-    mutationFn: (body: CreateReceptionistBody) => Api.Receptionist.Create(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.receptionistRoot(),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<IUser, CreateReceptionistBody>({
+    mutationFn: (body) => Api.Receptionist.Create(body),
+    invalidateKeys: [queryKey.receptionistRoot()],
   });
 }
 
 export function useUpdateReceptionist() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<IUser>,
-    Error,
+  return useAppMutation<
+    IUser,
     { params: Pick<ReceptionistParams, 'receptionistId'>; body: UpdateReceptionistBody }
   >({
     mutationFn: ({ params, body }) => Api.Receptionist.Update(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.receptionistRoot(),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    invalidateKeys: [queryKey.receptionistRoot()],
   });
 }
 
 export function useDeleteReceptionist() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<null>, Error, Pick<ReceptionistParams, 'receptionistId'>>({
+  return useAppMutation<null, Pick<ReceptionistParams, 'receptionistId'>>({
     mutationFn: (params) => Api.Receptionist.Delete(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.receptionistRoot(),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    invalidateKeys: [queryKey.receptionistRoot()],
   });
 }

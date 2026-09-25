@@ -142,7 +142,6 @@ export function PLNHero() {
         animate="visible"
       >
         {/* Eyebrow badge */}
-       
 
         {/* Headline */}
         <motion.h1
@@ -235,7 +234,7 @@ export function PLNHero() {
       </motion.div>
 
       {/* PWA QR Code - Desktop Only */}
-      <motion.div 
+      <motion.div
         className="hidden lg:block absolute bottom-8 right-8 z-50"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}

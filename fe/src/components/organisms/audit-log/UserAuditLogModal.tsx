@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import {
@@ -9,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/atoms/dialog';
 import { useApi } from '@/hooks/useService/useApi';
+import type { AuditLogResponse } from '@/types/api/auditLog.types';
 import { formatDate } from '@/utils/string.format';
 import { Activity, History, Loader2, ShieldAlert } from 'lucide-react';
 
@@ -17,15 +20,26 @@ export interface UserAuditLogModalProps {
   userId: string | null;
   userName?: string;
   onClose: () => void;
+  logs?: AuditLogResponse[];
+  isPending?: boolean;
 }
 
-export function UserAuditLogModal({ open, userId, userName, onClose }: UserAuditLogModalProps) {
+export function UserAuditLogModal({
+  open,
+  userId,
+  userName,
+  onClose,
+  logs: propLogs,
+  isPending: propIsPending,
+}: UserAuditLogModalProps) {
   const api = useApi();
+  const queryEnabled = Boolean(open && userId && propLogs === undefined);
   const userActivity = api.auditLog.query.userActivity({ userId: userId ?? '' }, undefined, {
-    enabled: Boolean(open && userId),
+    enabled: queryEnabled,
   });
 
-  const logs = userActivity.data ?? [];
+  const logs = propLogs ?? userActivity.data ?? [];
+  const isPending = propIsPending ?? (queryEnabled ? userActivity.isPending : false);
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
@@ -43,7 +57,7 @@ export function UserAuditLogModal({ open, userId, userName, onClose }: UserAudit
         </DialogHeader>
 
         <div className="max-h-96 overflow-y-auto py-2">
-          {userActivity.isPending ? (
+          {isPending ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>

@@ -1,6 +1,5 @@
-import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useAppMutation } from '@/hooks/useService/_shared/useAppMutation';
 import Api from '@/services/props.service';
 import {
   type ApplicationCacheContext,
@@ -17,13 +16,10 @@ import type {
   RejectApplicationBody,
   UpdateApplicationBody,
 } from '@/types/api/application.types';
-import { useMutation } from '@tanstack/react-query';
 
 export function useCreateApplication() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<ApplicationResponse>,
-    Error,
+  return useAppMutation<
+    ApplicationResponse,
     Pick<
       CreateApplicationBody,
       | 'requestedStartDate'
@@ -34,198 +30,64 @@ export function useCreateApplication() {
     >,
     ApplicationCacheContext
   >({
-    mutationFn: (
-      body: Pick<
-        CreateApplicationBody,
-        | 'requestedStartDate'
-        | 'requestedEndDate'
-        | 'motivation'
-        | 'coverLetterFileId'
-        | 'officeLocationId'
-      >,
-    ) => Api.Application.Create(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.applicationRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.applicationRoot() });
-      const previousData = readApplicationSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.application.createFailed,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (body) => Api.Application.Create(body),
+    invalidateKeys: [queryKey.applicationRoot()],
+    errorTitle: ResponseTitles.application.createFailed,
+    optimistic: (ns) => ({ previousData: readApplicationSnapshot(ns) }),
   });
 }
 
 export function useUpdateApplicationDraft() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<ApplicationResponse>,
-    Error,
+  return useAppMutation<
+    ApplicationResponse,
     { params: Pick<ApplicationParams, 'id'>; body: UpdateApplicationBody },
     ApplicationCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<ApplicationParams, 'id'>;
-      body: UpdateApplicationBody;
-    }) => Api.Application.UpdateDraft(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.applicationRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.applicationRoot() });
-      const previousData = readApplicationSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.application.updateFailed,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Application.UpdateDraft(params, body),
+    invalidateKeys: [queryKey.applicationRoot()],
+    errorTitle: ResponseTitles.application.updateFailed,
+    optimistic: (ns) => ({ previousData: readApplicationSnapshot(ns) }),
   });
 }
 
 export function useSubmitApplication() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<ApplicationResponse>,
-    Error,
+  return useAppMutation<
+    ApplicationResponse,
     Pick<ApplicationParams, 'id'>,
     ApplicationCacheContext
   >({
-    mutationFn: (params: Pick<ApplicationParams, 'id'>) => Api.Application.Submit(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.applicationRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.applicationRoot() });
-      const previousData = readApplicationSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.application.submitFailed,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (params) => Api.Application.Submit(params),
+    invalidateKeys: [queryKey.applicationRoot()],
+    errorTitle: ResponseTitles.application.submitFailed,
+    optimistic: (ns) => ({ previousData: readApplicationSnapshot(ns) }),
   });
 }
 
 export function useCancelApplication() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<ApplicationResponse>,
-    Error,
+  return useAppMutation<
+    ApplicationResponse,
     Pick<ApplicationParams, 'id'>,
     ApplicationCacheContext
   >({
-    mutationFn: (params: Pick<ApplicationParams, 'id'>) => Api.Application.Cancel(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.applicationRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.applicationRoot() });
-      const previousData = readApplicationSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.application.cancelFailed,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (params) => Api.Application.Cancel(params),
+    invalidateKeys: [queryKey.applicationRoot()],
+    errorTitle: ResponseTitles.application.cancelFailed,
+    optimistic: (ns) => ({ previousData: readApplicationSnapshot(ns) }),
   });
 }
 
 export function useDeleteApplicationDraft() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<null>,
-    Error,
-    Pick<ApplicationParams, 'id'>,
-    ApplicationCacheContext
-  >({
-    mutationFn: (params: Pick<ApplicationParams, 'id'>) => Api.Application.DeleteDraft(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.applicationRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.applicationRoot() });
-      const previousData = readApplicationSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.application.deleteFailed,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<null, Pick<ApplicationParams, 'id'>, ApplicationCacheContext>({
+    mutationFn: (params) => Api.Application.DeleteDraft(params),
+    invalidateKeys: [queryKey.applicationRoot()],
+    errorTitle: ResponseTitles.application.deleteFailed,
+    optimistic: (ns) => ({ previousData: readApplicationSnapshot(ns) }),
   });
 }
 
 export function useApproveApplication() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<ApproveApplicationResponse>,
-    Error,
+  return useAppMutation<
+    ApproveApplicationResponse,
     {
       params: Pick<ApplicationParams, 'id'>;
       body: Pick<
@@ -235,84 +97,22 @@ export function useApproveApplication() {
     },
     ApplicationCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<ApplicationParams, 'id'>;
-      body: Pick<
-        ApproveApplicationBody,
-        'departmentId' | 'officeLocationId' | 'supervisorId' | 'notes'
-      >;
-    }) => Api.Application.Approve(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.applicationRoot(),
-      });
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.applicationRoot() });
-      const previousData = readApplicationSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.application.approveFailed,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Application.Approve(params, body),
+    invalidateKeys: [queryKey.applicationRoot(), queryKey.internshipRoot()],
+    errorTitle: ResponseTitles.application.approveFailed,
+    optimistic: (ns) => ({ previousData: readApplicationSnapshot(ns) }),
   });
 }
 
 export function useRejectApplication() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<ApplicationResponse>,
-    Error,
+  return useAppMutation<
+    ApplicationResponse,
     { params: Pick<ApplicationParams, 'id'>; body: Pick<RejectApplicationBody, 'reason'> },
     ApplicationCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<ApplicationParams, 'id'>;
-      body: Pick<RejectApplicationBody, 'reason'>;
-    }) => Api.Application.Reject(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.applicationRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.applicationRoot() });
-      const previousData = readApplicationSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.application.rejectFailed,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Application.Reject(params, body),
+    invalidateKeys: [queryKey.applicationRoot()],
+    errorTitle: ResponseTitles.application.rejectFailed,
+    optimistic: (ns) => ({ previousData: readApplicationSnapshot(ns) }),
   });
 }
