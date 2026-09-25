@@ -1,12 +1,10 @@
-import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useAppMutation } from '@/hooks/useService/_shared/useAppMutation';
 import Api from '@/services/props.service';
 import {
   type AttendanceCacheContext,
   readAttendanceSnapshot,
 } from '@/utils/cache/attendance.cache';
-import { ResponseTitles } from '@/utils/response-titles';
 
 import type {
   AttendanceParams,
@@ -16,127 +14,42 @@ import type {
   OverrideAttendanceBody,
   OverrideAttendanceResponse,
 } from '@/types/api/attendance.types';
-import { useMutation } from '@tanstack/react-query';
 
 export function useCheckIn() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<AttendanceResponse>,
-    Error,
+  return useAppMutation<
+    AttendanceResponse,
     Pick<CheckInBody, 'latitude' | 'longitude' | 'accuracy' | 'deviceId' | 'fakeGpsDetected'>,
     AttendanceCacheContext
   >({
-    mutationFn: (
-      body: Pick<
-        CheckInBody,
-        'latitude' | 'longitude' | 'accuracy' | 'deviceId' | 'fakeGpsDetected'
-      >,
-    ) => Api.Attendance.CheckIn(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.attendanceRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.attendanceRoot() });
-      const previousData = readAttendanceSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (body) => Api.Attendance.CheckIn(body),
+    invalidateKeys: [queryKey.attendanceRoot()],
+    optimistic: (ns) => ({ previousData: readAttendanceSnapshot(ns) }),
   });
 }
 
 export function useCheckOut() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<AttendanceResponse>,
-    Error,
+  return useAppMutation<
+    AttendanceResponse,
     Pick<CheckOutBody, 'latitude' | 'longitude' | 'accuracy'>,
     AttendanceCacheContext
   >({
-    mutationFn: (body: Pick<CheckOutBody, 'latitude' | 'longitude' | 'accuracy'>) =>
-      Api.Attendance.CheckOut(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.attendanceRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.attendanceRoot() });
-      const previousData = readAttendanceSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (body) => Api.Attendance.CheckOut(body),
+    invalidateKeys: [queryKey.attendanceRoot()],
+    optimistic: (ns) => ({ previousData: readAttendanceSnapshot(ns) }),
   });
 }
 
 export function useOverrideAttendance() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<OverrideAttendanceResponse>,
-    Error,
+  return useAppMutation<
+    OverrideAttendanceResponse,
     {
       params: Pick<AttendanceParams, 'attendanceId'>;
       body: Pick<OverrideAttendanceBody, 'type' | 'time' | 'reason'>;
     },
     AttendanceCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<AttendanceParams, 'attendanceId'>;
-      body: Pick<OverrideAttendanceBody, 'type' | 'time' | 'reason'>;
-    }) => Api.Attendance.Override(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.attendanceRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.attendanceRoot() });
-      const previousData = readAttendanceSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Attendance.Override(params, body),
+    invalidateKeys: [queryKey.attendanceRoot()],
+    optimistic: (ns) => ({ previousData: readAttendanceSnapshot(ns) }),
   });
 }

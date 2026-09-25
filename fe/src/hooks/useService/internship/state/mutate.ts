@@ -1,8 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
-
-import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
-import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useAppMutation } from '@/hooks/useService/_shared/useAppMutation';
 import Api from '@/services/props.service';
 import type {
   AddSkillBody,
@@ -24,284 +21,87 @@ import {
   type InternshipCacheContext,
   readInternshipSnapshot,
 } from '@/utils/cache/internship.cache';
-import { ResponseTitles } from '@/utils/response-titles';
 
 export function useStartInternship() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<InternshipResponse>,
-    Error,
-    Pick<InternshipParams, 'id'>,
-    InternshipCacheContext
-  >({
-    mutationFn: (params: Pick<InternshipParams, 'id'>) => Api.Internship.Start(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      const previousData = readInternshipSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<InternshipResponse, Pick<InternshipParams, 'id'>, InternshipCacheContext>({
+    mutationFn: (params) => Api.Internship.Start(params),
+    invalidateKeys: [queryKey.internshipRoot()],
+    optimistic: (ns) => ({ previousData: readInternshipSnapshot(ns) }),
   });
 }
 
 export function useFinishInternship() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<InternshipResponse>,
-    Error,
-    Pick<InternshipParams, 'id'>,
-    InternshipCacheContext
-  >({
-    mutationFn: (params: Pick<InternshipParams, 'id'>) => Api.Internship.Finish(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      const previousData = readInternshipSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<InternshipResponse, Pick<InternshipParams, 'id'>, InternshipCacheContext>({
+    mutationFn: (params) => Api.Internship.Finish(params),
+    invalidateKeys: [queryKey.internshipRoot()],
+    optimistic: (ns) => ({ previousData: readInternshipSnapshot(ns) }),
   });
 }
 
 export function useExtendInternship() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<InternshipResponse>,
-    Error,
+  return useAppMutation<
+    InternshipResponse,
     {
       params: Pick<InternshipParams, 'id'>;
       body: Pick<ExtendInternshipBody, 'newEndDate' | 'reason'>;
     },
     InternshipCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<InternshipParams, 'id'>;
-      body: Pick<ExtendInternshipBody, 'newEndDate' | 'reason'>;
-    }) => Api.Internship.Extend(params, body),
-    onSettled: async () => {
-      await Promise.all([
-        ns.queryClient.invalidateQueries({
-          queryKey: queryKey.internshipRoot(),
-        }),
-        ns.queryClient.invalidateQueries({
-          queryKey: queryKey.attendanceRoot(),
-        }),
-        ns.queryClient.invalidateQueries({
-          queryKey: queryKey.certificateRoot(),
-        }),
-        ns.queryClient.invalidateQueries({
-          queryKey: queryKey.reportingRoot(),
-        }),
-      ]);
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      const previousData = readInternshipSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Internship.Extend(params, body),
+    invalidateKeys: [
+      queryKey.internshipRoot(),
+      queryKey.attendanceRoot(),
+      queryKey.certificateRoot(),
+      queryKey.reportingRoot(),
+    ],
+    optimistic: (ns) => ({ previousData: readInternshipSnapshot(ns) }),
   });
 }
 
 export function useAssignSupervisorInternship() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<InternshipResponse>,
-    Error,
+  return useAppMutation<
+    InternshipResponse,
     {
       params: Pick<InternshipParams, 'id'>;
       body: Pick<AssignSupervisorBody, 'supervisorId'>;
     },
     InternshipCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<InternshipParams, 'id'>;
-      body: Pick<AssignSupervisorBody, 'supervisorId'>;
-    }) => Api.Internship.AssignSupervisor(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      const previousData = readInternshipSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Internship.AssignSupervisor(params, body),
+    invalidateKeys: [queryKey.internshipRoot()],
+    optimistic: (ns) => ({ previousData: readInternshipSnapshot(ns) }),
   });
 }
 
 export function useChangeDepartmentInternship() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<InternshipResponse>,
-    Error,
+  return useAppMutation<
+    InternshipResponse,
     {
       params: Pick<InternshipParams, 'id'>;
       body: Pick<ChangeDepartmentBody, 'departmentId' | 'officeLocationId'>;
     },
     InternshipCacheContext
   >({
-    mutationFn: ({
-      params,
-      body,
-    }: {
-      params: Pick<InternshipParams, 'id'>;
-      body: Pick<ChangeDepartmentBody, 'departmentId' | 'officeLocationId'>;
-    }) => Api.Internship.ChangeDepartment(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      const previousData = readInternshipSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: ({ params, body }) => Api.Internship.ChangeDepartment(params, body),
+    invalidateKeys: [queryKey.internshipRoot()],
+    optimistic: (ns) => ({ previousData: readInternshipSnapshot(ns) }),
   });
 }
 
 export function useArchiveInternship() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<InternshipResponse>,
-    Error,
-    Pick<InternshipParams, 'id'>,
-    InternshipCacheContext
-  >({
-    mutationFn: (params: Pick<InternshipParams, 'id'>) => Api.Internship.Archive(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      const previousData = readInternshipSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<InternshipResponse, Pick<InternshipParams, 'id'>, InternshipCacheContext>({
+    mutationFn: (params) => Api.Internship.Archive(params),
+    invalidateKeys: [queryKey.internshipRoot()],
+    optimistic: (ns) => ({ previousData: readInternshipSnapshot(ns) }),
   });
 }
 
 export function useCreateInternProfile() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<CreateInternProfileResponse>, Error, PickMergeInternship>({
+  return useAppMutation<CreateInternProfileResponse, PickMergeInternship>({
     mutationFn: (payload) => Api.Internship.CreateProfile(payload),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-    },
-    onSuccess: (res) => {
+    invalidateKeys: [queryKey.internshipRoot()],
+    showSuccessToast: false,
+    onSuccess: (res, _, __, ns) => {
       ns.alert.toast({
         title: res.title,
         message: res.message,
@@ -311,152 +111,40 @@ export function useCreateInternProfile() {
         },
       });
     },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
   });
 }
 
 export function useAddSkillToIntern() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<AddSkillResponse>, Error, AddSkillBody>({
-    mutationFn: (body: AddSkillBody) => Api.Internship.AddSkill(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internship.profile(),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<AddSkillResponse, AddSkillBody>({
+    mutationFn: (body) => Api.Internship.AddSkill(body),
+    invalidateKeys: [queryKey.internshipRoot(), queryKey.internship.profile()],
   });
 }
 
 export function useCreateSkill() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<SkillResponse>, Error, CreateSkillBody>({
-    mutationFn: (body: CreateSkillBody) => Api.Internship.CreateSkill(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internship.skills({}),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<SkillResponse, CreateSkillBody>({
+    mutationFn: (body) => Api.Internship.CreateSkill(body),
+    invalidateKeys: [queryKey.internship.skills({})],
   });
 }
 
 export function useUpdateSkill() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<SkillResponse>,
-    Error,
-    { params: { id: string }; body: UpdateSkillBody }
-  >({
+  return useAppMutation<SkillResponse, { params: { id: string }; body: UpdateSkillBody }>({
     mutationFn: ({ params, body }) => Api.Internship.UpdateSkill(params, body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internship.skills({}),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    invalidateKeys: [queryKey.internship.skills({})],
   });
 }
 
 export function useDeleteSkill() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<null>, Error, { id: string }>({
+  return useAppMutation<null, { id: string }>({
     mutationFn: ({ id }) => Api.Internship.DeleteSkill({ id }),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internship.skills({}),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    invalidateKeys: [queryKey.internship.skills({})],
   });
 }
 
 export function useRemoveSkillFromIntern() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<RemoveSkillResponse>, Error, RemoveSkillParams>({
-    mutationFn: (params: RemoveSkillParams) => Api.Internship.RemoveSkill(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internshipRoot(),
-      });
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.internship.profile(),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+  return useAppMutation<RemoveSkillResponse, RemoveSkillParams>({
+    mutationFn: (params) => Api.Internship.RemoveSkill(params),
+    invalidateKeys: [queryKey.internshipRoot(), queryKey.internship.profile()],
   });
 }

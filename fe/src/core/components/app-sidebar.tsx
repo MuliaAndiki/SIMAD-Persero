@@ -28,7 +28,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/atoms';
-import { ROLE_SIDEBAR_MENU, SIDEBAR_MENU, getRoleDashboardPath, isItemActive, isMenuActive } from '@/configs/app.config';
+import {
+  ROLE_SIDEBAR_MENU,
+  SIDEBAR_MENU,
+  getRoleDashboardPath,
+  isItemActive,
+  isMenuActive,
+} from '@/configs/app.config';
 import { useInternAccess } from '@/hooks/useInternAccess';
 import { useApi } from '@/hooks/useService/useApi';
 import { cn } from '@/utils/classname';
@@ -192,7 +198,11 @@ export function AppSidebar() {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage key={user?.profilePhoto ?? 'sidebar'} src={user?.profilePhoto ?? ''} alt={user?.fullName ?? ''} />
+                    <AvatarImage
+                      key={user?.profilePhoto ?? 'sidebar'}
+                      src={user?.profilePhoto ?? ''}
+                      alt={user?.fullName ?? ''}
+                    />
                     <AvatarFallback className="rounded-lg">
                       {user?.fullName?.charAt(0).toUpperCase() ?? 'U'}
                     </AvatarFallback>
@@ -215,7 +225,11 @@ export function AppSidebar() {
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage key={user?.profilePhoto ?? 'dropdown'} src={user?.profilePhoto ?? ''} alt={user?.fullName ?? ''} />
+                      <AvatarImage
+                        key={user?.profilePhoto ?? 'dropdown'}
+                        src={user?.profilePhoto ?? ''}
+                        alt={user?.fullName ?? ''}
+                      />
                       <AvatarFallback className="rounded-lg">
                         {user?.fullName?.charAt(0).toUpperCase() ?? 'U'}
                       </AvatarFallback>
@@ -235,7 +249,10 @@ export function AppSidebar() {
                     Profil
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => logoutMutation.mutate({})} className="cursor-pointer text-destructive focus:text-destructive">
+                <DropdownMenuItem
+                  onClick={() => logoutMutation.mutate({})}
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                >
                   <LogOut className="mr-2 size-4" />
                   Keluar
                 </DropdownMenuItem>

@@ -316,7 +316,7 @@ function ProfileIdentityCard({
     }
 
     setLocalError(null);
-    
+
     // Open cropper
     const objectUrl = URL.createObjectURL(file);
     setPhotoToCrop(objectUrl);
@@ -334,7 +334,7 @@ function ProfileIdentityCard({
   return (
     <Card>
       <CardContent className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-        <Avatar 
+        <Avatar
           className="size-24 text-2xl font-semibold cursor-pointer hover:opacity-80 transition-opacity ring-2 ring-transparent hover:ring-[#00A2E9]/50"
           onClick={() => {
             if (profile.profilePhoto) setViewPhotoOpen(true);
@@ -408,19 +408,22 @@ function ProfileIdentityCard({
       <Dialog open={viewPhotoOpen} onOpenChange={setViewPhotoOpen}>
         <DialogContent className="sm:max-w-md flex flex-col items-center justify-center p-6 bg-transparent border-none shadow-none [&>button]:text-white">
           {profile.profilePhoto && (
-            <img 
-              src={profile.profilePhoto} 
-              alt={profile.fullName} 
-              className="max-w-full max-h-[80vh] rounded-lg object-contain shadow-2xl" 
+            <img
+              src={profile.profilePhoto}
+              alt={profile.fullName}
+              className="max-w-full max-h-[80vh] rounded-lg object-contain shadow-2xl"
             />
           )}
         </DialogContent>
       </Dialog>
 
-      <Dialog open={cropModalOpen} onOpenChange={(open) => {
-        setCropModalOpen(open);
-        if (!open) setPhotoToCrop(null);
-      }}>
+      <Dialog
+        open={cropModalOpen}
+        onOpenChange={(open) => {
+          setCropModalOpen(open);
+          if (!open) setPhotoToCrop(null);
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Sesuaikan Foto</DialogTitle>

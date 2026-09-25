@@ -1,12 +1,13 @@
-import type { TResponse } from '@/api/types/response.types';
 import { queryKey } from '@/configs/query-key';
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
+import { useAppMutation } from '@/hooks/useService/_shared/useAppMutation';
 import Api from '@/services/props.service';
 import {
   type CertificateCacheContext,
   readCertificateSnapshot,
 } from '@/utils/cache/certificate.cache';
 import { ResponseTitles } from '@/utils/response-titles';
+import { useMutation } from '@tanstack/react-query';
 
 import type {
   CertificateParams,
@@ -15,127 +16,46 @@ import type {
   GenerateCertificateBody,
   UpdateCertificateSettingsBody,
 } from '@/types/api/certificate.types';
-import { useMutation } from '@tanstack/react-query';
 
 export function useGenerateCertificate() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<CertificateResponse>,
-    Error,
+  return useAppMutation<
+    CertificateResponse,
     Pick<GenerateCertificateBody, 'internshipId'>,
     CertificateCacheContext
   >({
-    mutationFn: (body: Pick<GenerateCertificateBody, 'internshipId'>) =>
-      Api.Certificate.Generate(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.certificateRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.certificateRoot() });
-      const previousData = readCertificateSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (body) => Api.Certificate.Generate(body),
+    invalidateKeys: [queryKey.certificateRoot()],
+    optimistic: (ns) => ({ previousData: readCertificateSnapshot(ns) }),
   });
 }
 
 export function useRegenerateCertificate() {
-  const ns = useAppNameSpace();
-  return useMutation<
-    TResponse<CertificateResponse>,
-    Error,
+  return useAppMutation<
+    CertificateResponse,
     Pick<CertificateParams, 'certificateId'>,
     CertificateCacheContext
   >({
-    mutationFn: (params: Pick<CertificateParams, 'certificateId'>) =>
-      Api.Certificate.Regenerate(params),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.certificateRoot(),
-      });
-    },
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.certificateRoot() });
-      const previousData = readCertificateSnapshot(ns);
-      return { previousData };
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
+    mutationFn: (params) => Api.Certificate.Regenerate(params),
+    invalidateKeys: [queryKey.certificateRoot()],
+    optimistic: (ns) => ({ previousData: readCertificateSnapshot(ns) }),
+  });
+}
+
+export function useSaveCertificateSettings() {
+  return useAppMutation<CertificateSettingsResponse, UpdateCertificateSettingsBody>({
+    mutationFn: (body) => Api.Certificate.SaveSettings(body),
+    invalidateKeys: [queryKey.certificate.settings()],
   });
 }
 
 export function useDownloadCertificate() {
   const ns = useAppNameSpace();
-  return useMutation<
-    Response,
-    Error,
-    Pick<CertificateParams, 'certificateId'>,
-    CertificateCacheContext
-  >({
-    mutationFn: (params: Pick<CertificateParams, 'certificateId'>) =>
-      Api.Certificate.Download(params),
-    onMutate: async () => {
-      await ns.queryClient.cancelQueries({ queryKey: queryKey.certificateRoot() });
-      const previousData = readCertificateSnapshot(ns);
-      return { previousData };
-    },
+  return useMutation<Response, Error, Pick<CertificateParams, 'certificateId'>>({
+    mutationFn: (params) => Api.Certificate.Download(params),
     onSuccess: () => {
       ns.alert.toast({
         title: ResponseTitles.success,
         message: 'Downloaded successfully',
-        icon: 'success',
-      });
-    },
-    onError: (err) => {
-      ns.alert.toast({
-        title: ResponseTitles.error,
-        message: err.message,
-        icon: 'error',
-      });
-    },
-  });
-}
-
-export function useSaveCertificateSettings() {
-  const ns = useAppNameSpace();
-  return useMutation<TResponse<CertificateSettingsResponse>, Error, UpdateCertificateSettingsBody>({
-    mutationFn: (body: UpdateCertificateSettingsBody) => Api.Certificate.SaveSettings(body),
-    onSettled: async () => {
-      await ns.queryClient.invalidateQueries({
-        queryKey: queryKey.certificate.settings(),
-      });
-    },
-    onSuccess: (res) => {
-      ns.alert.toast({
-        title: res.title,
-        message: res.message,
         icon: 'success',
       });
     },

@@ -1,30 +1,20 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/atoms/badge";
-import { Button } from "@/components/atoms/button";
-import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
+import { Badge } from '@/components/atoms/badge';
+import { Button } from '@/components/atoms/button';
+import { Card } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/atoms/select";
-import { ApplicationStatusBadge } from "@/components/organisms/application/ApplicationStatusBadge";
-import type {
-  ApplicationResponse,
-  ApplicationStatusValue,
-} from "@/types/api/application.types";
-import {
-  AlertCircle,
-  FileText,
-  Loader2,
-  RefreshCw,
-  Search,
-  User,
-} from "lucide-react";
-import Link from "next/link";
+} from '@/components/atoms/select';
+import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
+import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
+import { AlertCircle, FileText, Loader2, RefreshCw, Search, User } from 'lucide-react';
+import Link from 'next/link';
 
 export interface ReceptionistApplicationsSectionProps {
   applications: ApplicationResponse[];
@@ -40,11 +30,11 @@ export interface ReceptionistApplicationsSectionProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "Semua Status" },
-  { value: "SUBMITTED", label: "Diajukan" },
-  { value: "UNDER_REVIEW", label: "Sedang Ditinjau" },
-  { value: "APPROVED", label: "Disetujui" },
-  { value: "REJECTED", label: "Ditolak" },
+  { value: 'all', label: 'Semua Status' },
+  { value: 'SUBMITTED', label: 'Diajukan' },
+  { value: 'UNDER_REVIEW', label: 'Sedang Ditinjau' },
+  { value: 'APPROVED', label: 'Disetujui' },
+  { value: 'REJECTED', label: 'Ditolak' },
 ];
 
 export function ReceptionistApplicationsSection({
@@ -66,9 +56,7 @@ export function ReceptionistApplicationsSection({
       {/* Header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">
-            Pengajuan Magang
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">Pengajuan Magang</h1>
           <p className="text-sm text-muted-foreground">
             Cari dan lihat detail pengajuan magang peserta.
           </p>
@@ -81,9 +69,7 @@ export function ReceptionistApplicationsSection({
             disabled={isFetching}
             className="w-fit"
           >
-            <RefreshCw
-              className={`mr-2 size-4 ${isFetching ? "animate-spin" : ""}`}
-            />
+            <RefreshCw className={`mr-2 size-4 ${isFetching ? 'animate-spin' : ''}`} />
             Perbarui
           </Button>
         )}
@@ -104,11 +90,9 @@ export function ReceptionistApplicationsSection({
           )}
         </div>
         <Select
-          value={statusFilter || "all"}
+          value={statusFilter || 'all'}
           onValueChange={(value) =>
-            onStatusFilter(
-              value === "all" ? undefined : (value as ApplicationStatusValue),
-            )
+            onStatusFilter(value === 'all' ? undefined : (value as ApplicationStatusValue))
           }
         >
           <SelectTrigger className="w-full sm:w-[200px]">
@@ -144,8 +128,8 @@ export function ReceptionistApplicationsSection({
           <FileText className="size-8 opacity-40" />
           <p className="text-sm font-medium">
             {searchQuery || statusFilter
-              ? "Tidak ada pengajuan yang sesuai dengan pencarian."
-              : "Belum ada pengajuan magang."}
+              ? 'Tidak ada pengajuan yang sesuai dengan pencarian.'
+              : 'Belum ada pengajuan magang.'}
           </p>
         </Card>
       ) : (
@@ -166,17 +150,14 @@ export function ReceptionistApplicationsSection({
                         <div className="flex items-center gap-2">
                           <User className="size-4 text-muted-foreground" />
                           <span className="font-semibold text-foreground">
-                            {application.internProfile?.user?.fullName || "-"}
+                            {application.internProfile?.user?.fullName || '-'}
                           </span>
                         </div>
                         <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                          <span>{application.internProfile?.user?.email || '-'}</span>
                           <span>
-                            {application.internProfile?.user?.email || "-"}
-                          </span>
-                          <span>
-                            {application.internProfile?.studentNumber || "-"} •{" "}
-                            {application.internProfile?.institution?.name ||
-                              "-"}
+                            {application.internProfile?.studentNumber || '-'} •{' '}
+                            {application.internProfile?.institution?.name || '-'}
                           </span>
                           {application.internProfile?.major?.name && (
                             <span>{application.internProfile.major.name}</span>
@@ -194,10 +175,8 @@ export function ReceptionistApplicationsSection({
                         <ApplicationStatusBadge status={application.status} />
                         {application.requestedStartDate && (
                           <span className="text-xs text-muted-foreground">
-                            Mulai:{" "}
-                            {new Date(
-                              application.requestedStartDate,
-                            ).toLocaleDateString("id-ID")}
+                            Mulai:{' '}
+                            {new Date(application.requestedStartDate).toLocaleDateString('id-ID')}
                           </span>
                         )}
                       </div>

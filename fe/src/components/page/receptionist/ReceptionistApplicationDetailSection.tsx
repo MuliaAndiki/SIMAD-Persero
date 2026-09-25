@@ -6,15 +6,7 @@ import { ApplicationDetailField } from '@/components/organisms/application/Appli
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
 import type { ApplicationResponse } from '@/types/api/application.types';
 import { getFilePreviewUrl } from '@/utils/file-preview';
-import {
-  AlertCircle,
-  ArrowLeft,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  FileText,
-  Loader2,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, ExternalLink, Eye, EyeOff, FileText, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -164,9 +156,7 @@ export function ReceptionistApplicationDetailSection({
             label="Departemen"
             value={
               application.internship?.department?.name ||
-              (application.status === 'APPROVED'
-                ? '-'
-                : 'Belum Ditentukan (Menunggu Persetujuan)')
+              (application.status === 'APPROVED' ? '-' : 'Belum Ditentukan (Menunggu Persetujuan)')
             }
           />
         </div>

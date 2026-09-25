@@ -1,24 +1,8 @@
 import { Badge } from '@/components/atoms/badge';
 import { cn } from '@/utils/classname';
+import { getAttendanceStatusLabel as attendanceStatusLabel } from '@/utils/status-labels';
 
-function attendanceStatusLabel(status: string | null): string {
-  switch (status) {
-    case 'PRESENT':
-      return 'Hadir';
-    case 'LATE':
-      return 'Terlambat';
-    case 'COMPLETED':
-      return 'Selesai';
-    case 'PENDING_REVIEW':
-      return 'Menunggu Review';
-    case 'INVALID':
-      return 'Tidak Valid';
-    case 'ABSENT':
-      return 'Tidak Hadir';
-    default:
-      return status ?? '-';
-  }
-}
+export { attendanceStatusLabel };
 
 /**
  * AttendanceStatusBadge — badge status absensi (PRESENT / LATE / COMPLETED /
