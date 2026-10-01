@@ -31,7 +31,7 @@ export function ReceptionistApplicationsContainer() {
 
   return (
     <ReceptionistApplicationsSection
-      applications={data ?? []}
+      applications={data?.data ?? (Array.isArray(data) ? data : [])}
       isPending={isPending}
       isFetching={isSearching}
       isError={isError}

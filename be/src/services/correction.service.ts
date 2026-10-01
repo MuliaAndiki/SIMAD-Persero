@@ -179,7 +179,8 @@ class CorrectionService {
     }
 
     // Role INTERN hanya boleh melihat miliknya sendiri
-    if (roles.includes('INTERN') && correction.internId !== userId) {
+    const isIntern = roles.some((r) => r.toLowerCase() === 'intern');
+    if (isIntern && correction.internId !== userId) {
       throw new ForbiddenError('Anda tidak memiliki akses ke pengajuan koreksi ini');
     }
 
@@ -286,11 +287,30 @@ class CorrectionService {
   public async approve(id: string, supervisorUserId: string, body: ApproveCorrectionBody) {
     const correction = await prisma.attendanceCorrectionRequest.findUnique({
       where: { id },
-      include: { attendance: true, internship: true },
+      include: {
+        attendance: true,
+        internship: {
+          include: {
+            supervisorAssignments: {
+              where: { isActive: true },
+            },
+          },
+        },
+      },
     });
 
     if (!correction) {
       throw new NotFoundError('Pengajuan koreksi tidak ditemukan');
+    }
+
+    const isAssigned =
+      correction.supervisorId === supervisorUserId ||
+      correction.internship?.supervisorAssignments?.some(
+        (sa) => sa.supervisorId === supervisorUserId,
+      );
+
+    if (!isAssigned) {
+      throw new ForbiddenError('Anda tidak memiliki wewenang untuk memproses pengajuan koreksi ini');
     }
 
     if (correction.status !== AttendanceCorrectionStatus.PENDING) {
@@ -300,15 +320,23 @@ class CorrectionService {
     const res = await prisma.$transaction(async (tx) => {
       const now = new Date();
 
-      // 1. Update status permohonan koreksi
-      const updatedCorrection = await tx.attendanceCorrectionRequest.update({
-        where: { id },
+      // 1. Update status permohonan koreksi secara atomik hanya jika status masih PENDING
+      const updateResult = await tx.attendanceCorrectionRequest.updateMany({
+        where: { id, status: AttendanceCorrectionStatus.PENDING },
         data: {
           status: AttendanceCorrectionStatus.APPROVED,
           reviewedById: supervisorUserId,
           reviewedAt: now,
           supervisorNotes: body.supervisorNotes?.trim() || null,
         },
+      });
+
+      if (updateResult.count === 0) {
+        throw new BadRequestError('Pengajuan koreksi sudah diproses atau status bukan PENDING');
+      }
+
+      const updatedCorrection = await tx.attendanceCorrectionRequest.findUniqueOrThrow({
+        where: { id },
       });
 
       // 2. Siapkan update data pada tabel attendances
@@ -402,25 +430,52 @@ class CorrectionService {
   public async reject(id: string, supervisorUserId: string, body: RejectCorrectionBody) {
     const correction = await prisma.attendanceCorrectionRequest.findUnique({
       where: { id },
-      include: { attendance: true },
+      include: {
+        attendance: true,
+        internship: {
+          include: {
+            supervisorAssignments: {
+              where: { isActive: true },
+            },
+          },
+        },
+      },
     });
 
     if (!correction) {
       throw new NotFoundError('Pengajuan koreksi tidak ditemukan');
     }
 
+    const isAssigned =
+      correction.supervisorId === supervisorUserId ||
+      correction.internship?.supervisorAssignments?.some(
+        (sa) => sa.supervisorId === supervisorUserId,
+      );
+
+    if (!isAssigned) {
+      throw new ForbiddenError('Anda tidak memiliki wewenang untuk memproses pengajuan koreksi ini');
+    }
+
     if (correction.status !== AttendanceCorrectionStatus.PENDING) {
       throw new BadRequestError('Hanya pengajuan dengan status PENDING yang dapat ditolak');
     }
 
-    const updated = await prisma.attendanceCorrectionRequest.update({
-      where: { id },
+    const updateResult = await prisma.attendanceCorrectionRequest.updateMany({
+      where: { id, status: AttendanceCorrectionStatus.PENDING },
       data: {
         status: AttendanceCorrectionStatus.REJECTED,
         reviewedById: supervisorUserId,
         reviewedAt: new Date(),
         supervisorNotes: body.supervisorNotes.trim(),
       },
+    });
+
+    if (updateResult.count === 0) {
+      throw new BadRequestError('Pengajuan koreksi sudah diproses atau status bukan PENDING');
+    }
+
+    const updated = await prisma.attendanceCorrectionRequest.findUniqueOrThrow({
+      where: { id },
     });
 
     // Notifikasi untuk intern

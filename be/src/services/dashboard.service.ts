@@ -438,16 +438,21 @@ class DashboardService {
   public async getCharts(): Promise<ChartsResponse> {
     const months = 6;
     const labels = this.buildMonthLabels(months);
-    const startMonth = new Date(new Date().getFullYear(), new Date().getMonth() - (months - 1), 1);
+    const now = new Date();
+    const startMonth = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
+    const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
     const [attendances, internships, grouped] = await Promise.all([
       prisma.attendance.findMany({
-        where: { attendanceDate: { gte: startMonth } },
+        where: { attendanceDate: { gte: startMonth, lte: endMonth } },
         select: { attendanceDate: true, attendanceStatus: true },
       }),
       prisma.internship.findMany({
         where: {
-          OR: [{ actualStartDate: { gte: startMonth } }, { completedAt: { gte: startMonth } }],
+          OR: [
+            { actualStartDate: { gte: startMonth, lte: endMonth } },
+            { completedAt: { gte: startMonth, lte: endMonth } },
+          ],
         },
         select: { actualStartDate: true, completedAt: true },
       }),

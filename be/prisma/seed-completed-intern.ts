@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import * as bcryptjs from "bcryptjs";
-import prisma from "./client";
+import prisma, { pool } from "./client";
 
 /**
  * Seeder untuk 1 User Intern dengan data lengkap dan status COMPLETED.
@@ -365,4 +365,5 @@ seedCompletedIntern()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

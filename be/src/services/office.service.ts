@@ -265,9 +265,11 @@ class OfficeService {
     }
 
     try {
-      // Hapus attendanceSetting terlebih dahulu jika ada
-      await prisma.attendanceSetting.deleteMany({ where: { officeLocationId: id } });
-      await prisma.officeLocation.delete({ where: { id } });
+      await prisma.$transaction(async (tx) => {
+        // Hapus attendanceSetting dan officeLocation secara atomik dalam satu transaksi (OPT-006)
+        await tx.attendanceSetting.deleteMany({ where: { officeLocationId: id } });
+        await tx.officeLocation.delete({ where: { id } });
+      });
     } catch (error: any) {
       if (error.code === 'P2003') {
         throw new AppError(

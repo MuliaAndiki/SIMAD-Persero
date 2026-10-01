@@ -9,7 +9,7 @@ export function useAuditLogList(query?: AuditLogQuery) {
     queryKey: queryKey.auditLog.list(query),
     queryFn: async () => {
       const res = await Api.AuditLog.List(query);
-      return res.data;
+      return res;
     },
   });
 }

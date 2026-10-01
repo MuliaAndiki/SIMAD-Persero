@@ -7,12 +7,15 @@ import {
   type InternshipQuery,
   InternshipStatus,
   type PickMergeInternship,
+  type RescheduleStartDateBody,
 } from '@/types/internship.types';
 import { createAuditLog } from '@/utils/audit.util';
+import type { Prisma } from '@prisma/client';
 import prisma from '../../prisma/client';
 import { getLogger } from '../telemetry/otel.config';
 import attendanceService from './attendance.service';
 import certificateService from './certificate.service';
+import { sendStartDateEmail } from './email.service';
 
 /**
  * Service layer for the Internship module.
@@ -142,6 +145,11 @@ class InternshipService {
 
     const page = Math.max(1, Number(query?.page) || 1);
     const limit = Math.min(500, Math.max(1, Number(query?.limit) || 10));
+    const shouldIncludeAttendance = Boolean(
+      query?.includeAttendance === true ||
+      query?.includeAttendance === 'true' ||
+      isReceptionist,
+    );
     const skip = (page - 1) * limit;
 
     const [total, data] = await prisma.$transaction([
@@ -179,20 +187,24 @@ class InternshipService {
               assignedAt: true,
             },
           },
-          attendances: {
-            orderBy: { attendanceDate: 'desc' },
-            take: 60,
-            select: {
-              id: true,
-              attendanceDate: true,
-              checkInAt: true,
-              checkOutAt: true,
-              checkInStatus: true,
-              checkOutStatus: true,
-              attendanceStatus: true,
-              notes: true,
-            },
-          },
+          ...(shouldIncludeAttendance
+            ? {
+                attendances: {
+                  orderBy: { attendanceDate: 'desc' },
+                  take: 14,
+                  select: {
+                    id: true,
+                    attendanceDate: true,
+                    checkInAt: true,
+                    checkOutAt: true,
+                    checkInStatus: true,
+                    checkOutStatus: true,
+                    attendanceStatus: true,
+                    notes: true,
+                  },
+                },
+              }
+            : {}),
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -241,7 +253,16 @@ class InternshipService {
         internProfile: {
           select: {
             institution: true,
-            user: true,
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                isActive: true,
+                avatarFileId: true,
+                avatarFile: true,
+              },
+            },
             major: true,
           },
         },
@@ -575,6 +596,36 @@ class InternshipService {
 
     const updated = await prisma.$transaction(
       async (tx) => {
+        // Concurrency Lock: Lock per officeLocationId during quota check & extension (OPT-004)
+        if (internship.officeLocationId) {
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'quota_' + internship.officeLocationId}))`;
+        }
+
+        // Re-validasi kuota kantor untuk periode perpanjangan (slot terbatas)
+        if (internship.officeLocationId && internship.departmentId) {
+          const quota = await tx.internshipQuota.findUnique({
+            where: { officeLocationId: internship.officeLocationId },
+            include: { departmentAllocations: true },
+          });
+          if (quota?.isActive) {
+            const officeOccupied = await tx.internship.count({
+              where: {
+                id: { not: id },
+                officeLocationId: internship.officeLocationId,
+                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                actualStartDate: { lte: newEndDate },
+                actualEndDate: { gte: extensionStartDate },
+              },
+            });
+            if (officeOccupied >= quota.totalCapacity) {
+              throw new AppError(
+                400,
+                `Total kuota kantor untuk periode perpanjangan sudah penuh (Kapasitas: ${quota.totalCapacity}, Terisi: ${officeOccupied})`,
+              );
+            }
+          }
+        }
+
         const res = await tx.internship.update({
           where: { id },
           data: {
@@ -612,6 +663,127 @@ class InternshipService {
         '[internship-extend] Failed to sync certificate end date',
       );
     });
+
+    return updated;
+  }
+
+  // ─── 15.5b Reschedule Start Date (HR_ADMIN) ──────────────────
+
+  public async rescheduleStartDate(id: string, userId: string, input: RescheduleStartDateBody) {
+    const internship = await this.findById(id);
+
+    // Hanya internship PENDING (belum mulai) yang boleh digeser tanggal masuknya.
+    if (internship.status !== InternshipStatus.PENDING) {
+      throw new AppError(400, 'Hanya internship berstatus PENDING yang dapat diubah tanggal masuknya');
+    }
+
+    const newStartDate = new Date(input.newStartDate);
+    if (Number.isNaN(newStartDate.getTime())) {
+      throw new AppError(400, 'Invalid date format for newStartDate');
+    }
+
+    const actualEnd = internship.actualEndDate ?? internship.application?.requestedEndDate;
+    if (!actualEnd) {
+      throw new AppError(400, 'Tanggal selesai magang tidak ditemukan');
+    }
+    if (newStartDate >= new Date(actualEnd)) {
+      throw new AppError(400, 'Tanggal masuk baru harus sebelum tanggal selesai');
+    }
+
+    const oldStartDate = internship.actualStartDate;
+
+    const updated = await prisma.$transaction(async (tx) => {
+      // Concurrency Lock: Lock per officeLocationId during quota check & rescheduling (OPT-004)
+      if (internship.officeLocationId) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'quota_' + internship.officeLocationId}))`;
+      }
+
+      // Re-validasi kuota untuk periode baru (slot terbatas) secara atomik di dalam transaksi
+      if (internship.officeLocationId && internship.departmentId) {
+        const quota = await tx.internshipQuota.findUnique({
+          where: { officeLocationId: internship.officeLocationId },
+          include: { departmentAllocations: true },
+        });
+        if (quota?.isActive) {
+          const endDate = new Date(actualEnd);
+          const officeOccupied = await tx.internship.count({
+            where: {
+              id: { not: id },
+              officeLocationId: internship.officeLocationId,
+              status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+              actualStartDate: { lte: endDate },
+              actualEndDate: { gte: newStartDate },
+            },
+          });
+          if (officeOccupied >= quota.totalCapacity) {
+            throw new AppError(
+              400,
+              `Total kuota kantor untuk periode tersebut sudah penuh (Kapasitas Kantor: ${quota.totalCapacity}, Terisi: ${officeOccupied})`,
+            );
+          }
+
+          const deptAlloc = quota.departmentAllocations.find(
+            (a) => a.departmentId === internship.departmentId,
+          );
+          if (deptAlloc) {
+            const deptOccupied = await tx.internship.count({
+              where: {
+                id: { not: id },
+                officeLocationId: internship.officeLocationId,
+                departmentId: internship.departmentId,
+                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                actualStartDate: { lte: endDate },
+                actualEndDate: { gte: newStartDate },
+              },
+            });
+            if (deptOccupied >= deptAlloc.capacity) {
+              throw new AppError(
+                400,
+                `Alokasi kuota magang untuk departemen ini pada periode tersebut sudah penuh (Alokasi: ${deptAlloc.capacity}, Terisi: ${deptOccupied})`,
+              );
+            }
+          }
+        }
+      }
+
+      const res = await tx.internship.update({
+        where: { id },
+        data: { actualStartDate: newStartDate },
+      });
+
+      if (internship.applicationId) {
+        await tx.internshipApplication.update({
+          where: { id: internship.applicationId },
+          data: { actualStartDate: newStartDate },
+        });
+      }
+
+      await this.recordStatusHistory(
+        tx,
+        id,
+        internship.status,
+        internship.status ?? InternshipStatus.PENDING,
+        userId,
+        `Tanggal masuk diubah menjadi ${input.newStartDate}. ${input.reason || ''}`.trim(),
+      );
+
+      return res;
+    });
+
+    // Kirim email pemberitahuan perubahan tanggal masuk (best-effort).
+    const internUser = internship.internProfile?.user;
+    if (internUser?.email) {
+      await sendStartDateEmail({
+        to: internUser.email,
+        fullName: internUser.fullName,
+        applicationNumber: internship.application?.applicationNumber,
+        oldStartDate,
+        newStartDate,
+        headline: 'Tanggal masuk magang Anda diubah oleh admin.',
+      }).catch((err) => {
+        getLogger().warn({ err, internshipId: id }, '[reschedule-start-date] Gagal mengirim email');
+      });
+    }
 
     return updated;
   }
@@ -719,6 +891,65 @@ class InternshipService {
     }
 
     return prisma.$transaction(async (tx) => {
+      // Concurrency Lock: Lock per officeLocationId during quota check & department change (OPT-004)
+      if (officeLocationId) {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'quota_' + officeLocationId}))`;
+      }
+
+      // Re-validasi kuota di departemen/kantor baru
+      if (officeLocationId && input.departmentId) {
+        const quota = await tx.internshipQuota.findUnique({
+          where: { officeLocationId },
+          include: { departmentAllocations: true },
+        });
+        if (quota?.isActive) {
+          const actualStart = internship.actualStartDate ?? new Date();
+          const actualEnd = internship.actualEndDate ?? new Date();
+
+          // 1. Cek kapasitas total kantor baru (jika kantor berpindah)
+          if (officeLocationId !== internship.officeLocationId) {
+            const officeOccupied = await tx.internship.count({
+              where: {
+                id: { not: id },
+                officeLocationId,
+                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                actualStartDate: { lte: actualEnd },
+                actualEndDate: { gte: actualStart },
+              },
+            });
+            if (officeOccupied >= quota.totalCapacity) {
+              throw new AppError(
+                400,
+                `Total kuota kantor tujuan sudah penuh (Kapasitas: ${quota.totalCapacity}, Terisi: ${officeOccupied})`,
+              );
+            }
+          }
+
+          // 2. Cek alokasi departemen baru
+          const deptAlloc = quota.departmentAllocations.find(
+            (a) => a.departmentId === input.departmentId,
+          );
+          if (deptAlloc) {
+            const deptOccupied = await tx.internship.count({
+              where: {
+                id: { not: id },
+                officeLocationId,
+                departmentId: input.departmentId,
+                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                actualStartDate: { lte: actualEnd },
+                actualEndDate: { gte: actualStart },
+              },
+            });
+            if (deptOccupied >= deptAlloc.capacity) {
+              throw new AppError(
+                400,
+                `Alokasi kuota departemen tujuan sudah penuh (Alokasi: ${deptAlloc.capacity}, Terisi: ${deptOccupied})`,
+              );
+            }
+          }
+        }
+      }
+
       const updated = await tx.internship.update({
         where: { id },
         data: {

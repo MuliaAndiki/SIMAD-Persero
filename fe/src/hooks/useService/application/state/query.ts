@@ -20,7 +20,7 @@ export function useApplicationList(query?: ApplicationQuery, options?: { enabled
     queryKey: queryKey.application.list(query),
     queryFn: async () => {
       const res = await Api.Application.List(query);
-      return res.data;
+      return res;
     },
     enabled: options?.enabled,
   });

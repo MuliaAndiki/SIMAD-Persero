@@ -68,7 +68,7 @@ export default function RegisterContainer() {
 
     register.mutate(formRegister, {
       onSuccess: () => {
-        router.push('/login');
+        router.push(`/check-email?email=${encodeURIComponent(formRegister.email.trim())}`);
       },
       onError: (err) => {
         const msg = err.message || '';

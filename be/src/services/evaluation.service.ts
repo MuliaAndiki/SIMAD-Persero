@@ -103,6 +103,15 @@ class EvaluationService {
 
       if (!internship) throw new NotFoundError('Data magang tidak ditemukan');
 
+      // Role INTERN hanya boleh melihat jika evaluasi sudah FINAL (pada branch ini belum ada evaluasi sama sekali)
+      const isIntern = roles.some((r) => r.toLowerCase() === 'intern');
+      if (isIntern) {
+        if (internship.internProfile?.user?.id !== userId) {
+          throw new ForbiddenError('Anda tidak memiliki akses ke penilaian magang ini');
+        }
+        throw new ForbiddenError('Penilaian magang belum difinalisasi oleh Supervisor');
+      }
+
       return {
         id: null,
         internshipId,
@@ -121,7 +130,8 @@ class EvaluationService {
     }
 
     // Role INTERN hanya boleh melihat nilainya jika status FINAL
-    if (roles.includes('INTERN')) {
+    const isIntern = roles.some((r) => r.toLowerCase() === 'intern');
+    if (isIntern) {
       if (evaluation.internship.internProfile?.user?.id !== userId) {
         throw new ForbiddenError('Anda tidak memiliki akses ke penilaian magang ini');
       }

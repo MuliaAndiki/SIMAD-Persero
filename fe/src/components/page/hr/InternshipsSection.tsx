@@ -15,6 +15,7 @@ import {
   AssignSupervisorModal,
   ChangeDepartmentModal,
   ExtendInternshipModal,
+  RescheduleStartDateModal,
 } from '@/components/organisms/internship/InternshipActionModals';
 import { InternshipsTable } from '@/components/organisms/internship/InternshipsTable';
 import type { DepartmentResponse } from '@/types/api/department.types';
@@ -56,6 +57,10 @@ export interface InternshipsSectionActions {
   onStart?: (id: string) => void;
   onFinish?: (id: string) => void;
   onExtendSubmit?: (id: string, data: { newEndDate: string; reason: string }) => Promise<void>;
+  onRescheduleStartDateSubmit?: (
+    id: string,
+    data: { newStartDate: string; reason?: string },
+  ) => Promise<void>;
   onChangeDepartmentSubmit?: (
     id: string,
     data: { departmentId: string; officeLocationId: string },
@@ -85,6 +90,7 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
   // Local state for modals
   const [selectedInternship, setSelectedInternship] = useState<InternshipResponse | null>(null);
   const [extendOpen, setExtendOpen] = useState(false);
+  const [rescheduleStartDateOpen, setRescheduleStartDateOpen] = useState(false);
   const [changeDeptOpen, setChangeDeptOpen] = useState(false);
   const [assignSuperOpen, setAssignSuperOpen] = useState(false);
   const [generateCertOpen, setGenerateCertOpen] = useState(false);
@@ -92,6 +98,11 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
   const handleOpenExtend = (internship: InternshipResponse) => {
     setSelectedInternship(internship);
     setExtendOpen(true);
+  };
+
+  const handleOpenRescheduleStartDate = (internship: InternshipResponse) => {
+    setSelectedInternship(internship);
+    setRescheduleStartDateOpen(true);
   };
 
   const handleOpenChangeDept = (internship: InternshipResponse) => {
@@ -236,6 +247,7 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
           onStart={actions.onStart}
           onFinish={actions.onFinish}
           onOpenExtend={handleOpenExtend}
+          onOpenRescheduleStartDate={handleOpenRescheduleStartDate}
           onOpenChangeDept={handleOpenChangeDept}
           onOpenAssignSupervisor={handleOpenAssignSupervisor}
           onOpenGenerateCert={handleOpenGenerateCert}
@@ -252,6 +264,18 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
         onSubmit={async (data) => {
           if (selectedInternship && actions.onExtendSubmit) {
             await actions.onExtendSubmit(selectedInternship.id, data);
+          }
+        }}
+      />
+
+      <RescheduleStartDateModal
+        open={rescheduleStartDateOpen}
+        isPending={Boolean(state.isActionPending)}
+        internship={selectedInternship}
+        onClose={() => setRescheduleStartDateOpen(false)}
+        onSubmit={async (data) => {
+          if (selectedInternship && actions.onRescheduleStartDateSubmit) {
+            await actions.onRescheduleStartDateSubmit(selectedInternship.id, data);
           }
         }}
       />

@@ -8,6 +8,7 @@ import {
   ExtendInternshipDto,
   InternshipIdParam,
   InternshipQueryDto,
+  RescheduleStartDateDto,
   UpdateSkillDto,
 } from '@/dtos/internship.dto';
 import { requireRole, verifyToken } from '@/middlewares/auth';
@@ -80,6 +81,17 @@ class InternshipRouter {
       body: ExtendInternshipDto,
       params: InternshipIdParam,
     });
+
+    // 15.5b PATCH /internships/:id/start-date — Reschedule start date (HR_ADMIN)
+    this.internshipRouter.patch(
+      '/:id/start-date',
+      (c: AppContext) => internshipController.rescheduleStartDate(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+        body: RescheduleStartDateDto,
+        params: InternshipIdParam,
+      },
+    );
 
     // 15.6 PATCH /internships/:id/assign-supervisor — Assign supervisor (HR_ADMIN)
     this.internshipRouter.patch(

@@ -14,6 +14,7 @@ import type {
   PickMergeInternship,
   RemoveSkillParams,
   RemoveSkillResponse,
+  RescheduleStartDateBody,
   SkillResponse,
   UpdateSkillBody,
 } from '@/types/api/internship.types';
@@ -48,6 +49,26 @@ export function useExtendInternship() {
     InternshipCacheContext
   >({
     mutationFn: ({ params, body }) => Api.Internship.Extend(params, body),
+    invalidateKeys: [
+      queryKey.internshipRoot(),
+      queryKey.attendanceRoot(),
+      queryKey.certificateRoot(),
+      queryKey.reportingRoot(),
+    ],
+    optimistic: (ns) => ({ previousData: readInternshipSnapshot(ns) }),
+  });
+}
+
+export function useRescheduleStartDateInternship() {
+  return useAppMutation<
+    InternshipResponse,
+    {
+      params: Pick<InternshipParams, 'id'>;
+      body: Pick<RescheduleStartDateBody, 'newStartDate' | 'reason'>;
+    },
+    InternshipCacheContext
+  >({
+    mutationFn: ({ params, body }) => Api.Internship.RescheduleStartDate(params, body),
     invalidateKeys: [
       queryKey.internshipRoot(),
       queryKey.attendanceRoot(),
