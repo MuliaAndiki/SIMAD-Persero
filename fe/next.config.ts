@@ -2,6 +2,9 @@ import { env } from '@/configs/env.config';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  compiler: {
+    styledComponents: true,
+  },
   images: {
     // Unoptimized untuk development, optimized untuk production
     unoptimized: process.env.NODE_ENV === 'development',
@@ -22,9 +25,7 @@ const nextConfig: NextConfig = {
     // Tambahkan domain R2 ke allowed domains
     domains: [
       'pub-2f811af54c344a96ad45cb28d7493156.r2.dev',
-      ...(process.env.NEXT_PUBLIC_R2_URL
-        ? [new URL(process.env.NEXT_PUBLIC_R2_URL).hostname]
-        : [])
+      ...(process.env.NEXT_PUBLIC_R2_URL ? [new URL(process.env.NEXT_PUBLIC_R2_URL).hostname] : []),
     ],
   },
   redirects: async () => {

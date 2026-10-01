@@ -3,6 +3,7 @@
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { TableLoader } from '@/components/atoms/loading';
 import {
   Select,
   SelectContent,
@@ -11,6 +12,8 @@ import {
   SelectValue,
 } from '@/components/atoms/select';
 import { ReportError } from '@/components/organisms/reporting/ReportError';
+import { StatusBadge } from '@/components/organisms/table/StatusBadge';
+import { TableEmptyState } from '@/components/organisms/table/TableEmptyState';
 import Api from '@/services/props.service';
 import type { InternshipResponse } from '@/types/api/internship.types';
 import type { OfficeResponse } from '@/types/api/office.types';
@@ -451,7 +454,9 @@ export function AttendanceReportTable({
           </CardContent>
         </Card>
       ) : isPending ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat laporan absensi..." />
+        </Card>
       ) : isError ? (
         <ReportError message={errorMessage} onRetry={onRetry} />
       ) : (
@@ -551,16 +556,11 @@ export function AttendanceReportTable({
             </CardHeader>
             <CardContent className="p-0">
               {rows.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-                  <Calendar className="size-8 text-muted-foreground/50" />
-                  <p className="text-sm font-medium text-foreground">
-                    Belum ada data absensi untuk peserta ini.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Coba sesuaikan filter bulan atau tahun bila periode yang dipilih belum memiliki
-                    catatan kehadiran.
-                  </p>
-                </div>
+                <TableEmptyState
+                  icon={Calendar}
+                  title="Belum ada data absensi untuk peserta ini."
+                  message="Coba sesuaikan filter bulan atau tahun bila periode yang dipilih belum memiliki catatan kehadiran."
+                />
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -581,17 +581,7 @@ export function AttendanceReportTable({
                         >
                           <td className="px-6 py-3.5 font-medium">{formatDate(row.date)}</td>
                           <td className="px-6 py-3.5">
-                            <Badge
-                              variant={
-                                row.status === 'PRESENT'
-                                  ? 'default'
-                                  : row.status === 'LATE'
-                                    ? 'secondary'
-                                    : 'outline'
-                              }
-                            >
-                              {row.status ?? '-'}
-                            </Badge>
+                            <StatusBadge status={row.status} />
                           </td>
                           <td className="px-6 py-3.5">{row.checkInAt ?? '-'}</td>
                           <td className="px-6 py-3.5">{row.checkOutAt ?? '-'}</td>

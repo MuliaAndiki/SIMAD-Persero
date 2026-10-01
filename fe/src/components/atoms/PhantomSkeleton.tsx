@@ -49,7 +49,7 @@ export function PhantomSkeleton({
       stagger={stagger}
       reveal={reveal}
       loading-label={loadingLabel}
-      class={className}
+      className={className}
     >
       {children}
     </phantom-ui>

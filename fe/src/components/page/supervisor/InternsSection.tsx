@@ -1,20 +1,13 @@
 'use client';
 
-import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/atoms/dropdown-menu';
+import { Card } from '@/components/atoms/card';
+import { DataTableCard } from '@/components/organisms/table/DataTableCard';
+import { RowActionsMenu } from '@/components/organisms/table/RowActionsMenu';
+import { StatusBadge } from '@/components/organisms/table/StatusBadge';
 import type { AttendanceSupervisorRow } from '@/types/api/attendance.types';
 import { formatDate } from '@/utils/string.format';
-import { AlertCircle, CalendarDays, Eye, MoreHorizontal, UsersRound } from 'lucide-react';
-import Link from 'next/link';
+import { AlertCircle, CalendarDays, Eye, UsersRound } from 'lucide-react';
 
 export interface InternsSectionState {
   isPending: boolean;
@@ -30,30 +23,6 @@ export interface InternsSectionService {
 export interface InternsSectionProps {
   state: InternsSectionState;
   service: InternsSectionService;
-}
-
-function InternshipStatusBadge({ status }: { status?: string | null }) {
-  switch (status) {
-    case 'ACTIVE':
-      return (
-        <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-200 hover:bg-emerald-500/25">
-          Aktif
-        </Badge>
-      );
-    case 'COMPLETED':
-    case 'CERTIFICATE_GENERATED':
-      return (
-        <Badge className="bg-blue-500/15 text-blue-600 border-blue-200 hover:bg-blue-500/25">
-          Selesai
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="text-muted-foreground">
-          {status ?? '-'}
-        </Badge>
-      );
-  }
 }
 
 /**
@@ -87,106 +56,73 @@ export function InternsSection({ state, service }: InternsSectionProps) {
           </div>
         </div>
       ) : (
-        <Card>
-          <CardHeader className="border-b">
-            <CardTitle>Daftar Peserta ({state.rows.length})</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {state.rows.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center">
-                <UsersRound className="size-10 text-muted-foreground/40" />
-                <p className="text-sm font-medium">Belum ada peserta yang ditugaskan</p>
-                <p className="text-sm text-muted-foreground">
-                  Hubungi HR_ADMIN untuk menetapkan peserta magang kepada Anda.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-left text-xs uppercase text-muted-foreground">
-                      <th className="px-6 py-3 font-medium">Peserta</th>
-                      <th className="px-6 py-3 font-medium">Departemen</th>
-                      <th className="px-6 py-3 font-medium">Periode Magang</th>
-                      <th className="px-6 py-3 font-medium">Status</th>
-                      <th className="px-6 py-3 text-right font-medium">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {state.rows.map((row) => {
-                      const intern = row.internship.intern;
-                      const department = row.internship.department;
-                      const internshipId = row.internship.id;
+        <DataTableCard
+          title={`Daftar Peserta (${state.rows.length})`}
+          columns={[
+            { label: 'Peserta' },
+            { label: 'Departemen' },
+            { label: 'Periode Magang' },
+            { label: 'Status' },
+            { label: 'Aksi', className: 'px-6 py-3 text-right font-medium' },
+          ]}
+          isEmpty={state.rows.length === 0}
+          emptyIcon={UsersRound}
+          emptyTitle="Belum ada peserta yang ditugaskan"
+          emptyMessage="Hubungi HR_ADMIN untuk menetapkan peserta magang kepada Anda."
+        >
+          {state.rows.map((row) => {
+            const intern = row.internship.intern;
+            const department = row.internship.department;
+            const internshipId = row.internship.id;
 
-                      return (
-                        <tr
-                          key={internshipId ?? intern?.id ?? 'unknown'}
-                          className="border-b transition-colors last:border-0 hover:bg-muted/40"
-                        >
-                          <td className="px-6 py-4">
-                            <div className="flex flex-col">
-                              <span className="font-medium text-foreground">
-                                {intern?.fullName ?? '-'}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {intern?.email ?? '-'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">{department?.name ?? '-'}</td>
-                          <td className="px-6 py-4">
-                            {row.internship.startDate || row.internship.endDate ? (
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <CalendarDays className="size-3.5 shrink-0" />
-                                <span>
-                                  {row.internship.startDate
-                                    ? formatDate(row.internship.startDate)
-                                    : '?'}{' '}
-                                  &ndash;{' '}
-                                  {row.internship.endDate
-                                    ? formatDate(row.internship.endDate)
-                                    : '?'}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">-</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <InternshipStatusBadge status={row.internship.status} />
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            {internshipId ? (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="size-8 p-0">
-                                    <MoreHorizontal className="size-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
-                                  <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/supervisor/interns/${internshipId}`}>
-                                      <Eye className="size-4" />
-                                      Lihat Detail
-                                    </Link>
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">-</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            return (
+              <tr
+                key={internshipId ?? intern?.id ?? 'unknown'}
+                className="border-b transition-colors last:border-0 hover:bg-muted/40"
+              >
+                <td className="px-6 py-4">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">{intern?.fullName ?? '-'}</span>
+                    <span className="text-xs text-muted-foreground">{intern?.email ?? '-'}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">{department?.name ?? '-'}</td>
+                <td className="px-6 py-4">
+                  {row.internship.startDate || row.internship.endDate ? (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <CalendarDays className="size-3.5 shrink-0" />
+                      <span>
+                        {row.internship.startDate ? formatDate(row.internship.startDate) : '?'}{' '}
+                        &ndash; {row.internship.endDate ? formatDate(row.internship.endDate) : '?'}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </td>
+                <td className="px-6 py-4">
+                  <StatusBadge status={row.internship.status} />
+                </td>
+                <td className="px-6 py-4 text-right">
+                  {internshipId ? (
+                    <RowActionsMenu
+                      items={[
+                        {
+                          key: 'detail',
+                          label: 'Lihat Detail',
+                          icon: Eye,
+                          href: `/supervisor/interns/${internshipId}`,
+                        },
+                      ]}
+                    />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </DataTableCard>
       )}
     </section>
   );
