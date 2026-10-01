@@ -5,6 +5,7 @@ import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
 import { Label } from '@/components/atoms/label';
+import { TableLoader } from '@/components/atoms/loading';
 import {
   Select,
   SelectContent,
@@ -12,11 +13,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/atoms/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/atoms/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/atoms/table';
+import { StatusBadge } from '@/components/organisms/table/StatusBadge';
+import { TableEmptyState } from '@/components/organisms/table/TableEmptyState';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import type { InternshipResponse } from '@/types/api/internship.types';
 import type { OfficeResponse } from '@/types/api/office.types';
-import type { QuotaAvailabilityQuery, QuotaAvailabilityResult, QuotaItem } from '@/types/api/quota.types';
+import type {
+  QuotaAvailabilityQuery,
+  QuotaAvailabilityResult,
+  QuotaItem,
+} from '@/types/api/quota.types';
 import {
   AlertCircle,
   Building2,
@@ -37,7 +51,8 @@ import {
   Users,
   XCircle,
 } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import type React from 'react';
+import { useMemo, useState } from 'react';
 
 export interface AvailabilitySectionProps {
   assignedOffice: OfficeResponse | null;
@@ -61,37 +76,6 @@ function formatDisplayDate(dateStr?: string | null): string {
     month: 'short',
     year: 'numeric',
   });
-}
-
-function getInternshipStatusBadge(status?: string | null) {
-  switch (status) {
-    case 'ACTIVE':
-      return (
-        <Badge variant="default" className="bg-emerald-600 text-xs py-0">
-          Aktif
-        </Badge>
-      );
-    case 'PENDING':
-      return (
-        <Badge variant="secondary" className="bg-amber-500/15 text-amber-700 border-amber-300 text-xs py-0">
-          Menunggu
-        </Badge>
-      );
-    case 'COMPLETED':
-      return (
-        <Badge variant="outline" className="bg-blue-500/10 text-blue-700 border-blue-300 text-xs py-0">
-          Selesai
-        </Badge>
-      );
-    case 'ARCHIVED':
-      return (
-        <Badge variant="outline" className="text-muted-foreground text-xs py-0">
-          Diarsipkan
-        </Badge>
-      );
-    default:
-      return <Badge variant="outline" className="text-xs py-0">{status || '-'}</Badge>;
-  }
 }
 
 export function AvailabilitySection({
@@ -138,7 +122,8 @@ export function AvailabilitySection({
   const officeAddress = assignedOffice?.address || 'Lokasi kantor penempatan tugas resepsionis';
   const totalCapacity = officeQuota?.totalCapacity ?? availabilityResult?.totalCapacity ?? 0;
   const totalOccupied = availabilityResult?.totalOccupied ?? 0;
-  const totalAvailable = availabilityResult?.totalAvailable ?? Math.max(0, totalCapacity - totalOccupied);
+  const totalAvailable =
+    availabilityResult?.totalAvailable ?? Math.max(0, totalCapacity - totalOccupied);
 
   // Filter daftar anak magang berdasarkan departemen yang diklik & search query
   const filteredInterns = useMemo(() => {
@@ -254,7 +239,8 @@ export function AvailabilitySection({
             Pengecekan Ketersediaan Slot Magang di Unit Anda
           </CardTitle>
           <CardDescription>
-            Pilih departemen/bidang dan estimasi rentang tanggal magang untuk memverifikasi ketersediaan kuota bagi calon pendaftar.
+            Pilih departemen/bidang dan estimasi rentang tanggal magang untuk memverifikasi
+            ketersediaan kuota bagi calon pendaftar.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -303,15 +289,15 @@ export function AvailabilitySection({
               </div>
               <div className="grid gap-1.5">
                 <Label className="text-xs font-medium">Target Selesai</Label>
-                <Input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
+                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
               </div>
             </div>
 
-            <Button type="submit" disabled={isChecking || !assignedOfficeId} className="w-full gap-2">
+            <Button
+              type="submit"
+              disabled={isChecking || !assignedOfficeId}
+              className="w-full gap-2"
+            >
               {isChecking ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -349,9 +335,14 @@ export function AvailabilitySection({
                         : 'Slot Magang di Unit Sedang Penuh'}
                     </h4>
                     <p className="text-xs opacity-90 mt-0.5">
-                      Total Kuota Unit: <strong>{availabilityResult.totalCapacity}</strong> • Sedang Aktif: <strong>{availabilityResult.totalOccupied}</strong> • Sisa Tersedia: <strong>{availabilityResult.totalAvailable}</strong> slot
+                      Total Kuota Unit: <strong>{availabilityResult.totalCapacity}</strong> • Sedang
+                      Aktif: <strong>{availabilityResult.totalOccupied}</strong> • Sisa Tersedia:{' '}
+                      <strong>{availabilityResult.totalAvailable}</strong> slot
                       {startDate && endDate && (
-                        <span> (Periode: {startDate} s/d {endDate})</span>
+                        <span>
+                          {' '}
+                          (Periode: {startDate} s/d {endDate})
+                        </span>
                       )}
                     </p>
                   </div>
@@ -400,7 +391,9 @@ export function AvailabilitySection({
                           >
                             <TableCell className="font-medium text-sm">
                               <div className="flex items-center gap-2">
-                                <span className="font-semibold text-foreground">{dept.departmentName}</span>
+                                <span className="font-semibold text-foreground">
+                                  {dept.departmentName}
+                                </span>
                                 {dept.departmentCode && (
                                   <Badge variant="outline" className="text-[10px] py-0 font-mono">
                                     {dept.departmentCode}
@@ -415,20 +408,18 @@ export function AvailabilitySection({
                               {dept.occupied} Peserta
                             </TableCell>
                             <TableCell className="text-center font-mono font-bold">
-                              <span className={dept.available > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}>
+                              <span
+                                className={
+                                  dept.available > 0
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-muted-foreground'
+                                }
+                              >
                                 {dept.available} Slot
                               </span>
                             </TableCell>
                             <TableCell className="text-center">
-                              {dept.available > 0 ? (
-                                <Badge variant="default" className="bg-emerald-600 text-xs py-0">
-                                  Tersedia
-                                </Badge>
-                              ) : (
-                                <Badge variant="destructive" className="text-xs py-0">
-                                  Penuh
-                                </Badge>
-                              )}
+                              <StatusBadge status={dept.available > 0 ? 'TERSEDIA' : 'PENUH'} />
                             </TableCell>
                             <TableCell className="text-center">
                               <Button
@@ -453,7 +444,8 @@ export function AvailabilitySection({
                 </div>
               ) : (
                 <div className="rounded-lg border bg-muted/20 p-4 text-xs text-muted-foreground text-center">
-                  Belum ada pembagian alokasi departemen yang dikonfigurasikan pada kuota kantor ini.
+                  Belum ada pembagian alokasi departemen yang dikonfigurasikan pada kuota kantor
+                  ini.
                 </div>
               )}
             </div>
@@ -472,10 +464,11 @@ export function AvailabilitySection({
                   Informasi Peserta Magang di {officeName}
                 </CardTitle>
                 <CardDescription>
-                  Filter aktif: <strong className="text-foreground">{activeSelectedDeptName}</strong> ({filteredInterns.length} peserta terdata)
+                  Filter aktif:{' '}
+                  <strong className="text-foreground">{activeSelectedDeptName}</strong> (
+                  {filteredInterns.length} peserta terdata)
                 </CardDescription>
               </div>
-
             </div>
 
             {/* Quick search input */}
@@ -494,29 +487,30 @@ export function AvailabilitySection({
 
           <CardContent>
             {isInternshipsPending ? (
-              <div className="flex items-center justify-center py-10 text-muted-foreground text-xs gap-2">
-                <Loader2 className="size-4 animate-spin text-primary" />
-                Memuat data peserta magang di unit ini...
-              </div>
+              <TableLoader label="Memuat data peserta magang di unit ini..." />
             ) : filteredInterns.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center rounded-lg border border-dashed p-6 bg-muted/10">
-                <Users className="size-8 text-muted-foreground/50 mb-2" />
-                <p className="text-sm font-semibold text-foreground">Tidak Ada Data Peserta Magang</p>
-                <p className="text-xs text-muted-foreground mt-1 max-w-md">
-                  {internSearchQuery
-                    ? `Tidak ditemukan peserta magang yang cocok dengan kata kunci "${internSearchQuery}".`
-                    : `Belum ada peserta magang yang terdaftar pada ${activeSelectedDeptName} di unit ini.`}
-                </p>
-                {activeDeptForInterns !== 'ALL' && (
-                  <Button
-                    variant="link"
-                    size="sm"
-                    onClick={() => setActiveDeptForInterns('ALL')}
-                    className="text-xs text-primary mt-2"
-                  >
-                    Tampilkan Semua Bidang
-                  </Button>
-                )}
+              <div className="rounded-lg border border-dashed p-6 bg-muted/10">
+                <TableEmptyState
+                  icon={Users}
+                  title="Tidak Ada Data Peserta Magang"
+                  message={
+                    internSearchQuery
+                      ? `Tidak ditemukan peserta magang yang cocok dengan kata kunci "${internSearchQuery}".`
+                      : `Belum ada peserta magang yang terdaftar pada ${activeSelectedDeptName} di unit ini.`
+                  }
+                  action={
+                    activeDeptForInterns !== 'ALL' ? (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => setActiveDeptForInterns('ALL')}
+                        className="text-xs text-primary mt-2"
+                      >
+                        Tampilkan Semua Bidang
+                      </Button>
+                    ) : undefined
+                  }
+                />
               </div>
             ) : (
               <div className="rounded-lg border overflow-x-auto">
@@ -547,7 +541,9 @@ export function AvailabilitySection({
                                 {userProfile?.fullName || 'Peserta Magang'}
                               </span>
                               <span className="text-xs text-muted-foreground font-mono">
-                                {intern.internProfile?.studentNumber ? `NIM/NISN: ${intern.internProfile.studentNumber}` : userProfile?.email || '-'}
+                                {intern.internProfile?.studentNumber
+                                  ? `NIM/NISN: ${intern.internProfile.studentNumber}`
+                                  : userProfile?.email || '-'}
                               </span>
                             </div>
                           </TableCell>
@@ -573,7 +569,7 @@ export function AvailabilitySection({
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
-                            {getInternshipStatusBadge(intern.status)}
+                            <StatusBadge status={intern.status} />
                           </TableCell>
                         </TableRow>
                       );

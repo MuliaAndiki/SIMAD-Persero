@@ -1,20 +1,12 @@
 'use client';
 
-import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/atoms/dropdown-menu';
 import { REVIEWABLE_STATUSES } from '@/components/organisms/application/ApplicationReviewDetail';
-import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
+import { DataTableCard } from '@/components/organisms/table/DataTableCard';
+import { RowActionsMenu } from '@/components/organisms/table/RowActionsMenu';
+import { StatusBadge } from '@/components/organisms/table/StatusBadge';
 import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
 import { formatDate } from '@/utils/string.format';
-import { CheckCircle2, Eye, FileText, MoreHorizontal, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
 
 export interface ApplicationTableProps {
   applications: ApplicationResponse[];
@@ -38,103 +30,76 @@ export function ApplicationTable({
   isRejecting,
 }: ApplicationTableProps) {
   return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle>Daftar Pengajuan</CardTitle>
-        <CardDescription>{applications.length} pengajuan ditemukan</CardDescription>
-      </CardHeader>
-      <CardContent className="p-0">
-        {applications.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-            <FileText className="size-8 text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">
-              Belum ada pengajuan yang cocok dengan filter.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs uppercase text-muted-foreground">
-                  <th className="px-6 py-3 font-medium">No. Pengajuan</th>
-                  <th className="px-6 py-3 font-medium">Peserta</th>
-                  <th className="px-6 py-3 font-medium">Periode</th>
-                  <th className="px-6 py-3 font-medium">Status</th>
-                  <th className="px-6 py-3 text-right font-medium">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {applications.map((app) => (
-                  <tr
-                    key={app.id}
-                    className="border-b transition-colors last:border-0 hover:bg-muted/40"
-                  >
-                    <td className="px-6 py-4 font-medium">{app.applicationNumber ?? '-'}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium">
-                          {app.internProfile?.user.fullName ?? '-'}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {app.internProfile?.studentNumber || app.internProfile?.user.email}{' '}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-0.5">
-                        <span>{formatDate(app.requestedStartDate)}</span>
-                        <span className="text-xs text-muted-foreground">
-                          s.d. {formatDate(app.requestedEndDate)}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <ApplicationStatusBadge status={app.status} />
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="size-8 p-0">
-                            <MoreHorizontal className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44">
-                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => onSelectApplication(app.id)}>
-                            <Eye className="size-4" />
-                            Review
-                          </DropdownMenuItem>
-                          {REVIEWABLE_STATUSES.includes(app.status as ApplicationStatusValue) && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => onApprove(app)}
-                                disabled={isApproving || isRejecting}
-                              >
-                                <CheckCircle2 className="size-4 text-emerald-500" />
-                                Setujui
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                variant="destructive"
-                                onClick={() => onReject(app)}
-                                disabled={isApproving || isRejecting}
-                              >
-                                <XCircle className="size-4" />
-                                Tolak
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <DataTableCard
+      title="Daftar Pengajuan"
+      description={`${applications.length} pengajuan ditemukan`}
+      columns={[
+        { label: 'No. Pengajuan' },
+        { label: 'Peserta' },
+        { label: 'Periode' },
+        { label: 'Status' },
+        { label: 'Aksi', className: 'px-6 py-3 text-right font-medium' },
+      ]}
+      isEmpty={applications.length === 0}
+      emptyIcon={FileText}
+      emptyMessage="Belum ada pengajuan yang cocok dengan filter."
+    >
+      {applications.map((app) => {
+        const reviewable = REVIEWABLE_STATUSES.includes(app.status as ApplicationStatusValue);
+        return (
+          <tr key={app.id} className="border-b transition-colors last:border-0 hover:bg-muted/40">
+            <td className="px-6 py-4 font-medium">{app.applicationNumber ?? '-'}</td>
+            <td className="px-6 py-4">
+              <div className="flex flex-col">
+                <span className="font-medium">{app.internProfile?.user.fullName ?? '-'}</span>
+                <span className="text-xs text-muted-foreground">
+                  {app.internProfile?.studentNumber || app.internProfile?.user.email}{' '}
+                </span>
+              </div>
+            </td>
+            <td className="px-6 py-4">
+              <div className="flex flex-col gap-0.5">
+                <span>{formatDate(app.requestedStartDate)}</span>
+                <span className="text-xs text-muted-foreground">
+                  s.d. {formatDate(app.requestedEndDate)}
+                </span>
+              </div>
+            </td>
+            <td className="px-6 py-4">
+              <StatusBadge status={app.status} />
+            </td>
+            <td className="px-6 py-4 text-right">
+              <RowActionsMenu
+                items={[
+                  {
+                    key: 'review',
+                    label: 'Review',
+                    icon: Eye,
+                    onSelect: () => onSelectApplication(app.id),
+                  },
+                  {
+                    key: 'approve',
+                    label: 'Setujui',
+                    icon: CheckCircle2,
+                    hidden: !reviewable,
+                    disabled: isApproving || isRejecting,
+                    onSelect: () => onApprove(app),
+                  },
+                  {
+                    key: 'reject',
+                    label: 'Tolak',
+                    icon: XCircle,
+                    variant: 'destructive',
+                    hidden: !reviewable,
+                    disabled: isApproving || isRejecting,
+                    onSelect: () => onReject(app),
+                  },
+                ]}
+              />
+            </td>
+          </tr>
+        );
+      })}
+    </DataTableCard>
   );
 }

@@ -11,8 +11,10 @@ import { ReactQueryClientProvider } from '@/pkg/react-query/query-client.pkg';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { composeProviders } from './composeProvinders';
+import { StyledComponentsRegistry } from './styled-registry';
 
 const Providers = composeProviders([
+  StyledComponentsRegistry,
   ({ children }) => <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>,
   ({ children }) => (
     <GoogleOAuthProvider clientId={env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>

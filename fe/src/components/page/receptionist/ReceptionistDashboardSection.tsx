@@ -4,6 +4,7 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import { TableLoader } from '@/components/atoms/loading';
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/atoms/select';
 import { ReceptionistDepartmentChart } from '@/components/organisms/dashboard/ReceptionistDepartmentChart';
+import { TableEmptyState } from '@/components/organisms/table/TableEmptyState';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { ReceptionistDashboardData } from '@/types/api/dashboard.types';
 import {
@@ -192,7 +194,9 @@ export function ReceptionistDashboardSection({
 
         {/* Table / List */}
         {isInitialLoading ? (
-          <Card className="h-64 animate-pulse bg-muted/40" />
+          <Card>
+            <TableLoader label="Memuat aktivitas absensi..." />
+          </Card>
         ) : isError ? (
           <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
             <AlertCircle className="mt-0.5 size-4 shrink-0" />
@@ -202,9 +206,12 @@ export function ReceptionistDashboardSection({
             </div>
           </div>
         ) : filteredAttendances.length === 0 ? (
-          <Card className="flex flex-col items-center justify-center gap-2 p-8 text-center text-muted-foreground">
-            <CheckCircle2 className="size-8 opacity-40" />
-            <p className="text-sm font-medium">Belum ada aktivitas absensi hari ini.</p>
+          <Card>
+            <TableEmptyState
+              icon={CheckCircle2}
+              title="Belum ada aktivitas absensi hari ini."
+              message="Data kehadiran peserta magang akan tampil di sini."
+            />
           </Card>
         ) : (
           <Card className="overflow-x-auto p-0">

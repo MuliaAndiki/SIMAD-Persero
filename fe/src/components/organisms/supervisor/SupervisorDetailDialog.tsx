@@ -10,17 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/atoms/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/atoms/dropdown-menu';
+import { SupervisorAssignmentsTable } from '@/components/organisms/table/SupervisorAssignmentsTable';
 import type { SupervisorDetailResponse } from '@/types/api/supervisor.types';
-import { formatDate } from '@/utils/string.format';
-import { MoreHorizontal, UserPlus, Users, XCircle } from 'lucide-react';
+import { UserPlus, Users } from 'lucide-react';
 
 export interface SupervisorDetailDialogProps {
   open: boolean;
@@ -103,70 +95,11 @@ export function SupervisorDetailDialog({
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-lg border">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b text-left text-xs uppercase text-muted-foreground">
-                          <th className="px-4 py-3 font-medium">Intern</th>
-                          <th className="px-4 py-3 font-medium">Departemen</th>
-                          <th className="px-4 py-3 font-medium">Periode</th>
-                          <th className="px-4 py-3 font-medium">Status</th>
-                          <th className="px-4 py-3 text-right font-medium">Aksi</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {supervisor.assignments.map((assignment) => (
-                          <tr key={assignment.id} className="border-b last:border-0">
-                            <td className="px-4 py-3">
-                              <div className="flex flex-col">
-                                <span className="font-medium">
-                                  {assignment.internship?.intern?.fullName ?? '-'}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {assignment.internship?.intern?.studentNumber ?? ''}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              {assignment.internship?.department?.name ?? '-'}
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex flex-col gap-0.5">
-                                <span>
-                                  {formatDate(assignment.internship?.actualStartDate ?? null)}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  s.d. {formatDate(assignment.internship?.actualEndDate ?? null)}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">{assignment.internship?.status ?? '-'}</td>
-                            <td className="px-4 py-3 text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="size-8 p-0">
-                                    <MoreHorizontal className="size-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-40">
-                                  <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    variant="destructive"
-                                    disabled={isRemoving}
-                                    onClick={() => onRemoveAssignment(assignment.id)}
-                                  >
-                                    <XCircle className="size-4" />
-                                    Lepas
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <SupervisorAssignmentsTable
+                    assignments={supervisor.assignments}
+                    isRemoving={isRemoving}
+                    onRemoveAssignment={onRemoveAssignment}
+                  />
                 )}
               </div>
             </div>

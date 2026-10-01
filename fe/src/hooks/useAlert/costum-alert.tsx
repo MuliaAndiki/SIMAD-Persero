@@ -1,8 +1,8 @@
 'use client';
 
-import { GooeyToaster } from '@/components/atoms/GoeyToaster';
 import { AlertModal } from '@/core/components/alert-modal';
 import { showAlertToast } from '@/core/components/alert-toast';
+import { SimadToaster } from '@/core/components/styled-toaster';
 import type { AlertContexType, ModalProps, ToastProps } from '@/types/ui';
 import { createContext, useContext, useState } from 'react';
 
@@ -60,7 +60,7 @@ export const AlertProvinder = ({ children }: { children: React.ReactNode }) => {
   return (
     <AlertContex.Provider value={{ toast: toastAlert, modal: showModal, confirm }}>
       {children}
-      <GooeyToaster />
+      <SimadToaster />
       {modal ? (
         <AlertModal
           open

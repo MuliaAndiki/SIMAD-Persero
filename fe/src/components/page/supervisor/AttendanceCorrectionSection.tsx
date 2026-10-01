@@ -11,8 +11,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/atoms/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/atoms/table';
+import { TableLoader } from '@/components/atoms/loading';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/atoms/table';
 import { Textarea } from '@/components/atoms/textarea';
+import { RowActionsMenu } from '@/components/organisms/table/RowActionsMenu';
+import { StatusBadge } from '@/components/organisms/table/StatusBadge';
+import { TableEmptyState } from '@/components/organisms/table/TableEmptyState';
 import type { AttendanceCorrectionItem } from '@/types/api/correction.types';
 import { formatDate, formatTime } from '@/utils/string.format';
 import {
@@ -22,7 +33,6 @@ import {
   Clock,
   ExternalLink,
   FileText,
-  Loader2,
   User,
   XCircle,
 } from 'lucide-react';
@@ -41,7 +51,9 @@ export function AttendanceCorrectionSection({
   onApprove,
   onReject,
 }: AttendanceCorrectionSectionProps) {
-  const [selectedCorrection, setSelectedCorrection] = useState<AttendanceCorrectionItem | null>(null);
+  const [selectedCorrection, setSelectedCorrection] = useState<AttendanceCorrectionItem | null>(
+    null,
+  );
   const [approveModalOpen, setApproveModalOpen] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [notes, setNotes] = useState('');
@@ -93,7 +105,8 @@ export function AttendanceCorrectionSection({
           Review Pengajuan Koreksi Absensi
         </h1>
         <p className="text-sm text-muted-foreground">
-          Periksa permohonan koreksi jam masuk atau keluar yang diajukan oleh peserta magang bimbingan Anda.
+          Periksa permohonan koreksi jam masuk atau keluar yang diajukan oleh peserta magang
+          bimbingan Anda.
         </p>
       </header>
 
@@ -111,13 +124,15 @@ export function AttendanceCorrectionSection({
       </div>
 
       {isPending ? (
-        <Card className="p-12 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Memuat daftar pengajuan koreksi...</p>
+        <Card>
+          <TableLoader label="Memuat daftar pengajuan koreksi..." />
         </Card>
       ) : corrections.length === 0 ? (
-        <Card className="p-12 text-center text-muted-foreground">
-          Tidak ada pengajuan koreksi absensi yang masuk.
+        <Card>
+          <TableEmptyState
+            icon={AlertCircle}
+            message="Tidak ada pengajuan koreksi absensi yang masuk."
+          />
         </Card>
       ) : (
         <div className="rounded-lg border overflow-x-auto">
@@ -160,10 +175,14 @@ export function AttendanceCorrectionSection({
                     <TableCell className="text-xs">
                       <div className="flex flex-col">
                         {item.requestedCheckIn && (
-                          <span>Masuk: <strong>{formatTime(item.requestedCheckIn)}</strong></span>
+                          <span>
+                            Masuk: <strong>{formatTime(item.requestedCheckIn)}</strong>
+                          </span>
                         )}
                         {item.requestedCheckOut && (
-                          <span>Keluar: <strong>{formatTime(item.requestedCheckOut)}</strong></span>
+                          <span>
+                            Keluar: <strong>{formatTime(item.requestedCheckOut)}</strong>
+                          </span>
                         )}
                       </div>
                     </TableCell>
@@ -182,40 +201,27 @@ export function AttendanceCorrectionSection({
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge
-                        variant={
-                          item.status === 'APPROVED'
-                            ? 'default'
-                            : item.status === 'REJECTED'
-                              ? 'destructive'
-                              : 'secondary'
-                        }
-                        className={item.status === 'APPROVED' ? 'bg-emerald-600' : ''}
-                      >
-                        {item.status}
-                      </Badge>
+                      <StatusBadge status={item.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       {isPendingItem ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-destructive hover:bg-destructive/10 text-xs h-8"
-                            onClick={() => handleOpenReject(item)}
-                          >
-                            <XCircle className="h-3.5 w-3.5 mr-1" />
-                            Tolak
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8"
-                            onClick={() => handleOpenApprove(item)}
-                          >
-                            <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                            Setujui
-                          </Button>
-                        </div>
+                        <RowActionsMenu
+                          items={[
+                            {
+                              key: 'approve',
+                              label: 'Setujui',
+                              icon: CheckCircle2,
+                              onSelect: () => handleOpenApprove(item),
+                            },
+                            {
+                              key: 'reject',
+                              label: 'Tolak',
+                              icon: XCircle,
+                              variant: 'destructive',
+                              onSelect: () => handleOpenReject(item),
+                            },
+                          ]}
+                        />
                       ) : (
                         <span className="text-xs text-muted-foreground">Telah diproses</span>
                       )}
