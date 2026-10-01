@@ -471,8 +471,9 @@ export function useLogout() {
         icon: 'success',
       });
 
-      // Hapus cookie sesi lalu kembali ke halaman login.
+      // Hapus cookie sesi dan seluruh cache query agar tidak terjadi kebocoran data antar user (OPT-014)
       clearSessionCookies();
+      ns.queryClient.clear();
       router.push('/login');
     },
     onError: (err) => {
@@ -512,7 +513,9 @@ export function useLogoutAll() {
         icon: 'success',
       });
 
+      // Hapus cookie sesi dan seluruh cache query agar tidak terjadi kebocoran data antar user (OPT-014)
       clearSessionCookies();
+      ns.queryClient.clear();
       router.push('/login');
     },
     onError: (err) => {

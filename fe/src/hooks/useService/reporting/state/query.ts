@@ -15,32 +15,35 @@ export function useAttendanceReport(query?: ReportingQuery, options?: { enabled?
   });
 }
 
-export function useInternshipReport() {
+export function useInternshipReport(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKey.reporting.internships(),
     queryFn: async () => {
       const res = await Api.Reporting.Internships();
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }
 
-export function useCertificateReport() {
+export function useCertificateReport(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKey.reporting.certificates(),
     queryFn: async () => {
       const res = await Api.Reporting.Certificates();
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }
 
-export function useDashboardReport() {
+export function useDashboardReport(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKey.reporting.dashboard(),
     queryFn: async () => {
       const res = await Api.Reporting.Dashboard();
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }

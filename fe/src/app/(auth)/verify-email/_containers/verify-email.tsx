@@ -53,12 +53,26 @@ export default function VerifyEmailContainer() {
     );
   }, [token, verifyEmail]);
 
-  // Auto-verifikasi sekali saat halaman terbuka (ref guard anti double-run StrictMode).
+  // Auto-verifikasi sekali saat halaman terbuka dengan token valid
+  // (ref guard anti double-run StrictMode; tunggu token tersedia dulu).
   useEffect(() => {
-    if (hasRunRef.current) return;
+    if (!token || hasRunRef.current) return;
     hasRunRef.current = true;
     runVerify();
-  }, [runVerify]);
+  }, [token, runVerify]);
+
+  // Failsafe: spinner tidak boleh jalan selamanya — bila 30 detik belum selesai,
+  // tampilkan error agar pengguna bisa coba lagi.
+  useEffect(() => {
+    if (status !== 'verifying') return;
+    const timeout = setTimeout(() => {
+      setStatus('error');
+      setMessage(
+        'Verifikasi memakan waktu terlalu lama. Periksa koneksi internet Anda lalu coba lagi.',
+      );
+    }, 30000);
+    return () => clearTimeout(timeout);
+  }, [status]);
 
   const handleRetry = () => {
     runVerify();

@@ -19,7 +19,7 @@ import {
   ViolationType,
 } from '@/types/attendance.types';
 import { checkInsideGeofence } from '@/utils/geofence.util';
-import type { Decimal } from '@prisma/client/runtime/library';
+import type { Prisma } from '@prisma/client';
 import ExcelJS from 'exceljs';
 import prisma from '../../prisma/client';
 import calendarService from './calendar.service';
@@ -32,7 +32,7 @@ import calendarService from './calendar.service';
 class AttendanceService {
   // ── helpers ──────────────────────────────────────────────────────────
 
-  private decimalToNumber(v: Decimal | null | undefined): number | null {
+  private decimalToNumber(v: Prisma.Decimal | null | undefined): number | null {
     if (v == null) return null;
     return Number(v);
   }

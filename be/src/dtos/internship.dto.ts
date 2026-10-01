@@ -13,6 +13,12 @@ export const ExtendInternshipDto = t.Object({
   reason: t.Optional(t.String()),
 });
 
+/** PATCH /internships/:id/start-date */
+export const RescheduleStartDateDto = t.Object({
+  newStartDate: t.String({ format: 'date' }),
+  reason: t.Optional(t.String()),
+});
+
 /** PATCH /internships/:id/assign-supervisor */
 export const AssignSupervisorDto = t.Object({
   supervisorId: t.String({ format: 'uuid' }),

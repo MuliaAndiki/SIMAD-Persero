@@ -1333,6 +1333,35 @@ HR_ADMIN
 
 ---
 
+## 15.5b Reschedule Start Date
+
+```
+PATCH /internships/{internshipId}/start-date
+```
+
+### Request
+
+```json
+{
+  "newStartDate": "2026-10-01",
+  "reason": "Penyesuaian slot kuota."
+}
+```
+
+### Required Role
+
+HR_ADMIN
+
+### Business Rules
+
+- Hanya internship berstatus PENDING (belum mulai).
+- Tanggal masuk baru harus sebelum tanggal selesai.
+- Kuota kantor & departemen divalidasi ulang untuk periode baru.
+- Email pemberitahuan perubahan tanggal masuk dikirim ke akun terdaftar
+  (termasuk pengingat memeriksa folder SPAM).
+
+---
+
 ## 15.6 Assign Supervisor
 
 ```

@@ -240,7 +240,115 @@ export function ChangeDepartmentModal({
   );
 }
 
-// ---------- 3. Assign Supervisor Modal Props & Component ----------
+// ---------- 3. Reschedule Start Date Modal Props & Component ----------
+
+export interface RescheduleStartDateModalProps {
+  open: boolean;
+  isPending: boolean;
+  internship: InternshipResponse | null;
+  onClose: () => void;
+  onSubmit: (data: { newStartDate: string; reason?: string }) => Promise<void>;
+}
+
+export function RescheduleStartDateModal({
+  open,
+  isPending,
+  internship,
+  onClose,
+  onSubmit,
+}: RescheduleStartDateModalProps) {
+  const [newStartDate, setNewStartDate] = useState('');
+  const [reason, setReason] = useState('');
+
+  const maxDate = useMemo(() => {
+    if (!internship?.actualEndDate) return '';
+    return internship.actualEndDate.split('T')[0] ?? '';
+  }, [internship?.actualEndDate]);
+
+  useEffect(() => {
+    if (internship?.actualStartDate) {
+      setNewStartDate(internship.actualStartDate.split('T')[0] ?? '');
+    } else {
+      setNewStartDate('');
+    }
+    setReason('');
+  }, [internship]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStartDate) return;
+    await onSubmit({ newStartDate, reason: reason.trim() || undefined });
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Calendar className="size-5 text-primary" />
+            Ubah Tanggal Masuk
+          </DialogTitle>
+          <DialogDescription>
+            Tentukan tanggal masuk baru untuk peserta{' '}
+            <span className="font-semibold text-foreground">
+              {internship?.internProfile?.user.fullName}
+            </span>
+            . Peserta akan menerima email pemberitahuan perubahan tanggal masuk.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="reschedule-new-start-date"
+              className="text-xs font-medium text-foreground"
+            >
+              Tanggal Masuk Baru
+            </label>
+            <Input
+              id="reschedule-new-start-date"
+              type="date"
+              max={maxDate || undefined}
+              value={newStartDate}
+              onChange={(e) => setNewStartDate(e.target.value)}
+              required
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Kuota akan divalidasi ulang untuk periode baru, dan peserta menerima email
+              pemberitahuan (periksa folder spam bila tidak ada di kotak masuk).
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="reschedule-reason" className="text-xs font-medium text-foreground">
+              Alasan Perubahan <span className="text-muted-foreground">(opsional)</span>
+            </label>
+            <Input
+              id="reschedule-reason"
+              type="text"
+              placeholder="Contoh: Penyesuaian slot kuota kantor..."
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </div>
+
+          <DialogFooter className="mt-2">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+              Batal
+            </Button>
+            <Button type="submit" disabled={isPending || !newStartDate}>
+              {isPending && <Loader2 className="mr-1.5 size-4 animate-spin" />}
+              Simpan Tanggal Masuk
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------- 4. Assign Supervisor Modal Props & Component ----------
 
 export interface AssignSupervisorModalProps {
   open: boolean;

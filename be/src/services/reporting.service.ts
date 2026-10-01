@@ -45,8 +45,14 @@ class ReportingService {
       where.attendanceDate = { gte: start, lte: end };
     }
 
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.min(1000, Math.max(1, Number(query.limit) || 500));
+    const skip = (page - 1) * limit;
+
     const data = await prisma.attendance.findMany({
       where,
+      skip,
+      take: limit,
       include: {
         internship: {
           include: {
@@ -87,6 +93,7 @@ class ReportingService {
    */
   public async getInternshipReport(): Promise<InternshipReportRow[]> {
     const data = await prisma.internship.findMany({
+      take: 1000,
       include: {
         internProfile: {
           include: {
@@ -127,6 +134,7 @@ class ReportingService {
    */
   public async getCertificateReport(): Promise<CertificateReportRow[]> {
     const data = await prisma.certificate.findMany({
+      take: 1000,
       include: {
         internship: {
           include: {

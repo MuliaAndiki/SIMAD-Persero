@@ -1,4 +1,6 @@
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
 import { env } from '../../src/config/env.config';
 
 function formatDatabaseUrl(rawUrl: string): string {
@@ -22,13 +24,21 @@ function formatDatabaseUrl(rawUrl: string): string {
   }
 }
 
+const connectionString = formatDatabaseUrl(env.DATABASE_URL);
+
+const pool = new Pool({
+  connectionString,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 30000,
+});
+
+const adapter = new PrismaPg(pool);
+
 const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: formatDatabaseUrl(env.DATABASE_URL),
-    },
-  },
+  adapter,
   log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
 });
 
+export { pool, adapter, prisma };
 export default prisma;

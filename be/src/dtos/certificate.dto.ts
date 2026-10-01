@@ -1,17 +1,17 @@
-import { t } from 'elysia';
+import { t } from "elysia";
 
 // ── Params ─────────────────────────────────────────────────────────────
 
 export const CertificateIdParam = t.Object({
-  certificateId: t.String({ format: 'uuid' }),
+  certificateId: t.String({ format: "uuid" }),
 });
 
 export const CertificateParamId = t.Object({
-  id: t.String({ format: 'uuid' }),
+  id: t.String({ format: "uuid" }),
 });
 
 export const OfficeLocationIdParam = t.Object({
-  officeLocationId: t.String({ format: 'uuid' }),
+  officeLocationId: t.String({ format: "uuid" }),
 });
 
 export const CertificateVerifyParam = t.Object({
@@ -21,7 +21,7 @@ export const CertificateVerifyParam = t.Object({
 // ── Body Schemas ───────────────────────────────────────────────────────
 
 export const GenerateCertificateDto = t.Object({
-  internshipId: t.String({ format: 'uuid' }),
+  internshipId: t.String({ format: "uuid" }),
 });
 
 export const ApproveCertificateDto = t.Object({
@@ -33,12 +33,12 @@ export const RejectCertificateDto = t.Object({
 });
 
 export const UpsertCertificateSettingDto = t.Object({
-  officeLocationId: t.String({ format: 'uuid' }),
+  officeLocationId: t.String({ format: "uuid" }),
   signerName: t.String({ minLength: 2 }),
   signerRole: t.String({ minLength: 2 }),
-  signatureFileId: t.Optional(t.String({ format: 'uuid' })),
-  stampFileId: t.Optional(t.String({ format: 'uuid' })),
-  templateFileId: t.Optional(t.String({ format: 'uuid' })),
+  signatureFileId: t.Optional(t.String({ format: "uuid" })),
+  stampFileId: t.Optional(t.String({ format: "uuid" })),
+  templateFileId: t.Optional(t.String({ format: "uuid" })),
   certificateNumberFormat: t.Optional(t.String()),
   isActive: t.Optional(t.Boolean()),
 });
