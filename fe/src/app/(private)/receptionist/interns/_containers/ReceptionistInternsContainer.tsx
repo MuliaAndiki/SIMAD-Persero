@@ -31,6 +31,7 @@ export function ReceptionistInternsContainer() {
 
   const { data, isPending, isFetching, isError, error, refetch } = api.internship.query.list({
     limit: 100,
+    includeAttendance: true,
   });
   const departmentsQuery = api.department.query.list();
 

@@ -11,6 +11,7 @@ import {
   Award,
   Building2,
   Calendar,
+  CalendarClock,
   CheckCircle2,
   Play,
   UserCheck,
@@ -26,6 +27,7 @@ export interface InternshipsTableProps {
   onStart?: (id: string) => void;
   onFinish?: (id: string) => void;
   onOpenExtend?: (internship: InternshipResponse) => void;
+  onOpenRescheduleStartDate?: (internship: InternshipResponse) => void;
   onOpenChangeDept?: (internship: InternshipResponse) => void;
   onOpenAssignSupervisor?: (internship: InternshipResponse) => void;
   onOpenGenerateCert?: (internship: InternshipResponse) => void;
@@ -44,6 +46,7 @@ export function InternshipsTable({
   onStart,
   onFinish,
   onOpenExtend,
+  onOpenRescheduleStartDate,
   onOpenChangeDept,
   onOpenAssignSupervisor,
   onOpenGenerateCert,
@@ -156,6 +159,13 @@ export function InternshipsTable({
                     icon: Calendar,
                     hidden: !onOpenExtend,
                     onSelect: () => onOpenExtend?.(internship),
+                  },
+                  {
+                    key: 'reschedule-start-date',
+                    label: 'Ubah Tanggal Masuk',
+                    icon: CalendarClock,
+                    hidden: !(internship.status === 'PENDING' && onOpenRescheduleStartDate),
+                    onSelect: () => onOpenRescheduleStartDate?.(internship),
                   },
                   {
                     key: 'change-dept',

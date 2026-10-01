@@ -7,5 +7,6 @@ export type ApplicationCacheContext = {
 };
 
 export function readApplicationSnapshot(ns: AppNameSpace): ApplicationResponse[] | undefined {
-  return ns.queryClient.getQueryData<ApplicationResponse[]>(queryKey.application.list());
+  const cached = ns.queryClient.getQueryData<any>(queryKey.application.list());
+  return cached?.data ?? (Array.isArray(cached) ? cached : undefined);
 }

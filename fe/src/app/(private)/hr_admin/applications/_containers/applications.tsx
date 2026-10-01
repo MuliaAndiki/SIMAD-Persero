@@ -139,6 +139,9 @@ export default function HrApplicationsContainer() {
     handleCloseModal();
   }, [reject, rejectForm, modalTarget, handleCloseModal]);
 
+  const applications = (list.data?.data ??
+    (Array.isArray(list.data) ? list.data : [])) as ApplicationResponse[];
+
   return (
     <ApplicationsSection
       state={{
@@ -146,7 +149,7 @@ export default function HrApplicationsContainer() {
         isFetching: isSearching,
         isError: list.isError,
         errorMessage: list.error?.message,
-        applications: list.data ?? [],
+        applications,
         statusFilter,
         keyword,
         modalMode,

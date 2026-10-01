@@ -157,7 +157,10 @@ export default function SupervisorDetailContainer({
       <SupervisorAssignInternDialog
         open={assignOpen}
         internshipId={internshipId}
-        approvedApplications={approvedApplications.data ?? []}
+        approvedApplications={
+          approvedApplications.data?.data ??
+          (Array.isArray(approvedApplications.data) ? approvedApplications.data : [])
+        }
         assignedInternshipIds={assignedInternshipIds}
         isAssigning={assign.isPending}
         onInternshipIdChange={setInternshipId}

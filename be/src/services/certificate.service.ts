@@ -16,6 +16,7 @@ import {
 import { InternshipStatus } from '@/types/internship.types';
 import { createAuditLog } from '@/utils/audit.util';
 import { generateCertificatePdf } from '@/utils/pdf.util';
+import { deleteFromR2 } from '@/utils/r2-utils';
 import prisma from '../../prisma/client';
 
 export interface CertificateSettings {
@@ -186,31 +187,77 @@ class CertificateService {
   }
 
   /**
-   * Buat nomor sertifikat unik sesuai setting kantor atau default: SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}
+   * Alokasikan nomor sertifikat secara atomik & concurrency-safe dengan PostgreSQL advisory lock (OPT-007)
    */
-  private async generateCertificateNumber(officeLocationId?: string | null): Promise<string> {
-    const year = new Date().getFullYear();
-    let officeCode = 'PST';
-    let format = 'SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}';
-
-    if (officeLocationId) {
-      const [office, setting] = await Promise.all([
-        prisma.officeLocation.findUnique({ where: { id: officeLocationId } }),
-        prisma.certificateSetting.findUnique({ where: { officeLocationId } }),
-      ]);
-      if (office?.name) {
-        officeCode = office.name.replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase() || 'PST';
+  private async allocateCertificateNumber(
+    internshipId: string,
+    officeLocationId?: string | null,
+    evaluationId?: string,
+  ): Promise<string> {
+    return prisma.$transaction(async (tx) => {
+      // 1. Jika internship ini sudah memiliki certificateNumber (misal regenerate / placeholder), reuse nomor yang ada
+      const existing = await tx.certificate.findUnique({
+        where: { internshipId },
+        select: { id: true, certificateNumber: true },
+      });
+      if (existing?.certificateNumber) {
+        return existing.certificateNumber;
       }
-      if (setting?.certificateNumberFormat) format = setting.certificateNumberFormat;
-    }
 
-    const count = (await prisma.certificate.count()) + 1;
-    const numStr = String(count).padStart(4, '0');
+      const year = new Date().getFullYear();
+      let officeCode = 'PST';
+      let format = 'SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}';
 
-    return format
-      .replace('{OFFICE_CODE}', officeCode)
-      .replace('{YEAR}', String(year))
-      .replace('{NUM}', numStr);
+      if (officeLocationId) {
+        const [office, setting] = await Promise.all([
+          tx.officeLocation.findUnique({ where: { id: officeLocationId } }),
+          tx.certificateSetting.findUnique({ where: { officeLocationId } }),
+        ]);
+        if (office?.name) {
+          officeCode = office.name.replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase() || 'PST';
+        }
+        if (setting?.certificateNumberFormat) format = setting.certificateNumberFormat;
+      }
+
+      // 2. Advisory lock per unit kantor dan tahun untuk serialisasi penomoran tanpa collision
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'cert_number_' + officeCode + '_' + year}))`;
+
+      const prefix = format
+        .replace('{OFFICE_CODE}', officeCode)
+        .replace('{YEAR}', String(year))
+        .replace('{NUM}', '');
+
+      const count = await tx.certificate.count({
+        where: {
+          certificateNumber: {
+            startsWith: prefix,
+          },
+        },
+      });
+
+      const nextNum = count + 1;
+      const numStr = String(nextNum).padStart(4, '0');
+      const newCertNumber = format
+        .replace('{OFFICE_CODE}', officeCode)
+        .replace('{YEAR}', String(year))
+        .replace('{NUM}', numStr);
+
+      // 3. Pesan/reserve record sertifikat dengan nomor ini agar transaksi berikutnya langsung menghitungnya
+      await tx.certificate.upsert({
+        where: { internshipId },
+        update: {
+          certificateNumber: newCertNumber,
+        },
+        create: {
+          internshipId,
+          certificateNumber: newCertNumber,
+          approvalStatus: CertificateApprovalStatus.WAITING_EVALUATION,
+          evaluationId,
+        },
+      });
+
+      return newCertNumber;
+    });
   }
 
   /** Upload file PDF sertifikat lewat FileService. */
@@ -535,7 +582,12 @@ class CertificateService {
 
     // Ambil setting sertifikat khusus kantor magang ini
     const officeSetting = await this.getSettingForOffice(internship.officeLocationId);
-    const certificateNumber = await this.generateCertificateNumber(internship.officeLocationId);
+    // Alokasi nomor sertifikat secara atomik & concurrency-safe (OPT-007)
+    const certificateNumber = await this.allocateCertificateNumber(
+      internship.id,
+      internship.officeLocationId,
+      internship.evaluation?.id,
+    );
     const verificationToken = randomBytes(32).toString('hex');
     const template = await this.getActiveTemplate();
 
@@ -545,7 +597,7 @@ class CertificateService {
     const departmentName = internship.department?.name ?? '-';
     const cityName = internship.officeLocation?.city || internship.officeLocation?.name || 'Jakarta';
 
-    // Generate PDF menggunakan setting kantor terkait
+    // Generate PDF menggunakan setting kantor terkait (di luar DB transaksi untuk menjaga connection pool)
     const pdfBuffer = generateCertificatePdf({
       certificateNumber,
       internName,
@@ -564,43 +616,52 @@ class CertificateService {
     const fileName = `certificate-${certificateNumber.replace(/[\/\\]/g, '-')}.pdf`;
     const file = await this.createPdfFile(userId, fileName, pdfBuffer);
 
-    // Simpan data sertifikat
-    const certificate = await prisma.$transaction(async (tx) => {
-      const created = await tx.certificate.upsert({
-        where: { internshipId: internship.id },
-        update: {
-          certificateNumber,
-          templateId: template?.id ?? null,
-          fileId: file.id,
-          generatedById: userId,
-          generatedAt: new Date(),
-          verificationToken,
-          approvalStatus: CertificateApprovalStatus.GENERATED,
-          evaluationId: internship.evaluation!.id,
-          approvedById: isDirectApproval ? userId : undefined,
-          approvedAt: isDirectApproval ? new Date() : undefined,
-          rejectionReason: null,
-        },
-        create: {
-          internshipId: internship.id,
-          certificateNumber,
-          templateId: template?.id ?? null,
-          fileId: file.id,
-          generatedById: userId,
-          generatedAt: new Date(),
-          verificationToken,
-          approvalStatus: CertificateApprovalStatus.GENERATED,
-          evaluationId: internship.evaluation!.id,
-          approvedById: isDirectApproval ? userId : undefined,
-          approvedAt: isDirectApproval ? new Date() : undefined,
-        },
-        include: this.certificateInclude,
+    // Simpan data sertifikat dengan failure compensation (OPT-007)
+    try {
+      const certificate = await prisma.$transaction(async (tx) => {
+        const created = await tx.certificate.upsert({
+          where: { internshipId: internship.id },
+          update: {
+            certificateNumber,
+            templateId: template?.id ?? null,
+            fileId: file.id,
+            generatedById: userId,
+            generatedAt: new Date(),
+            verificationToken,
+            approvalStatus: CertificateApprovalStatus.GENERATED,
+            evaluationId: internship.evaluation!.id,
+            approvedById: isDirectApproval ? userId : undefined,
+            approvedAt: isDirectApproval ? new Date() : undefined,
+            rejectionReason: null,
+          },
+          create: {
+            internshipId: internship.id,
+            certificateNumber,
+            templateId: template?.id ?? null,
+            fileId: file.id,
+            generatedById: userId,
+            generatedAt: new Date(),
+            verificationToken,
+            approvalStatus: CertificateApprovalStatus.GENERATED,
+            evaluationId: internship.evaluation!.id,
+            approvedById: isDirectApproval ? userId : undefined,
+            approvedAt: isDirectApproval ? new Date() : undefined,
+          },
+          include: this.certificateInclude,
+        });
+
+        return created;
       });
 
-      return created;
-    });
-
-    return this.serialize(certificate);
+      return this.serialize(certificate);
+    } catch (error) {
+      // Failure compensation: hapus file yang sudah diunggah agar tidak menjadi orphan file di DB dan R2 (OPT-007)
+      await prisma.file.delete({ where: { id: file.id } }).catch(() => null);
+      if (file.url) {
+        await deleteFromR2(file.url).catch(() => null);
+      }
+      throw error;
+    }
   }
 
   /**

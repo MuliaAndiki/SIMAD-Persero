@@ -103,6 +103,9 @@ class ReceptionistService {
   }
 
   public async createAccount(actionUserId: string, input: CreateReceptionistBody) {
+    // Hash password di luar transaksi (OPT-021)
+    const hashedPassword = await bcryptjs.hash(input.password || '123456', 10);
+
     return prisma.$transaction(async (tx) => {
       const existingUser = await tx.user.findFirst({
         where: { email: input.email },
@@ -110,8 +113,6 @@ class ReceptionistService {
       if (existingUser) {
         throw new AppError(400, 'Email sudah terdaftar');
       }
-
-      const hashedPassword = await bcryptjs.hash(input.password || '123456', 10);
 
       const role = await tx.role.findFirst({ where: { code: 'receptionist' } });
       if (!role) {
@@ -155,6 +156,9 @@ class ReceptionistService {
     input: UpdateReceptionistBody,
   ) {
     const user = await this.findReceptionistUser(receptionistId);
+    // Hash password di luar transaksi (OPT-021)
+    const hashedPassword = input.password ? await bcryptjs.hash(input.password, 10) : undefined;
+
     return prisma.$transaction(async (tx) => {
       if (input.email && input.email !== user.email) {
         const existingUser = await tx.user.findFirst({
@@ -171,8 +175,8 @@ class ReceptionistService {
       if (input.isActive !== undefined) updateData.isActive = input.isActive;
       if (input.departmentId !== undefined) updateData.departmentId = input.departmentId;
       if (input.officeId !== undefined) updateData.officeId = input.officeId;
-      if (input.password) {
-        updateData.password = await bcryptjs.hash(input.password, 10);
+      if (hashedPassword) {
+        updateData.password = hashedPassword;
       }
 
       const updatedUser = await tx.user.update({
@@ -180,13 +184,15 @@ class ReceptionistService {
         data: updateData,
       });
 
+      // Sanitasi audit log: jangan pernah menyimpan hash password di log (OPT-002)
+      const { password: _pw, ...safeAuditNewData } = updateData;
       await createAuditLog(tx, {
         userId: actionUserId,
         module: 'RECEPTIONIST',
         action: 'UPDATE',
         tableName: 'users',
         recordId: updatedUser.id,
-        newData: updateData,
+        newData: hashedPassword ? { ...safeAuditNewData, passwordUpdated: true } : safeAuditNewData,
         oldData: {
           email: user.email,
           fullName: user.fullName,

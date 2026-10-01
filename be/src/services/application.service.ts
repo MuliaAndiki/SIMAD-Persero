@@ -11,6 +11,8 @@ import {
 } from "@/types/application.types";
 import type { AuthUser } from "@/types/auth.types";
 import { InternshipStatus } from "@/types/internship.types";
+import { sendStartDateEmail } from "@/services/email.service";
+import { getLogger } from "../telemetry/otel.config";
 import prisma from "../../prisma/client";
 
 /**
@@ -582,7 +584,8 @@ class ApplicationService {
     }
 
     // INTERN hanya boleh melihat aplikasi miliknya sendiri.
-    if (roles?.includes("INTERN")) {
+    const isIntern = roles?.some((r) => r.toLowerCase() === "intern");
+    if (isIntern) {
       if (!userId) {
         throw new AppError(403, "Forbidden");
       }
@@ -604,6 +607,13 @@ class ApplicationService {
   ) {
     const app = await prisma.internshipApplication.findUnique({
       where: { id },
+      include: {
+        internProfile: {
+          select: {
+            user: { select: { id: true, fullName: true, email: true } },
+          },
+        },
+      },
     });
     if (!app) {
       throw new AppError(404, "Application not found");
@@ -679,6 +689,9 @@ class ApplicationService {
       let quotaId: string | null = null;
 
       if (officeLocationId && input.departmentId) {
+        // Concurrency Lock: Lock per officeLocationId during quota check & allocation (OPT-004)
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'quota_' + officeLocationId}))`;
+
         // Cari kuota aktif kantor
         const quota = await tx.internshipQuota.findUnique({
           where: {
@@ -689,7 +702,7 @@ class ApplicationService {
           },
         });
 
-        if (quota && quota.isActive) {
+        if (quota?.isActive) {
           quotaId = quota.id;
 
           // 1. Validasi kapasitas total kantor
@@ -795,6 +808,22 @@ class ApplicationService {
 
       return { application: updatedApp, internship };
     });
+
+    // Kirim email pemberitahuan tanggal masuk ke akun terdaftar (best-effort,
+    // tidak menggagalkan approval bila pengiriman gagal).
+    const internUser = app.internProfile?.user;
+    if (internUser?.email) {
+      await sendStartDateEmail({
+        to: internUser.email,
+        fullName: internUser.fullName,
+        applicationNumber: app.applicationNumber,
+        oldStartDate: app.requestedStartDate,
+        newStartDate: actualStart,
+        headline: "Pengajuan magang Anda telah disetujui.",
+      }).catch((err) => {
+        getLogger().warn({ err, applicationId: id }, "[approve] Gagal mengirim email tanggal masuk");
+      });
+    }
 
     return result;
   }

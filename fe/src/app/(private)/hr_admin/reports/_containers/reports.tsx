@@ -43,9 +43,15 @@ export default function HrReportsContainer() {
     { enabled: Boolean(selectedInternshipId) },
   );
 
-  const internships = api.reporting.query.internships();
-  const certificates = api.reporting.query.certificates();
-  const dashboard = api.reporting.query.dashboard();
+  const internships = api.reporting.query.internships({
+    enabled: activeTab === 'internships',
+  });
+  const certificates = api.reporting.query.certificates({
+    enabled: activeTab === 'certificates',
+  });
+  const dashboard = api.reporting.query.dashboard({
+    enabled: activeTab === 'dashboard',
+  });
 
   const handleTabChange = useCallback((tab: ReportsTab) => {
     setActiveTab(tab);

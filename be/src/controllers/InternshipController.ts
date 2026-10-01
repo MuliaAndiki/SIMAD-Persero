@@ -9,6 +9,7 @@ import type {
   ExtendInternshipBody,
   InternshipQuery,
   PickMergeInternship,
+  RescheduleStartDateBody,
 } from '@/types/internship.types';
 import { unauthorizedValidate } from '@/validation/auth.validate';
 
@@ -86,6 +87,17 @@ class InternshipController {
       const body = c.body as unknown as ExtendInternshipBody;
       const data = await internshipService.extend(c.params.id, c.user!.id, body);
       return HttpResponse(c).ok(data, undefined, 'Internship extended');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // PATCH /internships/:id/start-date
+  public async rescheduleStartDate(c: AppContext) {
+    try {
+      const body = c.body as unknown as RescheduleStartDateBody;
+      const data = await internshipService.rescheduleStartDate(c.params.id, c.user!.id, body);
+      return HttpResponse(c).ok(data, undefined, 'Tanggal masuk berhasil diubah');
     } catch (error) {
       return this.handleError(c, error);
     }

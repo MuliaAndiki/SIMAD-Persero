@@ -231,7 +231,9 @@ export default function HrSupervisorsContainer() {
         isDetailPending: detail.isPending,
         isAssigning: assign.isPending,
         isRemoving: removeAssignment.isPending,
-        approvedApplications: approvedApplications.data ?? [],
+        approvedApplications:
+          approvedApplications.data?.data ??
+          (Array.isArray(approvedApplications.data) ? approvedApplications.data : []),
         assignOpen,
         internshipId,
         departments: departments.data ?? [],

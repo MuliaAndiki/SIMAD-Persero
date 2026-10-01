@@ -37,6 +37,13 @@ export type ExtendInternshipBody = {
   reason?: string;
 };
 
+/** PATCH /internships/:id/start-date body */
+export type RescheduleStartDateBody = {
+  /** ISO date string (API layer) — disimpan sebagai Date di DB. */
+  newStartDate: string;
+  reason?: string;
+};
+
 /** PATCH /internships/:id/assign-supervisor body */
 export type AssignSupervisorBody = {
   supervisorId: IUser['id'];
@@ -57,6 +64,7 @@ export type InternshipQuery = Partial<{
   departmentId: string;
   officeLocationId: string;
   officeId: string;
+  includeAttendance: boolean | string;
 }>;
 
 export type PickCreateInternshipProfile = Pick<

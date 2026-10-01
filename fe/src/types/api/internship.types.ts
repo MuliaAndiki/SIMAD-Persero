@@ -35,6 +35,11 @@ export interface ExtendInternshipBody {
   reason?: string;
 }
 
+export interface RescheduleStartDateBody {
+  newStartDate: string;
+  reason?: string;
+}
+
 export interface AssignSupervisorBody {
   supervisorId: string;
 }
@@ -52,6 +57,7 @@ export interface InternshipQuery {
   departmentId?: string;
   officeLocationId?: string;
   officeId?: string;
+  includeAttendance?: boolean;
 }
 
 /** POST /internships/profile — Simpan data profil peserta magang (INTERN). */

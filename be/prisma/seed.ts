@@ -19,10 +19,8 @@
  * Referensi: docs/08-implementation-plan-missing-modules.md §4,
  *            docs/03. erd.sql, docs/07-api-specification.md §33.
  */
-import { PrismaClient } from "@prisma/client";
 import bcryptjs from "bcryptjs";
-
-const prisma = new PrismaClient();
+import prisma, { pool } from "./client";
 
 // ─── Helper idempoten ─────────────────────────────────────────────
 async function findOrCreate<T extends { id: string }>(
@@ -1069,4 +1067,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

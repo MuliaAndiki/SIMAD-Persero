@@ -1,22 +1,27 @@
-'use client';
+"use client";
 
-import { setAuthErrorHandler } from '@/api/client/client-http';
-import { clearSessionCookies, getAccessToken, getRefreshToken } from '@/utils/session-cookie';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import type React from 'react';
+import { setAuthErrorHandler } from "@/api/client/client-http";
+import {
+  clearSessionCookies,
+  getAccessToken,
+  getRefreshToken,
+} from "@/utils/session-cookie";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import type React from "react";
 
 /** Halaman publik yang tidak membutuhkan sesi aktif. */
 const PUBLIC_PATHS = [
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-  '/verify-email',
-  '/auth/verify-email',
-  '/magic-link',
-  '/auth/magic-link',
-  '/home',
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/auth/verify-email",
+  "/magic-link",
+  "/auth/magic-link",
+  "/check-email",
+  "/home",
 ];
 
 /**
@@ -39,8 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleAuthError = () => {
       clearSessionCookies();
-      if (!pathname?.startsWith('/login')) {
-        window.location.assign('/login');
+      if (!pathname?.startsWith("/login")) {
+        window.location.assign("/login");
       }
     };
 
@@ -52,11 +57,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Jika hanya refresh token yang tersisa, biarkan berjalan — client-http akan
   // memanggil POST /auth/refresh-token untuk memperbarui access token.
   useEffect(() => {
-    const isPublicPath = PUBLIC_PATHS.some((path) => pathname?.startsWith(path));
+    const isPublicPath = PUBLIC_PATHS.some((path) =>
+      pathname?.startsWith(path),
+    );
     const hasSession = Boolean(getAccessToken() || getRefreshToken());
 
     if (!isPublicPath && !hasSession) {
-      router.replace('/login');
+      router.replace("/login");
     }
   }, [pathname, router]);
 

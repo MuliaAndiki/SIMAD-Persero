@@ -45,7 +45,10 @@ export default function NotificationDropdownContainer() {
   const sortedMyApps = [...(myApps.data ?? [])].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
-  const pendingApplications = [...(hrApplications.data ?? [])]
+  const hrAppsList =
+    hrApplications.data?.data ??
+    (Array.isArray(hrApplications.data) ? hrApplications.data : []);
+  const pendingApplications = [...hrAppsList]
     .filter((app) => PENDING_APPLICATION_STATUSES.includes(app.status ?? ''))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 

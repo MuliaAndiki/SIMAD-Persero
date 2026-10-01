@@ -38,7 +38,7 @@ export default function HrAuditLogsContainer() {
         isPending: list.isPending,
         isError: list.isError,
         errorMessage: list.error?.message,
-        logs: list.data ?? [],
+        logs: list.data?.data ?? (Array.isArray(list.data) ? list.data : []),
         moduleFilter,
         actionFilter,
         detail: detail.data ?? null,

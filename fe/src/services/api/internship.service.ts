@@ -16,6 +16,7 @@ import type {
   PickMergeInternship,
   RemoveSkillParams,
   RemoveSkillResponse,
+  RescheduleStartDateBody,
   SkillQuery,
   SkillResponse,
   UpdateSkillBody,
@@ -103,6 +104,21 @@ class InternshipService {
       body,
     );
     return toServiceResponse(res, { message: 'Magang berhasil diperpanjang' });
+  }
+
+  /**
+   * PATCH /internships/:id/start-date
+   * Mengubah tanggal masuk magang (HR_ADMIN).
+   */
+  public async RescheduleStartDate(
+    params: Pick<InternshipParams, 'id'>,
+    body: Pick<RescheduleStartDateBody, 'newStartDate' | 'reason'>,
+  ): Promise<TResponse<InternshipResponse>> {
+    const res = await client.PatchResponse<InternshipResponse>(
+      INTERNSHIP_ENDPOINTS.START_DATE(params.id),
+      body,
+    );
+    return toServiceResponse(res, { message: 'Tanggal masuk berhasil diubah' });
   }
 
   /**

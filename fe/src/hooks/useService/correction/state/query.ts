@@ -8,7 +8,7 @@ export function useMyCorrectionList(query?: CorrectionQuery, options?: { enabled
     queryKey: queryKey.correction.myList(query),
     queryFn: async () => {
       const res = await Api.Correction.MyList(query);
-      return res.data;
+      return res;
     },
     enabled: options?.enabled,
   });
@@ -22,7 +22,7 @@ export function useSupervisorCorrectionList(
     queryKey: queryKey.correction.supervisorList(query),
     queryFn: async () => {
       const res = await Api.Correction.SupervisorList(query);
-      return res.data;
+      return res;
     },
     enabled: options?.enabled,
   });

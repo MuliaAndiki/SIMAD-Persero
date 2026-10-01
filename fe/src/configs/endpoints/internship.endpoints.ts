@@ -22,6 +22,8 @@ export const INTERNSHIP_ENDPOINTS = {
   FINISH: (id: string) => `/internships/${id}/finish`,
   /** PATCH /internships/:id/extend — Perpanjang magang (HR_ADMIN) */
   EXTEND: (id: string) => `/internships/${id}/extend`,
+  /** PATCH /internships/:id/start-date — Ubah tanggal masuk (HR_ADMIN) */
+  START_DATE: (id: string) => `/internships/${id}/start-date`,
   /** PATCH /internships/:id/assign-supervisor — Assign supervisor (HR_ADMIN) */
   ASSIGN_SUPERVISOR: (id: string) => `/internships/${id}/assign-supervisor`,
   /** PATCH /internships/:id/change-department — Pindah departemen (HR_ADMIN) */

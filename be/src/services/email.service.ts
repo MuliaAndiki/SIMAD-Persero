@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { env } from '@/config/env.config';
+import { generateEmailHtml } from '@/utils/email-template.util';
 import { getLogger } from '../telemetry/otel.config';
 
 interface MailOptions {
@@ -56,4 +57,83 @@ export function buildFrontendUrl(path: string): string {
     '',
   );
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
+/** Format tanggal ke bahasa Indonesia (ASCII-safe) untuk email. */
+function formatDateId(date: Date | null | undefined): string {
+  if (!date) return '-';
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return '-';
+  const months = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
+  ];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function toDateKey(date: Date | null | undefined): string | null {
+  if (!date) return null;
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+export interface StartDateMailInput {
+  to: string;
+  fullName: string;
+  applicationNumber?: string | null;
+  oldStartDate?: Date | null;
+  newStartDate: Date;
+  /** Kalimat pembuka, mis. persetujuan atau pemberitahuan perubahan. */
+  headline: string;
+}
+
+/**
+ * Email tanggal masuk yang ditentukan/diubah admin.
+ * Menyebutkan perubahan tanggal bila berbeda, plus pengingat memeriksa
+ * folder SPAM agar informasi tidak kelewat.
+ */
+export async function sendStartDateEmail(input: StartDateMailInput): Promise<void> {
+  const startFmt = formatDateId(input.newStartDate);
+  const changed =
+    toDateKey(input.oldStartDate) !== null &&
+    toDateKey(input.oldStartDate) !== toDateKey(input.newStartDate);
+  const changePart = changed
+    ? ` Tanggal masuk diubah dari ${formatDateId(input.oldStartDate)} menjadi ${startFmt} karena keterbatasan slot kuota.`
+    : '';
+  const appNo = input.applicationNumber ?? '-';
+
+  const text = `Halo ${input.fullName},
+
+${input.headline} (No. Pengajuan: ${appNo}).
+
+Tanggal masuk yang ditentukan admin: ${startFmt}.${changePart}
+
+PENTING: Jika email ini tidak muncul di kotak masuk, periksa folder SPAM/promosi agar informasi tanggal masuk ini tidak kelewat.
+
+Pantau pengajuan Anda di: ${buildFrontendUrl('/intern/application')}`;
+
+  await sendEmail({
+    to: input.to,
+    subject: `Tanggal Masuk Magang: ${startFmt}`,
+    text,
+    html: generateEmailHtml({
+      recipientName: input.fullName,
+      title: 'Tanggal Masuk Magang',
+      bodyText: `${input.headline} (No. Pengajuan: ${appNo}). Tanggal masuk yang ditentukan admin adalah ${startFmt}.${changePart} Mohon periksa folder SPAM atau promosi apabila email ini tidak ada di kotak masuk, agar informasi tanggal masuk tidak kelewat.`,
+      buttonText: 'Lihat Pengajuan Saya',
+      buttonUrl: buildFrontendUrl('/intern/application'),
+      expiryText: 'Simpan email ini sebagai pengingat jadwal mulai magang Anda.',
+    }),
+  });
 }

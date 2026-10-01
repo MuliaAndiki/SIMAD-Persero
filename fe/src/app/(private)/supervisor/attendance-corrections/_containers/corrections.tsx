@@ -17,9 +17,8 @@ export default function SupervisorCorrectionsContainer() {
         id,
         body: { supervisorNotes },
       });
-      await correctionsQuery.refetch();
     },
-    [approveMutation, correctionsQuery],
+    [approveMutation],
   );
 
   const handleReject = useCallback(
@@ -28,14 +27,16 @@ export default function SupervisorCorrectionsContainer() {
         id,
         body: { supervisorNotes },
       });
-      await correctionsQuery.refetch();
     },
-    [rejectMutation, correctionsQuery],
+    [rejectMutation],
   );
 
   return (
     <AttendanceCorrectionSection
-      corrections={correctionsQuery.data ?? []}
+      corrections={
+        correctionsQuery.data?.data ??
+        (Array.isArray(correctionsQuery.data) ? correctionsQuery.data : [])
+      }
       isPending={correctionsQuery.isPending}
       onApprove={handleApprove}
       onReject={handleReject}

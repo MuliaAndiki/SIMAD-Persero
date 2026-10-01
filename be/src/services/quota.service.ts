@@ -305,64 +305,75 @@ class QuotaService {
         },
       });
 
+      const officeIds = activeQuotas.map((q) => q.officeLocationId);
+      const internshipWhere: any = {
+        officeLocationId: { in: officeIds },
+        status: { in: ['PENDING', 'ACTIVE'] },
+      };
+      if (reqStart && reqEnd) {
+        internshipWhere.actualStartDate = { lte: reqEnd };
+        internshipWhere.actualEndDate = { gte: reqStart };
+      }
+
+      // Single grouped count across all offices and departments (OPT-008)
+      const groupedCounts = officeIds.length > 0
+        ? await prisma.internship.groupBy({
+            by: ['officeLocationId', 'departmentId'],
+            where: internshipWhere,
+            _count: { _all: true },
+          })
+        : [];
+
+      const officeOccupancyMap = new Map<string, number>();
+      const deptOccupancyMap = new Map<string, number>();
+
+      for (const row of groupedCounts) {
+        const offId = row.officeLocationId;
+        const count = row._count._all;
+        if (offId) {
+          officeOccupancyMap.set(offId, (officeOccupancyMap.get(offId) ?? 0) + count);
+          if (row.departmentId) {
+            deptOccupancyMap.set(`${offId}:${row.departmentId}`, count);
+          }
+        }
+      }
+
       let globalCapacity = 0;
       let globalOccupied = 0;
       let globalAvailable = 0;
 
-      const officeResults = await Promise.all(
-        activeQuotas.map(async (quota) => {
-          const internshipWhere: any = {
-            officeLocationId: quota.officeLocationId,
-            status: { in: ['PENDING', 'ACTIVE'] },
-          };
-          if (reqStart && reqEnd) {
-            internshipWhere.actualStartDate = { lte: reqEnd };
-            internshipWhere.actualEndDate = { gte: reqStart };
-          }
+      const officeResults = activeQuotas.map((quota) => {
+        const officeOccupied = officeOccupancyMap.get(quota.officeLocationId) ?? 0;
+        const officeAvailable = Math.max(0, quota.totalCapacity - officeOccupied);
 
-          const officeOccupied = await prisma.internship.count({
-            where: internshipWhere,
-          });
+        globalCapacity += quota.totalCapacity;
+        globalOccupied += officeOccupied;
+        globalAvailable += officeAvailable;
 
-          const officeAvailable = Math.max(0, quota.totalCapacity - officeOccupied);
-
-          globalCapacity += quota.totalCapacity;
-          globalOccupied += officeOccupied;
-          globalAvailable += officeAvailable;
-
-          const departmentBreakdown: DepartmentAvailabilityInfo[] = await Promise.all(
-            quota.departmentAllocations.map(async (alloc) => {
-              const deptOccupied = await prisma.internship.count({
-                where: {
-                  ...internshipWhere,
-                  departmentId: alloc.departmentId,
-                },
-              });
-
-              const deptAvailable = Math.max(0, alloc.capacity - deptOccupied);
-
-              return {
-                departmentId: alloc.departmentId,
-                departmentName: alloc.department.name ?? 'Departemen',
-                departmentCode: alloc.department.code,
-                allocatedCapacity: alloc.capacity,
-                occupied: deptOccupied,
-                available: Math.min(deptAvailable, officeAvailable),
-              };
-            }),
-          );
+        const departmentBreakdown: DepartmentAvailabilityInfo[] = quota.departmentAllocations.map((alloc) => {
+          const deptOccupied = deptOccupancyMap.get(`${quota.officeLocationId}:${alloc.departmentId}`) ?? 0;
+          const deptAvailable = Math.max(0, alloc.capacity - deptOccupied);
 
           return {
-            officeLocationId: quota.officeLocationId,
-            officeName: quota.officeLocation?.name ?? 'Kantor PLN',
-            totalCapacity: quota.totalCapacity,
-            totalOccupied: officeOccupied,
-            totalAvailable: officeAvailable,
-            isAvailable: officeAvailable > 0,
-            departments: departmentBreakdown,
+            departmentId: alloc.departmentId,
+            departmentName: alloc.department.name ?? 'Departemen',
+            departmentCode: alloc.department.code,
+            allocatedCapacity: alloc.capacity,
+            occupied: deptOccupied,
+            available: Math.min(deptAvailable, officeAvailable),
           };
-        }),
-      );
+        });
+
+        return {
+          officeLocationId: quota.officeLocationId,
+          officeName: quota.officeLocation?.name ?? 'Kantor PLN',
+          totalCapacity: quota.totalCapacity,
+          totalOccupied: officeOccupied,
+          totalAvailable: officeAvailable,
+          isAvailable: officeAvailable > 0,
+          departments: departmentBreakdown,
+        };
+      });
 
       return {
         totalCapacity: globalCapacity,
@@ -374,17 +385,6 @@ class QuotaService {
     }
 
     // Kasus 2: Pengecekan kantor spesifik
-    const internshipWhere: any = {
-      officeLocationId,
-      status: { in: ['PENDING', 'ACTIVE'] },
-    };
-
-    if (reqStart && reqEnd) {
-      internshipWhere.actualStartDate = { lte: reqEnd };
-      internshipWhere.actualEndDate = { gte: reqStart };
-    }
-
-    // Cari konfigurasi kuota kantor
     const quota = await prisma.internshipQuota.findUnique({
       where: {
         officeLocationId,
@@ -410,35 +410,50 @@ class QuotaService {
       };
     }
 
-    // 1. Hitung total okupansi seluruh kantor
-    const totalOfficeOccupied = await prisma.internship.count({
+    const internshipWhere: any = {
+      officeLocationId,
+      status: { in: ['PENDING', 'ACTIVE'] },
+    };
+
+    if (reqStart && reqEnd) {
+      internshipWhere.actualStartDate = { lte: reqEnd };
+      internshipWhere.actualEndDate = { gte: reqStart };
+    }
+
+    // Single grouped count by departmentId for this office (OPT-008)
+    const groupedCounts = await prisma.internship.groupBy({
+      by: ['departmentId'],
       where: internshipWhere,
+      _count: { _all: true },
     });
+
+    let totalOfficeOccupied = 0;
+    const deptOccupancyMap = new Map<string, number>();
+
+    for (const row of groupedCounts) {
+      const count = row._count._all;
+      totalOfficeOccupied += count;
+      if (row.departmentId) {
+        deptOccupancyMap.set(row.departmentId, count);
+      }
+    }
 
     const totalAvailable = Math.max(0, quota.totalCapacity - totalOfficeOccupied);
 
-    // 2. Hitung okupansi & ketersediaan per departemen yang dialokasikan
-    const departmentBreakdown: DepartmentAvailabilityInfo[] = await Promise.all(
-      quota.departmentAllocations.map(async (alloc) => {
-        const deptOccupied = await prisma.internship.count({
-          where: {
-            ...internshipWhere,
-            departmentId: alloc.departmentId,
-          },
-        });
+    // Hitung okupansi & ketersediaan per departemen yang dialokasikan
+    const departmentBreakdown: DepartmentAvailabilityInfo[] = quota.departmentAllocations.map((alloc) => {
+      const deptOccupied = deptOccupancyMap.get(alloc.departmentId) ?? 0;
+      const deptAvailable = Math.max(0, alloc.capacity - deptOccupied);
 
-        const deptAvailable = Math.max(0, alloc.capacity - deptOccupied);
-
-        return {
-          departmentId: alloc.departmentId,
-          departmentName: alloc.department.name ?? 'Departemen',
-          departmentCode: alloc.department.code,
-          allocatedCapacity: alloc.capacity,
-          occupied: deptOccupied,
-          available: Math.min(deptAvailable, totalAvailable),
-        };
-      }),
-    );
+      return {
+        departmentId: alloc.departmentId,
+        departmentName: alloc.department.name ?? 'Departemen',
+        departmentCode: alloc.department.code,
+        allocatedCapacity: alloc.capacity,
+        occupied: deptOccupied,
+        available: Math.min(deptAvailable, totalAvailable),
+      };
+    });
 
     // 3. Jika meminta department spesifik
     let specificDeptCap: number | undefined;

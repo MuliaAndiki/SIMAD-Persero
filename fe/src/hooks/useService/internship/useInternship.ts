@@ -9,6 +9,7 @@ import {
   useExtendInternship,
   useFinishInternship,
   useRemoveSkillFromIntern,
+  useRescheduleStartDateInternship,
   useStartInternship,
   useUpdateSkill,
 } from './state/mutate';
@@ -33,6 +34,7 @@ export const useInternship = () => {
       start: useStartInternship,
       finish: useFinishInternship,
       extend: useExtendInternship,
+      rescheduleStartDate: useRescheduleStartDateInternship,
       assignSupervisor: useAssignSupervisorInternship,
       changeDepartment: useChangeDepartmentInternship,
       archive: useArchiveInternship,

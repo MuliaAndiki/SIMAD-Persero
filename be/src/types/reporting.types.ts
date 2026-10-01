@@ -11,6 +11,8 @@ export type ReportingQuery = Partial<{
   month: number;
   year: number;
   format: string;
+  page: number;
+  limit: number;
 }>;
 
 /** Row laporan absensi — 26.1 Attendance Report. */

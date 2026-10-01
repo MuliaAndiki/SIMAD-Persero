@@ -48,6 +48,7 @@ export default function HrInternshipsContainer() {
   const startMutation = api.internship.mutate.start();
   const finishMutation = api.internship.mutate.finish();
   const extendMutation = api.internship.mutate.extend();
+  const rescheduleStartDateMutation = api.internship.mutate.rescheduleStartDate();
   const changeDeptMutation = api.internship.mutate.changeDepartment();
   const assignSuperMutation = api.internship.mutate.assignSupervisor();
   const archiveMutation = api.internship.mutate.archive();
@@ -57,6 +58,7 @@ export default function HrInternshipsContainer() {
     startMutation.isPending ||
     finishMutation.isPending ||
     extendMutation.isPending ||
+    rescheduleStartDateMutation.isPending ||
     changeDeptMutation.isPending ||
     assignSuperMutation.isPending ||
     archiveMutation.isPending ||
@@ -118,6 +120,19 @@ export default function HrInternshipsContainer() {
       params: { id },
       body: {
         newEndDate: data.newEndDate,
+        reason: data.reason,
+      },
+    });
+  };
+
+  const handleRescheduleStartDateSubmit = async (
+    id: string,
+    data: { newStartDate: string; reason?: string },
+  ) => {
+    await rescheduleStartDateMutation.mutateAsync({
+      params: { id },
+      body: {
+        newStartDate: data.newStartDate,
         reason: data.reason,
       },
     });
@@ -191,6 +206,7 @@ export default function HrInternshipsContainer() {
         onStart: handleStart,
         onFinish: handleFinish,
         onExtendSubmit: handleExtendSubmit,
+        onRescheduleStartDateSubmit: handleRescheduleStartDateSubmit,
         onChangeDepartmentSubmit: handleChangeDepartmentSubmit,
         onAssignSupervisorSubmit: handleAssignSupervisorSubmit,
         onGenerateCertSubmit: handleGenerateCertSubmit,
