@@ -1,8 +1,8 @@
-FROM oven/bun:1.2 AS build
+FROM oven/bun:1.1.45 AS build
 
 WORKDIR /app
 
-COPY package.json bun.lock prisma.config.ts ./
+COPY package.json bun.lock ./
 COPY prisma ./prisma/
 RUN bun install
 
