@@ -18,6 +18,6 @@
       "prisma/client": ["./prisma/client/index.ts"]
     }
   },
-  "include": ["src", "scripts", "types", "api", "prisma"],
+  "include": ["src", "scripts", "types", "api", "prisma", "prisma.config.ts"],
   "exclude": ["node_modules", "dist", ".vercel"]
 }
