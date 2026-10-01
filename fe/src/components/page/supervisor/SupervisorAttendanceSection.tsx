@@ -1,16 +1,7 @@
 'use client';
 
-import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/atoms/dropdown-menu';
+import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
 import {
   Select,
@@ -20,24 +11,22 @@ import {
   SelectValue,
 } from '@/components/atoms/select';
 import { OverrideAttendanceModal } from '@/components/organisms/attendance/OverrideAttendanceModal';
+import { DataTableCard } from '@/components/organisms/table/DataTableCard';
+import { RowActionsMenu } from '@/components/organisms/table/RowActionsMenu';
+import { StatusBadge } from '@/components/organisms/table/StatusBadge';
 import type { AttendanceSupervisorRow } from '@/types/api/attendance.types';
 import { formatDate, formatDateTime } from '@/utils/string.format';
 import {
   AlertCircle,
   Calendar,
   CalendarCheck2,
-  CheckCircle2,
-  Clock,
   Edit3,
   Loader2,
-  MoreHorizontal,
   RefreshCw,
   RotateCcw,
   Search,
   Users,
-  XCircle,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useState } from 'react';
 
 export type DateFilterMode = 'today' | 'yesterday' | 'custom';
@@ -71,36 +60,6 @@ export interface SupervisorAttendanceSectionActions {
 export interface SupervisorAttendanceSectionProps {
   state: SupervisorAttendanceSectionState;
   actions: SupervisorAttendanceSectionActions;
-}
-
-function AttendanceStatusBadge({ status }: { status: string | null }) {
-  switch (status) {
-    case 'PRESENT':
-      return (
-        <Badge className="bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 border-emerald-200">
-          <CheckCircle2 className="mr-1 size-3" /> Hadir
-        </Badge>
-      );
-    case 'LATE':
-      return (
-        <Badge className="bg-amber-500/15 text-amber-600 hover:bg-amber-500/25 border-amber-200">
-          <Clock className="mr-1 size-3" /> Terlambat
-        </Badge>
-      );
-    case 'INVALID':
-    case 'ABSENT':
-      return (
-        <Badge className="bg-rose-500/15 text-rose-600 hover:bg-rose-500/25 border-rose-200">
-          <XCircle className="mr-1 size-3" /> Tidak Hadir
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline" className="text-muted-foreground">
-          Belum Absen
-        </Badge>
-      );
-  }
 }
 
 export function SupervisorAttendanceSection({ state, actions }: SupervisorAttendanceSectionProps) {
@@ -242,111 +201,89 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
           </div>
         </div>
       ) : (
-        <Card>
-          <CardHeader className="border-b">
-            <CardTitle>
-              Rekap Absensi: {state.activeDate ? formatDate(state.activeDate) : 'Hari Ini'}
-            </CardTitle>
-            <CardDescription>
-              {hasActiveFilter
-                ? `${state.rows.length} dari ${state.allRowsCount} anak bimbingan ditampilkan`
-                : `${state.allRowsCount} anak bimbingan terdaftar`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            {state.rows.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-                <Users className="size-8 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
-                  {hasActiveFilter
-                    ? 'Tidak ada data peserta bimbingan yang sesuai dengan pencarian atau filter tanggal.'
-                    : 'Belum ada peserta magang bimbingan yang terdaftar.'}
-                </p>
-                {hasActiveFilter && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={actions.onResetFilters}
-                    className="mt-2 text-xs"
-                  >
-                    <RotateCcw className="mr-1.5 size-3" />
-                    Reset Pencarian & Filter
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-left text-xs uppercase text-muted-foreground">
-                      <th className="px-6 py-3 font-medium">Peserta Magang</th>
-                      <th className="px-6 py-3 font-medium">Departemen</th>
-                      <th className="px-6 py-3 font-medium">Check-In</th>
-                      <th className="px-6 py-3 font-medium">Check-Out</th>
-                      <th className="px-6 py-3 font-medium">Status</th>
-                      <th className="px-6 py-3 text-right font-medium">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {state.rows.map((row) => {
-                      const internName = row.internship.intern?.fullName ?? 'Peserta';
-                      const att = row.todayAttendance;
+        <DataTableCard
+          title={`Rekap Absensi: ${state.activeDate ? formatDate(state.activeDate) : 'Hari Ini'}`}
+          description={
+            hasActiveFilter
+              ? `${state.rows.length} dari ${state.allRowsCount} anak bimbingan ditampilkan`
+              : `${state.allRowsCount} anak bimbingan terdaftar`
+          }
+          columns={[
+            { label: 'Peserta Magang' },
+            { label: 'Departemen' },
+            { label: 'Check-In' },
+            { label: 'Check-Out' },
+            { label: 'Status' },
+            { label: 'Aksi', className: 'px-6 py-3 text-right font-medium' },
+          ]}
+          isEmpty={state.rows.length === 0}
+          emptyIcon={Users}
+          emptyMessage={
+            hasActiveFilter
+              ? 'Tidak ada data peserta bimbingan yang sesuai dengan pencarian atau filter tanggal.'
+              : 'Belum ada peserta magang bimbingan yang terdaftar.'
+          }
+          emptyAction={
+            hasActiveFilter ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={actions.onResetFilters}
+                className="mt-2 text-xs"
+              >
+                <RotateCcw className="mr-1.5 size-3" />
+                Reset Pencarian & Filter
+              </Button>
+            ) : undefined
+          }
+        >
+          {state.rows.map((row) => {
+            const internName = row.internship.intern?.fullName ?? 'Peserta';
+            const att = row.todayAttendance;
 
-                      return (
-                        <tr
-                          key={row.internship.id ?? internName}
-                          className="border-b transition-colors last:border-0 hover:bg-muted/40"
-                        >
-                          <td className="px-6 py-4">
-                            <div className="flex flex-col">
-                              <span className="font-medium text-foreground">{internName}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {row.internship.intern?.email}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">{row.internship.department?.name ?? '-'}</td>
-                          <td className="px-6 py-4">{renderTimeBlock(att?.checkInAt)}</td>
-                          <td className="px-6 py-4">{renderTimeBlock(att?.checkOutAt)}</td>
-                          <td className="px-6 py-4">
-                            <AttendanceStatusBadge status={att?.attendanceStatus ?? null} />
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            {att?.id && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="size-8 p-0">
-                                    <MoreHorizontal className="size-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-44">
-                                  <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem asChild>
-                                    <Link href={`/supervisor/attendance/${att.id}`}>
-                                      <CalendarCheck2 className="size-4" />
-                                      Lihat Absen
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleOpenOverride(att.id, internName)}
-                                  >
-                                    <Edit3 className="size-4" />
-                                    Override
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            return (
+              <tr
+                key={row.internship.id ?? internName}
+                className="border-b transition-colors last:border-0 hover:bg-muted/40"
+              >
+                <td className="px-6 py-4">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">{internName}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {row.internship.intern?.email}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">{row.internship.department?.name ?? '-'}</td>
+                <td className="px-6 py-4">{renderTimeBlock(att?.checkInAt)}</td>
+                <td className="px-6 py-4">{renderTimeBlock(att?.checkOutAt)}</td>
+                <td className="px-6 py-4">
+                  <StatusBadge status={att?.attendanceStatus ?? null} />
+                </td>
+                <td className="px-6 py-4 text-right">
+                  {att?.id && (
+                    <RowActionsMenu
+                      items={[
+                        {
+                          key: 'detail',
+                          label: 'Lihat Absen',
+                          icon: CalendarCheck2,
+                          href: `/supervisor/attendance/${att.id}`,
+                        },
+                        {
+                          key: 'override',
+                          label: 'Override',
+                          icon: Edit3,
+                          onSelect: () => handleOpenOverride(att.id, internName),
+                        },
+                      ]}
+                    />
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </DataTableCard>
       )}
 
       {/* Modal Override */}

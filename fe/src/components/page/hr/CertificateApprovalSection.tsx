@@ -11,8 +11,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/atoms/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/atoms/table';
+import { TableLoader } from '@/components/atoms/loading';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/atoms/table';
 import { Textarea } from '@/components/atoms/textarea';
+import { RowActionsMenu } from '@/components/organisms/table/RowActionsMenu';
+import { TableEmptyState } from '@/components/organisms/table/TableEmptyState';
 import type { CertificateResponse } from '@/types/api/certificate.types';
 import { formatDate } from '@/utils/string.format';
 import {
@@ -23,7 +33,6 @@ import {
   Clock,
   ExternalLink,
   GraduationCap,
-  Loader2,
   User,
   XCircle,
 } from 'lucide-react';
@@ -70,7 +79,8 @@ export function CertificateApprovalSection({ state, actions }: CertificateApprov
           Persetujuan & Penerbitan Sertifikat Magang
         </h1>
         <p className="text-sm text-muted-foreground">
-          Tinjau penilaian akhir supervisor sebelum menyetujui dan menerbitkan sertifikat resmi bertanda tangan digital.
+          Tinjau penilaian akhir supervisor sebelum menyetujui dan menerbitkan sertifikat resmi
+          bertanda tangan digital.
         </p>
       </header>
 
@@ -82,15 +92,16 @@ export function CertificateApprovalSection({ state, actions }: CertificateApprov
           </div>
           <div>
             <p className="text-xs font-medium text-muted-foreground">Menunggu Persetujuan</p>
-            <h3 className="text-2xl font-bold text-foreground">{state.certificates.length} Sertifikat</h3>
+            <h3 className="text-2xl font-bold text-foreground">
+              {state.certificates.length} Sertifikat
+            </h3>
           </div>
         </Card>
       </div>
 
       {state.isPending ? (
-        <Card className="p-12 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Memuat daftar sertifikat pending...</p>
+        <Card>
+          <TableLoader label="Memuat daftar sertifikat pending..." />
         </Card>
       ) : state.isError ? (
         <Card className="p-8 border-destructive/30 bg-destructive/5 text-destructive flex items-center gap-3">
@@ -103,12 +114,12 @@ export function CertificateApprovalSection({ state, actions }: CertificateApprov
           </div>
         </Card>
       ) : state.certificates.length === 0 ? (
-        <Card className="p-12 text-center flex flex-col items-center justify-center">
-          <Award className="h-12 w-12 text-muted-foreground/40 mb-3" />
-          <h3 className="text-base font-semibold text-foreground">Tidak Ada Antrean Persetujuan</h3>
-          <p className="text-sm text-muted-foreground max-w-sm mt-1">
-            Seluruh peserta yang selesai magang telah diproses, atau supervisor belum memfinalisasi penilaian.
-          </p>
+        <Card>
+          <TableEmptyState
+            icon={Award}
+            title="Tidak Ada Antrean Persetujuan"
+            message="Seluruh peserta yang selesai magang telah diproses, atau supervisor belum memfinalisasi penilaian."
+          />
         </Card>
       ) : (
         <div className="rounded-lg border overflow-x-auto">
@@ -136,7 +147,8 @@ export function CertificateApprovalSection({ state, actions }: CertificateApprov
                           {internUser?.fullName ?? cert.recipientName ?? '-'}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {internUser?.email} • {cert.internship?.internProfile?.studentNumber ?? ''}
+                          {internUser?.email} •{' '}
+                          {cert.internship?.internProfile?.studentNumber ?? ''}
                         </span>
                       </div>
                     </TableCell>
@@ -169,31 +181,33 @@ export function CertificateApprovalSection({ state, actions }: CertificateApprov
                     </TableCell>
                     <TableCell>
                       <span className="text-xs font-medium text-foreground">
-                        {evaluation?.supervisor?.fullName ?? cert.internship?.supervisor?.user?.fullName ?? '-'}
+                        {evaluation?.supervisor?.fullName ??
+                          cert.internship?.supervisor?.user?.fullName ??
+                          '-'}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-destructive hover:bg-destructive/10 border-destructive/30 text-xs h-8"
-                          onClick={() => handleOpenReject(cert)}
-                          disabled={state.isApproving || state.isRejecting}
-                        >
-                          <XCircle className="h-3.5 w-3.5 mr-1" />
-                          Tolak
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8"
-                          onClick={() => actions.onApprove(cert.id)}
-                          disabled={state.isApproving || state.isRejecting}
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                          Setujui & Terbitkan
-                        </Button>
-                      </div>
+                      <RowActionsMenu
+                        items={[
+                          {
+                            key: 'approve',
+                            label: 'Setujui & Terbitkan',
+                            icon: CheckCircle2,
+                            disabled: state.isApproving || state.isRejecting,
+                            onSelect: () => {
+                              void actions.onApprove(cert.id);
+                            },
+                          },
+                          {
+                            key: 'reject',
+                            label: 'Tolak',
+                            icon: XCircle,
+                            variant: 'destructive',
+                            disabled: state.isApproving || state.isRejecting,
+                            onSelect: () => handleOpenReject(cert),
+                          },
+                        ]}
+                      />
                     </TableCell>
                   </TableRow>
                 );
