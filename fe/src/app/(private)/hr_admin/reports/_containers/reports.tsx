@@ -29,18 +29,16 @@ export default function HrReportsContainer() {
   const offices = api.office.query.list({ limit: 100 });
   const allInternships = api.internship.query.list({ limit: 200 });
 
-  // Absensi HANYA di-query jika peserta magang sudah dipilih
+  // Absensi di-query saat tab attendance aktif (mendukung query ALL maupun filter spesifik)
   const attendance = api.reporting.query.attendance(
-    selectedInternshipId
-      ? {
-          officeLocationId: selectedOfficeId || undefined,
-          departmentId: selectedDepartmentId || undefined,
-          internshipId: selectedInternshipId,
-          month: selectedMonth,
-          year: selectedYear,
-        }
-      : undefined,
-    { enabled: Boolean(selectedInternshipId) },
+    {
+      officeLocationId: selectedOfficeId || undefined,
+      departmentId: selectedDepartmentId || undefined,
+      internshipId: selectedInternshipId || undefined,
+      month: selectedMonth,
+      year: selectedYear,
+    },
+    { enabled: activeTab === 'attendance' },
   );
 
   const internships = api.reporting.query.internships({
@@ -73,6 +71,14 @@ export default function HrReportsContainer() {
   }, []);
 
   const handleResetAttendanceFilter = useCallback(() => {
+    setSelectedOfficeId('');
+    setSelectedDepartmentId('');
+    setSelectedInternshipId('');
+    setSelectedMonth(undefined);
+    setSelectedYear(undefined);
+  }, []);
+
+  const handleQueryAll = useCallback(() => {
     setSelectedOfficeId('');
     setSelectedDepartmentId('');
     setSelectedInternshipId('');
@@ -129,6 +135,7 @@ export default function HrReportsContainer() {
         onSelectMonth: setSelectedMonth,
         onSelectYear: setSelectedYear,
         onResetAttendanceFilter: handleResetAttendanceFilter,
+        onQueryAll: handleQueryAll,
       }}
     />
   );
