@@ -252,8 +252,8 @@ export function AttendanceReportTable({
                 className="h-8 gap-1.5 text-xs"
               >
                 <Users className="size-3.5" />
-                Semua Data (Query All)
-              </Button>
+                Semua Data 
+                </Button>
 
               <Button
                 variant="outline"

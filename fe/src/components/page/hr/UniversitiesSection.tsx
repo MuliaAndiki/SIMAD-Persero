@@ -43,6 +43,8 @@ export interface UniversitiesSectionActions {
   onCloseForm: () => void;
   onFieldChange: (field: UniversityFormField, value: string) => void;
   onSubmit: () => void | Promise<void>;
+  onEdit?: (institution: InstitutionResponse) => void;
+  onDelete?: (institution: InstitutionResponse) => void;
 }
 
 export interface UniversitiesSectionProps {
@@ -117,7 +119,11 @@ export function UniversitiesSection({ state, actions }: UniversitiesSectionProps
         </div>
       ) : (
         <>
-          <UniversityTable universities={state.universities} />
+          <UniversityTable
+            universities={state.universities}
+            onEdit={actions.onEdit}
+            onDelete={actions.onDelete}
+          />
 
           {state.totalPages > 1 && (
             <div className="flex items-center justify-between px-2 text-xs text-muted-foreground">

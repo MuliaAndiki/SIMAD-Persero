@@ -1,13 +1,19 @@
 import { DataTableCard } from '@/components/organisms/table/DataTableCard';
 import { RowActionsMenu } from '@/components/organisms/table/RowActionsMenu';
 import type { InstitutionResponse } from '@/types/api/institution.types';
-import { Eye, GraduationCap, MapPin } from 'lucide-react';
+import { Eye, GraduationCap, MapPin, Pencil, Trash2 } from 'lucide-react';
 
 export interface UniversityTableProps {
   universities: InstitutionResponse[];
+  onEdit?: (institution: InstitutionResponse) => void;
+  onDelete?: (institution: InstitutionResponse) => void;
 }
 
-export function UniversityTable({ universities }: UniversityTableProps) {
+export function UniversityTable({
+  universities,
+  onEdit,
+  onDelete,
+}: UniversityTableProps) {
   return (
     <DataTableCard
       title="Daftar Universitas & Perguruan Tinggi"
@@ -80,6 +86,27 @@ export function UniversityTable({ universities }: UniversityTableProps) {
                   icon: Eye,
                   href: `/hr_admin/universities/${item.id}`,
                 },
+                ...(onEdit
+                  ? [
+                      {
+                        key: 'edit',
+                        label: 'Edit Universitas',
+                        icon: Pencil,
+                        onSelect: () => onEdit(item),
+                      },
+                    ]
+                  : []),
+                ...(onDelete
+                  ? [
+                      {
+                        key: 'delete',
+                        label: 'Hapus Universitas',
+                        icon: Trash2,
+                        variant: 'destructive' as const,
+                        onSelect: () => onDelete(item),
+                      },
+                    ]
+                  : []),
               ]}
             />
           </td>
