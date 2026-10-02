@@ -21,6 +21,7 @@ import {
   type RejectApplicationFormState,
 } from '@/components/organisms/application/ApplicationRejectForm';
 import { ApplicationTable } from '@/components/organisms/application/ApplicationTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { ApplicationResponse } from '@/types/api/application.types';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import type { OfficeResponse } from '@/types/api/office.types';
@@ -127,7 +128,9 @@ export function ApplicationsSection({ state, actions }: ApplicationsSectionProps
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data pengajuan..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

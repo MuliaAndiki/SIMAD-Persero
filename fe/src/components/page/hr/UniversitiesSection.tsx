@@ -10,6 +10,7 @@ import {
   type UniversityFormState,
 } from '@/components/organisms/institution/UniversityFormDialog';
 import { UniversityTable } from '@/components/organisms/institution/UniversityTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { EducationLevelResponse, InstitutionResponse } from '@/types/api/institution.types';
 import type { AlertContexType } from '@/types/ui';
 import { AlertCircle, ChevronLeft, ChevronRight, Loader2, Plus, Search } from 'lucide-react';
@@ -108,7 +109,9 @@ export function UniversitiesSection({ state, actions }: UniversitiesSectionProps
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data universitas..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

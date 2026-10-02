@@ -8,6 +8,7 @@ import {
   type ReceptionistFormType,
 } from '@/components/organisms/receptionist/ReceptionistFormDialog';
 import { ReceptionistTable } from '@/components/organisms/receptionist/ReceptionistTable';
+import { TableLoader } from '@/components/atoms/loading';
 
 import {
   Select,
@@ -132,7 +133,9 @@ export function ReceptionistsSection({ state, actions }: ReceptionistsSectionPro
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data resepsionis..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/atoms/card';
+import { TableLoader } from '@/components/atoms/loading';
 import { AttendanceDetailField } from '@/components/organisms/attendance/AttendanceDetailField';
 import { AttendanceLogsTable } from '@/components/organisms/attendance/AttendanceLogsTable';
 import { AttendanceOverridesList } from '@/components/organisms/attendance/AttendanceOverridesList';
@@ -85,7 +86,9 @@ export function AttendanceDetailSection({ state, actions }: AttendanceDetailSect
       </header>
 
       {state.isPending ? (
-        <Card className="h-64" />
+        <Card>
+          <TableLoader label="Memuat detail absensi..." />
+        </Card>
       ) : state.isError || !detail ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

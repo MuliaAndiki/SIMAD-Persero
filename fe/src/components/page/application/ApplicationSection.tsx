@@ -1,6 +1,6 @@
-import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { TableLoader } from '@/components/atoms/loading';
 import { Input } from '@/components/atoms/input';
 import {
   Select,
@@ -61,12 +61,9 @@ const ACTIVE_STATUSES = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'RESU
 export function ApplicationSection({ state, service }: ApplicationSectionProps) {
   if (state.isPending) {
     return (
-      <PhantomSkeleton loading>
-        <div className="flex flex-col gap-6">
-          <Card className="h-40" />
-          <Card className="h-64" />
-        </div>
-      </PhantomSkeleton>
+      <Card>
+        <TableLoader label="Memuat data pengajuan..." />
+      </Card>
     );
   }
 

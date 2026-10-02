@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/atoms/select';
 import { QuotaTable } from '@/components/organisms/quota/QuotaTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import type { OfficeResponse } from '@/types/api/office.types';
 import type { QuotaItem } from '@/types/api/quota.types';
@@ -158,9 +159,8 @@ export function QuotasSection({ state, actions }: QuotasSectionProps) {
 
       {/* Content Table / States */}
       {isInitialLoading ? (
-        <Card className="p-12 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Memuat data kuota kantor...</p>
+        <Card>
+          <TableLoader label="Memuat data kuota kantor..." />
         </Card>
       ) : state.isError ? (
         <Card className="p-8 border-destructive/30 bg-destructive/5 text-destructive flex items-center gap-3">

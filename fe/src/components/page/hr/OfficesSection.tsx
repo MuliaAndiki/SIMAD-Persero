@@ -8,6 +8,7 @@ import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
 import { OfficeTable } from '@/components/organisms/office/OfficeTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { OfficeResponse } from '@/types/api/office.types';
 
 export interface OfficesSectionState {
@@ -75,7 +76,9 @@ export function OfficesSection({ state, actions }: OfficesSectionProps) {
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data kantor..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
