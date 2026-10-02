@@ -19,6 +19,7 @@ import {
   type SupervisorFormType,
 } from '@/components/organisms/supervisor/SupervisorFormDialog';
 import { SupervisorTable } from '@/components/organisms/supervisor/SupervisorTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { ApplicationResponse } from '@/types/api/application.types';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import type { OfficeResponse } from '@/types/api/office.types';
@@ -205,7 +206,9 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data supervisor..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

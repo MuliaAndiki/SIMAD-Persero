@@ -3,6 +3,7 @@
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import { TableLoader } from '@/components/atoms/loading';
 import {
   Select,
   SelectContent,
@@ -186,11 +187,8 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
       )}
 
       {state.isPending ? (
-        <Card className="h-64 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Loader2 className="size-5 animate-spin" />
-            <span>Memuat absensi peserta bimbingan...</span>
-          </div>
+        <Card>
+          <TableLoader label="Memuat absensi peserta bimbingan..." />
         </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">

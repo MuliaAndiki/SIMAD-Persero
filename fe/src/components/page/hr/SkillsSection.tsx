@@ -2,6 +2,7 @@ import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
 import type { SkillResponse } from '@/types/api/internship.types';
+import { TableLoader } from '@/components/atoms/loading';
 import type { AlertContexType } from '@/types/ui';
 import { AlertCircle, Loader2, Pencil, Search, Trash2, X } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
@@ -123,7 +124,9 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data skill..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

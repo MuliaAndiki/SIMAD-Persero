@@ -4,8 +4,9 @@ import { Badge } from '@/components/atoms/badge';
 import { Card } from '@/components/atoms/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/atoms/table';
 import type { EvaluationItem } from '@/types/api/evaluation.types';
+import { TableLoader } from '@/components/atoms/loading';
 import { formatDate } from '@/utils/string.format';
-import { Award, CheckCircle2, ClipboardCheck, Loader2, User } from 'lucide-react';
+import { Award, CheckCircle2, ClipboardCheck, User } from 'lucide-react';
 
 export interface EvaluationsOverviewSectionProps {
   evaluations: EvaluationItem[];
@@ -66,9 +67,8 @@ export function EvaluationsOverviewSection({ evaluations, isPending }: Evaluatio
       </div>
 
       {isPending ? (
-        <Card className="p-12 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Memuat data rekap penilaian...</p>
+        <Card>
+          <TableLoader label="Memuat data rekap penilaian..." />
         </Card>
       ) : evaluations.length === 0 ? (
         <Card className="p-12 text-center text-muted-foreground">
