@@ -24,6 +24,7 @@ export const queryKey = {
   officeRoot: () => ['office'] as const,
   office: {
     list: (query?: Record<string, any>) => ['office', 'list', query] as const,
+    publicList: () => ['office', 'publicList'] as const,
     detail: (officeId: string) => ['office', 'detail', officeId] as const,
   },
 
@@ -161,5 +162,10 @@ export const queryKey = {
     charts: () => ['dashboard', 'charts'] as const,
     recentActivities: (query?: Record<string, any>) =>
       ['dashboard', 'recentActivities', query] as const,
+  },
+
+  healthRoot: () => ['health'] as const,
+  health: {
+    ping: () => ['health', 'ping'] as const,
   },
 } as const;

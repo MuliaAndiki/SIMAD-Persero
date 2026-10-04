@@ -33,6 +33,17 @@ class OfficeService {
   }
 
   /**
+   * GET /offices/public
+   * Mengambil daftar lokasi kantor publik beserta departemen terkait.
+   */
+  public async ListPublic(): Promise<TResponse<OfficeResponse[]>> {
+    const res = await client.GetResponse<OfficeResponse[]>(OFFICE_ENDPOINTS.LIST_PUBLIC);
+    return toServiceResponse(res, {
+      message: 'Daftar lokasi kantor publik berhasil dimuat',
+    });
+  }
+
+  /**
    * GET /offices/:officeId
    * Mengambil detail satu lokasi kantor.
    */
@@ -47,9 +58,7 @@ class OfficeService {
    * POST /offices
    * Membuat lokasi kantor baru.
    */
-  public async Create(
-    body: CreateOfficeBody,
-  ): Promise<TResponse<OfficeResponse>> {
+  public async Create(body: CreateOfficeBody): Promise<TResponse<OfficeResponse>> {
     const res = await client.PostResponse<OfficeResponse>(OFFICE_ENDPOINTS.CREATE, body);
     return toServiceResponse(res, {
       message: 'Lokasi kantor berhasil dibuat',

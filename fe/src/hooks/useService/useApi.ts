@@ -9,6 +9,7 @@ import { useDepartment } from './department/useDepartment';
 import { useEvaluation } from './evaluation/useEvaluation';
 import { useFile } from './file/useFile';
 import { useGuide } from './guide/useGuide';
+import { useHealth } from './health/useHealth';
 import { useInstitution } from './institution/useInstitution';
 import { useInternship } from './internship/useInternship';
 import { useNotification } from './notification/useNotification';
@@ -43,6 +44,7 @@ export function useApi() {
     evaluation: useEvaluation(),
     quota: useQuota(),
     guide: useGuide(),
+    health: useHealth(),
     application: useApplication(),
     department: useDepartment(),
     office: useOffice(),

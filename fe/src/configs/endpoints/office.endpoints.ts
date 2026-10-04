@@ -9,6 +9,7 @@
 
 export const OFFICE_ENDPOINTS = {
   LIST: '/offices',
+  LIST_PUBLIC: '/offices/public',
   DETAIL: (officeId: string) => `/offices/${officeId}`,
   CREATE: '/offices',
   UPDATE: (officeId: string) => `/offices/${officeId}`,
