@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { appConfig } from '@/configs/app.config';
-import { useLenis } from 'lenis/react';
-import { Award, Building2, MapPin, ShieldCheck } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
+import { appConfig } from "@/configs/app.config";
+import { useLenis } from "lenis/react";
+import { Award, Building2, MapPin, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
 
 export function LandingFooter() {
   const lenis = useLenis();
@@ -16,7 +16,7 @@ export function LandingFooter() {
       if (lenis) {
         lenis.scrollTo(target, { offset: -90, duration: 1.2 });
       } else {
-        target.scrollIntoView({ behavior: 'smooth' });
+        target.scrollIntoView({ behavior: "smooth" });
       }
     }
   };
@@ -37,7 +37,9 @@ export function LandingFooter() {
               />
               <div className="flex flex-col leading-none">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-xl tracking-tight text-foreground">SIMAD</span>
+                  <span className="font-bold text-xl tracking-tight text-foreground">
+                    SIMAD
+                  </span>
                   <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded-sm bg-primary/10 text-primary border border-primary/20">
                     PERSERO
                   </span>
@@ -49,15 +51,11 @@ export function LandingFooter() {
             </Link>
 
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm mb-6">
-              Sistem Informasi Manajemen Magang resmi PT PLN (Persero) yang mendigitalisasi seluruh
-              tahapan pendaftaran, absensi geofence, bimbingan mentor, evaluasi, hingga sertifikat
-              digital terakreditasi.
+              Sistem Informasi Manajemen Magang resmi PT PLN (Persero) yang
+              mendigitalisasi seluruh tahapan pendaftaran, absensi geofence,
+              bimbingan mentor, evaluasi, hingga sertifikat digital
+              terakreditasi.
             </p>
-
-            <div className="flex items-center gap-2 text-xs font-medium text-foreground/80">
-              <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-              <span>Sistem Manajemen Magang Terintegrasi PLN</span>
-            </div>
           </div>
 
           {/* Col 2: Navigasi Anchor */}
@@ -69,7 +67,7 @@ export function LandingFooter() {
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToHash('#about')}
+                  onClick={() => scrollToHash("#about")}
                   className="hover:text-primary transition-colors text-left cursor-pointer"
                 >
                   Tentang SIMAD
@@ -78,7 +76,7 @@ export function LandingFooter() {
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToHash('#lifecycle')}
+                  onClick={() => scrollToHash("#lifecycle")}
                   className="hover:text-primary transition-colors text-left cursor-pointer"
                 >
                   Alur Magang (9 Langkah)
@@ -87,7 +85,7 @@ export function LandingFooter() {
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToHash('#guide')}
+                  onClick={() => scrollToHash("#guide")}
                   className="hover:text-primary transition-colors text-left cursor-pointer"
                 >
                   Panduan Pendaftaran
@@ -96,7 +94,7 @@ export function LandingFooter() {
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToHash('#requirements')}
+                  onClick={() => scrollToHash("#requirements")}
                   className="hover:text-primary transition-colors text-left cursor-pointer"
                 >
                   Persyaratan Dokumen
@@ -105,7 +103,7 @@ export function LandingFooter() {
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToHash('#locations')}
+                  onClick={() => scrollToHash("#locations")}
                   className="hover:text-primary transition-colors text-left cursor-pointer"
                 >
                   Unit Penempatan Magang
@@ -114,7 +112,7 @@ export function LandingFooter() {
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToHash('#features')}
+                  onClick={() => scrollToHash("#features")}
                   className="hover:text-primary transition-colors text-left cursor-pointer"
                 >
                   Fitur Utama Sistem
@@ -123,7 +121,7 @@ export function LandingFooter() {
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToHash('#faq')}
+                  onClick={() => scrollToHash("#faq")}
                   className="hover:text-primary transition-colors text-left cursor-pointer"
                 >
                   Pusat Bantuan (FAQ)
@@ -139,29 +137,25 @@ export function LandingFooter() {
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm text-muted-foreground">
               <li>
-                <button
-                  type="button"
-                  onClick={() => scrollToHash('#verify')}
-                  className="hover:text-primary transition-colors font-medium text-foreground flex items-center gap-1.5 cursor-pointer text-left"
+                <Link
+                  href="/register"
+                  className="hover:text-primary transition-colors"
                 >
-                  <Award className="w-3.5 h-3.5 text-primary" />
-                  Verifikasi Sertifikat
-                </button>
-              </li>
-              <li>
-                <Link href="/register" className="hover:text-primary transition-colors">
                   Daftar Akun Baru
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="hover:text-primary transition-colors">
+                <Link
+                  href="/login"
+                  className="hover:text-primary transition-colors"
+                >
                   Masuk ke Portal Peserta
                 </Link>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => scrollToHash('#tutorial')}
+                  onClick={() => scrollToHash("#tutorial")}
                   className="hover:text-primary transition-colors text-left cursor-pointer"
                 >
                   Video Tutorial
@@ -173,20 +167,16 @@ export function LandingFooter() {
           {/* Col 4: Informasi & Kantor PLN */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">
-              Kantor Pusat PLN
+              Kantor Pusat PLN Aceh
             </h4>
             <div className="space-y-3 text-xs text-muted-foreground leading-relaxed">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <span>Jl. Trunojoyo Blok M - I No. 135, Kebayoran Baru, Jakarta Selatan 12160</span>
+                <span>Jl. Tgk. Moh. Daud Beureueh No. 172</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Building2 className="w-4 h-4 text-primary shrink-0" />
-                <span>PT PLN (Persero) Kantor Pusat</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-                <span>Divisi Pengembangan Human Capital</span>
+                <span>PT PLN (Persero) Kantor Pusat Aceh</span>
               </div>
             </div>
           </div>
@@ -195,11 +185,13 @@ export function LandingFooter() {
         {/* Bottom Bar: Copyright & Attribution */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground text-center sm:text-left">
           <p>
-            © {new Date().getFullYear()} PT PLN (Persero). SIMAD — Sistem Informasi Manajemen
-            Magang. Hak Cipta Dilindungi.
+            © {new Date().getFullYear()} PT PLN (Persero). SIMAD — Sistem
+            Informasi Manajemen Magang. Hak Cipta Dilindungi.
           </p>
           <div className="flex items-center gap-4">
-            <span className="font-mono text-[11px] text-primary">Inovasi Digital PLN</span>
+            <span className="font-mono text-[11px] text-primary">
+              Inovasi Digital PLN
+            </span>
             <span>•</span>
             <span>Sistem Resmi Korporat</span>
           </div>

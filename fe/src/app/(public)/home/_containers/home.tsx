@@ -12,8 +12,9 @@ import { LifecycleSection } from "@/components/page/landing/LifecycleSection";
 import { LocationsSection } from "@/components/page/landing/LocationsSection";
 import { RequirementsSection } from "@/components/page/landing/RequirementsSection";
 import { VideoSection } from "@/components/page/landing/VideoSection";
+import { PublicPageLoader } from "@/components/atoms/public.loader";
 import { PWAInstallDialog } from "@/components/pwa/PWAInstallDialog";
-import React from "react";
+import { useApi } from "@/hooks/useService/useApi";
 
 /**
  * Main SIMAD Landing Page Container.
@@ -22,6 +23,22 @@ import React from "react";
  * synced with GSAP ScrollTrigger to ensure 60fps performance without duplicate scroll instances.
  */
 export default function ContainerHome() {
+  const api = useApi();
+  const { isLoading: isLoadingOffices, data: office } =
+    api.office.query.publicList();
+  const { isLoading: isLoadingGuides, data: guide } = api.guide.query.list();
+  const isLoading = isLoadingOffices || isLoadingGuides;
+
+  if (isLoading) {
+    return (
+      <PublicPageLoader
+        fullScreen
+        label="Memuat Halaman..."
+        sublabel="Menyiapkan modul dan data magang SIMAD..."
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-background text-foreground relative selection:bg-primary/20 selection:text-foreground">
       {/* 1. Sticky Navigation Bar */}
@@ -39,13 +56,13 @@ export default function ContainerHome() {
         <LifecycleSection />
 
         {/* 5. Registration Guide (CMS Data) */}
-        <GuideSection />
+        <GuideSection guide={guide ?? []} />
 
         {/* 6. Document Requirements */}
         <RequirementsSection />
 
         {/* 7. PLN Placement Locations & Units */}
-        <LocationsSection />
+        <LocationsSection isLoading={isLoading} office={office ?? []} />
 
         {/* 8. Core Features */}
         <FeaturesSection />
