@@ -142,7 +142,7 @@ export function OfficeLocationMap({
     return DEFAULT_CENTER;
   }, [hasCoordinates, latitude, longitude]);
 
-  // Eksekusi pencarian ke Photon Geocoder API & Parser Koordinat
+  // Eksekusi pencarian geocoding (API internal /api/geocode + Photon fallback)
   const performSearch = useCallback(
     async (queryText: string) => {
       const trimmed = queryText.trim();
@@ -152,7 +152,7 @@ export function OfficeLocationMap({
         return;
       }
 
-      // 1. Cek format koordinat langsung (contoh: -5.3812, 105.2567)
+      // 1. Cek format koordinat langsung (contoh: "-5.3812, 105.2567")
       const coord = parseCoordinateString(trimmed);
       if (coord) {
         setSearchResults([
@@ -170,46 +170,66 @@ export function OfficeLocationMap({
         return;
       }
 
-      // 2. Query Photon API (OpenStreetMap Geocoder dengan CORS terbuka)
+      setIsSearching(true);
+      setShowResults(true);
+
+      // 2. Query ke API internal /api/geocode (terbebas dari isu CORS & adblocker)
       try {
-        setIsSearching(true);
-        let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(trimmed)}&limit=5&lang=id`;
+        let apiUrl = `/api/geocode?q=${encodeURIComponent(trimmed)}`;
         if (hasCoordinates) {
-          url += `&lat=${latitude}&lon=${longitude}`;
+          apiUrl += `&lat=${latitude}&lon=${longitude}`;
         }
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Search failed');
-        const data = await res.json();
-
-        const results: LocationSearchResult[] = (data.features || []).map(
-          (f: any, idx: number) => {
-            const p = f.properties || {};
-            const [lng, lat] = f.geometry?.coordinates || [0, 0];
-            const primaryName = p.name || p.street || p.city || 'Lokasi';
-            const addressParts = [p.street, p.district, p.city, p.state, p.country]
-              .filter(Boolean)
-              .filter((part) => part !== primaryName);
-
-            return {
-              id: `${p.osm_id || idx}-${lat}-${lng}`,
-              name: primaryName,
-              address: addressParts.join(', ') || p.country || '',
-              lat: Number(Number(lat).toFixed(6)),
-              lng: Number(Number(lng).toFixed(6)),
-              isCoord: false,
-            };
-          },
-        );
-
-        setSearchResults(results);
-        setShowResults(true);
+        const res = await fetch(apiUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.results) && data.results.length > 0) {
+            setSearchResults(data.results);
+            return;
+          }
+        }
       } catch (err) {
-        console.error('Error fetching location suggestions:', err);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
+        console.warn('Internal geocode route failed, trying direct fallback:', err);
       }
+
+      // 3. Direct client fallback ke Photon API (tanpa parameter lang=id yang dilarang)
+      try {
+        let fallbackUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(trimmed)}&limit=6`;
+        if (hasCoordinates) {
+          fallbackUrl += `&lat=${latitude}&lon=${longitude}`;
+        }
+
+        const res = await fetch(fallbackUrl);
+        if (res.ok) {
+          const data = await res.json();
+          const results: LocationSearchResult[] = (data.features || []).map(
+            (f: any, idx: number) => {
+              const p = f.properties || {};
+              const [lngVal, latVal] = f.geometry?.coordinates || [0, 0];
+              const primaryName = p.name || p.street || p.city || 'Lokasi';
+              const addressParts = [p.street, p.district, p.city, p.state, p.country]
+                .filter(Boolean)
+                .filter((part) => part !== primaryName);
+
+              return {
+                id: `direct-${p.osm_id || idx}-${latVal}-${lngVal}`,
+                name: primaryName,
+                address: addressParts.join(', ') || p.country || '',
+                lat: Number(Number(latVal).toFixed(6)),
+                lng: Number(Number(lngVal).toFixed(6)),
+                isCoord: false,
+              };
+            },
+          );
+
+          setSearchResults(results);
+          return;
+        }
+      } catch (err) {
+        console.error('All geocoding attempts failed:', err);
+      }
+
+      setSearchResults([]);
     },
     [hasCoordinates, latitude, longitude],
   );
@@ -223,9 +243,14 @@ export function OfficeLocationMap({
 
     if (val.trim().length >= 2) {
       setIsSearching(true);
-      debounceTimerRef.current = setTimeout(() => {
-        performSearch(val);
-      }, 400);
+      setShowResults(true); // Buka dropdown langsung menampilkan status loading
+      debounceTimerRef.current = setTimeout(async () => {
+        try {
+          await performSearch(val);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 350);
     } else {
       setSearchResults([]);
       setShowResults(false);
@@ -246,6 +271,7 @@ export function OfficeLocationMap({
     setSearchQuery('');
     setSearchResults([]);
     setShowResults(false);
+    setIsSearching(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -256,8 +282,10 @@ export function OfficeLocationMap({
       }
       if (searchResults.length > 0) {
         handleSelectResult(searchResults[0]);
-      } else {
-        performSearch(searchQuery);
+      } else if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
+        setShowResults(true);
+        performSearch(searchQuery).finally(() => setIsSearching(false));
       }
     } else if (e.key === 'Escape') {
       setShowResults(false);
@@ -309,7 +337,7 @@ export function OfficeLocationMap({
       {showSearch && (
         <div
           ref={searchBoxRef}
-          className="absolute top-2.5 left-2.5 right-2.5 sm:right-auto sm:w-80 md:w-96 z-[500]"
+          className="absolute top-2.5 left-2.5 right-2.5 sm:right-auto sm:w-84 md:w-96 z-[500]"
         >
           <div className="relative flex items-center">
             <div className="absolute left-3 flex items-center pointer-events-none text-muted-foreground">
@@ -325,37 +353,68 @@ export function OfficeLocationMap({
               value={searchQuery}
               onChange={(e) => handleQueryChange(e.target.value)}
               onFocus={() => {
-                if (searchResults.length > 0 || searchQuery.trim().length >= 2) {
+                if (searchQuery.trim().length >= 2) {
                   setShowResults(true);
+                  if (searchResults.length === 0 && !isSearching) {
+                    setIsSearching(true);
+                    performSearch(searchQuery).finally(() => setIsSearching(false));
+                  }
                 }
               }}
               onKeyDown={handleKeyDown}
               placeholder="Cari lokasi, jalan, kota, atau koordinat..."
-              className="w-full h-9 pl-9 pr-8 rounded-lg border border-border/80 bg-background/95 text-xs text-foreground shadow-md backdrop-blur-md transition-all placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+              className="w-full h-9 pl-9 pr-20 rounded-lg border border-border/80 bg-background/95 text-xs text-foreground shadow-md backdrop-blur-md transition-all placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
             />
 
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={handleClearSearch}
-                className="absolute right-2.5 p-0.5 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                title="Hapus pencarian"
-              >
-                <X className="size-3.5" />
-              </button>
-            )}
+            <div className="absolute right-2 flex items-center gap-1">
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  title="Hapus pencarian"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+
+              {searchQuery.trim().length >= 2 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (debounceTimerRef.current) {
+                      clearTimeout(debounceTimerRef.current);
+                    }
+                    setIsSearching(true);
+                    setShowResults(true);
+                    performSearch(searchQuery).finally(() => setIsSearching(false));
+                  }}
+                  disabled={isSearching}
+                  className="h-6 px-2 text-[10px] font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 rounded-md transition-colors flex items-center gap-1 shrink-0"
+                >
+                  {isSearching ? <Loader2 className="size-3 animate-spin" /> : 'Cari'}
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Dropdown Hasil Pencarian */}
+          {/* ─── Dropdown Hasil Pencarian & State Loading ─── */}
           {showResults && (
-            <div className="mt-1.5 max-h-60 overflow-y-auto rounded-lg border border-border/80 bg-background/95 shadow-lg backdrop-blur-md py-1 divide-y divide-border/40 animate-in fade-in-0 zoom-in-95 duration-100">
-              {searchResults.length > 0 ? (
+            <div className="mt-1.5 max-h-64 overflow-y-auto rounded-lg border border-border/80 bg-background/95 shadow-lg backdrop-blur-md py-1 divide-y divide-border/40 animate-in fade-in-0 zoom-in-95 duration-100">
+              {/* State 1: Sedang Mencari (Loader Aktif) */}
+              {isSearching ? (
+                <div className="p-3.5 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="size-4 animate-spin text-primary shrink-0" />
+                  <span className="font-medium text-foreground">Mencari lokasi...</span>
+                </div>
+              ) : searchResults.length > 0 ? (
+                /* State 2: Hasil Pencarian Ditemukan */
                 searchResults.map((item) => (
                   <button
                     type="button"
                     key={item.id}
                     onClick={() => handleSelectResult(item)}
-                    className="w-full px-3 py-2 text-left hover:bg-accent/60 transition-colors flex items-start gap-2.5 group"
+                    className="w-full px-3 py-2.5 text-left hover:bg-accent/60 transition-colors flex items-start gap-2.5 group cursor-pointer"
                   >
                     <div className="size-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                       {item.isCoord ? (
@@ -379,9 +438,13 @@ export function OfficeLocationMap({
                     </div>
                   </button>
                 ))
-              ) : !isSearching && searchQuery.trim().length >= 2 ? (
-                <div className="p-3 text-center text-xs text-muted-foreground">
-                  Lokasi tidak ditemukan. Coba gunakan nama kota, nama jalan, atau masukkan koordinat (contoh: <code>-5.3812, 105.2567</code>).
+              ) : searchQuery.trim().length >= 2 ? (
+                /* State 3: Tidak Ditemukan */
+                <div className="p-4 text-center text-xs text-muted-foreground">
+                  <p className="font-medium text-foreground mb-1">Lokasi tidak ditemukan</p>
+                  <p className="text-[11px]">
+                    Coba gunakan nama kota, nama jalan, atau masukkan koordinat (contoh: <code className="bg-muted px-1 py-0.5 rounded text-foreground">-5.3812, 105.2567</code>).
+                  </p>
                 </div>
               ) : null}
             </div>
@@ -457,8 +520,8 @@ export function OfficeLocationMap({
           <MapPin className="size-3.5 text-primary shrink-0" />
           <span className="truncate">
             {hasCoordinates
-              ? '💡 Geser pin atau klik peta untuk mengubah titik kantor'
-              : '🔍 Cari lokasi di atas atau klik peta untuk menetapkan koordinat'}
+              ? 'Klik peta atau geser pin untuk mengubah titik kantor'
+              : 'Cari lokasi di atas atau klik peta untuk menetapkan koordinat'}
           </span>
         </div>
       )}

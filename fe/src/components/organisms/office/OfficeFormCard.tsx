@@ -355,7 +355,7 @@ export function OfficeFormCard({
                 <div className="space-y-1">
                   <p className="font-semibold">Standar Disiplin Presensi SIMAD PLN:</p>
                   <p className="opacity-90">
-                    Batas kehadiran tepat waktu adalah <strong>08:00:00 WIB</strong>. Peserta magang yang melakukan presensi di atas jam tersebut akan otomatis ditandai berstatus <strong>TERLAMBAT (LATE)</strong>.
+                    Batas kehadiran tepat waktu adalah <strong>08:00:00 WIB</strong>. Peserta magang yang melakukan presensi di atas jam tersebut akan otomatis ditandai berstatus <strong>TERLAMBAT</strong>.
                   </p>
                 </div>
               </div>
