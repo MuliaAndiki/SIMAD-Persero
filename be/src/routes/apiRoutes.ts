@@ -12,6 +12,7 @@ import departmentRoutes from './departmentRoutes';
 import evaluationRoutes from './evaluationRoutes';
 import fileRoutes from './fileRoutes';
 import guideRoutes from './guideRoutes';
+import healthRoutes from './healthRoutes';
 import institutionRoutes from './institutionRoutes';
 import internshipRoutes from './internshipRoutes';
 import notificationRoutes from './notificationRoutes';
@@ -40,6 +41,7 @@ class ApiRouter {
   private routes() {
     this.apiRouter
       .use(InternalApiKey)
+      .use(healthRoutes)
       .use(authRoutes)
       .use(departmentRoutes)
       .use(officeRoutes)

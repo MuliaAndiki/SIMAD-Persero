@@ -31,6 +31,16 @@ class OfficeController {
     }
   }
 
+  // GET /offices/public (Public for landing page)
+  public async publicList(c: AppContext) {
+    try {
+      const data = await OfficeService.listPublic();
+      return HttpResponse(c).ok(data, undefined, 'Public offices retrieved successfully');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
   // GET /offices/:officeId
   public async detail(c: AppContext) {
     try {

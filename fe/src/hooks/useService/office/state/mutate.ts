@@ -11,11 +11,7 @@ import type {
 } from '@/types/api/office.types';
 
 export function useCreateOffice() {
-  return useAppMutation<
-    OfficeResponse,
-    CreateOfficeBody,
-    OfficeCacheContext
-  >({
+  return useAppMutation<OfficeResponse, CreateOfficeBody, OfficeCacheContext>({
     mutationFn: (body) => Api.Office.Create(body),
     invalidateKeys: [queryKey.officeRoot()],
     optimistic: (ns) => ({ previousData: readOfficeSnapshot(ns) }),

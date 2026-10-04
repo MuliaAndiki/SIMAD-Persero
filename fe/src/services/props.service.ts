@@ -9,6 +9,7 @@ import departmentService from '@/services/api/department.service';
 import evaluationService from '@/services/api/evaluation.service';
 import fileService from '@/services/api/file.service';
 import guideService from '@/services/api/guide.service';
+import healthService from '@/services/api/health.service';
 import institutionService from '@/services/api/institution.service';
 import internshipService from '@/services/api/internship.service';
 import notificationService from '@/services/api/notification.service';
@@ -35,6 +36,7 @@ class Api {
   static Correction = WrapApi(correctionService);
   static Evaluation = WrapApi(evaluationService);
   static Guide = WrapApi(guideService);
+  static Health = WrapApi(healthService);
   static Quota = WrapApi(quotaService);
   static Certificate = WrapApi(certificateService);
   static Notification = WrapApi(notificationService);

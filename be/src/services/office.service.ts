@@ -104,6 +104,26 @@ class OfficeService {
     };
   }
 
+  // GET /offices/public (Daftar lokasi kantor untuk publik/landing page)
+  public async listPublic() {
+    const items = await prisma.officeLocation.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        departments: this.departmentSelect,
+      },
+    });
+
+    return items.map((office) => ({
+      id: office.id,
+      name: office.name,
+      address: office.address,
+      latitude: office.latitude != null ? Number(office.latitude) : null,
+      longitude: office.longitude != null ? Number(office.longitude) : null,
+      radiusMeter: office.radiusMeter,
+      departments: office.departments,
+    }));
+  }
+
   // GET /offices/:officeId
   public async getById(id: string) {
     const office = await prisma.officeLocation.findUnique({

@@ -4,6 +4,7 @@ import { SidebarProvider } from '@/components/atoms';
 import { PWAUpdatePrompt } from '@/components/pwa/PWAUpdatePrompt';
 import { env } from '@/configs/env.config';
 import { AuthProvider } from '@/core/providers/auth.provider';
+import { HealthPingProvider } from '@/core/providers/health-ping.provider';
 import { LenisProvider } from '@/core/providers/lenis.provinder';
 import { ThemeProvider } from '@/core/providers/theme.provider';
 import { AlertProvinder } from '@/hooks/useAlert/costum-alert';
@@ -31,9 +32,11 @@ const Providers = composeProviders([
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
-      <PWAUpdatePrompt />
-      {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      <HealthPingProvider>
+        <PWAUpdatePrompt />
+        {children}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </HealthPingProvider>
     </Providers>
   );
 }

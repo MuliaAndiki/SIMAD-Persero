@@ -14,6 +14,16 @@ export function useOfficeList(query?: OfficeQuery) {
   });
 }
 
+export function usePublicOfficeList() {
+  return useQuery({
+    queryKey: queryKey.office.publicList(),
+    queryFn: async () => {
+      const res = await Api.Office.ListPublic();
+      return res.data;
+    },
+  });
+}
+
 export function useOfficeDetail(
   params: Pick<OfficeParams, 'officeId'>,
   options?: { enabled?: boolean },
