@@ -66,7 +66,7 @@ export function CertificateActions({
 
           <Button variant="outline" size="sm" className="w-full" onClick={handleCopyVerifyLink}>
             <ExternalLink className="mr-2 size-3.5" />
-            Salin Link Verifikasi
+            Salin Tautan Verifikasi
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">

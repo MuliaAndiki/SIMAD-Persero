@@ -172,7 +172,7 @@ export function OfficeFormCard({
             {isEdit ? 'Ubah Informasi & Pengaturan Kantor' : 'Tambah Lokasi Kantor PLN Baru'}
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Konfigurasikan detail lokasi, geofence pada peta, departemen yang dinaungi, dan jadwal waktu absensi kantor.
+            Konfigurasikan detail lokasi, batas lokasi pada peta, departemen yang dinaungi, dan jadwal waktu absensi kantor.
           </p>
         </div>
 
@@ -195,7 +195,7 @@ export function OfficeFormCard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Building2 className="size-5 text-primary" />
-                Informasi Kantor & Titik Geofencing
+                Informasi Kantor & Titik Batas Lokasi
               </CardTitle>
               <CardDescription>
                 Tentukan lokasi kantor pada peta dan sesuaikan radius toleransi jarak presensi peserta magang.
@@ -232,7 +232,7 @@ export function OfficeFormCard({
                   <div className="flex items-center gap-2">
                     <MapPin className="size-4 text-primary" />
                     <span className="text-sm font-semibold text-foreground">
-                      Peta Interaktif Geofencing Presensi
+                      Peta Interaktif Batas Lokasi Presensi
                     </span>
                   </div>
                   <Button
@@ -296,7 +296,7 @@ export function OfficeFormCard({
 
                   <div className="grid gap-1.5">
                     <Label htmlFor="radiusMeter" className="text-xs font-medium">
-                      Radius Geofence (Meter) <span className="text-destructive">*</span>
+                      Radius Batas Lokasi (Meter) <span className="text-destructive">*</span>
                     </Label>
                     <Input
                       id="radiusMeter"
@@ -355,7 +355,7 @@ export function OfficeFormCard({
                 <div className="space-y-1">
                   <p className="font-semibold">Standar Disiplin Presensi SIMAD PLN:</p>
                   <p className="opacity-90">
-                    Batas kehadiran tepat waktu adalah <strong>08:00:00 WIB</strong>. Peserta magang yang melakukan presensi di atas jam tersebut akan otomatis ditandai berstatus <strong>TERLAMBAT (LATE)</strong>.
+                    Batas kehadiran tepat waktu adalah <strong>08:00:00 WIB</strong>. Peserta magang yang melakukan presensi di atas jam tersebut akan otomatis ditandai berstatus <strong>TERLAMBAT</strong>.
                   </p>
                 </div>
               </div>
@@ -386,7 +386,7 @@ export function OfficeFormCard({
                       }
                       required
                     />
-                    <span className="text-[10px] text-muted-foreground">Default: 06:00 WIB</span>
+                    <span className="text-[10px] text-muted-foreground">Bawaan: 06:00 WIB</span>
                   </div>
 
                   <div className="grid gap-1.5">
@@ -409,7 +409,7 @@ export function OfficeFormCard({
                       required
                       className="border-primary font-bold"
                     />
-                    <span className="text-[10px] text-primary font-medium">Lewat jam ini = Terlambat (Default: 08:00)</span>
+                    <span className="text-[10px] text-primary font-medium">Lewat jam ini = Terlambat (Bawaan: 08:00)</span>
                   </div>
 
                   <div className="grid gap-1.5">
@@ -431,7 +431,7 @@ export function OfficeFormCard({
                       }
                       required
                     />
-                    <span className="text-[10px] text-muted-foreground">Default: 10:00 WIB</span>
+                    <span className="text-[10px] text-muted-foreground">Bawaan: 10:00 WIB</span>
                   </div>
                 </div>
               </div>
@@ -462,7 +462,7 @@ export function OfficeFormCard({
                       }
                       required
                     />
-                    <span className="text-[10px] text-muted-foreground">Default: 16:00 WIB</span>
+                    <span className="text-[10px] text-muted-foreground">Bawaan: 16:00 WIB</span>
                   </div>
 
                   <div className="grid gap-1.5">
@@ -484,7 +484,7 @@ export function OfficeFormCard({
                       }
                       required
                     />
-                    <span className="text-[10px] text-muted-foreground">Default: 20:00 WIB</span>
+                    <span className="text-[10px] text-muted-foreground">Bawaan: 20:00 WIB</span>
                   </div>
                 </div>
               </div>

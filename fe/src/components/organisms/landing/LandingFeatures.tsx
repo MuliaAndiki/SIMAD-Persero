@@ -104,7 +104,7 @@ export function LandingFeatures() {
                 {/* Overlay map element */}
                 <div className="absolute top-4 right-4 z-20 bg-background/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-sm border border-border flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-foreground">Area Geofence Aktif</span>
+                  <span className="text-xs font-semibold text-foreground">Area Batas Lokasi Aktif</span>
                 </div>
               </div>
             </div>
@@ -126,7 +126,7 @@ export function LandingFeatures() {
             <div className="w-12 h-12 rounded-xl bg-accent text-accent-foreground flex items-center justify-center mb-6">
               <Award className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-3">E-Certificate Digital</h3>
+            <h3 className="text-xl font-bold text-foreground mb-3">Sertifikat Elektronik Digital</h3>
             <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
               Setelah selesai, program secara otomatis menerbitkan sertifikat digital yang dapat
               diverifikasi keasliannya.

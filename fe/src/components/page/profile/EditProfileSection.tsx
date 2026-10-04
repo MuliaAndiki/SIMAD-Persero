@@ -137,11 +137,11 @@ function EditProfileForm({
 
           <div className="flex flex-col gap-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              Surel
             </label>
             <Input id="email" value={profile.email} disabled readOnly />
             <p className="text-xs text-muted-foreground">
-              Email tidak dapat diubah dari halaman ini.
+              Surel tidak dapat diubah dari halaman ini.
             </p>
           </div>
 

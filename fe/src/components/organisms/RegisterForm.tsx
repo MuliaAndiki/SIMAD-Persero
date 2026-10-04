@@ -62,11 +62,11 @@ export function RegisterForm({
       />
 
       <TextField
-        label="Email"
+        label="Surel"
         id="email"
         name="email"
         type="email"
-        placeholder="Masukkan email Anda"
+        placeholder="Masukkan surel Anda"
         value={formRegister.email}
         onChange={(e) => onChange({ email: e.target.value })}
         disabled={isPending}
@@ -76,11 +76,11 @@ export function RegisterForm({
 
       <div className="space-y-2">
         <TextField
-          label="Password"
+          label="Kata Sandi"
           id="password"
           name="password"
           type="password"
-          placeholder="Buat password baru"
+          placeholder="Buat kata sandi baru"
           value={formRegister.password}
           onChange={(e) => onChange({ password: e.target.value })}
           disabled={isPending}
@@ -89,7 +89,7 @@ export function RegisterForm({
         />
 
         <div className="rounded-lg bg-muted/50 p-3 border border-border/50 text-xs space-y-1.5">
-          <p className="font-medium text-foreground/80 mb-1">Ketentuan password:</p>
+          <p className="font-medium text-foreground/80 mb-1">Ketentuan kata sandi:</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             <CriteriaItem fulfilled={criteria.minLength} text="Minimal 8 karakter" />
             <CriteriaItem fulfilled={criteria.hasUpper} text="Huruf besar (A-Z)" />

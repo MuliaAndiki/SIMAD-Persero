@@ -15,7 +15,7 @@ const { client } = Api();
 class FileService {
   /**
    * POST /files/upload
-   * Mengunggah file (FormData dengan field 'file' atau JSON dengan 'url').
+   * Mengunggah file (FormData dengan field 'berkas' atau JSON dengan 'url').
    */
   public async Upload(
     payload: FormData | { url: string; originalName?: string; mimeType?: string; size?: number },
@@ -23,13 +23,13 @@ class FileService {
     if (payload instanceof FormData) {
       const res = await client.PostFormDataResponse<FileResponse>(FILE_ENDPOINTS.UPLOAD, payload);
       return toServiceResponse(res, {
-        message: 'File berhasil diunggah',
+        message: 'Berkas berhasil diunggah',
         statusCode: 201,
       });
     }
     const res = await client.PostResponse<FileResponse>(FILE_ENDPOINTS.UPLOAD, payload);
     return toServiceResponse(res, {
-      message: 'File berhasil didaftarkan',
+      message: 'Berkas berhasil didaftarkan',
       statusCode: 201,
     });
   }
@@ -40,7 +40,7 @@ class FileService {
    */
   public async Detail(params: Pick<FileParams, 'fileId'>): Promise<TResponse<FileResponse>> {
     const res = await client.GetResponse<FileResponse>(FILE_ENDPOINTS.DETAIL(params.fileId));
-    return toServiceResponse(res, { message: 'Detail file berhasil dimuat' });
+    return toServiceResponse(res, { message: 'Detail berkas berhasil dimuat' });
   }
 
   /**
@@ -57,7 +57,7 @@ class FileService {
    */
   public async Delete(params: Pick<FileParams, 'fileId'>): Promise<TResponse<null>> {
     const res = await client.DeleteResponse<null>(FILE_ENDPOINTS.DELETE(params.fileId));
-    return toServiceResponse(res, { message: 'File berhasil dihapus' });
+    return toServiceResponse(res, { message: 'Berkas berhasil dihapus' });
   }
 }
 

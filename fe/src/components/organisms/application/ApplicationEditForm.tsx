@@ -50,7 +50,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] ?? null;
     if (selected && selected.size > 5 * 1024 * 1024) {
-      setLocalError('Ukuran file maksimal 5MB.');
+      setLocalError('Ukuran berkas maksimal 5MB.');
       setFile(null);
       e.target.value = '';
       return;
@@ -88,7 +88,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
     if (file) {
       const upload = await service.onUploadFile(file);
       if (!upload) {
-        setLocalError('Gagal mengunggah file baru');
+        setLocalError('Gagal mengunggah berkas baru');
         return;
       }
       updateData.coverLetterFileId = upload.fileId;
@@ -104,7 +104,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Edit Draft Pengajuan</CardTitle>
+        <CardTitle>Ubah Draf Pengajuan</CardTitle>
         <CardDescription>
           Perbarui informasi pengajuan magang Anda sebelum mengirimkan.
         </CardDescription>
@@ -186,7 +186,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
                       <span className="truncate text-sm font-semibold">
                         {app.introductionLetterFile.originalName}
                       </span>
-                      <span className="text-xs text-muted-foreground">File saat ini</span>
+                      <span className="text-xs text-muted-foreground">Berkas saat ini</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
                       onClick={() => setShowPdfPreview((prev) => !prev)}
                     >
                       {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
+                      {showPdfPreview ? 'Tutup Pratinjau' : 'Pratinjau PDF'}
                     </Button>
                     {(() => {
                       const previewUrl = getFilePreviewUrl(app.introductionLetterFile);
@@ -220,7 +220,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
                         <iframe
                           src={previewUrl}
                           className="h-[400px] w-full border-0"
-                          title={`Preview ${app.introductionLetterFile.originalName}`}
+                          title={`Pratinjau ${app.introductionLetterFile.originalName}`}
                         />
                       </div>
                     ) : null;
@@ -233,7 +233,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
                 onClick={() => setWillChangeFile(true)}
                 className="self-start"
               >
-                Ganti File
+                Ganti Berkas
               </Button>
             </div>
           )}
@@ -250,11 +250,11 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
               >
                 <UploadCloud className="size-8 text-muted-foreground" />
                 <span className="text-sm font-medium">
-                  {file ? file.name : 'Klik untuk memilih file baru'}
+                  {file ? file.name : 'Klik untuk memilih berkas baru'}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {file
-                    ? 'File baru siap diunggah'
+                    ? 'Berkas baru siap diunggah'
                     : 'Unggah surat pengantar baru dalam format PDF'}
                 </span>
                 <input
@@ -275,7 +275,7 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
                 }}
                 className="self-start"
               >
-                Batal Ganti File
+                Batal Ganti Berkas
               </Button>
             </div>
           )}

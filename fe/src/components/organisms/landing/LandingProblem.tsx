@@ -127,7 +127,7 @@ export function LandingProblem() {
               <li className="problem-stagger flex items-start gap-3">
                 <Clock className="w-5 h-5 text-destructive/70 shrink-0 mt-0.5" />
                 <span className="text-foreground/80">
-                  Proses panjang dari pengajuan hingga persetujuan supervisor.
+                   Proses panjang dari pengajuan hingga persetujuan mentor.
                 </span>
               </li>
             </ul>
@@ -154,7 +154,7 @@ export function LandingProblem() {
             <ul className="space-y-4">
               <li className="problem-stagger flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-foreground/80 font-medium">Paperless</span>
+                <span className="text-foreground/80 font-medium">Tanpa Kertas</span>
                 <span className="text-muted-foreground hidden sm:inline">
                   - Pengajuan & dokumen terpusat.
                 </span>
@@ -168,16 +168,16 @@ export function LandingProblem() {
               </li>
               <li className="problem-stagger flex items-start gap-3">
                 <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-foreground/80 font-medium">E-Certificate</span>
+                <span className="text-foreground/80 font-medium">Sertifikat Elektronik</span>
                 <span className="text-muted-foreground hidden sm:inline">
                   - Dihasilkan otomatis via sistem.
                 </span>
               </li>
               <li className="problem-stagger flex items-start gap-3">
                 <Search className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-foreground/80 font-medium">Monitoring</span>
+                <span className="text-foreground/80 font-medium">Pemantauan</span>
                 <span className="text-muted-foreground hidden sm:inline">
-                  - Pelacakan aktivitas oleh supervisor transparan.
+                   - Pelacakan aktivitas oleh mentor transparan.
                 </span>
               </li>
             </ul>

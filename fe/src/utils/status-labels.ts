@@ -4,7 +4,7 @@
  */
 
 export const APPLICATION_STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Draft',
+  DRAFT: 'Draf',
   SUBMITTED: 'Diajukan',
   UNDER_REVIEW: 'Sedang Direview',
   RESUBMITTED: 'Diajukan Ulang',
@@ -13,7 +13,7 @@ export const APPLICATION_STATUS_LABELS: Record<string, string> = {
 };
 
 export const INTERNSHIP_STATUS_LABELS: Record<string, string> = {
-  DRAFT: 'Draft',
+  DRAFT: 'Draf',
   PENDING: 'Menunggu',
   APPROVED: 'Disetujui',
   REJECTED: 'Ditolak',

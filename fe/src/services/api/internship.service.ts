@@ -134,7 +134,7 @@ class InternshipService {
       body,
     );
     return toServiceResponse(res, {
-      message: 'Supervisor berhasil ditugaskan',
+      message: 'Mentor berhasil ditugaskan',
     });
   }
 
@@ -203,13 +203,13 @@ class InternshipService {
       query as Record<string, string | number | boolean | null | undefined>,
     );
     const res = await client.GetResponse<SkillResponse[]>(`${INTERNSHIP_ENDPOINTS.SKILLS}${qs}`);
-    return toServiceResponse(res, { message: 'Daftar skill berhasil dimuat' });
+    return toServiceResponse(res, { message: 'Daftar keterampilan berhasil dimuat' });
   }
 
   public async CreateSkill(body: CreateSkillBody): Promise<TResponse<SkillResponse>> {
     const res = await client.PostResponse<SkillResponse>(INTERNSHIP_ENDPOINTS.CREATE_SKILL, body);
     return toServiceResponse(res, {
-      message: 'Skill berhasil dibuat',
+      message: 'Keterampilan berhasil dibuat',
       statusCode: 201,
     });
   }
@@ -222,12 +222,12 @@ class InternshipService {
       INTERNSHIP_ENDPOINTS.UPDATE_SKILL(params.id),
       body,
     );
-    return toServiceResponse(res, { message: 'Skill berhasil diperbarui' });
+    return toServiceResponse(res, { message: 'Keterampilan berhasil diperbarui' });
   }
 
   public async DeleteSkill(params: { id: string }): Promise<TResponse<null>> {
     const res = await client.DeleteResponse<null>(INTERNSHIP_ENDPOINTS.DELETE_SKILL(params.id));
-    return toServiceResponse(res, { message: 'Skill berhasil dihapus' });
+    return toServiceResponse(res, { message: 'Keterampilan berhasil dihapus' });
   }
 
   /**
@@ -236,7 +236,7 @@ class InternshipService {
    */
   public async AddSkill(body: AddSkillBody): Promise<TResponse<AddSkillResponse>> {
     const res = await client.PostResponse<AddSkillResponse>(INTERNSHIP_ENDPOINTS.ADD_SKILLS, body);
-    return toServiceResponse(res, { message: 'Skill berhasil ditambahkan' });
+    return toServiceResponse(res, { message: 'Keterampilan berhasil ditambahkan' });
   }
 
   /**
@@ -248,7 +248,7 @@ class InternshipService {
       INTERNSHIP_ENDPOINTS.REMOVE_SKILL(params.skillId),
     );
     return toServiceResponse(res, {
-      message: 'Skill berhasil dihapus dari profil',
+      message: 'Keterampilan berhasil dihapus dari profil',
     });
   }
 }

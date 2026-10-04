@@ -26,11 +26,11 @@ export function GuideDetailModal({ guide, open, onOpenChange }: GuideDetailModal
   const getCategoryLabel = (category: string) => {
     switch (category) {
       case 'ONBOARDING':
-        return 'Orientasi / Onboarding';
+        return 'Orientasi';
       case 'ATTENDANCE':
         return 'Presensi & Lokasi';
       case 'LOGBOOK':
-        return 'Pengisian Logbook';
+        return 'Pengisian Jurnal';
       case 'FINAL_REPORT':
         return 'Laporan Akhir';
       case 'CERTIFICATE':

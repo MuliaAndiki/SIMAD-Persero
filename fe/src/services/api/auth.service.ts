@@ -58,7 +58,7 @@ class AuthService {
    */
   public async SendVerifyEmail(body: Pick<SendVerifyEmailBody, 'email'>): Promise<TResponse<null>> {
     const res = await client.PublicPostResponse<null>(AUTH_ENDPOINTS.SEND_VERIFY_EMAIL, body);
-    return toServiceResponse(res, { message: 'Email verifikasi terkirim' });
+    return toServiceResponse(res, { message: 'Surel verifikasi terkirim' });
   }
 
   /**
@@ -67,7 +67,7 @@ class AuthService {
    */
   public async VerifyEmail(body: Pick<VerifyEmailBody, 'token'>): Promise<TResponse<null>> {
     const res = await client.PublicPostResponse<null>(AUTH_ENDPOINTS.VERIFY_EMAIL, body);
-    return toServiceResponse(res, { message: 'Email berhasil diverifikasi' });
+    return toServiceResponse(res, { message: 'Surel berhasil diverifikasi' });
   }
 
   /**
@@ -78,7 +78,7 @@ class AuthService {
     body: Pick<LoginBody, 'email' | 'password'>,
   ): Promise<TResponse<AuthSessionResponse>> {
     const res = await client.PublicPostResponse<AuthSessionResponse>(AUTH_ENDPOINTS.LOGIN, body);
-    return toServiceResponse(res, { message: 'Login berhasil' });
+    return toServiceResponse(res, { message: 'Masuk berhasil' });
   }
 
   /**
@@ -89,7 +89,7 @@ class AuthService {
     body: Pick<GoogleLoginBody, 'credential'>,
   ): Promise<TResponse<AuthSessionResponse>> {
     const res = await client.PublicPostResponse<AuthSessionResponse>(AUTH_ENDPOINTS.OAUTH, body);
-    return toServiceResponse(res, { message: 'Login Google berhasil' });
+    return toServiceResponse(res, { message: 'Masuk Google berhasil' });
   }
 
   /**
@@ -98,7 +98,7 @@ class AuthService {
    */
   public async SendMagicLink(body: Pick<SendMagicLinkBody, 'email'>): Promise<TResponse<null>> {
     const res = await client.PublicPostResponse<null>(AUTH_ENDPOINTS.SEND_MAGIC_LINK, body);
-    return toServiceResponse(res, { message: 'Magic link terkirim' });
+    return toServiceResponse(res, { message: 'Magic tautan terkirim' });
   }
 
   /**
@@ -112,7 +112,7 @@ class AuthService {
       AUTH_ENDPOINTS.VERIFY_MAGIC_LINK,
       body,
     );
-    return toServiceResponse(res, { message: 'Login berhasil' });
+    return toServiceResponse(res, { message: 'Masuk berhasil' });
   }
 
   /**
@@ -121,7 +121,7 @@ class AuthService {
    */
   public async ForgotPassword(body: Pick<ForgotPasswordBody, 'email'>): Promise<TResponse<null>> {
     const res = await client.PublicPostResponse<null>(AUTH_ENDPOINTS.FORGOT_PASSWORD, body);
-    return toServiceResponse(res, { message: 'Link reset password terkirim' });
+    return toServiceResponse(res, { message: 'Tautan reset kata sandi terkirim' });
   }
 
   /**
@@ -132,7 +132,7 @@ class AuthService {
     body: Pick<ResetPasswordBody, 'token' | 'password'>,
   ): Promise<TResponse<null>> {
     const res = await client.PublicPostResponse<null>(AUTH_ENDPOINTS.RESET_PASSWORD, body);
-    return toServiceResponse(res, { message: 'Password berhasil direset' });
+    return toServiceResponse(res, { message: 'Kata Sandi berhasil direset' });
   }
 
   /**
@@ -155,7 +155,7 @@ class AuthService {
    */
   public async Logout(body: Pick<LogoutBody, 'refreshToken'>): Promise<TResponse<null>> {
     const res = await client.PostResponse<null>(AUTH_ENDPOINTS.LOGOUT, body);
-    return toServiceResponse(res, { message: 'Logout berhasil' });
+    return toServiceResponse(res, { message: 'Keluar berhasil' });
   }
 
   /**
@@ -184,7 +184,7 @@ class AuthService {
     body: Pick<ChangePasswordBody, 'currentPassword' | 'newPassword'>,
   ): Promise<TResponse<null>> {
     const res = await client.PatchResponse<null>(AUTH_ENDPOINTS.CHANGE_PASSWORD, body);
-    return toServiceResponse(res, { message: 'Password berhasil diubah' });
+    return toServiceResponse(res, { message: 'Kata Sandi berhasil diubah' });
   }
 
   /**
@@ -196,7 +196,7 @@ class AuthService {
   ): Promise<TResponse<null>> {
     const res = await client.PatchResponse<null>(AUTH_ENDPOINTS.CHANGE_EMAIL, body);
     return toServiceResponse(res, {
-      message: 'Email verifikasi terkirim ke alamat baru',
+      message: 'Surel verifikasi terkirim ke alamat baru',
     });
   }
 
@@ -208,7 +208,7 @@ class AuthService {
     body: Pick<ChangeEmailVerifyBody, 'token'>,
   ): Promise<TResponse<null>> {
     const res = await client.PostResponse<null>(AUTH_ENDPOINTS.CHANGE_EMAIL_VERIFY, body);
-    return toServiceResponse(res, { message: 'Email berhasil diubah' });
+    return toServiceResponse(res, { message: 'Surel berhasil diubah' });
   }
 
   /**

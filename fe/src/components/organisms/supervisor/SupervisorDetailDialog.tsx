@@ -54,7 +54,7 @@ export function SupervisorDetailDialog({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Detail Supervisor</DialogTitle>
+              <DialogTitle>Detail Mentor</DialogTitle>
               <DialogDescription>
                 {supervisor.fullName} · {supervisor.email}
               </DialogDescription>
@@ -80,10 +80,10 @@ export function SupervisorDetailDialog({
 
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">Intern Bimbingan</h3>
+                  <h3 className="text-sm font-semibold">Magang Bimbingan</h3>
                   <Button size="sm" onClick={onOpenAssign}>
                     <UserPlus className="size-4" />
-                    Assign Intern
+                    Tetapkan Magang
                   </Button>
                 </div>
 
@@ -91,7 +91,7 @@ export function SupervisorDetailDialog({
                   <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-6 py-8 text-center">
                     <Users className="size-6 text-muted-foreground/50" />
                     <p className="text-sm text-muted-foreground">
-                      Belum ada intern yang dibimbing supervisor ini.
+                      Belum ada magang yang dibimbing mentor ini.
                     </p>
                   </div>
                 ) : (

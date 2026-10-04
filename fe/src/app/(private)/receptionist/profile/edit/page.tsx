@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import ReceptionistEditProfileContainer from './_container/edit-profile';
 
 export const metadata: Metadata = {
-  title: 'Edit Profil - SIMAD',
-  description: 'Edit Profil Resepsionis SIMAD',
+  title: 'Ubah Profil - SIMAD',
+  description: 'Ubah Profil Resepsionis SIMAD',
 };
 
 export default function ReceptionistEditProfilePage() {

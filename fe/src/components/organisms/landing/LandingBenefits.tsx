@@ -18,7 +18,7 @@ const benefits = [
   },
   {
     title: 'Mudah Dipantau',
-    desc: 'Akses informasi real-time bagi supervisor dan admin untuk mengambil keputusan lebih cepat.',
+      desc: 'Akses informasi real-time bagi mentor dan admin untuk mengambil keputusan lebih cepat.',
   },
   {
     title: 'Transparansi Data',

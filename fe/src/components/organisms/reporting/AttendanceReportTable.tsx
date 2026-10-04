@@ -3,6 +3,7 @@
 import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
+import { Input } from '@/components/atoms/input';
 import { TableLoader } from '@/components/atoms/loading';
 import {
   Select,
@@ -20,16 +21,18 @@ import type { OfficeResponse } from '@/types/api/office.types';
 import type { AttendanceReportRow } from '@/types/api/reporting.types';
 import { formatDate } from '@/utils/string.format';
 import {
-  ArrowRight,
   Briefcase,
   Building2,
   Calendar,
-  CheckCircle2,
+  Clock,
   Download,
+  Filter,
   GraduationCap,
   RotateCcw,
+  Search,
   User,
-  UserCheck,
+  Users,
+  X,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -51,6 +54,15 @@ const MONTH_OPTIONS = [
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR, CURRENT_YEAR + 1];
 
+const STATUS_TAGS = [
+  { value: 'ALL', label: 'Semua Status' },
+  { value: 'PRESENT', label: 'Hadir' },
+  { value: 'LATE', label: 'Terlambat' },
+  { value: 'LEAVE', label: 'Izin' },
+  { value: 'SICK', label: 'Sakit' },
+  { value: 'ABSENT', label: 'Alpha' },
+];
+
 export interface AttendanceReportTableProps {
   rows: AttendanceReportRow[];
   isPending: boolean;
@@ -70,6 +82,7 @@ export interface AttendanceReportTableProps {
   onSelectMonth: (month?: number) => void;
   onSelectYear: (year?: number) => void;
   onResetFilter: () => void;
+  onQueryAll?: () => void;
 }
 
 export function AttendanceReportTable({
@@ -91,8 +104,13 @@ export function AttendanceReportTable({
   onSelectMonth,
   onSelectYear,
   onResetFilter,
+  onQueryAll,
 }: AttendanceReportTableProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const [searchTableQuery, setSearchTableQuery] = useState('');
+  const [searchInternDropdown, setSearchInternDropdown] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
 
   // Departemen yang tersedia di kantor yang dipilih
   const availableDepartments = useMemo(() => {
@@ -101,17 +119,31 @@ export function AttendanceReportTable({
     return office?.departments ?? [];
   }, [offices, selectedOfficeId]);
 
-  // Peserta magang yang berada di kantor & departemen yang dipilih
+  // Peserta magang yang berada di kantor & departemen yang dipilih (atau semua bila belum difilter)
   const availableInternships = useMemo(() => {
-    if (!selectedDepartmentId) return [];
     return allInternships.filter((internship) => {
       const matchOffice = selectedOfficeId
         ? internship.officeLocation?.id === selectedOfficeId
         : true;
-      const matchDept = internship.department?.id === selectedDepartmentId;
+      const matchDept = selectedDepartmentId
+        ? internship.department?.id === selectedDepartmentId
+        : true;
       return matchOffice && matchDept;
     });
   }, [allInternships, selectedOfficeId, selectedDepartmentId]);
+
+  // Peserta magang yang disaring oleh pencarian dropdown
+  const filteredDropdownInternships = useMemo(() => {
+    if (!searchInternDropdown.trim()) return availableInternships;
+    const q = searchInternDropdown.toLowerCase();
+    return availableInternships.filter((intern) => {
+      const name = intern.internProfile?.user?.fullName?.toLowerCase() ?? '';
+      const nim = intern.internProfile?.studentNumber?.toLowerCase() ?? '';
+      const email = intern.internProfile?.user?.email?.toLowerCase() ?? '';
+      const inst = intern.internProfile?.institution?.name?.toLowerCase() ?? '';
+      return name.includes(q) || nim.includes(q) || email.includes(q) || inst.includes(q);
+    });
+  }, [availableInternships, searchInternDropdown]);
 
   // Detail intern yang sedang dipilih
   const selectedInternship = useMemo(() => {
@@ -126,6 +158,51 @@ export function AttendanceReportTable({
   const selectedDept = useMemo(() => {
     return availableDepartments.find((d) => d.id === selectedDepartmentId) ?? null;
   }, [availableDepartments, selectedDepartmentId]);
+
+  // Filter baris data lokal (status dan pencarian teks)
+  const filteredRows = useMemo(() => {
+    let result = rows;
+    if (statusFilter !== 'ALL') {
+      result = result.filter((r) => r.status?.toUpperCase() === statusFilter);
+    }
+    if (searchTableQuery.trim()) {
+      const q = searchTableQuery.toLowerCase();
+      result = result.filter((r) => {
+        const intern = r.intern?.toLowerCase() ?? '';
+        const email = r.email?.toLowerCase() ?? '';
+        const nim = r.studentNumber?.toLowerCase() ?? '';
+        const dept = r.department?.toLowerCase() ?? '';
+        const office = r.office?.toLowerCase() ?? '';
+        const inst = r.institution?.toLowerCase() ?? '';
+        return (
+          intern.includes(q) ||
+          email.includes(q) ||
+          nim.includes(q) ||
+          dept.includes(q) ||
+          office.includes(q) ||
+          inst.includes(q)
+        );
+      });
+    }
+    return result;
+  }, [rows, statusFilter, searchTableQuery]);
+
+  const isAllActive =
+    !selectedOfficeId &&
+    !selectedDepartmentId &&
+    !selectedInternshipId &&
+    !selectedMonth &&
+    !selectedYear;
+
+  const handleQueryAllClick = () => {
+    setSearchTableQuery('');
+    setStatusFilter('ALL');
+    if (onQueryAll) {
+      onQueryAll();
+    } else {
+      onResetFilter();
+    }
+  };
 
   const handleExport = async () => {
     try {
@@ -144,130 +221,174 @@ export function AttendanceReportTable({
     }
   };
 
-  const totalPresent = rows.filter((r) => r.status === 'PRESENT').length;
-  const totalWorkMinutes = rows.reduce((acc, r) => acc + (r.totalWorkMinutes || 0), 0);
+  const totalPresent = filteredRows.filter((r) => r.status === 'PRESENT').length;
+  const totalLate = filteredRows.filter((r) => r.status === 'LATE').length;
+  const totalWorkMinutes = filteredRows.reduce((acc, r) => acc + (r.totalWorkMinutes || 0), 0);
 
   return (
     <div className="flex flex-col gap-6">
-      {/* ─── Filter Bertahap (Cascading Stepper & Dropdowns) ─── */}
+      {/* ─── Filter Section dengan Tag & Pencarian ─── */}
       <Card className="border shadow-xs">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-base font-semibold">
-                Filter Bertahap Laporan Absensi
-              </CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base font-semibold">Filter Laporan Absensi</CardTitle>
+                <Badge variant={isAllActive ? 'default' : 'secondary'} className="text-[11px]">
+                  {isAllActive ? 'Semua Data' : 'Terfilter'}
+                </Badge>
+              </div>
               <CardDescription className="text-xs">
-                Pilih Kantor, Departemen, dan Peserta Magang secara berurutan untuk menampilkan data
-                absensi.
+                Gunakan tombol &ldquo;Semua Data&rdquo; untuk memuat seluruh riwayat absensi atau filter berdasarkan kantor, departemen, dan peserta.
               </CardDescription>
             </div>
-            {(selectedOfficeId || selectedDepartmentId || selectedInternshipId) && (
+
+            {/* Aksi Cepat: Query All & Reset */}
+            <div className="flex flex-wrap items-center gap-2">
               <Button
-                variant="ghost"
+                variant={isAllActive ? 'default' : 'outline'}
                 size="sm"
-                onClick={onResetFilter}
-                className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground"
+                onClick={handleQueryAllClick}
+                className="h-8 gap-1.5 text-xs"
               >
-                <RotateCcw className="size-3.5" />
-                Reset Filter
+                <Users className="size-3.5" />
+                Semua Data 
+                </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+                className="h-8 gap-1.5 text-xs"
+              >
+                <Filter className="size-3.5" />
+                {showAdvancedFilter ? 'Tutup Filter' : 'Filter Lanjutan'}
               </Button>
-            )}
+
+              {!isAllActive && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleQueryAllClick}
+                  className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <RotateCcw className="size-3" />
+                  Reset
+                </Button>
+              )}
+            </div>
           </div>
 
-          {/* Stepper Visual Status Indicator */}
-          <div className="mt-3 grid grid-cols-1 gap-2 pt-2 border-t sm:grid-cols-3">
-            {/* Step 1: Kantor */}
-            <div
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors ${
-                selectedOfficeId
-                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                  : 'border-primary/40 bg-primary/10 text-primary font-medium'
-              }`}
-            >
-              {selectedOfficeId ? (
-                <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              ) : (
-                <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                  1
-                </span>
-              )}
-              <div className="flex flex-col overflow-hidden">
-                <span className="font-semibold truncate">Tahap 1: Kantor</span>
-                <span className="text-[11px] truncate opacity-90">
-                  {selectedOffice ? selectedOffice.name : 'Pilih Kantor'}
-                </span>
-              </div>
-            </div>
-
-            {/* Step 2: Departemen */}
-            <div
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors ${
-                !selectedOfficeId
-                  ? 'opacity-50 border-border bg-muted/30 text-muted-foreground'
-                  : selectedDepartmentId
-                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                    : 'border-primary/40 bg-primary/10 text-primary font-medium'
-              }`}
-            >
-              {selectedDepartmentId ? (
-                <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              ) : (
-                <span
-                  className={`flex size-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                    selectedOfficeId
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted-foreground/30 text-muted-foreground'
+          {/* ─── Tag Filter Status & Quick Tags ─── */}
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 pt-2 border-t">
+            <span className="text-xs font-medium text-muted-foreground mr-1 flex items-center gap-1">
+              Status Tag:
+            </span>
+            {STATUS_TAGS.map((tag) => {
+              const isActive = statusFilter === tag.value;
+              return (
+                <button
+                  type="button"
+                  key={tag.value}
+                  onClick={() => setStatusFilter(tag.value)}
+                  className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-all ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground shadow-xs'
+                      : 'bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
-                  2
-                </span>
-              )}
-              <div className="flex flex-col overflow-hidden">
-                <span className="font-semibold truncate">Tahap 2: Departemen</span>
-                <span className="text-[11px] truncate opacity-90">
-                  {selectedDept ? selectedDept.name : 'Pilih Departemen'}
-                </span>
-              </div>
-            </div>
-
-            {/* Step 3: Peserta Magang */}
-            <div
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors ${
-                !selectedDepartmentId
-                  ? 'opacity-50 border-border bg-muted/30 text-muted-foreground'
-                  : selectedInternshipId
-                    ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                    : 'border-primary/40 bg-primary/10 text-primary font-medium'
-              }`}
-            >
-              {selectedInternshipId ? (
-                <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              ) : (
-                <span
-                  className={`flex size-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                    selectedDepartmentId
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted-foreground/30 text-muted-foreground'
-                  }`}
-                >
-                  3
-                </span>
-              )}
-              <div className="flex flex-col overflow-hidden">
-                <span className="font-semibold truncate">Tahap 3: Peserta Magang</span>
-                <span className="text-[11px] truncate opacity-90">
-                  {selectedInternship
-                    ? selectedInternship.internProfile?.user?.fullName
-                    : 'Pilih Peserta'}
-                </span>
-              </div>
-            </div>
+                  {tag.label}
+                  {tag.value === 'ALL' && rows.length > 0 && ` (${rows.length})`}
+                  {tag.value === 'PRESENT' && totalPresent > 0 && ` (${totalPresent})`}
+                  {tag.value === 'LATE' && totalLate > 0 && ` (${totalLate})`}
+                </button>
+              );
+            })}
           </div>
+
+          {/* ─── Tag Filter Aktif (Dismissible Badges) ─── */}
+          {!isAllActive && (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+              <span className="text-muted-foreground">Filter aktif:</span>
+              {selectedOffice && (
+                <Badge variant="outline" className="gap-1 bg-background text-xs py-0.5">
+                  <Building2 className="size-3 text-muted-foreground" />
+                  {selectedOffice.name}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectOffice('');
+                      onSelectDepartment('');
+                      onSelectInternship('');
+                    }}
+                    className="ml-1 rounded-full hover:bg-muted p-0.5"
+                  >
+                    <X className="size-2.5" />
+                  </button>
+                </Badge>
+              )}
+              {selectedDept && (
+                <Badge variant="outline" className="gap-1 bg-background text-xs py-0.5">
+                  <Briefcase className="size-3 text-muted-foreground" />
+                  {selectedDept.name}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectDepartment('');
+                      onSelectInternship('');
+                    }}
+                    className="ml-1 rounded-full hover:bg-muted p-0.5"
+                  >
+                    <X className="size-2.5" />
+                  </button>
+                </Badge>
+              )}
+              {selectedInternship && (
+                <Badge variant="outline" className="gap-1 bg-background text-xs py-0.5">
+                  <User className="size-3 text-muted-foreground" />
+                  {selectedInternship.internProfile?.user?.fullName}
+                  <button
+                    type="button"
+                    onClick={() => onSelectInternship('')}
+                    className="ml-1 rounded-full hover:bg-muted p-0.5"
+                  >
+                    <X className="size-2.5" />
+                  </button>
+                </Badge>
+              )}
+              {selectedMonth && (
+                <Badge variant="outline" className="gap-1 bg-background text-xs py-0.5">
+                  <Calendar className="size-3 text-muted-foreground" />
+                  Bulan {MONTH_OPTIONS.find((m) => m.value === String(selectedMonth))?.label}
+                  <button
+                    type="button"
+                    onClick={() => onSelectMonth(undefined)}
+                    className="ml-1 rounded-full hover:bg-muted p-0.5"
+                  >
+                    <X className="size-2.5" />
+                  </button>
+                </Badge>
+              )}
+              {selectedYear && (
+                <Badge variant="outline" className="gap-1 bg-background text-xs py-0.5">
+                  <Calendar className="size-3 text-muted-foreground" />
+                  Tahun {selectedYear}
+                  <button
+                    type="button"
+                    onClick={() => onSelectYear(undefined)}
+                    className="ml-1 rounded-full hover:bg-muted p-0.5"
+                  >
+                    <X className="size-2.5" />
+                  </button>
+                </Badge>
+              )}
+            </div>
+          )}
         </CardHeader>
 
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {/* ─── Kontrol Filter Dropdown & Pencarian Peserta ─── */}
+        <CardContent className={`pt-0 ${showAdvancedFilter || !isAllActive ? 'block' : 'hidden sm:block'}`}>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 pt-2 border-t">
             {/* 1. Dropdown Kantor */}
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
@@ -275,14 +396,14 @@ export function AttendanceReportTable({
                 1. Kantor
               </span>
               <Select
-                value={selectedOfficeId || '__empty__'}
-                onValueChange={(val) => onSelectOffice(val === '__empty__' ? '' : val)}
+                value={selectedOfficeId || '__all__'}
+                onValueChange={(val) => onSelectOffice(val === '__all__' ? '' : val)}
               >
-                <SelectTrigger className="w-full h-9">
-                  <SelectValue placeholder="Pilih Kantor..." />
+                <SelectTrigger className="w-full h-9 text-xs">
+                  <SelectValue placeholder="Semua Kantor (Semua)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__empty__">Pilih Kantor...</SelectItem>
+                  <SelectItem value="__all__">Semua Kantor (Semua)</SelectItem>
                   {offices.map((office) => (
                     <SelectItem key={office.id} value={office.id}>
                       {office.name}
@@ -299,17 +420,19 @@ export function AttendanceReportTable({
                 2. Departemen
               </span>
               <Select
-                value={selectedDepartmentId || '__empty__'}
-                onValueChange={(val) => onSelectDepartment(val === '__empty__' ? '' : val)}
-                disabled={!selectedOfficeId}
+                value={selectedDepartmentId || '__all__'}
+                onValueChange={(val) => onSelectDepartment(val === '__all__' ? '' : val)}
+                disabled={!selectedOfficeId && offices.length > 0}
               >
-                <SelectTrigger className="w-full h-9">
+                <SelectTrigger className="w-full h-9 text-xs">
                   <SelectValue
-                    placeholder={!selectedOfficeId ? 'Pilih Kantor dahulu' : 'Pilih Departemen...'}
+                    placeholder={
+                      !selectedOfficeId ? 'Pilih Kantor dahulu' : 'Semua Departemen (Semua)'
+                    }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__empty__">Pilih Departemen...</SelectItem>
+                  <SelectItem value="__all__">Semua Departemen (Semua)</SelectItem>
                   {availableDepartments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -319,34 +442,42 @@ export function AttendanceReportTable({
               </Select>
             </div>
 
-            {/* 3. Dropdown Peserta Magang */}
+            {/* 3. Dropdown Peserta Magang (dengan Search Filter) */}
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <User className="size-3.5 text-primary" />
                 3. Peserta Magang
               </span>
               <Select
-                value={selectedInternshipId || '__empty__'}
-                onValueChange={(val) => onSelectInternship(val === '__empty__' ? '' : val)}
-                disabled={!selectedDepartmentId}
+                value={selectedInternshipId || '__all__'}
+                onValueChange={(val) => onSelectInternship(val === '__all__' ? '' : val)}
               >
-                <SelectTrigger className="w-full h-9">
-                  <SelectValue
-                    placeholder={
-                      !selectedDepartmentId ? 'Pilih Departemen dahulu' : 'Pilih Peserta...'
-                    }
-                  />
+                <SelectTrigger className="w-full h-9 text-xs">
+                  <SelectValue placeholder="Semua Peserta (Semua)" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__empty__">Pilih Peserta Magang...</SelectItem>
-                  {availableInternships.length === 0 ? (
-                    <SelectItem value="__none__" disabled>
-                      Tidak ada peserta magang di departemen ini
-                    </SelectItem>
+                <SelectContent className="max-h-72">
+                  <div className="p-2 pb-1 sticky top-0 bg-popover z-10">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                      <Input
+                        placeholder="Cari nama / NIM peserta..."
+                        value={searchInternDropdown}
+                        onChange={(e) => setSearchInternDropdown(e.target.value)}
+                        className="h-8 pl-8 text-xs"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                  <SelectItem value="__all__">Semua Peserta Magang (Semua)</SelectItem>
+                  {filteredDropdownInternships.length === 0 ? (
+                    <div className="p-3 text-center text-xs text-muted-foreground">
+                      Tidak ditemukan peserta
+                    </div>
                   ) : (
-                    availableInternships.map((intern) => (
-                      <SelectItem key={intern.id} value={intern.id}>
-                        {intern.internProfile?.user?.fullName ?? 'Intern'}{' '}
+                    filteredDropdownInternships.map((intern) => (
+                      <SelectItem key={intern.id} value={intern.id} className="text-xs">
+                        {intern.internProfile?.user?.fullName ?? 'Magang'}{' '}
                         {intern.internProfile?.studentNumber
                           ? `(${intern.internProfile.studentNumber})`
                           : ''}
@@ -361,13 +492,13 @@ export function AttendanceReportTable({
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <Calendar className="size-3.5 text-primary" />
-                Bulan (Opsional)
+                4. Bulan
               </span>
               <Select
                 value={selectedMonth ? String(selectedMonth) : '__all__'}
                 onValueChange={(val) => onSelectMonth(val === '__all__' ? undefined : Number(val))}
               >
-                <SelectTrigger className="w-full h-9">
+                <SelectTrigger className="w-full h-9 text-xs">
                   <SelectValue placeholder="Semua Bulan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -385,13 +516,13 @@ export function AttendanceReportTable({
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <Calendar className="size-3.5 text-primary" />
-                Tahun (Opsional)
+                5. Tahun
               </span>
               <Select
                 value={selectedYear ? String(selectedYear) : '__all__'}
                 onValueChange={(val) => onSelectYear(val === '__all__' ? undefined : Number(val))}
               >
-                <SelectTrigger className="w-full h-9">
+                <SelectTrigger className="w-full h-9 text-xs">
                   <SelectValue placeholder="Semua Tahun" />
                 </SelectTrigger>
                 <SelectContent>
@@ -408,61 +539,17 @@ export function AttendanceReportTable({
         </CardContent>
       </Card>
 
-      {/* ─── State: Belum Memilih Intern (Staged Guide) ─── */}
-      {!selectedInternshipId ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center gap-4 py-14 text-center">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <UserCheck className="size-7" />
-            </div>
-            <div className="max-w-md space-y-1.5">
-              <h3 className="text-base font-semibold text-foreground">
-                {!selectedOfficeId
-                  ? 'Langkah 1: Silakan Pilih Kantor Terlebih Dahulu'
-                  : !selectedDepartmentId
-                    ? 'Langkah 2: Silakan Pilih Departemen Terlebih Dahulu'
-                    : 'Langkah 3: Silakan Pilih Peserta Magang'}
-              </h3>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                Untuk menjaga kejelasan data, absensi tidak ditampilkan sekaligus. Ikuti tahap di
-                atas dengan memilih Kantor &rarr; Departemen &rarr; Peserta Magang yang ingin Anda
-                pantau riwayat absensinya.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs text-muted-foreground">
-              <span
-                className={`rounded-full px-2.5 py-1 ${
-                  selectedOfficeId ? 'bg-emerald-500/15 text-emerald-600 font-medium' : 'bg-muted'
-                }`}
-              >
-                1. Kantor {selectedOffice ? `(${selectedOffice.name})` : ''}
-              </span>
-              <ArrowRight className="size-3.5 text-muted-foreground/60" />
-              <span
-                className={`rounded-full px-2.5 py-1 ${
-                  selectedDepartmentId
-                    ? 'bg-emerald-500/15 text-emerald-600 font-medium'
-                    : 'bg-muted'
-                }`}
-              >
-                2. Departemen {selectedDept ? `(${selectedDept.name})` : ''}
-              </span>
-              <ArrowRight className="size-3.5 text-muted-foreground/60" />
-              <span className="rounded-full px-2.5 py-1 bg-muted">3. Peserta Magang</span>
-            </div>
-          </CardContent>
-        </Card>
-      ) : isPending ? (
+      {/* ─── State Loading & Error ─── */}
+      {isPending ? (
         <Card>
           <TableLoader label="Memuat laporan absensi..." />
         </Card>
       ) : isError ? (
         <ReportError message={errorMessage} onRetry={onRetry} />
       ) : (
-        /* ─── State: Intern Terpilih (Tampilkan Data & Tabel) ─── */
+        /* ─── Tampilan Konten Laporan Absensi (Semua atau Per Peserta) ─── */
         <div className="flex flex-col gap-6">
-          {/* Header Info Peserta Terpilih & Statistik Ringkas */}
+          {/* Card Info Peserta (Jika Sedang Memfilter 1 Peserta Spesifik) */}
           {selectedInternship && (
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <Card className="col-span-1 lg:col-span-2">
@@ -485,7 +572,7 @@ export function AttendanceReportTable({
                       </div>
                     </div>
                     <Badge variant="outline" className="capitalize text-xs">
-                      {selectedInternship.status?.toLowerCase() ?? 'intern'}
+                      {selectedInternship.status?.toLowerCase() ?? 'magang'}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -505,7 +592,7 @@ export function AttendanceReportTable({
                 </CardContent>
               </Card>
 
-              {/* Ringkasan Kehadiran */}
+              {/* Ringkasan Kehadiran Peserta Terpilih */}
               <Card className="col-span-1">
                 <CardContent className="p-4 flex h-full flex-col justify-between">
                   <div className="text-xs font-medium text-muted-foreground">
@@ -513,7 +600,7 @@ export function AttendanceReportTable({
                   </div>
                   <div className="grid grid-cols-2 gap-2 my-2">
                     <div className="rounded-lg bg-muted/40 p-2.5">
-                      <div className="text-lg font-bold text-foreground">{rows.length}</div>
+                      <div className="text-lg font-bold text-foreground">{filteredRows.length}</div>
                       <div className="text-[11px] text-muted-foreground">Total Rekap</div>
                     </div>
                     <div className="rounded-lg bg-emerald-500/10 p-2.5">
@@ -534,38 +621,112 @@ export function AttendanceReportTable({
             </div>
           )}
 
-          {/* Tabel Absensi */}
+          {/* Statistik Global jika melihat semua peserta */}
+          {!selectedInternship && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Card className="p-3 shadow-2xs">
+                <div className="text-xs text-muted-foreground">Total Rekap</div>
+                <div className="text-xl font-bold text-foreground mt-0.5">{filteredRows.length}</div>
+                <div className="text-[11px] text-muted-foreground">Catatan kehadiran</div>
+              </Card>
+              <Card className="p-3 shadow-2xs bg-emerald-500/5 border-emerald-500/20">
+                <div className="text-xs text-emerald-700 dark:text-emerald-400">Hadir Tepat Waktu</div>
+                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                  {totalPresent}
+                </div>
+                <div className="text-[11px] text-muted-foreground">Status Present</div>
+              </Card>
+              <Card className="p-3 shadow-2xs bg-amber-500/5 border-amber-500/20">
+                <div className="text-xs text-amber-700 dark:text-amber-400">Terlambat</div>
+                <div className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                  {totalLate}
+                </div>
+                <div className="text-[11px] text-muted-foreground">Status Late</div>
+              </Card>
+              <Card className="p-3 shadow-2xs">
+                <div className="text-xs text-muted-foreground">Total Jam Kerja</div>
+                <div className="text-xl font-bold text-foreground mt-0.5">
+                  {Math.round(totalWorkMinutes / 60)} Jam
+                </div>
+                <div className="text-[11px] text-muted-foreground">{totalWorkMinutes} menit kerja</div>
+              </Card>
+            </div>
+          )}
+
+          {/* ─── Tabel Riwayat Absensi ─── */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between border-b space-y-0 py-3.5">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b space-y-0 py-3.5 gap-3">
               <div>
-                <CardTitle className="text-base font-semibold">Catatan Riwayat Absensi</CardTitle>
+                <CardTitle className="text-base font-semibold">
+                  {selectedInternship
+                    ? `Catatan Riwayat Absensi: ${selectedInternship.internProfile?.user?.fullName}`
+                    : 'Seluruh Catatan Riwayat Absensi'}
+                </CardTitle>
                 <CardDescription className="text-xs">
-                  Menampilkan {rows.length} catatan absensi untuk peserta ini
+                  Menampilkan {filteredRows.length} dari total {rows.length} catatan absensi
                 </CardDescription>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExport}
-                disabled={isExporting || rows.length === 0}
-                className="h-8 gap-1.5 text-xs"
-              >
-                <Download className="size-3.5" />
-                {isExporting ? 'Mengekspor...' : 'Export Excel'}
-              </Button>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                {/* Search Bar untuk Tabel Absensi */}
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="Cari peserta / NIM / kantor..."
+                    value={searchTableQuery}
+                    onChange={(e) => setSearchTableQuery(e.target.value)}
+                    className="h-8 pl-8 text-xs w-full"
+                  />
+                  {searchTableQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTableQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  )}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExport}
+                  disabled={isExporting || filteredRows.length === 0}
+                  className="h-8 gap-1.5 text-xs shrink-0"
+                >
+                  <Download className="size-3.5" />
+                  {isExporting ? 'Mengekspor...' : 'Ekspor Excel'}
+                </Button>
+              </div>
             </CardHeader>
+
             <CardContent className="p-0">
-              {rows.length === 0 ? (
+              {filteredRows.length === 0 ? (
                 <TableEmptyState
                   icon={Calendar}
-                  title="Belum ada data absensi untuk peserta ini."
-                  message="Coba sesuaikan filter bulan atau tahun bila periode yang dipilih belum memiliki catatan kehadiran."
+                  title="Belum ada data absensi yang sesuai."
+                  message={
+                    searchTableQuery || statusFilter !== 'ALL'
+                      ? 'Coba sesuaikan kata kunci pencarian atau tag status yang dipilih.'
+                      : 'Data absensi untuk kriteria ini belum tersedia. Klik "Semua Data (Query Semua)" untuk melihat seluruh riwayat.'
+                  }
+                  action={
+                    (!isAllActive || statusFilter !== 'ALL' || searchTableQuery) ? (
+                      <Button variant="outline" size="sm" onClick={handleQueryAllClick} className="gap-1.5 text-xs">
+                        <RotateCcw className="size-3.5" />
+                        Tampilkan Semua Data
+                      </Button>
+                    ) : undefined
+                  }
                 />
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b text-left text-xs uppercase text-muted-foreground bg-muted/20">
+                        {!selectedInternship && <th className="px-6 py-3 font-medium">Peserta Magang</th>}
+                        {!selectedInternship && <th className="px-6 py-3 font-medium">Penempatan</th>}
                         <th className="px-6 py-3 font-medium">Tanggal</th>
                         <th className="px-6 py-3 font-medium">Status</th>
                         <th className="px-6 py-3 font-medium">Jam Masuk</th>
@@ -574,19 +735,54 @@ export function AttendanceReportTable({
                       </tr>
                     </thead>
                     <tbody>
-                      {rows.map((row, index) => (
+                      {filteredRows.map((row, index) => (
                         <tr
-                          key={`${row.date}-${index}`}
+                          key={`${row.date}-${row.intern}-${index}`}
                           className="border-b last:border-0 hover:bg-muted/40 transition-colors"
                         >
-                          <td className="px-6 py-3.5 font-medium">{formatDate(row.date)}</td>
+                          {!selectedInternship && (
+                            <td className="px-6 py-3.5">
+                              <div className="flex flex-col">
+                                <span className="font-medium text-foreground">{row.intern}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {row.studentNumber !== '-' ? row.studentNumber : row.email}
+                                </span>
+                              </div>
+                            </td>
+                          )}
+
+                          {!selectedInternship && (
+                            <td className="px-6 py-3.5 text-xs">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-medium text-foreground flex items-center gap-1">
+                                  <Building2 className="size-3 text-muted-foreground" />
+                                  {row.office}
+                                </span>
+                                <span className="text-muted-foreground flex items-center gap-1">
+                                  <Briefcase className="size-3 text-muted-foreground" />
+                                  {row.department}
+                                </span>
+                              </div>
+                            </td>
+                          )}
+
+                          <td className="px-6 py-3.5 font-medium whitespace-nowrap">
+                            {formatDate(row.date)}
+                          </td>
                           <td className="px-6 py-3.5">
                             <StatusBadge status={row.status} />
                           </td>
-                          <td className="px-6 py-3.5">{row.checkInAt ?? '-'}</td>
-                          <td className="px-6 py-3.5">{row.checkOutAt ?? '-'}</td>
-                          <td className="px-6 py-3.5 text-muted-foreground">
-                            {row.totalWorkMinutes != null ? `${row.totalWorkMinutes} mnt` : '-'}
+                          <td className="px-6 py-3.5 whitespace-nowrap">{row.checkInAt ?? '-'}</td>
+                          <td className="px-6 py-3.5 whitespace-nowrap">{row.checkOutAt ?? '-'}</td>
+                          <td className="px-6 py-3.5 text-muted-foreground whitespace-nowrap">
+                            {row.totalWorkMinutes != null ? (
+                              <span className="inline-flex items-center gap-1">
+                                <Clock className="size-3 text-muted-foreground" />
+                                {row.totalWorkMinutes} mnt
+                              </span>
+                            ) : (
+                              '-'
+                            )}
                           </td>
                         </tr>
                       ))}

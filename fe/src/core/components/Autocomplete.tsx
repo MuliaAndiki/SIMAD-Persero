@@ -199,7 +199,7 @@ export default function Autocomplete({
                 <div className="flex justify-between items-center w-full">
                   <div className="flex flex-wrap items-center">
                     {allSelected ? (
-                      <span className="pl-4">All</span>
+                      <span className="pl-4">Semua</span>
                     ) : (
                       selectedValues.slice(0, maxCount).map((value) => {
                         const option = options.find((o) => o.value === value);
@@ -238,7 +238,7 @@ export default function Autocomplete({
                         )}
                         style={{ animationDuration: `${animation}s` }}
                       >
-                        {`+ ${selectedValues.length - maxCount} more`}
+                        {`+ ${selectedValues.length - maxCount} lainnya`}
                         <XCircle
                           className="ml-2 h-4 w-4 cursor-pointer"
                           onClick={(event) => {
@@ -275,9 +275,9 @@ export default function Autocomplete({
             onEscapeKeyDown={() => setIsPopoverOpen(false)}
           >
             <Command>
-              <CommandInput placeholder="Search..." onKeyDown={handleInputKeyDown} />
+              <CommandInput placeholder="Cari..." onKeyDown={handleInputKeyDown} />
               <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandEmpty>Tidak ada hasil.</CommandEmpty>
                 <CommandGroup>
                   <CommandItem key="all" onSelect={toggleAll} className="cursor-pointer">
                     <div
@@ -290,7 +290,7 @@ export default function Autocomplete({
                     >
                       <CheckIcon className="h-4 w-4" />
                     </div>
-                    <span>All</span>
+                    <span>Semua</span>
                   </CommandItem>
                   {options.map((option) => {
                     const isSelected = selectedValues.includes(option.value);
@@ -330,7 +330,7 @@ export default function Autocomplete({
                           onSelect={handleClear}
                           className="flex-1 justify-center cursor-pointer"
                         >
-                          Clear
+                          Bersihkan
                         </CommandItem>
                         <Separator orientation="vertical" className="flex min-h-6 h-full" />
                       </>
@@ -340,7 +340,7 @@ export default function Autocomplete({
                       onSelect={() => setIsPopoverOpen(false)}
                       className="flex-1 justify-center cursor-pointer"
                     >
-                      Close
+                      Tutup
                     </CommandItem>
                   </div>
                 </CommandGroup>

@@ -87,7 +87,7 @@ export function LandingAttendance() {
             Absensi Akurat dengan Lokasi
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Kehadiran didukung dengan validasi geofencing, memastikan peserta berada di tempat
+            Kehadiran didukung dengan validasi batas lokasi, memastikan peserta berada di tempat
             penempatan yang telah ditetapkan sebelum mengkonfirmasi kehadiran.
           </p>
 

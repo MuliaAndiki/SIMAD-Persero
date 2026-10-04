@@ -73,7 +73,7 @@ export interface ProfileSkillsSectionProps {
 }
 
 /**
- * Section halaman "Kelola Skill".
+ * Section halaman "Kelola Keterampilan".
  *
  * Skill dipilih/disimpan dulu ke array lokal (selectedSkills), baru dikirim
  * sekaligus lewat satu request POST /internships/add-skills saat tombol
@@ -103,10 +103,10 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
         </div>
         <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
           <Sparkles className="size-5 text-primary" />
-          Kelola Skill
+          Kelola Keterampilan
         </h1>
         <p className="text-sm text-muted-foreground">
-          Pilih skill yang Anda miliki, lalu simpan semuanya sekaligus.
+          Pilih keterampilan yang Anda miliki, lalu simpan semuanya sekaligus.
         </p>
       </header>
 
@@ -116,7 +116,7 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
           <div className="flex flex-col gap-0.5">
             <span className="font-medium text-foreground">Profil magang belum lengkap</span>
             <span className="text-muted-foreground">
-              Lengkapi profil magang terlebih dahulu sebelum menambahkan skill.
+              Lengkapi profil magang terlebih dahulu sebelum menambahkan keterampilan.
             </span>
           </div>
         </div>
@@ -126,10 +126,10 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="size-4 text-primary" />
-            Cari Skill
+            Cari Keterampilan
           </CardTitle>
           <CardDescription>
-            Ketik nama atau kategori skill, lalu pilih tingkat keahlian.
+            Ketik nama atau kategori keterampilan, lalu pilih tingkat keahlian.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
@@ -139,7 +139,7 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
               <Input
                 value={state.search}
                 onChange={(e) => service.onSearchChange(e.target.value)}
-                placeholder="Cari skill…"
+                placeholder="Cari keterampilan…"
                 className="pl-9 pr-9"
               />
               {(state.isSearching || state.isLoading) && (
@@ -167,7 +167,7 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
             <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
               <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
               <div className="flex flex-col gap-0.5">
-                <span className="font-medium text-foreground">Gagal memuat daftar skill</span>
+                <span className="font-medium text-foreground">Gagal memuat daftar keterampilan</span>
                 <span className="text-muted-foreground">
                   {state.errorMessage ||
                     'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'}
@@ -176,7 +176,7 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
             </div>
           ) : state.skills.length === 0 ? (
             <p className="rounded-lg border border-dashed bg-muted/40 p-4 text-center text-sm text-muted-foreground">
-              Skill tidak ditemukan. Coba kata kunci lain.
+              Keterampilan tidak ditemukan. Coba kata kunci lain.
             </p>
           ) : (
             <ul className="divide-y">
@@ -202,7 +202,7 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
                           type="button"
                           size="icon"
                           variant="ghost"
-                          aria-label={`Hapus ${skill.name || 'skill'} dari profil`}
+                          aria-label={`Hapus ${skill.name || 'keterampilan'} dari profil`}
                           disabled={isRemoving}
                           onClick={() => service.onRemoveSkill(skill.id)}
                         >
@@ -237,14 +237,14 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Save className="size-4 text-primary" />
-            Skill Dipilih ({state.selectedSkills.length})
+            Keterampilan Dipilih ({state.selectedSkills.length})
           </CardTitle>
           <CardDescription>Tinjau kembali pilihan Anda sebelum disimpan ke profil.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {state.selectedSkills.length === 0 ? (
             <p className="rounded-lg border border-dashed bg-muted/40 p-4 text-center text-sm text-muted-foreground">
-              Belum ada skill yang dipilih.
+              Belum ada keterampilan yang dipilih.
             </p>
           ) : (
             <ul className="divide-y">
@@ -263,7 +263,7 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
                     type="button"
                     size="icon"
                     variant="ghost"
-                    aria-label={`Hapus ${skill.name || 'skill'}`}
+                    aria-label={`Hapus ${skill.name || 'keterampilan'}`}
                     onClick={() => service.onRemoveSelected(skill.id)}
                   >
                     <X className="size-4" />
@@ -284,7 +284,7 @@ export function ProfileSkillsSection({ state, service }: ProfileSkillsSectionPro
             ) : (
               <Save className="size-4" />
             )}
-            {state.isSubmitting ? 'Menyimpan…' : `Simpan ${state.selectedSkills.length} Skill`}
+            {state.isSubmitting ? 'Menyimpan…' : `Simpan ${state.selectedSkills.length} Keterampilan`}
           </Button>
         </CardContent>
       </Card>

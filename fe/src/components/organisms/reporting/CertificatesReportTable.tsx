@@ -40,7 +40,7 @@ export function CertificatesReportTable({
       description={`${rows.length} sertifikat diterbitkan`}
       columns={[
         { label: 'No. Sertifikat' },
-        { label: 'Intern' },
+        { label: 'Magang' },
         { label: 'Departemen' },
         { label: 'Diterbitkan' },
         { label: 'Oleh' },

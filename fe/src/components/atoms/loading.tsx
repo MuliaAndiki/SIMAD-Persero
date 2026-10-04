@@ -74,6 +74,7 @@ export function CardGridSkeleton({
     </div>
   );
 }
+
 export function TableLoader({
   label = "Memuat data...",
   className,
@@ -88,7 +89,7 @@ export function TableLoader({
         className,
       )}
     >
-      <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       <p className="text-sm font-semibold text-slate-600">{label}</p>
     </div>
   );

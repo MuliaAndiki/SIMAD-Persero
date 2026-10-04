@@ -63,7 +63,7 @@ class UserService {
     body: Pick<ChangePasswordBody, 'oldPassword' | 'newPassword'>,
   ): Promise<TResponse<null>> {
     const res = await client.PatchResponse<null>(USER_ENDPOINTS.CHANGE_PASSWORD, body);
-    return toServiceResponse(res, { message: 'Password berhasil diubah' });
+    return toServiceResponse(res, { message: 'Kata Sandi berhasil diubah' });
   }
   public async DeleteAccount(): Promise<TResponse<null>> {
     const res = await client.DeleteResponse<null>(USER_ENDPOINTS.DELETE_ACCOUNT);

@@ -2,7 +2,7 @@
 - Di supervisor Itu bisa menambahkan nilai anak magang - Done Not Test
 - Generator Sertifikat Itu Harus Approve Admin Dikarenakan Harus Dapat Nilai Dari Supervisor 
 - Start Absensi Masuk Peserta magang itu Mulai Jam 8 Maksimal - Done
-- Resepsinis bisa Check Slot Anak magang yang tersedia Di Depetement Yang Tersedia Dikantor - Dome
+- Resepsinis bisa Check Slot Anak magang yang tersedia Di Depetement Yang Tersedia Dikantor - Done
 - Tanggal Masuk Harus Ditentukan admin - karena slot kuota terbatas
 - Peserta Bisa Mengajukan Koreksi Absen - Syaratnya Ada izin ke Supervisor 
 - Tutorial Via Video - Belum Ada Dibuatkan

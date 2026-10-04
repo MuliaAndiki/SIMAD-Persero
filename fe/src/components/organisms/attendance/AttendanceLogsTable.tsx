@@ -20,12 +20,12 @@ export function AttendanceLogsTable({ logs }: AttendanceLogsTableProps) {
       <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
           <Clock3 className="size-4" />
-          Log Check-in / Check-out
+          Log Masuk / Pulang
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {logs.length === 0 ? (
-          <TableEmptyState icon={Clock3} message="Belum ada log check-in / check-out." />
+          <TableEmptyState icon={Clock3} message="Belum ada log masuk / pulang." />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -45,7 +45,7 @@ export function AttendanceLogsTable({ logs }: AttendanceLogsTableProps) {
                   <tr key={log.id} className="border-b last:border-0">
                     <td className="px-6 py-4">
                       <Badge variant={log.action === 'CHECK_IN' ? 'default' : 'secondary'}>
-                        {log.action === 'CHECK_IN' ? 'Check-in' : 'Check-out'}
+                        {log.action === 'CHECK_IN' ? 'Masuk' : 'Pulang'}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">{formatDateTime(log.createdAt)}</td>

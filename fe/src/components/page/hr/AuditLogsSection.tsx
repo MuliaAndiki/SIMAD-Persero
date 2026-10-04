@@ -11,6 +11,7 @@ import {
 } from '@/components/atoms/select';
 import { AuditLogDetailDialog } from '@/components/organisms/audit-log/AuditLogDetailDialog';
 import { AuditLogTable } from '@/components/organisms/audit-log/AuditLogTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { AuditLogResponse } from '@/types/api/auditLog.types';
 import { AlertCircle } from 'lucide-react';
 
@@ -55,7 +56,9 @@ export function AuditLogsSection({ state, actions }: AuditLogsSectionProps) {
       </header>
 
       {state.isPending ? (
-        <Card className="h-64" />
+        <Card>
+          <TableLoader label="Memuat data audit log..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

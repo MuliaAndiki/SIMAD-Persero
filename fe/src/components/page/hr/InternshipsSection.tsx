@@ -18,6 +18,7 @@ import {
   RescheduleStartDateModal,
 } from '@/components/organisms/internship/InternshipActionModals';
 import { InternshipsTable } from '@/components/organisms/internship/InternshipsTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import type { InternshipResponse } from '@/types/api/internship.types';
 import type { OfficeResponse } from '@/types/api/office.types';
@@ -228,7 +229,9 @@ export function InternshipsSection({ state, actions }: InternshipsSectionProps) 
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data peserta magang..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

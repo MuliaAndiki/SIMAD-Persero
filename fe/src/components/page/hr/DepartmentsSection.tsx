@@ -9,6 +9,7 @@ import {
   type DepartmentFormState,
 } from '@/components/organisms/department/DepartmentFormDialog';
 import { DepartmentTable } from '@/components/organisms/department/DepartmentTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import type { AlertContexType } from '@/types/ui';
 import { AlertCircle, Loader2, Plus, Search } from 'lucide-react';
@@ -83,7 +84,9 @@ export function DepartmentsSection({ state, actions }: DepartmentsSectionProps) 
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data departemen..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

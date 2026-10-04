@@ -39,11 +39,11 @@ export function GuideCard({ guide, onSelect }: GuideCardProps) {
   const getCategoryLabel = (category: string) => {
     switch (category) {
       case 'ONBOARDING':
-        return 'Onboarding';
+        return 'Orientasi';
       case 'ATTENDANCE':
         return 'Presensi';
       case 'LOGBOOK':
-        return 'Logbook';
+        return 'Jurnal';
       case 'FINAL_REPORT':
         return 'Laporan Akhir';
       case 'CERTIFICATE':

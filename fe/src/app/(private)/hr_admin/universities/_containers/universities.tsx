@@ -10,6 +10,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useApi } from '@/hooks/useService/useApi';
 import type { InstitutionResponse } from '@/types/api/institution.types';
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 const EMPTY_FORM: UniversityFormState = {
   name: '',
@@ -51,6 +52,7 @@ export default function HrUniversitiesContainer() {
 
   const create = api.institution.mutate.create();
   const update = api.institution.mutate.update();
+  const remove = api.institution.mutate.delete();
 
   const meta = list.data?.meta as
     | { page?: number; limit?: number; total?: number; totalPages?: number }
@@ -76,6 +78,19 @@ export default function HrUniversitiesContainer() {
     setFormOpen(true);
   }, []);
 
+  const handleOpenEdit = useCallback((institution: InstitutionResponse) => {
+    setEditing(institution);
+    setForm({
+      name: institution.name ?? '',
+      shortName: institution.shortName ?? '',
+      educationLevelId: institution.educationLevelId ?? '',
+      province: institution.province ?? '',
+      city: institution.city ?? '',
+      logo: (institution.logo as string | null | undefined) ?? '',
+    });
+    setFormOpen(true);
+  }, []);
+
   const handleCloseForm = useCallback(() => {
     if (create.isPending || update.isPending) return;
     setFormOpen(false);
@@ -92,18 +107,46 @@ export default function HrUniversitiesContainer() {
       logo: form.logo.trim() || undefined,
     };
 
-    if (editing) {
-      await update.mutateAsync({
-        params: { institutionId: editing.id },
-        body: payload,
-      });
-    } else {
-      await create.mutateAsync(payload);
+    try {
+      if (editing) {
+        await update.mutateAsync({
+          params: { institutionId: editing.id },
+          body: payload,
+        });
+        toast.success(`Universitas ${payload.name} berhasil diperbarui`);
+      } else {
+        await create.mutateAsync(payload);
+        toast.success(`Universitas ${payload.name} berhasil ditambahkan`);
+      }
+      setFormOpen(false);
+      setEditing(null);
+      setForm(EMPTY_FORM);
+      list.refetch();
+    } catch (err: any) {
+      toast.error(err?.message || 'Gagal menyimpan universitas');
     }
-    setFormOpen(false);
-    setEditing(null);
-    setForm(EMPTY_FORM);
-  }, [create, editing, form, update]);
+  }, [create, editing, form, list, update]);
+
+  const handleDelete = useCallback(
+    async (institution: InstitutionResponse) => {
+      const confirmed = await ns.alert.confirm({
+        title: 'Hapus Universitas?',
+        deskripsi: `Apakah Anda yakin ingin menghapus universitas ${institution.name}? Tindakan ini tidak dapat dibatalkan.`,
+        confirmButtonText: 'Ya, Hapus',
+        icon: 'warning',
+      });
+      if (!confirmed) return;
+
+      try {
+        await remove.mutateAsync({ institutionId: institution.id });
+        toast.success(`Universitas ${institution.name} berhasil dihapus`);
+        list.refetch();
+      } catch (err: any) {
+        toast.error(err?.message || 'Gagal menghapus universitas');
+      }
+    },
+    [list, ns.alert, remove],
+  );
 
   return (
     <UniversitiesSection
@@ -134,7 +177,10 @@ export default function HrUniversitiesContainer() {
         onCloseForm: handleCloseForm,
         onFieldChange: handleFieldChange,
         onSubmit: handleSubmit,
+        onEdit: handleOpenEdit,
+        onDelete: handleDelete,
       }}
     />
   );
 }
+

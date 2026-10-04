@@ -20,7 +20,7 @@ export function CheckEmailSection({ state, service }: CheckEmailSectionProps) {
       <div className="card-glass w-full max-w-md overflow-hidden rounded-2xl bg-card shadow-xl">
         <div className="px-8 py-10">
           <div className="mb-10 text-center">
-            <h1 className="mb-2 text-3xl font-bold text-foreground">Periksa Email Anda</h1>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">Periksa Surel Anda</h1>
             <p className="text-sm text-foreground/60">
               Sistem Informasi Manajemen Magang & Absensi Digital
             </p>
@@ -38,14 +38,14 @@ export function CheckEmailSection({ state, service }: CheckEmailSectionProps) {
                   untuk mengaktifkan akun Anda.
                 </>
               ) : (
-                'Kami mengirim tautan verifikasi ke email Anda. Klik tautan tersebut untuk mengaktifkan akun Anda.'
+                'Kami mengirim tautan verifikasi ke surel Anda. Klik tautan tersebut untuk mengaktifkan akun Anda.'
               )}
             </p>
 
             <div className="flex w-full items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-left">
               <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-600" />
               <p className="text-xs text-foreground/80">
-                Tidak menemukan emailnya? Periksa juga folder <strong>SPAM</strong> atau{' '}
+                Tidak menemukan surelnya? Periksa juga folder <strong>SPAM</strong> atau{' '}
                 <strong>Promosi</strong> agar tidak kelewat.
               </p>
             </div>
@@ -57,11 +57,11 @@ export function CheckEmailSection({ state, service }: CheckEmailSectionProps) {
                 ) : (
                   <RefreshCw className="mr-2 h-4 w-4" />
                 )}
-                {isResending ? 'Mengirim ulang...' : 'Kirim Ulang Email'}
+                {isResending ? 'Mengirim ulang...' : 'Kirim Ulang Surel'}
               </Button>
               <Button variant="ghost" onClick={service.onGoToLogin}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Kembali ke Login
+                Kembali ke Masuk
               </Button>
             </div>
           </div>

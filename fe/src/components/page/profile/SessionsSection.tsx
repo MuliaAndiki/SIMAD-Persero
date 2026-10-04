@@ -134,7 +134,7 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
             Perangkat & Sesi Aktif
           </h1>
           <p className="text-sm text-muted-foreground">
-            Pantau dan kelola sesi login akun Anda di berbagai perangkat dan browser.
+            Pantau dan kelola sesi masuk akun Anda di berbagai perangkat dan browser.
           </p>
         </div>
       </div>
@@ -171,7 +171,7 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
               <Clock className="size-6" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-medium text-muted-foreground">Sesi Ini Login:</span>
+              <span className="text-xs font-medium text-muted-foreground">Sesi Ini Masuk:</span>
               <span className="text-xs font-semibold text-foreground">
                 {currentSession ? formatDate(currentSession.createdAt) : '-'}
               </span>
@@ -189,7 +189,7 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
               Daftar Perangkat Terhubung
             </CardTitle>
             <CardDescription>
-              Semua browser yang memiliki akses login aktif ke akun SIMAD ini.
+              Semua browser yang memiliki akses masuk aktif ke akun SIMAD ini.
             </CardDescription>
           </div>
           {otherSessionsCount > 0 && (
@@ -215,7 +215,7 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
               <ShieldCheck className="size-12 text-muted-foreground/50 mb-2" />
               <p className="text-sm font-medium text-foreground">Tidak Ada Sesi Aktif</p>
               <p className="text-xs text-muted-foreground">
-                Tidak ada sesi login lain yang ditemukan.
+                Tidak ada sesi masuk lain yang ditemukan.
               </p>
             </div>
           ) : (

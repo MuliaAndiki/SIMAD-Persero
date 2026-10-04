@@ -118,7 +118,7 @@ export function StatisticsGrid({ data }: { data: DashboardStatistics }) {
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               icon={UserCog}
-              label="Total Supervisor"
+              label="Total Mentor"
               value={data.totalSupervisors.toLocaleString('id-ID')}
             />
             <StatCard

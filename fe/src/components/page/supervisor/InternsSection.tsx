@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
+import { TableLoader } from '@/components/atoms/loading';
 import { DataTableCard } from '@/components/organisms/table/DataTableCard';
 import { RowActionsMenu } from '@/components/organisms/table/RowActionsMenu';
 import { StatusBadge } from '@/components/organisms/table/StatusBadge';
@@ -27,7 +28,7 @@ export interface InternsSectionProps {
 
 /**
  * InternsSection — daftar peserta magang yang ditugaskan ke supervisor.
- * Menampilkan info magang (departemen, periode) dengan aksi "Lihat Detail Intern".
+ * Menampilkan info magang (departemen, periode) dengan aksi "Lihat Detail Magang".
  */
 export function InternsSection({ state, service }: InternsSectionProps) {
   return (
@@ -41,7 +42,9 @@ export function InternsSection({ state, service }: InternsSectionProps) {
       </header>
 
       {state.isPending ? (
-        <Card className="h-64" />
+        <Card>
+          <TableLoader label="Memuat data peserta bimbingan..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />

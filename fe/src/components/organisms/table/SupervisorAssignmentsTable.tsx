@@ -35,7 +35,7 @@ export function SupervisorAssignmentsTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b text-left text-xs uppercase text-muted-foreground">
-            <th className="px-4 py-3 font-medium">Intern</th>
+            <th className="px-4 py-3 font-medium">Magang</th>
             <th className="px-4 py-3 font-medium">Departemen</th>
             <th className="px-4 py-3 font-medium">Periode</th>
             <th className="px-4 py-3 font-medium">Status</th>

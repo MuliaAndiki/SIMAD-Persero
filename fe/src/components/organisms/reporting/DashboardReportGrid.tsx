@@ -43,7 +43,7 @@ export function DashboardReportGrid({
   const stats: { label: string; value: number; icon: typeof Users }[] = [
     { label: 'Departemen', value: data.totalDepartments, icon: Building2 },
     { label: 'Kantor', value: data.totalOffices, icon: MapPin },
-    { label: 'Total Intern', value: data.totalInterns, icon: Users },
+    { label: 'Total Magang', value: data.totalInterns, icon: Users },
     {
       label: 'Total Pengajuan',
       value: data.totalApplications,
@@ -65,7 +65,7 @@ export function DashboardReportGrid({
       value: data.completedInternships,
       icon: FileCheck2,
     },
-    { label: 'Supervisor', value: data.totalSupervisors, icon: UserCheck },
+    { label: 'Mentor', value: data.totalSupervisors, icon: UserCheck },
     {
       label: 'Total Absensi',
       value: data.totalAttendance,

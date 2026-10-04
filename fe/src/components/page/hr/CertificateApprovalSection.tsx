@@ -128,9 +128,9 @@ export function CertificateApprovalSection({ state, actions }: CertificateApprov
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">Peserta Magang</TableHead>
                 <TableHead className="font-semibold">Unit Kantor & Bidang</TableHead>
-                <TableHead className="font-semibold text-center">Nilai Akhir (SPV)</TableHead>
+                <TableHead className="font-semibold text-center">Nilai Akhir (Mentor)</TableHead>
                 <TableHead className="font-semibold text-center">Huruf Mutu</TableHead>
-                <TableHead className="font-semibold">Supervisor</TableHead>
+                <TableHead className="font-semibold">Mentor</TableHead>
                 <TableHead className="font-semibold text-right">Aksi Persetujuan</TableHead>
               </TableRow>
             </TableHeader>

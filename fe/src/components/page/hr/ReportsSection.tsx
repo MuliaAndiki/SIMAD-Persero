@@ -53,6 +53,7 @@ export interface ReportsSectionActions {
   onSelectMonth: (month?: number) => void;
   onSelectYear: (year?: number) => void;
   onResetAttendanceFilter: () => void;
+  onQueryAll?: () => void;
 }
 
 export interface ReportsSectionProps {
@@ -115,6 +116,7 @@ export function ReportsSection({ state, actions }: ReportsSectionProps) {
           onSelectMonth={actions.onSelectMonth}
           onSelectYear={actions.onSelectYear}
           onResetFilter={actions.onResetAttendanceFilter}
+          onQueryAll={actions.onQueryAll}
         />
       )}
 

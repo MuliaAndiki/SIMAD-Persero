@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import MagicLinkContainer from './_containers/magic-link';
 
 export const metadata: Metadata = {
-  title: 'Masuk via Magic Link - SIMAD',
+  title: 'Masuk via Tautan Ajaib - SIMAD',
   description:
-    'Masuk ke Sistem Informasi Manajemen Magang & Absensi Digital menggunakan magic link',
+    'Masuk ke Sistem Informasi Manajemen Magang & Absensi Digital menggunakan tautan ajaib',
 };
 
 export default function MagicLinkPage() {

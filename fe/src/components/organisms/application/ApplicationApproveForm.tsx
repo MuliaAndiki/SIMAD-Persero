@@ -302,7 +302,7 @@ export function ApplicationApproveForm({
           Setujui & Tugaskan Pengajuan
         </h2>
         <p className="text-sm text-muted-foreground">
-          Pilih departemen, kantor penempatan, periode aktual magang, dan supervisor pembimbing.
+          Pilih departemen, kantor penempatan, periode aktual magang, dan mentor pembimbing.
         </p>
       </div>
 
@@ -340,7 +340,7 @@ export function ApplicationApproveForm({
                 <span>Surat Pengantar ({targetApplication.introductionLetterFile.originalName})</span>
               </a>
             ) : (
-              <span className="text-xs text-muted-foreground italic">Tidak ada lampiran dokumen file.</span>
+              <span className="text-xs text-muted-foreground italic">Tidak ada lampiran dokumen berkas.</span>
             )}
           </div>
         </div>
@@ -489,7 +489,7 @@ export function ApplicationApproveForm({
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
             <UserCheck className="size-3.5 text-muted-foreground" />
-            Supervisor Pembimbing <span className="text-destructive">*</span>
+            Mentor Pembimbing <span className="text-destructive">*</span>
           </span>
           <Select
             value={form.supervisorId || undefined}
@@ -500,12 +500,12 @@ export function ApplicationApproveForm({
               <SelectValue
                 placeholder={
                   safeSupervisors.length === 0
-                    ? 'Belum ada supervisor terdaftar'
+                    ? 'Belum ada mentor terdaftar'
                     : form.departmentId && currentDeptSupervisors.length > 1 && !form.supervisorId
-                      ? `Pilih salah satu (${currentDeptSupervisors.length} supervisor di departemen ini)`
+                      ? `Pilih salah satu (${currentDeptSupervisors.length} mentor di departemen ini)`
                       : form.departmentId && currentDeptSupervisors.length === 0
-                        ? 'Pilih supervisor dari departemen lain'
-                        : 'Pilih supervisor bimbingan'
+                        ? 'Pilih mentor dari departemen lain'
+                        : 'Pilih mentor bimbingan'
                 }
               />
             </SelectTrigger>
@@ -513,14 +513,14 @@ export function ApplicationApproveForm({
               {form.departmentId && currentDeptSupervisors.length > 0 && (
                 <SelectGroup>
                   <SelectLabel className="text-xs font-semibold text-primary">
-                    Supervisor di {getDepartmentName(form.departmentId)} (
-                    {currentDeptSupervisors.length} supervisor)
+                    Mentor di {getDepartmentName(form.departmentId)} (
+                    {currentDeptSupervisors.length} mentor)
                   </SelectLabel>
                   {currentDeptSupervisors.map((sup) => {
                     const offName = getOfficeName(sup.officeId);
                     return (
                       <SelectItem key={sup.id} value={sup.id}>
-                        {sup.fullName} • {offName} ({sup.activeAssignmentsCount ?? 0} intern)
+                        {sup.fullName} • {offName} ({sup.activeAssignmentsCount ?? 0} magang)
                       </SelectItem>
                     );
                   })}
@@ -530,7 +530,7 @@ export function ApplicationApproveForm({
               {form.departmentId && currentDeptSupervisors.length === 0 && (
                 <SelectGroup>
                   <SelectLabel className="text-xs text-muted-foreground italic">
-                    Tidak ada supervisor di {getDepartmentName(form.departmentId)}
+                    Tidak ada mentor di {getDepartmentName(form.departmentId)}
                   </SelectLabel>
                 </SelectGroup>
               )}
@@ -541,8 +541,8 @@ export function ApplicationApproveForm({
                   <SelectGroup>
                     <SelectLabel className="text-xs font-semibold text-muted-foreground">
                       {form.departmentId
-                        ? 'Pindah ke Supervisor Departemen Lain:'
-                        : 'Daftar Semua Supervisor:'}
+                        ? 'Pindah ke Mentor Departemen Lain:'
+                        : 'Daftar Semua Mentor:'}
                     </SelectLabel>
                     {otherSupervisors.map((sup) => {
                       const deptName = getDepartmentName(sup.departmentId);
@@ -550,7 +550,7 @@ export function ApplicationApproveForm({
                       return (
                         <SelectItem key={sup.id} value={sup.id}>
                           {sup.fullName} — {deptName} • {offName} ({sup.activeAssignmentsCount ?? 0}{' '}
-                          intern)
+                          magang)
                         </SelectItem>
                       );
                     })}
@@ -583,8 +583,8 @@ export function ApplicationApproveForm({
                 <div className="mt-1 text-[11px] text-muted-foreground flex items-center gap-1 border-t border-border/50 pt-1.5">
                   <Info className="size-3 text-primary shrink-0" />
                   <span>
-                    Departemen ini memiliki {currentDeptSupervisors.length} supervisor di kantor
-                    yang sama. Anda dapat memilih supervisor lain di departemen ini tanpa mengubah
+                    Departemen ini memiliki {currentDeptSupervisors.length} mentor di kantor
+                    yang sama. Anda dapat memilih mentor lain di departemen ini tanpa mengubah
                     departemen.
                   </span>
                 </div>
@@ -597,7 +597,7 @@ export function ApplicationApproveForm({
                 <Info className="size-4 shrink-0 mt-0.5" />
                 <span>
                   Departemen {getDepartmentName(form.departmentId)} memiliki{' '}
-                  {currentDeptSupervisors.length} supervisor. Silakan pilih salah satu supervisor di
+                  {currentDeptSupervisors.length} mentor. Silakan pilih salah satu mentor di
                   atas.
                 </span>
               </div>
@@ -611,8 +611,8 @@ export function ApplicationApproveForm({
               <div className="flex items-start gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-400">
                 <AlertCircle className="size-4 shrink-0 mt-0.5" />
                 <span>
-                  Tidak ada supervisor yang terdaftar di departemen ini pada kantor terpilih.
-                  Silakan pilih supervisor dari opsi departemen lain pada dropdown di atas
+                  Tidak ada mentor yang terdaftar di departemen ini pada kantor terpilih.
+                  Silakan pilih mentor dari opsi departemen lain pada dropdown di atas
                   (departemen dan kantor akan otomatis disesuaikan).
                 </span>
               </div>

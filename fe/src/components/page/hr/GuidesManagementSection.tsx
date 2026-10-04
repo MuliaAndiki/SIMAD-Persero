@@ -93,7 +93,7 @@ export function GuidesManagementSection({
             variant="secondary"
             className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
           >
-            Onboarding
+            Orientasi
           </Badge>
         );
       case 'ATTENDANCE':
@@ -111,7 +111,7 @@ export function GuidesManagementSection({
             variant="secondary"
             className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
           >
-            Logbook
+            Jurnal
           </Badge>
         );
       case 'FINAL_REPORT':
@@ -143,7 +143,7 @@ export function GuidesManagementSection({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Manajemen Panduan & Video Tutorial</h1>
           <p className="text-sm text-muted-foreground">
-            Kelola konten petunjuk operasional, orientasi onboarding, dan video tutorial untuk
+            Kelola konten petunjuk operasional, orientasi, dan video tutorial untuk
             peserta magang.
           </p>
         </div>
@@ -167,9 +167,9 @@ export function GuidesManagementSection({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Semua Kategori</SelectItem>
-                <SelectItem value="ONBOARDING">Onboarding</SelectItem>
+                <SelectItem value="ONBOARDING">Orientasi</SelectItem>
                 <SelectItem value="ATTENDANCE">Presensi</SelectItem>
-                <SelectItem value="LOGBOOK">Logbook</SelectItem>
+                <SelectItem value="LOGBOOK">Jurnal</SelectItem>
                 <SelectItem value="FINAL_REPORT">Laporan Akhir</SelectItem>
                 <SelectItem value="CERTIFICATE">Sertifikat</SelectItem>
                 <SelectItem value="GENERAL">Umum</SelectItem>
@@ -185,8 +185,8 @@ export function GuidesManagementSection({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Semua Status</SelectItem>
-                <SelectItem value="PUBLISHED">Published</SelectItem>
-                <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="PUBLISHED">Diterbitkan</SelectItem>
+                <SelectItem value="DRAFT">Draf</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -265,7 +265,7 @@ export function GuidesManagementSection({
                           items={[
                             {
                               key: 'preview',
-                              label: 'Preview Panduan',
+                              label: 'Pratinjau Panduan',
                               icon: Eye,
                               onSelect: () => handleOpenPreview(guide),
                             },

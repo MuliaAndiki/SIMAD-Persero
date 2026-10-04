@@ -145,7 +145,7 @@ export function EvaluationsSection({
                         <div className="flex items-center justify-center gap-1.5 font-mono font-bold">
                           <span>{evalData.finalScore}</span>
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-bold">
-                            Grade {evalData.grade}
+                            Nilai {evalData.grade}
                           </Badge>
                         </div>
                       ) : (
@@ -166,7 +166,7 @@ export function EvaluationsSection({
                         items={[
                           {
                             key: 'evaluate',
-                            label: isFinal ? 'Lihat Nilai' : evalData ? 'Edit Draf' : 'Beri Nilai',
+                            label: isFinal ? 'Lihat Nilai' : evalData ? 'Ubah Draf' : 'Beri Nilai',
                             icon: isFinal ? Eye : Edit,
                             onSelect: () => handleOpenEvaluation(internship),
                           },

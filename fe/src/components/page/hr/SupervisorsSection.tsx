@@ -19,6 +19,7 @@ import {
   type SupervisorFormType,
 } from '@/components/organisms/supervisor/SupervisorFormDialog';
 import { SupervisorTable } from '@/components/organisms/supervisor/SupervisorTable';
+import { TableLoader } from '@/components/atoms/loading';
 import type { ApplicationResponse } from '@/types/api/application.types';
 import type { DepartmentResponse } from '@/types/api/department.types';
 import type { OfficeResponse } from '@/types/api/office.types';
@@ -110,9 +111,9 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">Supervisor</h1>
+          <h1 className="text-2xl font-bold text-foreground">Mentor</h1>
           <p className="text-sm text-muted-foreground">
-            Kelola supervisor pembimbing dan penugasan peserta magang.
+            Kelola mentor pembimbing dan penugasan peserta magang.
           </p>
         </div>
         <div className="w-full flex gap-4 justify-end ">
@@ -205,7 +206,9 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
       </div>
 
       {isInitialLoading ? (
-        <Card className="h-64 animate-pulse bg-muted/40" />
+        <Card>
+          <TableLoader label="Memuat data supervisor..." />
+        </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
