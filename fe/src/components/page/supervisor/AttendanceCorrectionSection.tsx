@@ -249,7 +249,7 @@ export function AttendanceCorrectionSection({
           <div className="py-2">
             <Textarea
               rows={2}
-              placeholder="Catatan supervisor (opsional)..."
+              placeholder="Catatan mentor (opsional)..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />

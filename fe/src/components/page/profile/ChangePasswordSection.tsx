@@ -30,9 +30,9 @@ export function ChangePasswordSection({ state, service }: ChangePasswordSectionP
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-foreground">Ganti Password</h1>
+        <h1 className="text-2xl font-bold text-foreground">Ganti Kata Sandi</h1>
         <p className="text-sm text-muted-foreground">
-          Ganti password secara berkala untuk menjaga keamanan akun Anda.
+          Ganti kata sandi secara berkala untuk menjaga keamanan akun Anda.
         </p>
       </header>
 
@@ -68,15 +68,15 @@ function ChangePasswordForm({
     setLocalError(null);
 
     if (!oldPassword) {
-      setLocalError('Password lama wajib diisi.');
+      setLocalError('Kata Sandi lama wajib diisi.');
       return;
     }
     if (newPassword.length < 8) {
-      setLocalError('Password baru minimal 8 karakter.');
+      setLocalError('Kata Sandi baru minimal 8 karakter.');
       return;
     }
     if (newPassword !== confirmPassword) {
-      setLocalError('Konfirmasi password baru tidak cocok.');
+      setLocalError('Konfirmasi kata sandi baru tidak cocok.');
       return;
     }
 
@@ -90,27 +90,27 @@ function ChangePasswordForm({
           <KeyRound className="size-4 text-primary" />
           Keamanan Akun
         </CardTitle>
-        <CardDescription>Password baru minimal 8 karakter.</CardDescription>
+        <CardDescription>Kata Sandi baru minimal 8 karakter.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <label htmlFor="oldPassword" className="text-sm font-medium">
-              Password Lama
+              Kata Sandi Lama
             </label>
             <Input
               id="oldPassword"
               type="password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
-              placeholder="Masukkan password saat ini"
+              placeholder="Masukkan kata sandi saat ini"
               autoComplete="current-password"
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <label htmlFor="newPassword" className="text-sm font-medium">
-              Password Baru
+              Kata Sandi Baru
             </label>
             <Input
               id="newPassword"
@@ -124,14 +124,14 @@ function ChangePasswordForm({
 
           <div className="flex flex-col gap-2">
             <label htmlFor="confirmPassword" className="text-sm font-medium">
-              Konfirmasi Password Baru
+              Konfirmasi Kata Sandi Baru
             </label>
             <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Ulangi password baru"
+              placeholder="Ulangi kata sandi baru"
               autoComplete="new-password"
             />
           </div>
@@ -153,7 +153,7 @@ function ChangePasswordForm({
               ) : (
                 <Save className="size-4" />
               )}
-              {isChangingPassword ? 'Menyimpan…' : 'Ganti Password'}
+              {isChangingPassword ? 'Menyimpan…' : 'Ganti Kata Sandi'}
             </Button>
           </div>
         </form>

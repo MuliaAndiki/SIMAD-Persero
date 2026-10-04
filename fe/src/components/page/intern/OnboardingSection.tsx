@@ -37,7 +37,7 @@ export interface OnboardingSectionProps {
 
 /** Baris placeholder skeleton — key statis agar tidak memakai indeks array. */
 const PLACEHOLDER_ROWS = Array.from({ length: 5 }, (_, i) => ({
-  id: `onboarding-skeleton-${i}`,
+  id: `orientasi-skeleton-${i}`,
 }));
 
 /** Ketentuan tata tertib yang wajib disetujui peserta magang. */
@@ -46,7 +46,7 @@ const TATA_TERTIB = [
   'Menggunakan pakaian rapi dan sopan selama kegiatan magang.',
   'Menjaga nama baik perusahaan dan kerahasiaan data perusahaan.',
   'Mengisi absensi harian melalui aplikasi pada saat masuk dan pulang.',
-  'Melaporkan kendala atau ketidakhadiran kepada supervisor.',
+  'Melaporkan kendala atau ketidakhadiran kepada mentor.',
   'Mematuhi seluruh aturan dan ketentuan yang berlaku di lingkungan kerja.',
 ];
 
@@ -86,7 +86,7 @@ function formatDate(value: string | null): string {
 function internshipStatusLabel(status: string | null): string {
   switch (status) {
     case 'PENDING':
-      return 'Pending';
+      return 'Menunggu';
     case 'ACTIVE':
       return 'Aktif';
     case 'COMPLETED':
@@ -166,7 +166,7 @@ function SupervisorInfoCard({
       <CardHeader className="space-y-0.5">
         <CardTitle className="flex items-center gap-2 text-base">
           <UserCheck className="size-4 text-primary" />
-          Supervisor Pembimbing
+          Mentor Pembimbing
         </CardTitle>
         <CardDescription>Pembimbing yang bertanggung jawab selama Anda magang.</CardDescription>
       </CardHeader>
@@ -189,7 +189,7 @@ function SupervisorInfoCard({
             ) : null}
           </>
         ) : (
-          <p className="text-muted-foreground">Supervisor pembimbing belum ditetapkan.</p>
+          <p className="text-muted-foreground">Mentor pembimbing belum ditetapkan.</p>
         )}
       </CardContent>
     </Card>

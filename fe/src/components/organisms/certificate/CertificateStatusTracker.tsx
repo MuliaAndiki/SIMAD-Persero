@@ -75,7 +75,7 @@ export function CertificateStatusTracker({
       id: 'step-3',
       stepNumber: 3,
       title: 'Validasi & Persetujuan HR',
-      desc: 'Verifikasi nilai & approval HR Admin',
+      desc: 'Verifikasi nilai & persetujuan Admin HR',
       icon: ShieldCheck,
       isDone: currentStep > 2,
       isActive: currentStep === 2,
@@ -83,7 +83,7 @@ export function CertificateStatusTracker({
     {
       id: 'step-4',
       stepNumber: 4,
-      title: 'E-Sertifikat Terbit',
+      title: 'Sertifikat Elektronik Terbit',
       desc: 'Sertifikat resmi siap diunduh secara online',
       icon: Award,
       isDone: currentStep === 3,
@@ -98,7 +98,7 @@ export function CertificateStatusTracker({
           <div>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Sparkles className="size-5 text-primary" />
-              Status Penerbitan E-Sertifikat
+              Status Penerbitan Sertifikat Elektronik
             </CardTitle>
             <CardDescription>
               Pantau progres kelulusan dan tahapan verifikasi sertifikat digital Anda.

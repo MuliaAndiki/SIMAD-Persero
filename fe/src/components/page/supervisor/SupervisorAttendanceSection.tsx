@@ -209,8 +209,8 @@ export function SupervisorAttendanceSection({ state, actions }: SupervisorAttend
           columns={[
             { label: 'Peserta Magang' },
             { label: 'Departemen' },
-            { label: 'Check-In' },
-            { label: 'Check-Out' },
+            { label: 'Masuk' },
+            { label: 'Pulang' },
             { label: 'Status' },
             { label: 'Aksi', className: 'px-6 py-3 text-right font-medium' },
           ]}

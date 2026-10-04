@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import CertificateBuilderContainer from './_containers/certificate-builder';
 
 export const metadata: Metadata = {
-  title: 'Certificate Layout Builder - SIMAD',
+  title: 'Penyusun Tata Letak Sertifikat - SIMAD',
   description: 'Atur tata letak posisi elemen teks pada sertifikat magang secara visual',
 };
 

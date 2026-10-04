@@ -53,11 +53,11 @@ export function SupervisorTable({
 
   return (
     <DataTableCard
-      title="Daftar Supervisor"
-      description={`${supervisors.length} supervisor ditemukan`}
+      title="Daftar Mentor"
+      description={`${supervisors.length} mentor ditemukan`}
       columns={[
         { label: 'Nama' },
-        { label: 'Email' },
+        { label: 'Surel' },
         { label: 'Kantor' },
         { label: 'Departemen' },
         { label: 'Status' },
@@ -66,7 +66,7 @@ export function SupervisorTable({
       ]}
       isEmpty={supervisors.length === 0}
       emptyIcon={UserCheck}
-      emptyMessage="Belum ada supervisor yang cocok dengan filter."
+      emptyMessage="Belum ada mentor yang cocok dengan filter."
     >
       {supervisors.map((supervisor) => (
         <tr
@@ -106,7 +106,7 @@ export function SupervisorTable({
                 },
                 {
                   key: 'edit',
-                  label: 'Edit',
+                  label: 'Ubah',
                   icon: Pencil,
                   hidden: !onEditSupervisor,
                   onSelect: () => onEditSupervisor?.(supervisor.id),
@@ -126,7 +126,7 @@ export function SupervisorTable({
                   onSelect: () =>
                     alert.confirm({
                       title: 'Hapus',
-                      deskripsi: 'Apakah Kamu Ingin Menghapus Supervisor Ini?',
+                      deskripsi: 'Apakah Kamu Ingin Menghapus Mentor Ini?',
                       icon: 'question',
                       confirmButtonText: 'Hapus',
                       onConfirm: () => {

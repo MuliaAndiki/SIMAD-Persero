@@ -173,8 +173,8 @@ export function OverrideAttendanceDialog({
                 <SelectValue placeholder="Pilih jenis" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="CHECK_IN">Check In (Jam Masuk)</SelectItem>
-                <SelectItem value="CHECK_OUT">Check Out (Jam Pulang)</SelectItem>
+                <SelectItem value="CHECK_IN">Masuk (Jam Masuk)</SelectItem>
+                <SelectItem value="CHECK_OUT">Pulang (Jam Pulang)</SelectItem>
                 <SelectItem value="INVALID">Tidak Hadir / Tidak Valid</SelectItem>
               </SelectContent>
             </Select>
@@ -182,7 +182,7 @@ export function OverrideAttendanceDialog({
           {isTimeType && (
             <div className="flex flex-col gap-1.5">
               <label htmlFor="overrideTime" className="text-sm font-medium">
-                Waktu {form.type === 'CHECK_IN' ? 'Check In' : 'Check Out'}
+                Waktu {form.type === 'CHECK_IN' ? 'Masuk' : 'Pulang'}
               </label>
               <Input
                 id="overrideTime"

@@ -77,9 +77,9 @@ export function SendNotificationModal({
                 <SelectValue placeholder="Pilih Tipe" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ANNOUNCEMENT">Pengumuman (ANNOUNCEMENT)</SelectItem>
-                <SelectItem value="INFO">Informasi (INFO)</SelectItem>
-                <SelectItem value="WARNING">Peringatan (WARNING)</SelectItem>
+                <SelectItem value="ANNOUNCEMENT">Pengumuman</SelectItem>
+                <SelectItem value="INFO">Informasi</SelectItem>
+                <SelectItem value="WARNING">Peringatan</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -27,7 +27,7 @@ export function HrOverview({ data }: { data: HrDashboardResponse }) {
         icon={CalendarCheck}
         label="Absensi Hari Ini"
         value={data.attendanceToday}
-        description="Total check-in"
+        description="Total masuk"
         tone="muted"
       />
       <StatCard
@@ -39,7 +39,7 @@ export function HrOverview({ data }: { data: HrDashboardResponse }) {
       />
       <StatCard
         icon={Users}
-        label="Total Supervisor"
+        label="Total Mentor"
         value={data.totalSupervisors}
         description="Terdaftar"
         tone="muted"

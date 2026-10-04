@@ -68,7 +68,7 @@ class ApplicationService {
       body,
     );
     return toServiceResponse(res, {
-      message: 'Draft lamaran berhasil diperbarui',
+      message: 'Draf lamaran berhasil diperbarui',
     });
   }
 
@@ -107,7 +107,7 @@ class ApplicationService {
   public async DeleteDraft(params: Pick<ApplicationParams, 'id'>): Promise<TResponse<null>> {
     const res = await client.DeleteResponse<null>(APPLICATION_ENDPOINTS.DELETE(params.id));
     return toServiceResponse(res, {
-      message: 'Draft lamaran berhasil dihapus',
+      message: 'Draf lamaran berhasil dihapus',
     });
   }
 

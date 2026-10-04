@@ -101,9 +101,9 @@ function roleLabel(role: string | null): string {
     case 'INTERN':
       return 'Peserta Magang';
     case 'HR_ADMIN':
-      return 'HR Admin';
+      return 'Admin HR';
     case 'SUPERVISOR':
-      return 'Supervisor';
+      return 'Mentor';
     default:
       return role ?? '-';
   }
@@ -185,7 +185,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
               <dd className="text-sm font-medium">{profile.fullName}</dd>
             </div>
             <div className="flex flex-col gap-1 rounded-lg border bg-muted/40 p-4">
-              <dt className="text-xs text-muted-foreground">Email</dt>
+              <dt className="text-xs text-muted-foreground">Surel</dt>
               <dd className="flex items-center gap-1.5 text-sm font-medium">
                 <Mail className="size-3.5 shrink-0 text-primary" />
                 {profile.email}
@@ -218,7 +218,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
             <Button asChild>
               <Link href={`${basePath}/skills`}>
                 <Sparkles className="size-4" />
-                Kelola Skill
+                Kelola Keterampilan
               </Link>
             </Button>
           </>
@@ -231,7 +231,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
         </Button>
         <Button type="button" variant="outline" onClick={service.onOpenChangeEmail}>
           <Mail className="size-4" />
-          Ubah Email
+          Ubah Surel
         </Button>
         {(roleUpper === 'INTERN' || roleUpper === 'HR_ADMIN') && (
           <>
@@ -244,7 +244,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
             <Button asChild variant="outline">
               <Link href={`${basePath}/password`}>
                 <KeyRound className="size-4" />
-                Ganti Password
+                Ganti Kata Sandi
               </Link>
             </Button>
           </>
@@ -263,7 +263,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
           }
           disabled={state.isPending}
         >
-          {state.isPending ? 'Loading...' : 'Keluar'}
+          {state.isPending ? 'Memuat...' : 'Keluar'}
         </Button>
       </div>
 

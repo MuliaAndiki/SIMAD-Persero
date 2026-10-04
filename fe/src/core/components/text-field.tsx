@@ -71,7 +71,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
               onClick={() => document.getElementById(id || 'file')?.click()}
               type="button"
             >
-              {file?.name || placeholder || 'Choose File'}
+              {file?.name || placeholder || 'Pilih Berkas'}
             </button>
             <input
               type="file"
@@ -153,7 +153,7 @@ const TextField = forwardRef<HTMLInputElement, InputBaseProps>(
           )}
           {forgotPassword && type === 'password' && (
             <Link href="/forgot-password" className="text-blue-500 text-sm font-normal">
-              Forgot Password ?
+              Lupa Kata Sandi ?
             </Link>
           )}
         </div>

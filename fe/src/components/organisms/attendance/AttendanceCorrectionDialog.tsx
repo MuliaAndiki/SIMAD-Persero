@@ -74,7 +74,7 @@ export function AttendanceCorrectionDialog({
     try {
       setIsUploading(true);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('berkas', file);
       const res = await uploadFileMutation.mutateAsync(formData);
       const uploadedId = (res as any)?.data?.id ?? (res as any)?.id;
       if (uploadedId) {
@@ -160,7 +160,7 @@ export function AttendanceCorrectionDialog({
           <DialogHeader>
             <DialogTitle>Ajukan Koreksi Presensi</DialogTitle>
             <DialogDescription>
-              Ajukan permohonan koreksi jam hadir atau status presensi kepada supervisor Anda.
+              Ajukan permohonan koreksi jam hadir atau status presensi kepada mentor Anda.
             </DialogDescription>
           </DialogHeader>
 
@@ -280,7 +280,7 @@ export function AttendanceCorrectionDialog({
               <div className="flex items-center gap-3">
                 <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-input bg-muted/30 px-4 py-2 text-sm hover:bg-muted/60 transition">
                   <UploadCloud className="size-4 text-muted-foreground" />
-                  <span>{isUploading ? 'Mengunggah...' : 'Pilih File Bukti (Foto/PDF)'}</span>
+                  <span>{isUploading ? 'Mengunggah...' : 'Pilih Berkas Bukti (Foto/PDF)'}</span>
                   <input
                     id="evidence"
                     type="file"
@@ -302,7 +302,7 @@ export function AttendanceCorrectionDialog({
             <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-700 dark:text-amber-400">
               <AlertCircle className="size-4 shrink-0 mt-0.5" />
               <p>
-                Pengajuan koreksi akan diteruskan kepada pembimbing lapangan (supervisor) Anda untuk
+                Pengajuan koreksi akan diteruskan kepada pembimbing lapangan (mentor) Anda untuk
                 ditinjau dan disetujui.
               </p>
             </div>

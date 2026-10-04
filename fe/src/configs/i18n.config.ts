@@ -1,12 +1,12 @@
 import type { InitOptions } from 'i18next';
 
 export const defaultNS = 'common';
-export const fallbackLng = 'en';
+export const fallbackLng = 'id';
 
 export const languages = ['en', 'id'] as const;
 export type Language = (typeof languages)[number];
 
-export const defaultLanguage: Language = 'en';
+export const defaultLanguage: Language = 'id';
 
 export const i18nConfig: InitOptions = {
   defaultNS,

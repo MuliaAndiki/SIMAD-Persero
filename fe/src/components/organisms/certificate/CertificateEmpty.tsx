@@ -53,7 +53,7 @@ export function CertificateEmpty({
             </>
           ) : isCertificateGenerated ? (
             <>
-              Sertifikat Anda sedang dalam proses penerbitan. Mohon tunggu atau hubungi HR Admin
+              Sertifikat Anda sedang dalam proses penerbitan. Mohon tunggu atau hubungi Admin HR
               untuk informasi lebih lanjut.
             </>
           ) : isActive ? (
@@ -85,7 +85,7 @@ export function CertificateEmpty({
               ) : (
                 <>
                   <Download className="size-4" />
-                  <span>Download Sertifikat</span>
+                  <span>Unduh Sertifikat</span>
                 </>
               )}
             </Button>

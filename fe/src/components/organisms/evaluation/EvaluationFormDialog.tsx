@@ -144,7 +144,7 @@ export function EvaluationFormDialog({
           </div>
           {isFinal && (
             <Badge variant="default" className="bg-emerald-600">
-              Nilai Final
+              Nilai Akhir
             </Badge>
           )}
         </div>
@@ -217,7 +217,7 @@ export function EvaluationFormDialog({
 
           <div className="grid gap-1.5">
             <Label htmlFor="technical" className="text-xs font-medium flex items-center justify-between">
-              <span>5. Kemampuan Teknis / Skill (0-100)</span>
+              <span>5. Kemampuan Teknis / Keterampilan (0-100)</span>
               <span className="font-mono font-bold text-primary">{technicalScore}</span>
             </Label>
             <Input
@@ -282,7 +282,7 @@ export function EvaluationFormDialog({
         {/* Catatan Supervisor */}
         <div className="grid gap-1.5">
           <Label htmlFor="comments" className="text-xs font-medium">
-            Catatan / Masukan Supervisor untuk Peserta
+            Catatan / Masukan Mentor untuk Peserta
           </Label>
           <Textarea
             id="comments"

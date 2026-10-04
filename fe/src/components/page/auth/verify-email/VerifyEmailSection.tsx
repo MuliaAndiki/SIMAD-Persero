@@ -22,7 +22,7 @@ export function VerifyEmailSection({ state, service }: VerifyEmailSectionProps) 
       <div className="card-glass w-full max-w-md overflow-hidden rounded-2xl bg-card shadow-xl">
         <div className="px-8 py-10">
           <div className="mb-10 text-center">
-            <h1 className="mb-2 text-3xl font-bold text-foreground">Verifikasi Email</h1>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">Verifikasi Surel</h1>
             <p className="text-sm text-foreground/60">
               Sistem Informasi Manajemen Magang & Absensi Digital
             </p>
@@ -40,11 +40,11 @@ export function VerifyEmailSection({ state, service }: VerifyEmailSectionProps) 
               <>
                 <CheckCircle2 className="h-14 w-14 text-emerald-500" />
                 <p className="text-base font-semibold text-foreground">
-                  Email Berhasil Diverifikasi
+                  Surel Berhasil Diverifikasi
                 </p>
                 <p className="text-sm text-foreground/70">{message}</p>
                 <Button className="mt-2 w-full" onClick={service.onGoToLogin}>
-                  Lanjut ke Login
+                  Lanjut ke Masuk
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </>
@@ -61,7 +61,7 @@ export function VerifyEmailSection({ state, service }: VerifyEmailSectionProps) 
                     Coba Lagi
                   </Button>
                   <Button variant="ghost" onClick={service.onGoToLogin}>
-                    Kembali ke Login
+                    Kembali ke Masuk
                   </Button>
                 </div>
               </>

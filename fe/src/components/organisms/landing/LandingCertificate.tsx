@@ -93,7 +93,7 @@ export function LandingCertificate() {
               <div>
                 <h4 className="font-semibold text-foreground text-lg">Sertifikat Diterbitkan</h4>
                 <p className="text-muted-foreground text-sm">
-                  E-certificate dapat diunduh kapan saja.
+                  Sertifikat elektronik dapat diunduh kapan saja.
                 </p>
               </div>
             </div>

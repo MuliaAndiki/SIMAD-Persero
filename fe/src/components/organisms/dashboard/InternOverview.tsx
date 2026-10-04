@@ -80,10 +80,10 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                 {data.internship.status === 'PENDING' && (
                   <div className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3">
                     <p className="text-sm">
-                      Status magang Anda masih <strong>Pending</strong>.
+                      Status magang Anda masih <strong>Menunggu</strong>.
                     </p>
                     <Button asChild size="sm" className="w-fit">
-                      <Link href="/intern/onboarding">Selesaikan Onboarding</Link>
+                      <Link href="/intern/onboarding">Selesaikan Orientasi</Link>
                     </Button>
                   </div>
                 )}
@@ -168,7 +168,7 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
             {data.todayAttendance ? (
               <div className="flex flex-col gap-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground">Check-in</span>
+                  <span className="text-muted-foreground">Masuk</span>
                   <span className="flex items-center gap-2 font-medium text-foreground">
                     {formatTime(data.todayAttendance.checkInAt)}
                     <Badge variant="secondary">
@@ -177,7 +177,7 @@ export function InternOverview({ data }: { data: InternDashboardResponse }) {
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground">Check-out</span>
+                  <span className="text-muted-foreground">Pulang</span>
                   <span className="flex items-center gap-2 font-medium text-foreground">
                     {formatTime(data.todayAttendance.checkOutAt)}
                     <Badge variant="secondary">

@@ -32,7 +32,7 @@ class DashboardService {
   public async Intern(): Promise<TResponse<InternDashboardResponse>> {
     const res = await client.GetResponse<InternDashboardResponse>(DASHBOARD_ENDPOINTS.INTERN);
     return toServiceResponse(res, {
-      message: 'Dashboard intern berhasil dimuat',
+      message: 'Dasbor magang berhasil dimuat',
     });
   }
 
@@ -42,7 +42,7 @@ class DashboardService {
    */
   public async Hr(): Promise<TResponse<HrDashboardResponse>> {
     const res = await client.GetResponse<HrDashboardResponse>(DASHBOARD_ENDPOINTS.HR);
-    return toServiceResponse(res, { message: 'Dashboard HR berhasil dimuat' });
+    return toServiceResponse(res, { message: 'Dasbor HR berhasil dimuat' });
   }
 
   /**
@@ -52,7 +52,7 @@ class DashboardService {
   public async Supervisor(): Promise<TResponse<SupervisorDashboardData>> {
     const res = await client.GetResponse<SupervisorDashboardData>(DASHBOARD_ENDPOINTS.SUPERVISOR);
     return toServiceResponse(res, {
-      message: 'Dashboard supervisor berhasil dimuat',
+      message: 'Dasbor mentor berhasil dimuat',
     });
   }
 
@@ -81,7 +81,7 @@ class DashboardService {
       DASHBOARD_ENDPOINTS.RECEPTIONIST,
     );
     return toServiceResponse(res, {
-      message: 'Dashboard receptionist berhasil dimuat',
+      message: 'Dasbor receptionist berhasil dimuat',
     });
   }
 

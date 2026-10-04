@@ -45,7 +45,7 @@ export function GenerateCertificateModal({
             <span className="font-semibold text-foreground">
               {internship?.internProfile?.user.fullName}
             </span>
-            . File PDF sertifikat akan dibuat otomatis dan dapat diunduh oleh peserta.
+            . Berkas PDF sertifikat akan dibuat otomatis dan dapat diunduh oleh peserta.
           </DialogDescription>
         </DialogHeader>
 

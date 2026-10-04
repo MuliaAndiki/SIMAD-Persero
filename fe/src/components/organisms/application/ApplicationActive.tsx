@@ -126,7 +126,7 @@ const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
                       onClick={() => setShowPdfPreview((prev) => !prev)}
                     >
                       {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
+                      {showPdfPreview ? 'Tutup Pratinjau' : 'Pratinjau PDF'}
                     </Button>
                     {previewUrl && (
                       <Button asChild variant="outline" size="sm">
@@ -143,7 +143,7 @@ const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
                     <iframe
                       src={previewUrl}
                       className="h-[520px] w-full border-0"
-                      title={`Preview ${app.introductionLetterFile.originalName}`}
+                      title={`Pratinjau ${app.introductionLetterFile.originalName}`}
                     />
                   </div>
                 )}
@@ -170,7 +170,7 @@ const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
               </Button>
               <Button variant="outline" onClick={() => setIsEditing(true)} disabled={isSubmitting}>
                 <Edit className="size-4" />
-                Edit Draft
+                Ubah Draf
               </Button>
               <Button
                 variant="destructive"
@@ -183,7 +183,7 @@ const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
                     Hapus Draf
                   </div>
                 ) : (
-                  <div>Loading...</div>
+                  <div>Memuat...</div>
                 )}
               </Button>
             </>

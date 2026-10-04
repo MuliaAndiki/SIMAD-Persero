@@ -144,7 +144,7 @@ export function GuideFormDialog({
                 <Label htmlFor="guideTitle">Judul Panduan *</Label>
                 <Input
                   id="guideTitle"
-                  placeholder="Contoh: Tata Cara Presensi & Geofence"
+                  placeholder="Contoh: Tata Cara Presensi & Batas Lokasi"
                   value={title}
                   onChange={handleTitleChange}
                   required
@@ -158,9 +158,9 @@ export function GuideFormDialog({
                     <SelectValue placeholder="Pilih Kategori" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ONBOARDING">Onboarding</SelectItem>
+                    <SelectItem value="ONBOARDING">Orientasi</SelectItem>
                     <SelectItem value="ATTENDANCE">Presensi</SelectItem>
-                    <SelectItem value="LOGBOOK">Logbook</SelectItem>
+                    <SelectItem value="LOGBOOK">Jurnal</SelectItem>
                     <SelectItem value="FINAL_REPORT">Laporan Akhir</SelectItem>
                     <SelectItem value="CERTIFICATE">Sertifikat</SelectItem>
                     <SelectItem value="GENERAL">Umum</SelectItem>
@@ -203,7 +203,7 @@ export function GuideFormDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="guideVideo">Link Video Tutorial (YouTube / MP4)</Label>
+              <Label htmlFor="guideVideo">Tautan Video Tutorial (YouTube / MP4)</Label>
               <Input
                 id="guideVideo"
                 placeholder="https://www.youtube.com/watch?v=..."
@@ -216,7 +216,7 @@ export function GuideFormDialog({
               <Label htmlFor="guideContent">Konten Panduan / Petunjuk Lengkap *</Label>
               <Textarea
                 id="guideContent"
-                placeholder="Tulis langkah-langkah detail atau petunjuk bagi intern..."
+                placeholder="Tulis langkah-langkah detail atau petunjuk bagi peserta magang..."
                 rows={6}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -233,7 +233,7 @@ export function GuideFormDialog({
                 className="size-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <Label htmlFor="isPublished" className="text-sm font-normal cursor-pointer">
-                Publikasikan panduan ini ke peserta magang (Published)
+                Publikasikan panduan ini ke peserta magang
               </Label>
             </div>
           </div>

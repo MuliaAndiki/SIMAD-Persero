@@ -667,7 +667,7 @@ function FieldSidebar({
             className="text-xs font-semibold text-foreground flex items-center gap-1.5"
           >
             <Type className="size-3.5 text-primary" />
-            Ukuran Font
+            Ukuran Huruf
           </label>
           <span className="font-mono text-xs font-bold text-primary">
             {(field.scale * 100).toFixed(0)}%
@@ -685,7 +685,7 @@ function FieldSidebar({
               })
             }
             className="size-7 p-0"
-            title="Perkecil Font"
+            title="Perkecil Huruf"
           >
             <ChevronDown className="size-3.5" />
           </Button>
@@ -710,7 +710,7 @@ function FieldSidebar({
               })
             }
             className="size-7 p-0"
-            title="Perbesar Font"
+            title="Perbesar Huruf"
           >
             <ChevronUp className="size-3.5" />
           </Button>
@@ -729,10 +729,10 @@ function FieldSidebar({
               size="sm"
               onClick={() => onUpdateField({ ...field, bold: !field.bold })}
               className="h-8 px-2.5 text-xs gap-1"
-              title="Tebal (Bold)"
+              title="Tebal"
             >
               <Bold className="size-3.5" />
-              <span>Bold</span>
+              <span>Tebal</span>
             </Button>
 
             {/* Italic Toggle */}
@@ -742,10 +742,10 @@ function FieldSidebar({
               size="sm"
               onClick={() => onUpdateField({ ...field, italic: !field.italic })}
               className="h-8 px-2.5 text-xs gap-1"
-              title="Miring (Italic)"
+              title="Miring"
             >
               <Italic className="size-3.5" />
-              <span>Italic</span>
+              <span>Miring</span>
             </Button>
 
             {/* Uppercase Toggle */}
@@ -888,7 +888,7 @@ function PreviewSidebar({
       <div className="pb-2 border-b">
         <div className="flex items-center gap-2">
           <Eye className="size-4 text-primary" />
-          <span className="text-sm font-bold text-foreground">Pratinjau Cetak Final</span>
+          <span className="text-sm font-bold text-foreground">Pratinjau Cetak Akhir</span>
         </div>
         <p className="text-[11px] text-muted-foreground mt-0.5">
           Tampilan identik sesuai dengan sertifikat yang akan diterbitkan.
@@ -910,7 +910,7 @@ function PreviewSidebar({
           </Badge>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          Template: {templateFileName || 'Template Resmi PT PLN (Persero)'}
+          Templat: {templateFileName || 'Templat Resmi PT PLN (Persero)'}
         </p>
       </div>
 
@@ -995,7 +995,7 @@ function PreviewSidebar({
           className="w-full text-xs gap-1.5"
         >
           <Pencil className="size-3.5 text-violet-500" />
-          <span>Kembali ke Mode Edit</span>
+          <span>Kembali ke Mode Sunting</span>
         </Button>
         <Button
           type="button"
@@ -1242,7 +1242,7 @@ export function CertificateDragEditor({
                 className="h-8 gap-1 text-xs"
               >
                 <RefreshCw className="size-3.5" />
-                <span className="hidden sm:inline">Reset Default</span>
+                <span className="hidden sm:inline">Atur Ulang Bawaan</span>
               </Button>
             </>
           )}
@@ -1256,7 +1256,7 @@ export function CertificateDragEditor({
             }`}
           >
             {isSaved ? <Check className="size-3.5" /> : <Save className="size-3.5" />}
-            <span>{isSaved ? 'Tersimpan ✓' : 'Simpan Layout'}</span>
+<span>{isSaved ? 'Tersimpan ✓' : 'Simpan Tata Letak'}</span>
           </Button>
         </div>
       </header>
@@ -1271,8 +1271,8 @@ export function CertificateDragEditor({
               <div className="flex items-center gap-1.5">
                 <GripVertical className="size-3.5 text-violet-500" />
                 <span>
-                  Seret label pada elemen untuk mengubah posisi • Klik elemen untuk mengatur teks,
-                  ukuran, warna, bold, &amp; italic di panel samping.
+                   Seret label pada elemen untuk mengubah posisi • Klik elemen untuk mengatur teks,
+                   ukuran, warna, tebal, &amp; miring di panel samping.
                 </span>
               </div>
               <span className="font-mono text-[10px] hidden sm:inline">A4 (29,7 cm × 21 cm)</span>
@@ -1316,7 +1316,7 @@ export function CertificateDragEditor({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={templateUrl && !isPdf ? templateUrl : '/images/FORMAT.png'}
-                alt="Template Sertifikat"
+                alt="Templat Sertifikat"
                 className="absolute inset-0 size-full object-cover pointer-events-none"
                 draggable={false}
               />

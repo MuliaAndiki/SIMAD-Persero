@@ -489,7 +489,7 @@ export function OfficeLocationMap({
                     Lat: {latitude?.toFixed(6)}, Lng: {longitude?.toFixed(6)}
                   </p>
                   <p className="text-primary font-medium">
-                    Radius Geofence: {radiusMeter} meter
+                    Radius Batas Lokasi: {radiusMeter} meter
                   </p>
                   {isInteractive && (
                     <p className="text-[10px] text-amber-600 dark:text-amber-400 italic pt-1 border-t">

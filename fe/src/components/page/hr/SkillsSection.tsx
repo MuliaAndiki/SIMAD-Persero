@@ -125,7 +125,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
 
       {isInitialLoading ? (
         <Card>
-          <TableLoader label="Memuat data skill..." />
+          <TableLoader label="Memuat data keterampilan..." />
         </Card>
       ) : state.isError ? (
         <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
@@ -161,7 +161,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
                     size="icon"
                     className="size-8"
                     onClick={() => openEdit(skill)}
-                    aria-label={`Edit ${skill.name ?? 'skill'}`}
+                    aria-label={`Ubah ${skill.name ?? 'keterampilan'}`}
                   >
                     <Pencil className="size-4" />
                   </Button>
@@ -172,7 +172,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
                     onClick={() =>
                       state.alert.confirm({
                         title: 'Hapus',
-                        deskripsi: 'Apakah Kamu Ingin Menghapus Skill Ini?',
+                        deskripsi: 'Apakah Kamu Ingin Menghapus Keterampilan Ini?',
                         icon: 'question',
                         onConfirm: () => {
                           handleDelete(skill);
@@ -180,7 +180,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
                       })
                     }
                     disabled={state.isDeleting && deletingId === skill.id}
-                    aria-label={`Hapus ${skill.name ?? 'skill'}`}
+                    aria-label={`Hapus ${skill.name ?? 'keterampilan'}`}
                   >
                     <Trash2 className="size-4" />
                   </Button>
@@ -196,7 +196,7 @@ export function SkillsSection({ state, actions }: SkillsSectionProps) {
           <Card className="w-full max-w-md p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">
-                {editing === 'new' ? 'Tambah Keterampilan' : 'Edit Keterampilan'}
+                {editing === 'new' ? 'Tambah Keterampilan' : 'Ubah Keterampilan'}
               </h2>
               <Button
                 variant="ghost"

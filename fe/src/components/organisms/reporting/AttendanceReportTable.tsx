@@ -400,10 +400,10 @@ export function AttendanceReportTable({
                 onValueChange={(val) => onSelectOffice(val === '__all__' ? '' : val)}
               >
                 <SelectTrigger className="w-full h-9 text-xs">
-                  <SelectValue placeholder="Semua Kantor (All)" />
+                  <SelectValue placeholder="Semua Kantor (Semua)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__all__">Semua Kantor (All)</SelectItem>
+                  <SelectItem value="__all__">Semua Kantor (Semua)</SelectItem>
                   {offices.map((office) => (
                     <SelectItem key={office.id} value={office.id}>
                       {office.name}
@@ -427,12 +427,12 @@ export function AttendanceReportTable({
                 <SelectTrigger className="w-full h-9 text-xs">
                   <SelectValue
                     placeholder={
-                      !selectedOfficeId ? 'Pilih Kantor dahulu' : 'Semua Departemen (All)'
+                      !selectedOfficeId ? 'Pilih Kantor dahulu' : 'Semua Departemen (Semua)'
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__all__">Semua Departemen (All)</SelectItem>
+                  <SelectItem value="__all__">Semua Departemen (Semua)</SelectItem>
                   {availableDepartments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -453,7 +453,7 @@ export function AttendanceReportTable({
                 onValueChange={(val) => onSelectInternship(val === '__all__' ? '' : val)}
               >
                 <SelectTrigger className="w-full h-9 text-xs">
-                  <SelectValue placeholder="Semua Peserta (All)" />
+                  <SelectValue placeholder="Semua Peserta (Semua)" />
                 </SelectTrigger>
                 <SelectContent className="max-h-72">
                   <div className="p-2 pb-1 sticky top-0 bg-popover z-10">
@@ -469,7 +469,7 @@ export function AttendanceReportTable({
                       />
                     </div>
                   </div>
-                  <SelectItem value="__all__">Semua Peserta Magang (All)</SelectItem>
+                  <SelectItem value="__all__">Semua Peserta Magang (Semua)</SelectItem>
                   {filteredDropdownInternships.length === 0 ? (
                     <div className="p-3 text-center text-xs text-muted-foreground">
                       Tidak ditemukan peserta
@@ -477,7 +477,7 @@ export function AttendanceReportTable({
                   ) : (
                     filteredDropdownInternships.map((intern) => (
                       <SelectItem key={intern.id} value={intern.id} className="text-xs">
-                        {intern.internProfile?.user?.fullName ?? 'Intern'}{' '}
+                        {intern.internProfile?.user?.fullName ?? 'Magang'}{' '}
                         {intern.internProfile?.studentNumber
                           ? `(${intern.internProfile.studentNumber})`
                           : ''}
@@ -572,7 +572,7 @@ export function AttendanceReportTable({
                       </div>
                     </div>
                     <Badge variant="outline" className="capitalize text-xs">
-                      {selectedInternship.status?.toLowerCase() ?? 'intern'}
+                      {selectedInternship.status?.toLowerCase() ?? 'magang'}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -696,7 +696,7 @@ export function AttendanceReportTable({
                   className="h-8 gap-1.5 text-xs shrink-0"
                 >
                   <Download className="size-3.5" />
-                  {isExporting ? 'Mengekspor...' : 'Export Excel'}
+                  {isExporting ? 'Mengekspor...' : 'Ekspor Excel'}
                 </Button>
               </div>
             </CardHeader>
@@ -709,7 +709,7 @@ export function AttendanceReportTable({
                   message={
                     searchTableQuery || statusFilter !== 'ALL'
                       ? 'Coba sesuaikan kata kunci pencarian atau tag status yang dipilih.'
-                      : 'Data absensi untuk kriteria ini belum tersedia. Klik "Semua Data (Query All)" untuk melihat seluruh riwayat.'
+                      : 'Data absensi untuk kriteria ini belum tersedia. Klik "Semua Data (Query Semua)" untuk melihat seluruh riwayat.'
                   }
                   action={
                     (!isAllActive || statusFilter !== 'ALL' || searchTableQuery) ? (

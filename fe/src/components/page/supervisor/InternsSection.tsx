@@ -28,7 +28,7 @@ export interface InternsSectionProps {
 
 /**
  * InternsSection — daftar peserta magang yang ditugaskan ke supervisor.
- * Menampilkan info magang (departemen, periode) dengan aksi "Lihat Detail Intern".
+ * Menampilkan info magang (departemen, periode) dengan aksi "Lihat Detail Magang".
  */
 export function InternsSection({ state, service }: InternsSectionProps) {
   return (

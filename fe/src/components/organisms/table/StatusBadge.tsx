@@ -89,12 +89,12 @@ const STATUS_STYLES: Record<string, StatusStyle> = {
     variant: 'destructive',
     Icon: XCircle,
   },
-  FINAL: { label: 'Final', variant: 'default', className: EMERALD_CLASS, Icon: CheckCircle2 },
+  FINAL: { label: 'Nilai Akhir', variant: 'default', className: EMERALD_CLASS, Icon: CheckCircle2 },
   AKTIF: { label: 'Aktif', variant: 'default' },
   NONAKTIF: { label: 'Nonaktif', variant: 'secondary' },
   TERSEDIA: { label: 'Tersedia', variant: 'default', className: EMERALD_CLASS },
   PENUH: { label: 'Penuh', variant: 'destructive' },
-  PUBLISHED: { label: 'Published', variant: 'default', className: EMERALD_CLASS },
+  PUBLISHED: { label: 'Diterbitkan', variant: 'default', className: EMERALD_CLASS },
 };
 
 export interface StatusBadgeProps {

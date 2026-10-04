@@ -77,7 +77,7 @@ export function ApplicationReviewDetail({
         <span className="text-xs font-medium text-muted-foreground">Data Peserta</span>
         <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
           <ApplicationDetailField label="Nama" value={app.internProfile?.user.fullName} />
-          <ApplicationDetailField label="Email" value={app.internProfile?.user.email} />
+          <ApplicationDetailField label="Surel" value={app.internProfile?.user.email} />
           <ApplicationDetailField label="NIM" value={app.internProfile?.studentNumber} />
           <ApplicationDetailField label="Institusi" value={app.internProfile?.institution?.name} />
           <ApplicationDetailField label="Jurusan" value={app.internProfile?.major?.name} />
@@ -132,7 +132,7 @@ export function ApplicationReviewDetail({
                     onClick={() => setShowPdfPreview((prev) => !prev)}
                   >
                     {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
+                    {showPdfPreview ? 'Tutup Pratinjau' : 'Pratinjau PDF'}
                   </Button>
                   {previewUrl && (
                     <Button asChild variant="outline" size="sm">
@@ -149,7 +149,7 @@ export function ApplicationReviewDetail({
                   <iframe
                     src={previewUrl}
                     className="h-[520px] w-full border-0"
-                    title={`Preview ${app.introductionLetterFile.originalName}`}
+                    title={`Pratinjau ${app.introductionLetterFile.originalName}`}
                   />
                 </div>
               )}

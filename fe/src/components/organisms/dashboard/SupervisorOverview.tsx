@@ -57,14 +57,14 @@ export function SupervisorOverview({
           icon={CheckCircle2}
           label="Hadir"
           value={data.present}
-          description="Sudah check-in"
+          description="Sudah masuk"
           className="border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)] bg-gradient-to-br from-card to-emerald-500/5"
         />
       </motion.div>
       <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="transition-all">
         <StatCard
           icon={Clock}
-          label="Belum Check-in"
+          label="Belum Masuk"
           value={data.notCheckedIn}
           description="Belum hadir"
           className="border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)] bg-gradient-to-br from-card to-amber-500/5"

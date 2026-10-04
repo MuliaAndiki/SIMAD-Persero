@@ -42,7 +42,7 @@ export function PWAUpdatePrompt() {
           <ul className="list-inside space-y-1 text-xs text-blue-800 dark:text-blue-200">
             <li>• Peningkatan performa aplikasi</li>
             <li>• Perbaikan bug dan keamanan</li>
-            <li>• Fitur dan UI improvements</li>
+            <li>• Fitur dan peningkatan UI</li>
           </ul>
         </div>
 
@@ -83,7 +83,7 @@ export function PWAUpdateToast() {
           onClick={updateApp}
           className="rounded-md bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700"
         >
-          Update
+          Perbarui
         </button>
       </div>
     </div>

@@ -86,9 +86,9 @@ export function ReceptionistDashboardSection({
       {/* Header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">Dashboard Resepsionis</h1>
+          <h1 className="text-2xl font-bold text-foreground">Dasbor Resepsionis</h1>
           <p className="text-sm text-muted-foreground">
-            Pantau kehadiran harian intern & verifikasi kedatangan di lokasi kantor.
+            Pantau kehadiran harian magang & verifikasi kedatangan di lokasi kantor.
           </p>
         </div>
         {onRefresh && (
@@ -122,7 +122,7 @@ export function ReceptionistDashboardSection({
               <span className="text-2xl font-bold text-foreground">
                 {data?.activeInternsCount ?? 0}
               </span>
-              <span className="text-xs text-muted-foreground">Total Intern Aktif</span>
+              <span className="text-xs text-muted-foreground">Total Magang Aktif</span>
             </div>
           </Card>
 
@@ -166,7 +166,7 @@ export function ReceptionistDashboardSection({
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari nama intern, email, departemen, atau status…"
+              placeholder="Cari nama magang, email, departemen, atau status…"
               className="pl-9 pr-9"
             />
             {isSearching && (
@@ -220,7 +220,7 @@ export function ReceptionistDashboardSection({
                 <tr>
                   <th className="px-4 py-3">Peserta Magang</th>
                   <th className="px-4 py-3">Departemen & Kantor</th>
-                  <th className="px-4 py-3">Waktu Check-In</th>
+                  <th className="px-4 py-3">Waktu Masuk</th>
                   <th className="px-4 py-3">Status Masuk</th>
                   <th className="px-4 py-3">Status Absensi</th>
                 </tr>

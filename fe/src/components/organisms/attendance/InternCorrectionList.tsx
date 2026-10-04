@@ -115,7 +115,7 @@ export function InternCorrectionList({
             Daftar Pengajuan Koreksi Presensi
           </CardTitle>
           <CardDescription>
-            Riwayat permohonan koreksi kehadiran Anda beserta status persetujuan supervisor.
+            Riwayat permohonan koreksi kehadiran Anda beserta status persetujuan mentor.
           </CardDescription>
         </div>
         {onOpenNewCorrection && (
@@ -130,7 +130,7 @@ export function InternCorrectionList({
             <Calendar className="size-10 text-muted-foreground/50 mb-2" />
             <p className="font-medium text-muted-foreground">Belum ada pengajuan koreksi presensi</p>
             <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-              Jika Anda mengalami kendala saat absen atau salah jam, Anda dapat mengajukan koreksi kepada supervisor.
+              Jika Anda mengalami kendala saat absen atau salah jam, Anda dapat mengajukan koreksi kepada mentor.
             </p>
             {onOpenNewCorrection && (
               <Button variant="outline" size="sm" className="mt-4" onClick={onOpenNewCorrection}>
@@ -196,7 +196,7 @@ export function InternCorrectionList({
                     <div className="flex items-start gap-1.5 text-xs text-primary font-medium mt-1">
                       <AlertCircle className="size-3.5 shrink-0 mt-0.5" />
                       <span>
-                        Catatan Supervisor: {item.supervisorNotes}
+                        Catatan Mentor: {item.supervisorNotes}
                         {item.reviewedBy ? ` (oleh ${item.reviewedBy.fullName})` : ''}
                       </span>
                     </div>

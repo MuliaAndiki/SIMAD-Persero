@@ -280,7 +280,7 @@ export function ReceptionistInternsSection({
                       <div className="flex items-center gap-2">
                         <User className="size-4 text-muted-foreground" />
                         <div className="flex flex-col">
-                          <span className="font-medium text-foreground">Supervisor</span>
+                          <span className="font-medium text-foreground">Mentor</span>
                           <span className="text-muted-foreground">
                             {intern.supervisorAssignments[0].supervisor.fullName}
                           </span>
