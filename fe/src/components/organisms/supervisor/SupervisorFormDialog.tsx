@@ -62,11 +62,11 @@ export function SupervisorFormDialog({
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <DialogHeader>
-            <DialogTitle>{isEditing ? 'Edit Supervisor' : 'Buat Supervisor'}</DialogTitle>
+            <DialogTitle>{isEditing ? 'Ubah Mentor' : 'Buat Mentor'}</DialogTitle>
             <DialogDescription>
               {isEditing
-                ? 'Ubah detail data supervisor.'
-                : 'Tambahkan akun supervisor baru ke dalam sistem.'}
+                ? 'Ubah detail data mentor.'
+                : 'Tambahkan akun mentor baru ke dalam sistem.'}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
@@ -84,7 +84,7 @@ export function SupervisorFormDialog({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                Surel
               </label>
               <Input
                 id="email"
@@ -140,7 +140,7 @@ export function SupervisorFormDialog({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password {isEditing && '(Opsional)'}
+                Kata Sandi {isEditing && '(Opsional)'}
               </label>
               <DecoratedInput
                 id="password"

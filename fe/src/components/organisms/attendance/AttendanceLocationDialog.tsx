@@ -195,7 +195,7 @@ export function AttendanceLocationDialog({
               ) : (
                 <LogOut className="size-5 text-sky-600" />
               )}
-              {isCheckIn ? 'Presensi Masuk (Check-in)' : 'Presensi Pulang (Check-out)'}
+              {isCheckIn ? 'Presensi Masuk' : 'Presensi Pulang'}
             </DialogTitle>
             <Badge variant={timeValidation.allowed ? 'default' : 'destructive'}>
               {timeValidation.currentWib}
@@ -220,8 +220,8 @@ export function AttendanceLocationDialog({
             <div className="flex flex-col gap-0.5">
               <span className="font-semibold">
                 {isCheckIn
-                  ? 'Jadwal Check-in: 08:00 - 10:00 WIB'
-                  : 'Jadwal Check-out: 17:00 - 20:00 WIB'}
+                  ? 'Jadwal Masuk: 08:00 - 10:00 WIB'
+                  : 'Jadwal Pulang: 17:00 - 20:00 WIB'}
               </span>
               <span>{timeValidation.message}</span>
             </div>
@@ -393,12 +393,12 @@ export function AttendanceLocationDialog({
             ) : isCheckIn ? (
               <>
                 <LogIn className="size-4" />
-                Konfirmasi Check-in
+                Konfirmasi Masuk
               </>
             ) : (
               <>
                 <LogOut className="size-4" />
-                Konfirmasi Check-out
+                Konfirmasi Pulang
               </>
             )}
           </Button>

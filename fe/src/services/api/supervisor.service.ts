@@ -35,7 +35,7 @@ class SupervisorService {
       SUPERVISOR_ENDPOINTS.DASHBOARD,
     );
     return toServiceResponse(res, {
-      message: 'Dashboard supervisor berhasil dimuat',
+      message: 'Dasbor mentor berhasil dimuat',
     });
   }
 
@@ -47,7 +47,7 @@ class SupervisorService {
     const qs = buildQueryString(query as Record<string, string | number | boolean>);
     const res = await client.GetResponse<SupervisorResponse[]>(`${SUPERVISOR_ENDPOINTS.LIST}${qs}`);
     return toServiceResponse(res, {
-      message: 'Daftar supervisor berhasil dimuat',
+      message: 'Daftar mentor berhasil dimuat',
     });
   }
 
@@ -62,7 +62,7 @@ class SupervisorService {
       SUPERVISOR_ENDPOINTS.DETAIL(params.supervisorId),
     );
     return toServiceResponse(res, {
-      message: 'Detail supervisor berhasil dimuat',
+      message: 'Detail mentor berhasil dimuat',
     });
   }
 
@@ -79,7 +79,7 @@ class SupervisorService {
       body,
     );
     return toServiceResponse(res, {
-      message: 'Intern berhasil ditugaskan',
+      message: 'Magang berhasil ditugaskan',
       statusCode: 201,
     });
   }
@@ -104,7 +104,7 @@ class SupervisorService {
   public async Create(body: CreateSupervisorBody): Promise<TResponse<IUser>> {
     const res = await client.PostResponse<IUser>(SUPERVISOR_ENDPOINTS.CREATE, body);
     return toServiceResponse(res, {
-      message: 'Akun supervisor berhasil dibuat',
+      message: 'Akun mentor berhasil dibuat',
       statusCode: 201,
     });
   }
@@ -122,7 +122,7 @@ class SupervisorService {
       body,
     );
     return toServiceResponse(res, {
-      message: 'Akun supervisor berhasil diperbarui',
+      message: 'Akun mentor berhasil diperbarui',
     });
   }
 
@@ -133,7 +133,7 @@ class SupervisorService {
   public async Delete(params: Pick<SupervisorParams, 'supervisorId'>): Promise<TResponse<null>> {
     const res = await client.DeleteResponse<null>(SUPERVISOR_ENDPOINTS.DELETE(params.supervisorId));
     return toServiceResponse(res, {
-      message: 'Akun supervisor berhasil dihapus',
+      message: 'Akun mentor berhasil dihapus',
     });
   }
 }

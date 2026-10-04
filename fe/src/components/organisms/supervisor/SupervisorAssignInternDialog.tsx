@@ -69,9 +69,9 @@ export function SupervisorAssignInternDialog({
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Assign Intern</DialogTitle>
+          <DialogTitle>Tetapkan Magang</DialogTitle>
           <DialogDescription>
-            Pilih peserta magang yang disetujui untuk dibimbing supervisor ini.
+            Pilih peserta magang yang disetujui untuk dibimbing mentor ini.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -86,7 +86,7 @@ export function SupervisorAssignInternDialog({
               <SelectContent>
                 {available.length === 0 ? (
                   <div className="px-4 py-2 text-sm text-muted-foreground">
-                    Tidak ada peserta yang dapat di-assign.
+                    Tidak ada peserta yang dapat ditetapkan.
                   </div>
                 ) : (
                   available.map((app) => (
@@ -104,7 +104,7 @@ export function SupervisorAssignInternDialog({
               Batal
             </Button>
             <Button type="submit" disabled={isAssigning || !internshipId}>
-              {isAssigning ? 'Menyimpan…' : 'Assign'}
+              {isAssigning ? 'Menyimpan…' : 'Tetapkan'}
             </Button>
           </DialogFooter>
         </form>

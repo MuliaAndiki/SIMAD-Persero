@@ -80,7 +80,7 @@ export function PLNLifeAtPLN() {
     >
       <div className="max-w-6xl mx-auto" ref={containerRef}>
         <SectionHeading
-          label="Life At PLN"
+          label="Kehidupan di PLN"
           title="Budaya Kerja yang Mendukung Potensimu"
           description="Dari kerja lapangan yang menantang hingga inovasi digital di kantor pusat. Temukan lingkungan yang tepat untuk mengembangkan kariermu."
         />

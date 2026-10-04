@@ -120,7 +120,7 @@ export function AttendanceDetailSection({ state, actions }: AttendanceDetailSect
                 value={formatDateTime(detail.attendanceDate)}
               />
               <AttendanceDetailField
-                label="Status Check-in"
+                label="Status Masuk"
                 value={
                   detail.checkInStatus ? (
                     <AttendanceStatusBadge status={detail.checkInStatus} />
@@ -130,7 +130,7 @@ export function AttendanceDetailSection({ state, actions }: AttendanceDetailSect
                 }
               />
               <AttendanceDetailField
-                label="Status Check-out"
+                label="Status Pulang"
                 value={
                   detail.checkOutStatus ? (
                     <AttendanceStatusBadge status={detail.checkOutStatus} />
@@ -139,8 +139,8 @@ export function AttendanceDetailSection({ state, actions }: AttendanceDetailSect
                   )
                 }
               />
-              <AttendanceDetailField label="Check-in" value={formatDateTime(detail.checkInAt)} />
-              <AttendanceDetailField label="Check-out" value={formatDateTime(detail.checkOutAt)} />
+              <AttendanceDetailField label="Masuk" value={formatDateTime(detail.checkInAt)} />
+              <AttendanceDetailField label="Pulang" value={formatDateTime(detail.checkOutAt)} />
               <AttendanceDetailField
                 label="Durasi Kerja"
                 value={formatMinutes(detail.totalWorkMinutes)}

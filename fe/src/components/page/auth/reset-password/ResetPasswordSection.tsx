@@ -27,7 +27,7 @@ export function ResetPasswordSection({ state, service }: ResetPasswordSectionPro
             <div className="w-full flex justify-center ">
               <Image alt="logo" src={'/images/logos.png'} height={86} width={86} />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Daftar Akun</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Atur Ulang Kata Sandi</h1>
             <p className="text-sm text-foreground/60">SIMAD PLN Persero</p>
           </div>
 

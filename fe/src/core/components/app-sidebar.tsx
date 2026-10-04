@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/atoms';
 import {
+  DASHBOARD_ROLE_LABELS,
   ROLE_SIDEBAR_MENU,
   SIDEBAR_MENU,
   getRoleDashboardPath,
@@ -208,9 +209,12 @@ export function AppSidebar() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user?.fullName ?? 'User'}</span>
+                    <span className="truncate font-semibold">{user?.fullName ?? 'Pengguna'}</span>
                     <span className="truncate text-xs text-muted-foreground capitalize">
-                      {user?.role?.replace('_', ' ') ?? 'Role'}
+                      {user?.role
+                        ? (DASHBOARD_ROLE_LABELS[user.role as keyof typeof DASHBOARD_ROLE_LABELS] ??
+                          user.role.replace('_', ' '))
+                        : 'Peran'}
                     </span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
@@ -235,9 +239,12 @@ export function AppSidebar() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{user?.fullName ?? 'User'}</span>
+                      <span className="truncate font-semibold">{user?.fullName ?? 'Pengguna'}</span>
                       <span className="truncate text-xs text-muted-foreground capitalize">
-                        {user?.role?.replace('_', ' ') ?? 'Role'}
+                        {user?.role
+                          ? (DASHBOARD_ROLE_LABELS[user.role as keyof typeof DASHBOARD_ROLE_LABELS] ??
+                            user.role.replace('_', ' '))
+                          : 'Peran'}
                       </span>
                     </div>
                   </div>

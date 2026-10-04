@@ -111,9 +111,9 @@ export function SupervisorsSection({ state, actions }: SupervisorsSectionProps) 
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">Supervisor</h1>
+          <h1 className="text-2xl font-bold text-foreground">Mentor</h1>
           <p className="text-sm text-muted-foreground">
-            Kelola supervisor pembimbing dan penugasan peserta magang.
+            Kelola mentor pembimbing dan penugasan peserta magang.
           </p>
         </div>
         <div className="w-full flex gap-4 justify-end ">

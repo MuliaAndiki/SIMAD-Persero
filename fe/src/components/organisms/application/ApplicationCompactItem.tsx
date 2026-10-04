@@ -23,11 +23,11 @@ export function ApplicationCompactItem({
   href,
 }: ApplicationCompactItemProps) {
   const title = showApplicant
-    ? (application.internProfile?.user.fullName ?? 'Intern')
-    : (application.applicationNumber ?? 'Draft');
+    ? (application.internProfile?.user.fullName ?? 'Magang')
+    : (application.applicationNumber ?? 'Draf');
 
   const subtitle = showApplicant
-    ? [application.applicationNumber ?? 'Draft', formatDate(application.requestedStartDate)]
+    ? [application.applicationNumber ?? 'Draf', formatDate(application.requestedStartDate)]
         .filter(Boolean)
         .join(' · ')
     : `${formatDate(application.requestedStartDate)} — ${formatDate(application.requestedEndDate)}`;

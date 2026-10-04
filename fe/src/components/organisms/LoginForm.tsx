@@ -84,11 +84,11 @@ export function LoginForm({
         </div>
       ) : (
         <TextField
-          label="Email"
+          label="Surel"
           id="email"
           name="email"
           type="email"
-          placeholder="Masukkan email Anda"
+          placeholder="Masukkan surel Anda"
           value={formLogin.email}
           onChange={(e) => onChange({ email: e.target.value })}
           disabled={isPending}
@@ -97,11 +97,11 @@ export function LoginForm({
       )}
 
       <TextField
-        label="Password"
+        label="Kata Sandi"
         id="password"
         name="password"
         type="password"
-        placeholder="Masukkan password Anda"
+        placeholder="Masukkan kata sandi Anda"
         value={formLogin.password}
         onChange={(e) => onChange({ password: e.target.value })}
         disabled={isPending}

@@ -27,16 +27,16 @@ export function ForgotPasswordSection({ state, service }: ForgotPasswordSectionP
             className="inline-flex items-center text-sm text-foreground/60 hover:text-primary mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Kembali ke login
+            Kembali ke Masuk
           </Link>
 
           <div className="text-center mb-8">
             <div className="w-full flex justify-center ">
               <Image alt="logo" src={'/images/logos.png'} height={86} width={86} />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Lupa Password</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Lupa Kata Sandi</h1>
             <p className="text-sm text-foreground/60">
-              Masukkan email Anda dan kami akan mengirimkan instruksi untuk reset password.
+              Masukkan surel Anda dan kami akan mengirimkan instruksi untuk reset kata sandi.
             </p>
           </div>
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import HrAuditLogsContainer from './_containers/audit-logs';
 
 export const metadata: Metadata = {
-  title: 'Audit Log - SIMAD',
+  title: 'Log Audit - SIMAD',
   description: 'Jejak aktivitas pengguna di seluruh modul sistem',
 };
 

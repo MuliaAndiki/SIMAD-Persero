@@ -29,7 +29,7 @@ export function ResetPasswordForm({
       <div className="bg-destructive/10 text-destructive p-4 rounded-lg flex items-start space-x-3 mb-6">
         <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
         <p className="text-sm">
-          Link reset password tidak valid atau tidak menyertakan token yang diperlukan.
+          Tautan reset kata sandi tidak valid atau tidak menyertakan token yang diperlukan.
         </p>
       </div>
     );
@@ -38,11 +38,11 @@ export function ResetPasswordForm({
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <TextField
-        label="Password Baru:"
+        label="Kata Sandi Baru:"
         id="password"
         name="password"
         type="password"
-        placeholder="Masukkan password baru"
+        placeholder="Masukkan kata sandi baru"
         value={formReset.password}
         onChange={(e) => onChange({ password: e.target.value })}
         disabled={isPending}
@@ -50,11 +50,11 @@ export function ResetPasswordForm({
       />
 
       <TextField
-        label="Confirm Password Baru:"
+        label="Konfirmasi Kata Sandi Baru:"
         id="confirm password"
         name="confirm password"
         type="password"
-        placeholder="Confirm password baru"
+        placeholder="Konfirmasi kata sandi baru"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         disabled={isPending}
@@ -67,7 +67,7 @@ export function ResetPasswordForm({
         variant="default"
         disabled={isButtonDisabled}
       >
-        {isPending ? 'Menyimpan...' : 'Simpan Password'}
+        {isPending ? 'Menyimpan...' : 'Simpan Kata Sandi'}
       </Button>
     </form>
   );

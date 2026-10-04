@@ -23,7 +23,7 @@ export function MagicLinkSection({ state, service }: MagicLinkSectionProps) {
       <div className="card-glass w-full max-w-md overflow-hidden rounded-2xl bg-card shadow-xl">
         <div className="px-8 py-10">
           <div className="mb-10 text-center">
-            <h1 className="mb-2 text-3xl font-bold text-foreground">Masuk via Magic Link</h1>
+            <h1 className="mb-2 text-3xl font-bold text-foreground">Masuk via Magic Tautan</h1>
             <p className="text-sm text-foreground/60">
               Sistem Informasi Manajemen Magang & Absensi Digital
             </p>
@@ -40,10 +40,10 @@ export function MagicLinkSection({ state, service }: MagicLinkSectionProps) {
             {status === 'success' ? (
               <>
                 <CheckCircle2 className="h-14 w-14 text-emerald-500" />
-                <p className="text-base font-semibold text-foreground">Login Berhasil</p>
+                <p className="text-base font-semibold text-foreground">Masuk Berhasil</p>
                 <p className="text-sm text-foreground/70">{message}</p>
                 <Button className="mt-2 w-full" onClick={service.onGoToDashboard}>
-                  Ke Dashboard
+                  Ke Dasbor
                   <LayoutDashboard className="ml-2 h-4 w-4" />
                 </Button>
               </>
@@ -52,7 +52,7 @@ export function MagicLinkSection({ state, service }: MagicLinkSectionProps) {
             {status === 'error' ? (
               <>
                 <XCircle className="h-14 w-14 text-red-500" />
-                <p className="text-base font-semibold text-foreground">Login Gagal</p>
+                <p className="text-base font-semibold text-foreground">Masuk Gagal</p>
                 <p className="text-sm text-foreground/70">{message}</p>
                 <div className="mt-2 flex w-full flex-col gap-2">
                   <Button variant="outline" onClick={service.onRetry}>
@@ -60,7 +60,7 @@ export function MagicLinkSection({ state, service }: MagicLinkSectionProps) {
                     Coba Lagi
                   </Button>
                   <Button variant="ghost" onClick={service.onGoToLogin}>
-                    Kembali ke Login
+                    Kembali ke Masuk
                   </Button>
                 </div>
               </>

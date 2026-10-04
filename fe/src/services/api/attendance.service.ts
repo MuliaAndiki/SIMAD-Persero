@@ -38,7 +38,7 @@ class AttendanceService {
   ): Promise<TResponse<AttendanceResponse>> {
     const res = await client.PostResponse<AttendanceResponse>(ATTENDANCE_ENDPOINTS.CHECK_IN, body);
     return toServiceResponse(res, {
-      message: 'Check-in berhasil',
+      message: 'Masuk berhasil',
       statusCode: 201,
     });
   }
@@ -51,7 +51,7 @@ class AttendanceService {
     body: Pick<CheckOutBody, 'latitude' | 'longitude' | 'accuracy'>,
   ): Promise<TResponse<AttendanceResponse>> {
     const res = await client.PostResponse<AttendanceResponse>(ATTENDANCE_ENDPOINTS.CHECK_OUT, body);
-    return toServiceResponse(res, { message: 'Check-out berhasil' });
+    return toServiceResponse(res, { message: 'Pulang berhasil' });
   }
 
   /**
@@ -103,7 +103,7 @@ class AttendanceService {
       `${ATTENDANCE_ENDPOINTS.SUPERVISOR}${qs}`,
     );
     return toServiceResponse(res, {
-      message: 'Dashboard supervisor berhasil dimuat',
+      message: 'Dasbor mentor berhasil dimuat',
     });
   }
 

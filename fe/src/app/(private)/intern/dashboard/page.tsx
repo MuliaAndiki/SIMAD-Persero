@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import InternDashboardContainer from './_containers/dashboard';
 
 export const metadata: Metadata = {
-  title: 'Dashboard Intern - SIMAD',
+  title: 'Dasbor Magang - SIMAD',
   description: 'Ringkasan magang & absensi digital peserta magang PLN Persero',
 };
 

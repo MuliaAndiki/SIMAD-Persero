@@ -119,7 +119,7 @@ export const navigationMenuConfig: NavigationMenuConfig = {
       description: 'Keunggulan magang di PLN.',
     },
     {
-      title: 'Life at PLN',
+      title: 'Kehidupan di PLN',
       href: '#culture',
       description: 'Budaya kerja dan fasilitas.',
     },
@@ -158,7 +158,7 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
     icon: FileText,
   },
   {
-    name: 'Onboarding',
+    name: 'Orientasi',
     url: '/intern/onboarding',
     icon: ClipboardCheck,
     requiresInternship: true,
@@ -234,7 +234,7 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
         icon: MapPin,
       },
       {
-        name: 'Supervisor',
+        name: 'Mentor',
         url: '/hr_admin/supervisors',
         icon: UserCheck,
       },
@@ -256,12 +256,12 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
         icon: BarChart3,
       },
       {
-        name: 'Penilaian Intern',
+        name: 'Penilaian Magang',
         url: '/hr_admin/evaluations',
         icon: ClipboardCheck,
       },
       {
-        name: 'Audit Log',
+        name: 'Log Audit',
         url: '/hr_admin/audit-logs',
         icon: ScrollText,
       },
@@ -300,7 +300,7 @@ export const SIDEBAR_MENU_HR_ADMIN: SidebarMenuItem[] = [
 export const SIDEBAR_MENU_SUPERVISOR: SidebarMenuItem[] = [
   { name: 'Beranda', url: '/supervisor/dashboard', icon: Home, subMenu: [] },
   {
-    name: 'Intern Bimbingan',
+    name: 'Magang Bimbingan',
     url: '/supervisor/interns',
     icon: Users,
     subMenu: [],
@@ -341,7 +341,7 @@ export const SIDEBAR_MENU_RECEPTIONIST: SidebarMenuItem[] = [
     subMenu: [],
   },
   {
-    name: 'Intern Aktif',
+    name: 'Magang Aktif',
     url: '/receptionist/interns',
     icon: Users,
     subMenu: [],
@@ -359,8 +359,8 @@ export const ROLE_SIDEBAR_MENU: Record<DashboardRole, SidebarMenuItem[]> = {
 /** Label role untuk UI (header dashboard, badge, dll). */
 export const DASHBOARD_ROLE_LABELS: Record<DashboardRole, string> = {
   INTERN: 'Peserta Magang',
-  HR_ADMIN: 'HR Admin',
-  SUPERVISOR: 'Supervisor',
+  HR_ADMIN: 'Admin HR',
+  SUPERVISOR: 'Mentor',
   RECEPTIONIST: 'Resepsionis',
 };
 

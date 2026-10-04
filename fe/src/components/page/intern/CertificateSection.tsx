@@ -64,7 +64,7 @@ export function CertificateSection({ state, service }: CertificateSectionProps) 
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight">E-Certificate</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Sertifikat Elektronik</h1>
         <p className="text-sm text-muted-foreground">
           Unduh dan verifikasi sertifikat kelulusan magang Anda secara digital.
         </p>

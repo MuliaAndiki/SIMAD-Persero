@@ -6,7 +6,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Sector, Tooltip } from 'recha
 /** Segmen status absensi (menggunakan warna hex untuk recharts DropShadow). */
 const ATTENDANCE_ITEMS = [
   { key: 'Hadir', valueKey: 'present', color: '#10b981' },
-  { key: 'Belum Check-in', valueKey: 'notCheckedIn', color: '#f59e0b' },
+  { key: 'Belum Masuk', valueKey: 'notCheckedIn', color: '#f59e0b' },
   { key: 'Tidak Valid', valueKey: 'invalidAttendance', color: '#f43f5e' },
 ] as const;
 

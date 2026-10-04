@@ -22,10 +22,10 @@ export interface InternshipsReportTableProps {
 
 const STATUS_TAGS = [
   { value: 'ALL', label: 'Semua' },
-  { value: 'IN_PROGRESS', label: 'Aktif (In Progress)' },
-  { value: 'COMPLETED', label: 'Selesai (Completed)' },
+  { value: 'IN_PROGRESS', label: 'Aktif' },
+  { value: 'COMPLETED', label: 'Selesai' },
   { value: 'APPROVED', label: 'Disetujui' },
-  { value: 'PENDING', label: 'Pending' },
+  { value: 'PENDING', label: 'Menunggu' },
 ];
 
 /**
@@ -97,7 +97,7 @@ export function InternshipsReportTable({
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama, NIM, universitas, jurusan, departemen, supervisor..."
+            placeholder="Cari nama, NIM, universitas, jurusan, departemen, mentor..."
             className="pl-9 pr-8 h-9 text-xs"
           />
           {searchQuery && (
@@ -154,11 +154,11 @@ export function InternshipsReportTable({
         title="Laporan Peserta Magang"
         description={`Menampilkan ${filteredRows.length} dari ${rows.length} peserta magang`}
         columns={[
-          { label: 'Intern' },
+          { label: 'Magang' },
           { label: 'Instansi' },
           { label: 'Jurusan' },
           { label: 'Departemen' },
-          { label: 'Supervisor' },
+          { label: 'Mentor' },
           { label: 'Periode' },
           { label: 'Status' },
         ]}

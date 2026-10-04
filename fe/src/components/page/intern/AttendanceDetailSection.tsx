@@ -324,14 +324,14 @@ export function AttendanceDetailSection({
           {/* Check-in / check-out */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <CheckPointCard
-              title="Check-in"
+              title="Masuk"
               icon={LogIn}
               time={detail.checkInAt}
               status={detail.checkInStatus}
               log={checkInLog}
             />
             <CheckPointCard
-              title="Check-out"
+              title="Pulang"
               icon={LogOut}
               time={detail.checkOutAt}
               status={detail.checkOutStatus}
@@ -420,7 +420,7 @@ export function AttendanceDetailSection({
                       </span>
                       <div className="flex flex-col gap-1">
                         <p className="font-medium">
-                          {log.action === "CHECK_IN" ? "Check-in" : "Check-out"}
+                          {log.action === "CHECK_IN" ? "Masuk" : "Pulang"}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(log.createdAt).toLocaleString("id-ID", {

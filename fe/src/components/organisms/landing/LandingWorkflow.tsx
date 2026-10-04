@@ -20,12 +20,12 @@ if (typeof window !== 'undefined') {
 const steps = [
   { id: 1, title: 'Pengajuan', icon: FileUp, desc: 'Submit berkas' },
   { id: 2, title: 'Verifikasi', icon: ShieldCheck, desc: 'Review oleh tim HR' },
-  { id: 3, title: 'Onboarding', icon: PlayCircle, desc: 'Pengenalan sistem' },
+  { id: 3, title: 'Orientasi', icon: PlayCircle, desc: 'Pengenalan sistem' },
   { id: 4, title: 'Penempatan', icon: MapPin, desc: 'Alokasi departemen' },
   { id: 5, title: 'Absensi', icon: CheckCircle, desc: 'Check-in harian' },
-  { id: 6, title: 'Monitoring', icon: Activity, desc: 'Pantau aktivitas' },
+  { id: 6, title: 'Pemantauan', icon: Activity, desc: 'Pantau aktivitas' },
   { id: 7, title: 'Selesai', icon: Flag, desc: 'Evaluasi akhir' },
-  { id: 8, title: 'Sertifikat', icon: Award, desc: 'E-certificate' },
+  { id: 8, title: 'Sertifikat', icon: Award, desc: 'Sertifikat elektronik' },
 ];
 
 export function LandingWorkflow() {

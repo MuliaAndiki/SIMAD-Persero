@@ -3,8 +3,8 @@ import { Suspense } from 'react';
 import SupervisorDetailContainer from './_containers/supervisor-detail';
 
 export const metadata: Metadata = {
-  title: 'Detail Supervisor - SIMAD',
-  description: 'Detail bimbingan supervisor magang',
+  title: 'Detail Mentor - SIMAD',
+  description: 'Detail bimbingan mentor magang',
 };
 
 type HrSupervisorDetailPageProps = {
@@ -15,7 +15,7 @@ export default async function HrSupervisorDetailPage({ params }: HrSupervisorDet
   const { id } = await params;
 
   return (
-    <Suspense fallback={<div className="p-8">Memuat detail supervisor...</div>}>
+    <Suspense fallback={<div className="p-8">Memuat detail mentor...</div>}>
       <SupervisorDetailContainer supervisorId={id} />
     </Suspense>
   );

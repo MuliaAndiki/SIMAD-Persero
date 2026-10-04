@@ -43,13 +43,13 @@ export const PWAInstallDialog = ({ trigger }: PWAInstallDialogProps) => {
       {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent className="w-full max-w-sm">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg">Download SIMAD</AlertDialogTitle>
+          <AlertDialogTitle className="text-lg">Unduh SIMAD</AlertDialogTitle>
           <AlertDialogDescription className="text-sm">
             {isStandalone
               ? 'SIMAD sudah terpasang di perangkat kamu.'
               : canInstall
                 ? 'Pasang SIMAD sebagai aplikasi agar akses lebih cepat dan nyaman.'
-                : 'Untuk memasang aplikasi, buka menu browser lalu pilih “Add to Home Screen” atau “Install App”.'}
+                : 'Untuk memasang aplikasi, buka menu browser lalu pilih “Tambah ke Layar Utama” atau “Pasang Aplikasi”.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 sm:gap-0">

@@ -18,16 +18,16 @@ export const ResponseTitles = {
   // Auth
   auth: {
     registered: 'Pendaftaran Berhasil',
-    loggedIn: 'Login Berhasil',
-    loggedOut: 'Logout Berhasil',
-    passwordChanged: 'Password Berhasil Diubah',
-    emailChanged: 'Email Berhasil Diubah',
-    emailVerified: 'Email Berhasil Diverifikasi',
-    passwordReset: 'Password Berhasil Direset',
+    loggedIn: 'Masuk Berhasil',
+    loggedOut: 'Keluar Berhasil',
+    passwordChanged: 'Kata Sandi Berhasil Diubah',
+    emailChanged: 'Surel Berhasil Diubah',
+    emailVerified: 'Surel Berhasil Diverifikasi',
+    passwordReset: 'Kata Sandi Berhasil Direset',
     tokenRefreshed: 'Sesi Diperpanjang',
     // Error states
     registerFailed: 'Gagal Mendaftar',
-    loginFailed: 'Gagal Login',
+    loginFailed: 'Gagal Masuk',
   },
 
   // Application
@@ -41,19 +41,19 @@ export const ResponseTitles = {
     deleted: 'Pengajuan Berhasil Dihapus',
     // Error states
     createFailed: 'Gagal Membuat Pengajuan',
-    updateFailed: 'Gagal Memperbarui Draft',
+    updateFailed: 'Gagal Memperbarui Draf',
     submitFailed: 'Gagal Mengirim Pengajuan',
     cancelFailed: 'Gagal Membatalkan Pengajuan',
-    deleteFailed: 'Gagal Menghapus Draft',
+    deleteFailed: 'Gagal Menghapus Draf',
     approveFailed: 'Gagal Menyetujui Pengajuan',
     rejectFailed: 'Gagal Menolak Pengajuan',
   },
 
   // Attendance
   attendance: {
-    checkedIn: 'Check In Berhasil',
-    checkedOut: 'Check Out Berhasil',
-    overridden: 'Absensi Berhasil Di-override',
+    checkedIn: 'Masuk Berhasil',
+    checkedOut: 'Pulang Berhasil',
+    overridden: 'Absensi Berhasil Disesuaikan',
   },
 
   // Certificate
@@ -72,9 +72,9 @@ export const ResponseTitles = {
 
   // File
   file: {
-    uploaded: 'File Berhasil Diunggah',
-    deleted: 'File Berhasil Dihapus',
-    downloaded: 'File Berhasil Diunduh',
+    uploaded: 'Berkas Berhasil Diunggah',
+    deleted: 'Berkas Berhasil Dihapus',
+    downloaded: 'Berkas Berhasil Diunduh',
   },
 
   // Institution
@@ -92,8 +92,8 @@ export const ResponseTitles = {
     completed: 'Magang Berhasil Diselesaikan',
     extended: 'Magang Berhasil Diperpanjang',
     archived: 'Magang Berhasil Diarsipkan',
-    onboardingCompleted: 'Onboarding Berhasil Diselesaikan',
-    supervisorAssigned: 'Supervisor Berhasil Ditugaskan',
+    onboardingCompleted: 'Orientasi Berhasil Diselesaikan',
+    supervisorAssigned: 'Mentor Berhasil Ditugaskan',
     departmentTransferred: 'Departemen Berhasil Dipindahkan',
   },
 
@@ -120,10 +120,10 @@ export const ResponseTitles = {
 
   // Skill
   skill: {
-    created: 'Skill Berhasil Dibuat',
-    updated: 'Skill Berhasil Diperbarui',
-    deleted: 'Skill Berhasil Dihapus',
-    added: 'Skill Berhasil Ditambahkan',
-    removed: 'Skill Berhasil Dihapus dari Profil',
+    created: 'Keterampilan Berhasil Dibuat',
+    updated: 'Keterampilan Berhasil Diperbarui',
+    deleted: 'Keterampilan Berhasil Dihapus',
+    added: 'Keterampilan Berhasil Ditambahkan',
+    removed: 'Keterampilan Berhasil Dihapus dari Profil',
   },
 } as const;

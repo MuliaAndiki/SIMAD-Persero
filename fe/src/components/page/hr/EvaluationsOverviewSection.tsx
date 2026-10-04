@@ -81,9 +81,9 @@ export function EvaluationsOverviewSection({ evaluations, isPending }: Evaluatio
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">Nama Peserta</TableHead>
                 <TableHead className="font-semibold">Departemen & Kantor</TableHead>
-                <TableHead className="font-semibold">Supervisor</TableHead>
-                <TableHead className="font-semibold text-center">Skor Akhir</TableHead>
-                <TableHead className="font-semibold text-center">Grade</TableHead>
+                <TableHead className="font-semibold">Mentor</TableHead>
+                <TableHead className="font-semibold text-center">Nilai Akhir</TableHead>
+                <TableHead className="font-semibold text-center">Nilai</TableHead>
                 <TableHead className="font-semibold text-center">Status</TableHead>
                 <TableHead className="font-semibold">Catatan Evaluasi</TableHead>
               </TableRow>

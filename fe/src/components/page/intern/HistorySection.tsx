@@ -310,7 +310,7 @@ export function HistorySection({ state, service }: HistorySectionProps) {
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold tracking-tight">Riwayat & Koreksi Presensi</h1>
           <p className="text-sm text-muted-foreground">
-            Rekap kehadiran harian magang dan pengajuan koreksi presensi kepada supervisor.
+            Rekap kehadiran harian magang dan pengajuan koreksi presensi kepada mentor.
           </p>
         </header>
 
@@ -334,14 +334,14 @@ export function HistorySection({ state, service }: HistorySectionProps) {
                     disabled={isExporting || state.internshipStatus !== 'COMPLETED'}
                   >
                     <Download className="mr-2 size-4" />
-                    {isExporting ? 'Mengekspor...' : 'Export Excel'}
+                    {isExporting ? 'Mengekspor...' : 'Ekspor Excel'}
                   </Button>
                 </div>
               </TooltipTrigger>
               {state.internshipStatus !== 'COMPLETED' && (
                 <TooltipContent>
                   <p>
-                    Export data hanya bisa dilakukan ketika status magang telah selesai (COMPLETED).
+                    Ekspor data hanya bisa dilakukan ketika status magang telah selesai (COMPLETED).
                   </p>
                 </TooltipContent>
               )}

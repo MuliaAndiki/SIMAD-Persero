@@ -103,7 +103,7 @@ export function ReceptionistApplicationDetailSection({
             label="Nama Lengkap"
             value={application.internProfile?.user?.fullName}
           />
-          <ApplicationDetailField label="Email" value={application.internProfile?.user?.email} />
+          <ApplicationDetailField label="Surel" value={application.internProfile?.user?.email} />
           <ApplicationDetailField label="Nomor Telepon" value={application.internProfile?.phone} />
           <ApplicationDetailField
             label="NIM/NPM"
@@ -196,7 +196,7 @@ export function ReceptionistApplicationDetailSection({
                     onClick={() => setShowPdfPreview((prev) => !prev)}
                   >
                     {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    {showPdfPreview ? 'Tutup Preview' : 'Preview Dokumen'}
+                    {showPdfPreview ? 'Tutup Pratinjau' : 'Pratinjau Dokumen'}
                   </Button>
                   {previewUrl && (
                     <Button asChild variant="outline" size="sm">
@@ -214,7 +214,7 @@ export function ReceptionistApplicationDetailSection({
                   <iframe
                     src={previewUrl}
                     className="h-[560px] w-full border-0"
-                    title={`Preview ${application.introductionLetterFile.originalName || 'Surat Pengantar'}`}
+                    title={`Pratinjau ${application.introductionLetterFile.originalName || 'Surat Pengantar'}`}
                   />
                 </div>
               )}

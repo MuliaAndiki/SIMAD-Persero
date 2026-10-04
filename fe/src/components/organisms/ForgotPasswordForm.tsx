@@ -25,11 +25,11 @@ export function ForgotPasswordForm({
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-2">
           <MailCheck className="w-8 h-8 text-primary" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground">Email Terkirim</h3>
+        <h3 className="text-lg font-semibold text-foreground">Surel Terkirim</h3>
         <p className="text-sm text-foreground/70">
-          Silakan cek <span className="font-bold">Kotak Masuk</span> email atau {''}
+          Silakan cek <span className="font-bold">Kotak Masuk</span> surel atau {''}
           <span className="font-bold">Folder Spam</span> Anda dan ikuti instruksi untuk mengatur
-          ulang password Anda.
+          ulang kata sandi Anda.
         </p>
       </div>
     );
@@ -38,11 +38,11 @@ export function ForgotPasswordForm({
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <TextField
-        label="Email Terdaftar"
+        label="Surel Terdaftar"
         id="email"
         name="email"
         type="email"
-        placeholder="Masukkan email Anda"
+        placeholder="Masukkan surel Anda"
         value={formForgot.email}
         onChange={(e) => onChange({ email: e.target.value })}
         disabled={isPending}
@@ -55,7 +55,7 @@ export function ForgotPasswordForm({
         variant="default"
         disabled={isPending}
       >
-        {isPending ? 'Mengirim...' : 'Kirim Link Reset'}
+        {isPending ? 'Mengirim...' : 'Kirim Tautan Reset'}
       </Button>
     </form>
   );
