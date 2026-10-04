@@ -1,20 +1,19 @@
-'use client';
+"use client";
 
-import { AboutSection } from '@/components/page/landing/AboutSection';
-import { CertificateVerificationSection } from '@/components/page/landing/CertificateVerificationSection';
-import { FAQSection } from '@/components/page/landing/FAQSection';
-import { FeaturesSection } from '@/components/page/landing/FeaturesSection';
-import { FinalCTASection } from '@/components/page/landing/FinalCTASection';
-import { GuideSection } from '@/components/page/landing/GuideSection';
-import { HeroSection } from '@/components/page/landing/HeroSection';
-import { LandingFooter } from '@/components/page/landing/LandingFooter';
-import { LandingNavbar } from '@/components/page/landing/LandingNavbar';
-import { LifecycleSection } from '@/components/page/landing/LifecycleSection';
-import { LocationsSection } from '@/components/page/landing/LocationsSection';
-import { RequirementsSection } from '@/components/page/landing/RequirementsSection';
-import { VideoSection } from '@/components/page/landing/VideoSection';
-import { PWAInstallDialog } from '@/components/pwa/PWAInstallDialog';
-import React from 'react';
+import { AboutSection } from "@/components/page/landing/AboutSection";
+import { FAQSection } from "@/components/page/landing/FAQSection";
+import { FeaturesSection } from "@/components/page/landing/FeaturesSection";
+import { FinalCTASection } from "@/components/page/landing/FinalCTASection";
+import { GuideSection } from "@/components/page/landing/GuideSection";
+import { HeroSection } from "@/components/page/landing/HeroSection";
+import { LandingFooter } from "@/components/page/landing/LandingFooter";
+import { LandingNavbar } from "@/components/page/landing/LandingNavbar";
+import { LifecycleSection } from "@/components/page/landing/LifecycleSection";
+import { LocationsSection } from "@/components/page/landing/LocationsSection";
+import { RequirementsSection } from "@/components/page/landing/RequirementsSection";
+import { VideoSection } from "@/components/page/landing/VideoSection";
+import { PWAInstallDialog } from "@/components/pwa/PWAInstallDialog";
+import React from "react";
 
 /**
  * Main SIMAD Landing Page Container.
@@ -56,9 +55,6 @@ export default function ContainerHome() {
 
         {/* 10. Frequently Asked Questions */}
         <FAQSection />
-
-        {/* 11. Certificate Verification */}
-        <CertificateVerificationSection />
 
         {/* 12. Final Call-to-Action */}
         <FinalCTASection />
