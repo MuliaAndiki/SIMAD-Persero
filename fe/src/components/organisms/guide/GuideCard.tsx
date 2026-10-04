@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
-import { Badge } from '@/components/atoms/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import type { GuideItem } from '@/types/api/guide.types';
+import { Badge } from "@/components/atoms/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/atoms/card";
+import type { GuideItem } from "@/types/api/guide.types";
 import {
   ArrowRight,
   BookOpen,
@@ -12,8 +18,8 @@ import {
   GraduationCap,
   PlayCircle,
   Video,
-} from 'lucide-react';
-import React from 'react';
+} from "lucide-react";
+import React from "react";
 
 interface GuideCardProps {
   guide: GuideItem;
@@ -23,13 +29,13 @@ interface GuideCardProps {
 export function GuideCard({ guide, onSelect }: GuideCardProps) {
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'ONBOARDING':
+      case "ONBOARDING":
         return <GraduationCap className="size-4 text-emerald-500" />;
-      case 'ATTENDANCE':
+      case "ATTENDANCE":
         return <CalendarCheck className="size-4 text-blue-500" />;
-      case 'LOGBOOK':
+      case "LOGBOOK":
         return <FileCheck className="size-4 text-amber-500" />;
-      case 'FINAL_REPORT':
+      case "FINAL_REPORT":
         return <CheckCircle2 className="size-4 text-indigo-500" />;
       default:
         return <BookOpen className="size-4 text-primary" />;
@@ -38,16 +44,18 @@ export function GuideCard({ guide, onSelect }: GuideCardProps) {
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'ONBOARDING':
-        return 'Orientasi';
-      case 'ATTENDANCE':
-        return 'Presensi';
-      case 'LOGBOOK':
-        return 'Jurnal';
-      case 'FINAL_REPORT':
-        return 'Laporan Akhir';
-      case 'CERTIFICATE':
-        return 'Sertifikat';
+      case "REGISTRATION":
+        return "Pendaftaran";
+      case "ONBOARDING":
+        return "Orientasi";
+      case "ATTENDANCE":
+        return "Presensi";
+      case "LOGBOOK":
+        return "Jurnal";
+      case "FINAL_REPORT":
+        return "Laporan Akhir";
+      case "CERTIFICATE":
+        return "Sertifikat";
       default:
         return category;
     }
@@ -55,7 +63,7 @@ export function GuideCard({ guide, onSelect }: GuideCardProps) {
 
   return (
     <Card
-      className="group flex flex-col justify-between overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-md cursor-pointer"
+      className="group flex flex-col justify-between overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-md cursor-pointer"
       onClick={() => onSelect(guide)}
     >
       <CardHeader className="p-5 pb-3">
@@ -68,7 +76,10 @@ export function GuideCard({ guide, onSelect }: GuideCardProps) {
           </div>
 
           {guide.videoUrl && (
-            <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20 text-[11px] gap-1 px-1.5 py-0">
+            <Badge
+              variant="outline"
+              className="bg-red-500/10 text-red-600 border-red-500/20 text-[11px] gap-1 px-1.5 py-0"
+            >
               <PlayCircle className="size-3" /> Video
             </Badge>
           )}

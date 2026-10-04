@@ -27,9 +27,10 @@ export interface InternGuideSectionProps {
 
 const CATEGORIES = [
   { key: 'ALL', label: 'Semua Kategori', icon: BookOpen },
-  { key: 'ONBOARDING', label: 'Onboarding', icon: GraduationCap },
+  { key: 'REGISTRATION', label: 'Pendaftaran', icon: Sparkles },
+  { key: 'ONBOARDING', label: 'Orientasi', icon: GraduationCap },
   { key: 'ATTENDANCE', label: 'Presensi', icon: CalendarCheck },
-  { key: 'LOGBOOK', label: 'Logbook', icon: FileCheck },
+  { key: 'LOGBOOK', label: 'Jurnal', icon: FileCheck },
   { key: 'FINAL_REPORT', label: 'Laporan Akhir', icon: CheckCircle2 },
   { key: 'CERTIFICATE', label: 'Sertifikat', icon: Sparkles },
   { key: 'GENERAL', label: 'Umum', icon: HelpCircle },
