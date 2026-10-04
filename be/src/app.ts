@@ -4,6 +4,7 @@ import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import Elysia from "elysia";
 import { helmet } from "elysia-helmet";
+import healthController from "./controllers/HealthController";
 import apiRoutes from "./routes/apiRoutes";
 import cronRoutes from "./routes/cronRoutes";
 import {
@@ -25,6 +26,8 @@ class App {
 
   private routes(): void {
     this.app.get("/", () => "Hello Elysia! Bun js");
+    this.app.get("/health", async (c: any) => healthController.check(c));
+    this.app.get("/ping", async (c: any) => healthController.check(c));
   }
 
   private middlewares() {

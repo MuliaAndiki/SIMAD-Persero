@@ -40,6 +40,15 @@ class OfficeRouter {
       },
     });
 
+    // GET /offices/public (Public for landing page)
+    this.officeRouter.get('/public', (c: AppContext) => OfficeController.publicList(c), {
+      detail: {
+        summary: 'Daftar lokasi kantor untuk publik / landing page',
+        description: 'Mengembalikan daftar lokasi kantor yang dapat diakses publik tanpa autentikasi.',
+        tags: ['Office'],
+      },
+    });
+
     // GET /offices/:officeId
     this.officeRouter.get('/:officeId', (c: AppContext) => OfficeController.detail(c), {
       params: OfficeParamsDto,
