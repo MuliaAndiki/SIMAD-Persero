@@ -1,22 +1,25 @@
-'use client';
+"use client";
 
-import { SidebarProvider } from '@/components/atoms';
-import { PWAUpdatePrompt } from '@/components/pwa/PWAUpdatePrompt';
-import { env } from '@/configs/env.config';
-import { AuthProvider } from '@/core/providers/auth.provider';
-import { HealthPingProvider } from '@/core/providers/health-ping.provider';
-import { LenisProvider } from '@/core/providers/lenis.provinder';
-import { ThemeProvider } from '@/core/providers/theme.provider';
-import { AlertProvinder } from '@/hooks/useAlert/costum-alert';
-import { ReactQueryClientProvider } from '@/pkg/react-query/query-client.pkg';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { composeProviders } from './composeProvinders';
-import { StyledComponentsRegistry } from './styled-registry';
+import { SidebarProvider } from "@/components/atoms";
+import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
+import { env } from "@/configs/env.config";
+import { AuthProvider } from "@/core/providers/auth.provider";
+import { HealthPingProvider } from "@/core/providers/health-ping.provider";
+import { LenisProvider } from "@/core/providers/lenis.provinder";
+import { ThemeProvider } from "@/core/providers/theme.provider";
+import { AlertProvinder } from "@/hooks/useAlert/costum-alert";
+import { ReactQueryClientProvider } from "@/pkg/react-query/query-client.pkg";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { composeProviders } from "./composeProvinders";
+import { StyledComponentsRegistry } from "./styled-registry";
+import NextTopLoader from "nextjs-toploader";
 
 const Providers = composeProviders([
   StyledComponentsRegistry,
-  ({ children }) => <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>,
+  ({ children }) => (
+    <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>
+  ),
   ({ children }) => (
     <GoogleOAuthProvider clientId={env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
       {children}
@@ -34,6 +37,17 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <Providers>
       <HealthPingProvider>
         <PWAUpdatePrompt />
+        <NextTopLoader
+          color="#00baff"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          zIndex={99999}
+        />
         {children}
         <ReactQueryDevtools initialIsOpen={false} />
       </HealthPingProvider>
