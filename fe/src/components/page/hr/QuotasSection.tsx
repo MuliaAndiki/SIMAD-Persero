@@ -69,35 +69,56 @@ export function QuotasSection({ state, actions }: QuotasSectionProps) {
         </Button>
       </div>
 
-      {/* Summary Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4 flex items-center gap-4 bg-primary/5 border-primary/20">
-          <div className="p-3 rounded-lg bg-primary/10 text-primary">
-            <Users className="h-6 w-6" />
+      {/* High-Density Summary Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Total Kuota Master</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Users className="size-3.5" />
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Total Kuota Seluruh Kantor</p>
-            <h3 className="text-2xl font-bold text-foreground">{totalCapacity} Slot</h3>
-          </div>
-        </Card>
-
-        <Card className="p-4 flex items-center gap-4 bg-emerald-500/5 border-emerald-500/20">
-          <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-600">
-            <Building2 className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Periode Kuota Aktif</p>
-            <h3 className="text-2xl font-bold text-foreground">{totalActiveQuotas} Kantor</h3>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
+                {totalCapacity}
+              </span>
+              <span className="text-xs text-muted-foreground">Slot Kuota</span>
+            </div>
+            <span className="text-xs text-muted-foreground">Seluruh Unit PLN</span>
           </div>
         </Card>
 
-        <Card className="p-4 flex items-center gap-4 bg-blue-500/5 border-blue-500/20">
-          <div className="p-3 rounded-lg bg-blue-500/10 text-blue-600">
-            <MapPin className="h-6 w-6" />
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Periode Kuota Aktif</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <Building2 className="size-3.5" />
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Lokasi Kantor Terdaftar</p>
-            <h3 className="text-2xl font-bold text-foreground">{state.offices.length} Kantor</h3>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400">
+                {totalActiveQuotas}
+              </span>
+              <span className="text-xs text-muted-foreground">/ {state.quotas.length} Periode</span>
+            </div>
+            <span className="text-xs text-muted-foreground">Status Aktif</span>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Unit Kantor Terdaftar</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-sky-500/10 text-sky-600 dark:text-sky-400">
+              <MapPin className="size-3.5" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
+              {state.offices.length}
+            </span>
+            <span className="text-xs text-muted-foreground">Lokasi Kantor Cabang</span>
           </div>
         </Card>
       </div>

@@ -5,7 +5,6 @@ import { PWAInstallDialog } from '@/components/pwa/PWAInstallDialog';
 import { AppSidebar } from '@/core/components/app-sidebar';
 import { BottomNav } from '@/core/components/bottom-nav';
 import LanguageDropdown from '@/core/components/language.dropdown';
-import ThemeToggle from '@/core/components/theme-toggle';
 import NotificationDropdownContainer from '@/core/containers/notification.dropdown.container';
 import { useApi } from '@/hooks/useService/useApi';
 import Image from 'next/image';
@@ -58,19 +57,6 @@ export function AppShell({ children }: AppShellProps) {
 
           {/* Aksi header */}
           <div className="ml-auto flex items-center gap-3">
-            {/* <PWAInstallDialog
-              trigger={
-                <Button
-                  variant="ghost"
-                  className="p-0"
-                  aria-label="Install SIMAD"
-                >
-                  <Download className="h-5 w-5" />
-                </Button>
-              }
-            /> */}
-            <ThemeToggle />
-
             <NotificationDropdownContainer />
           </div>
         </header>

@@ -25,6 +25,7 @@ import { useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 
 import { ActiveSessionsCard } from '@/components/organisms/profile/ActiveSessionsCard';
+import { AppSettingsCard } from '@/components/organisms/profile/AppSettingsCard';
 import { ChangeEmailModal } from '@/components/organisms/profile/ChangeEmailModal';
 import { PhotoCropper } from './PhotoCropper';
 import type { AuthSession } from '@/types/api/auth.types';
@@ -205,6 +206,8 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
           </dl>
         </CardContent>
       </Card>
+
+      <AppSettingsCard />
 
       <div className="flex flex-wrap gap-3">
         {isIntern && (

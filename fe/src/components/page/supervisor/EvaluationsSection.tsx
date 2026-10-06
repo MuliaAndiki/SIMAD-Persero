@@ -99,41 +99,52 @@ export function EvaluationsSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {internships.map((internship) => {
+              {internships.map((item) => {
+                const internship = item.internship ?? item;
+                const internId = internship.id || item.id;
                 const evalData = internship.evaluation;
                 const isFinal = evalData?.status === 'FINAL';
 
+                const internProfile = internship.internProfile;
+                const user = internProfile?.user;
+                const fullName = user?.fullName ?? '-';
+                const initial = fullName.charAt(0).toUpperCase() || 'P';
+                const institutionName =
+                  internProfile?.institution?.name ??
+                  internProfile?.universityName ??
+                  '';
+                const departmentName = internship.department?.name ?? '-';
+                const startDate =
+                  internship.actualStartDate || internship.application?.requestedStartDate;
+                const endDate =
+                  internship.actualEndDate || internship.application?.requestedEndDate;
+
                 return (
-                  <TableRow key={internship.id} className="hover:bg-muted/30 transition-colors">
+                  <TableRow key={internId} className="hover:bg-muted/30 transition-colors">
                     <TableCell>
                       <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                          {internship.internProfile?.user?.fullName?.charAt(0) ?? 'P'}
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                          {initial}
                         </div>
-                        <div>
-                          <span className="font-semibold text-sm text-foreground">
-                            {internship.internProfile?.user?.fullName ?? '-'}
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-semibold text-sm text-foreground truncate">
+                            {fullName}
                           </span>
-                          <p className="text-xs text-muted-foreground">
-                            {internship.internProfile?.institution?.name ?? '-'}
-                          </p>
+                          {institutionName && (
+                            <p className="text-xs text-muted-foreground truncate">
+                              {institutionName}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col text-xs">
                         <span className="font-medium text-foreground">
-                          {internship.department?.name ?? '-'}
+                          {departmentName}
                         </span>
                         <span className="text-muted-foreground">
-                          {formatDate(
-                            internship.actualStartDate ||
-                              internship.application?.requestedStartDate,
-                          )}{' '}
-                          s/d{' '}
-                          {formatDate(
-                            internship.actualEndDate || internship.application?.requestedEndDate,
-                          )}
+                          {startDate ? formatDate(startDate) : '-'} s/d {endDate ? formatDate(endDate) : '-'}
                         </span>
                       </div>
                     </TableCell>
@@ -143,7 +154,7 @@ export function EvaluationsSection({
                     <TableCell className="text-center">
                       {evalData?.finalScore ? (
                         <div className="flex items-center justify-center gap-1.5 font-mono font-bold">
-                          <span>{evalData.finalScore}</span>
+                          <span>{Number(evalData.finalScore)}</span>
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-bold">
                             Nilai {evalData.grade}
                           </Badge>

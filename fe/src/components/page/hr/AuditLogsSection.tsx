@@ -55,24 +55,7 @@ export function AuditLogsSection({ state, actions }: AuditLogsSectionProps) {
         </p>
       </header>
 
-      {state.isPending ? (
-        <Card>
-          <TableLoader label="Memuat data audit log..." />
-        </Card>
-      ) : state.isError ? (
-        <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
-          <div className="flex flex-col gap-1 text-destructive">
-            <p className="font-semibold">Gagal memuat audit log</p>
-            <p className="opacity-90">{state.errorMessage}</p>
-            <Button variant="outline" size="sm" className="mt-1 w-fit" onClick={actions.onRetry}>
-              Coba Lagi
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <Select
               value={state.moduleFilter || 'all'}
               onValueChange={(value) => actions.onModuleChange(value === 'all' ? '' : value)}
@@ -107,8 +90,25 @@ export function AuditLogsSection({ state, actions }: AuditLogsSectionProps) {
             </Select>
           </div>
 
+      {state.isPending ? (
+        <Card>
+          <TableLoader label="Memuat data audit log..." />
+        </Card>
+      ) : state.isError ? (
+        <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
+          <div className="flex flex-col gap-1 text-destructive">
+            <p className="font-semibold">Gagal memuat audit log</p>
+            <p className="opacity-90">{state.errorMessage}</p>
+            <Button variant="outline" size="sm" className="mt-1 w-fit" onClick={actions.onRetry}>
+              Coba Lagi
+            </Button>
+          </div>
+        </div>
+      ) : (
+        
           <AuditLogTable logs={state.logs} onSelectLog={actions.onSelectLog} />
-        </>
+        
       )}
 
       <AuditLogDetailDialog log={state.detail} onClose={actions.onCloseDetail} />

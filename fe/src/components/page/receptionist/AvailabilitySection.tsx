@@ -196,37 +196,69 @@ export function AvailabilitySection({
         </Button>
       </div>
 
-      {/* Summary KPI Cards for Assigned Office */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4 flex items-center gap-4 bg-primary/5 border-primary/20">
-          <div className="p-3 rounded-xl bg-primary/10 text-primary">
-            <Users className="h-6 w-6" />
+      {/* High-Density Summary KPI Cards for Assigned Office */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Total Kuota Unit</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Users className="size-3.5" />
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Total Kuota Kantor Anda</p>
-            <h3 className="text-2xl font-bold text-foreground">{totalCapacity} Slot</h3>
-          </div>
-        </Card>
-
-        <Card className="p-4 flex items-center gap-4 bg-amber-500/5 border-amber-500/20">
-          <div className="p-3 rounded-xl bg-amber-500/10 text-amber-600">
-            <Clock className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Peserta Magang Aktif</p>
-            <h3 className="text-2xl font-bold text-foreground">{totalOccupied} Peserta</h3>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
+                {totalCapacity}
+              </span>
+              <span className="text-xs text-muted-foreground">Slot Alokasi</span>
+            </div>
+            <span className="text-xs text-muted-foreground">Kapasitas Maksimal</span>
           </div>
         </Card>
 
-        <Card className="p-4 flex items-center gap-4 bg-emerald-500/5 border-emerald-500/20">
-          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600">
-            <CheckCircle2 className="h-6 w-6" />
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Peserta Magang Aktif</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <Clock className="size-3.5" />
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Sisa Slot Tersedia</p>
-            <h3 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {totalAvailable} Slot
-            </h3>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
+                {totalOccupied}
+              </span>
+              <span className="text-xs text-muted-foreground">/ {totalCapacity} Terisi</span>
+            </div>
+            <Badge
+              variant="outline"
+              className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] px-1.5 py-0"
+            >
+              {totalCapacity > 0 ? `${Math.round((totalOccupied / totalCapacity) * 100)}% Okupansi` : '0%'}
+            </Badge>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Sisa Slot Tersedia</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-3.5" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400">
+                {totalAvailable}
+              </span>
+              <span className="text-xs text-muted-foreground">Slot Siap Isi</span>
+            </div>
+            <Badge
+              variant="outline"
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0"
+            >
+              {totalAvailable > 0 ? 'Tersedia' : 'Penuh'}
+            </Badge>
           </div>
         </Card>
       </div>

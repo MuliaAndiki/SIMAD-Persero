@@ -11,6 +11,13 @@
 }
 
 @theme inline {
+
+  --font-sans:
+    var(--font-poppins), "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-poppins: var(--font-poppins), "Poppins", sans-serif;
+
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);

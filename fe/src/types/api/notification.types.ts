@@ -48,3 +48,22 @@ export interface UnreadCountResponse {
 export interface ReadAllResponse {
   count: number;
 }
+
+/** VAPID Public Key Response */
+export interface VapidKeyResponse {
+  publicKey: string;
+}
+
+/** Push Subscription Payload */
+export interface PushSubscriptionPayload {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
+/** Unsubscribe Payload */
+export interface UnsubscribePayload {
+  endpoint: string;
+}

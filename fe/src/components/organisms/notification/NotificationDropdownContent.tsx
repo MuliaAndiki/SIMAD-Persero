@@ -108,7 +108,11 @@ export function NotificationDropdownContent({
       )}
 
       <DropdownMenuSeparator />
-      <NotificationDropdownFooter href={rolePath} description="Buka halaman sesuai role Anda" />
+      <NotificationDropdownFooter
+        href="/notifications"
+        label="Lihat Semua Notifikasi"
+        description="Buka Pusat Notifikasi Lengkap"
+      />
     </DropdownMenuContent>
   );
 }

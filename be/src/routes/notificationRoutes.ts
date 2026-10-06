@@ -67,6 +67,42 @@ class NotificationRouter {
       body: SendNotificationDto,
     });
 
+    // 18.8 GET /notifications/vapid-public-key (public / all authenticated roles)
+    this.notificationRouter.get(
+      '/vapid-public-key',
+      (c: AppContext) => notificationController.getVapidPublicKey(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+        ],
+      },
+    );
+
+    // 18.9 POST /notifications/subscribe (all authenticated roles)
+    this.notificationRouter.post(
+      '/subscribe',
+      (c: AppContext) => notificationController.subscribePush(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+        ],
+      },
+    );
+
+    // 18.10 POST /notifications/unsubscribe (all authenticated roles)
+    this.notificationRouter.post(
+      '/unsubscribe',
+      (c: AppContext) => notificationController.unsubscribePush(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+        ],
+      },
+    );
+
     // ─── Dynamic Routes ───────────────────────────────────────────────
 
     // 18.2 GET /notifications/:notificationId (all authenticated roles)

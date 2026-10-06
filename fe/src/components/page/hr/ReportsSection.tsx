@@ -23,6 +23,10 @@ export interface ReportsSectionState {
   isAttendancePending: boolean;
   isAttendanceError: boolean;
   attendanceErrorMessage?: string;
+  attendancePage: number;
+  attendanceTotalPages: number;
+  attendanceTotalItems: number;
+  attendanceLimit: number;
   internships: InternshipReportRow[];
   isInternshipsPending: boolean;
   isInternshipsError: boolean;
@@ -54,6 +58,8 @@ export interface ReportsSectionActions {
   onSelectYear: (year?: number) => void;
   onResetAttendanceFilter: () => void;
   onQueryAll?: () => void;
+  onAttendancePageChange: (page: number) => void;
+  onAttendanceLimitChange?: (limit: number) => void;
 }
 
 export interface ReportsSectionProps {
@@ -110,6 +116,12 @@ export function ReportsSection({ state, actions }: ReportsSectionProps) {
           selectedInternshipId={state.selectedInternshipId}
           selectedMonth={state.selectedMonth}
           selectedYear={state.selectedYear}
+          page={state.attendancePage}
+          totalPages={state.attendanceTotalPages}
+          totalItems={state.attendanceTotalItems}
+          limit={state.attendanceLimit}
+          onPageChange={actions.onAttendancePageChange}
+          onLimitChange={actions.onAttendanceLimitChange}
           onSelectOffice={actions.onSelectOffice}
           onSelectDepartment={actions.onSelectDepartment}
           onSelectInternship={actions.onSelectInternship}

@@ -48,6 +48,7 @@ model User {
   reviewedCorrections       AttendanceCorrectionRequest[] @relation("CorrectionReviewedBy")
   supervisedEvaluations     InternshipEvaluation[]        @relation("EvaluationSupervisor")
   createdGuides             GuideContent[]                @relation("GuideCreatedBy")
+  pushSubscriptions         PushSubscription[]
 
   @@index([avatarFileId])
   @@map("users")
@@ -751,6 +752,21 @@ model NotificationRead {
   @@id([notificationId, userId])
   @@index([userId])
   @@map("notification_reads")
+}
+
+model PushSubscription {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  endpoint  String    @unique @db.VarChar(1000)
+  p256dh    String    @db.VarChar(255)
+  auth      String    @db.VarChar(255)
+  userAgent String?   @map("user_agent")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 model AuditLog {

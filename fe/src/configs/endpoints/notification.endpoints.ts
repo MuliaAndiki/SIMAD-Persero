@@ -22,4 +22,10 @@ export const NOTIFICATION_ENDPOINTS = {
   READ: (notificationId: string) => `/notifications/${notificationId}/read`,
   /** DELETE /notifications/:notificationId — Hapus notifikasi */
   DELETE: (notificationId: string) => `/notifications/${notificationId}`,
+  /** GET /notifications/vapid-public-key — Ambil VAPID Public Key */
+  VAPID_PUBLIC_KEY: '/notifications/vapid-public-key',
+  /** POST /notifications/subscribe — Daftarkan PushSubscription PWA */
+  SUBSCRIBE: '/notifications/subscribe',
+  /** POST /notifications/unsubscribe — Batalkan PushSubscription PWA */
+  UNSUBSCRIBE: '/notifications/unsubscribe',
 } as const;

@@ -92,67 +92,79 @@ export function CertificateStatusTracker({
   ];
 
   return (
-    <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-card via-card to-primary/[0.03]">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <Card className="overflow-hidden border-border/70 p-4 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b">
+        <div className="flex items-center gap-2">
+          <Sparkles className="size-4 text-primary" />
           <div>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Sparkles className="size-5 text-primary" />
-              Status Penerbitan Sertifikat Elektronik
-            </CardTitle>
-            <CardDescription>
-              Pantau progres kelulusan dan tahapan verifikasi sertifikat digital Anda.
-            </CardDescription>
+            <h3 className="text-sm font-semibold text-foreground">
+              Tahapan Penerbitan Sertifikat Elektronik
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Progres penilaian pembimbing hingga pengesahan sertifikat digital resmi.
+            </p>
           </div>
-
-          {currentStep === 3 ? (
-            <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 w-fit">
-              <CheckCircle2 className="mr-1 size-3.5" /> Siap Diunduh
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="w-fit">
-              <Clock className="mr-1 size-3.5" /> Tahap {currentStep + 1} dari 4
-            </Badge>
-          )}
         </div>
-      </CardHeader>
 
-      <CardContent className="flex flex-col gap-6">
-        {/* Stepper Grid / Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative">
-          {steps.map((s, index) => {
+        {currentStep === 3 ? (
+          <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 w-fit text-xs">
+            <CheckCircle2 className="mr-1 size-3" /> Siap Diunduh
+          </Badge>
+        ) : (
+          <Badge variant="secondary" className="w-fit text-xs">
+            <Clock className="mr-1 size-3" /> Tahap {currentStep + 1} dari 4
+          </Badge>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-4 pt-3">
+        {/* High-Density Stepper Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          {steps.map((s) => {
             const Icon = s.icon;
             return (
               <div
                 key={s.id}
-                className={`relative flex flex-col gap-2 rounded-xl border p-4 transition-all ${
+                className={`relative flex flex-col gap-1.5 rounded-lg border p-3 transition-colors ${
                   s.isDone
-                    ? 'border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-950/20'
+                    ? 'border-emerald-500/40 bg-emerald-500/5'
                     : s.isActive
-                      ? 'border-primary bg-primary/5 shadow-sm dark:bg-primary/10'
+                      ? 'border-primary/50 bg-primary/5'
                       : 'border-border/60 bg-muted/20 opacity-70'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <div
-                    className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
-                      s.isDone
-                        ? 'bg-emerald-600 text-white'
-                        : s.isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    {s.isDone ? <CheckCircle2 className="size-4" /> : <Icon className="size-4" />}
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`flex size-6 shrink-0 items-center justify-center rounded-md ${
+                        s.isDone
+                          ? 'bg-emerald-600 text-white'
+                          : s.isActive
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {s.isDone ? <CheckCircle2 className="size-3.5" /> : <Icon className="size-3.5" />}
+                    </div>
+                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Langkah {s.stepNumber}
+                    </span>
                   </div>
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Langkah {s.stepNumber}
-                  </span>
+
+                  {s.isDone ? (
+                    <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      Selesai
+                    </span>
+                  ) : s.isActive ? (
+                    <span className="text-[10px] font-semibold text-primary">
+                      Sedang Berjalan
+                    </span>
+                  ) : null}
                 </div>
 
-                <div className="flex flex-col gap-0.5 mt-1">
-                  <h4 className="text-sm font-semibold leading-tight">{s.title}</h4>
-                  <p className="text-xs text-muted-foreground leading-snug">{s.desc}</p>
+                <div className="flex flex-col gap-0.5 mt-0.5">
+                  <h4 className="text-xs font-semibold leading-tight text-foreground">{s.title}</h4>
+                  <p className="text-[11px] text-muted-foreground leading-tight">{s.desc}</p>
                 </div>
               </div>
             );
@@ -161,16 +173,16 @@ export function CertificateStatusTracker({
 
         {/* Certificate Ready Action Callout */}
         {currentStep === 3 && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-emerald-600 text-white shrink-0">
-                <Award className="size-5" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-8 items-center justify-center rounded-md bg-emerald-600 text-white shrink-0">
+                <Award className="size-4" />
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="font-semibold text-sm text-emerald-900 dark:text-emerald-200">
+              <div className="flex flex-col">
+                <span className="font-semibold text-xs text-emerald-950 dark:text-emerald-100">
                   Nomor Sertifikat: {certificateNumber}
                 </span>
-                <span className="text-xs text-emerald-700 dark:text-emerald-400">
+                <span className="text-[11px] text-emerald-800 dark:text-emerald-300">
                   Diterbitkan resmi oleh PT PLN (Persero)
                   {generatedAt ? ` pada ${new Date(generatedAt).toLocaleDateString('id-ID')}` : ''}
                 </span>
@@ -178,9 +190,9 @@ export function CertificateStatusTracker({
             </div>
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
-              <Button asChild size="sm" variant="outline" className="text-xs">
+              <Button asChild size="sm" variant="outline" className="h-8 text-xs">
                 <Link href="/intern/certificate">
-                  Lihat Pratinjau <ChevronRight className="ml-1 size-3.5" />
+                  Lihat Pratinjau <ChevronRight className="ml-1 size-3" />
                 </Link>
               </Button>
               {onDownload && (
@@ -188,7 +200,7 @@ export function CertificateStatusTracker({
                   size="sm"
                   onClick={onDownload}
                   disabled={isDownloading}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5"
+                  className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5"
                 >
                   <Download className="size-3.5" />
                   {isDownloading ? 'Mengunduh...' : 'Unduh PDF'}
@@ -197,7 +209,7 @@ export function CertificateStatusTracker({
             </div>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 }

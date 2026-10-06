@@ -37,3 +37,14 @@ export function useSupervisorDetail(
     enabled: options?.enabled,
   });
 }
+
+
+export function useSupervisorInternshipList(query?: SupervisorQuery) {
+  return useQuery({
+    queryKey: queryKey.supervisor.internshipList(query),
+    queryFn: async () => {
+      const res = await Api.Supervisor.GetInternship(query); 
+      return res.data;
+    },
+  });
+}

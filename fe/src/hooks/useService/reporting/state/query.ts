@@ -9,7 +9,7 @@ export function useAttendanceReport(query?: ReportingQuery, options?: { enabled?
     queryKey: queryKey.reporting.attendance(query),
     queryFn: async () => {
       const res = await Api.Reporting.Attendance(query);
-      return res.data;
+      return res;
     },
     enabled: options?.enabled,
   });

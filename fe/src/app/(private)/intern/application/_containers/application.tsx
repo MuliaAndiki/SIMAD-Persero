@@ -72,13 +72,9 @@ export default function ApplicationContainer() {
   };
 
   // Actions
-  const handleCreate = async (data: {
-    requestedStartDate: string;
-    requestedEndDate: string;
-    motivation?: string;
-    coverLetterFileId?: string;
-    officeLocationId: string;
-  }) => {
+  const handleCreate = async (
+    data: import('@/types/api/application.types').CreateApplicationBody,
+  ) => {
     try {
       await createMutation.mutateAsync(data);
     } catch {
