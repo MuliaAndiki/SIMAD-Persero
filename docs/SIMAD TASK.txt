@@ -5,7 +5,7 @@
 - Resepsinis bisa Check Slot Anak magang yang tersedia Di Depetement Yang Tersedia Dikantor - Done
 - Tanggal Masuk Harus Ditentukan admin - karena slot kuota terbatas
 - Peserta Bisa Mengajukan Koreksi Absen - Syaratnya Ada izin ke Supervisor 
-- Tutorial Via Video - Belum Ada Dibuatkan
+- Tutorial Via Video - done - Belum Ada Dibuatkan
 - Tambah Menu Panduan Di Intern Agar Tidak Kebingunan Sebelum Daftar Dan Setelah Daftar
 - Setiap Bidang Kuota Tanggal Berapa Masuk Serta Tanggal Keluar 
 - CV wajib, surat permohonan dari fakultas wajib - Done

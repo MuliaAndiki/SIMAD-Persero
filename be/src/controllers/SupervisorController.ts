@@ -1,6 +1,7 @@
 import type { AppContext } from "@/contex";
 import { HttpResponse, handleAppError } from "@/http";
 import supervisorService from "@/services/supervisor.service";
+import { JwtPayload } from "@/types/auth.types";
 import type {
   AssignInternBody,
   CreateSupervisorBody,
@@ -121,6 +122,21 @@ class SupervisorController {
         undefined,
         "Akun supervisor berhasil dihapus.",
       );
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+  public async getInternshipsBySupervisor(c: AppContext) {
+    try {
+      const user = c.user as JwtPayload
+      const query = c.query as SupervisorQuery
+
+      if(!user) {
+        return HttpResponse(c).unauthorized("Anda tidak memiliki hak akses untuk melakukan operasi ini.")
+      
+      }
+      const data = await supervisorService.getInternshipsBySupervisor(user.id,query);
+      return HttpResponse(c).ok(data);
     } catch (error) {
       return this.handleError(c, error);
     }

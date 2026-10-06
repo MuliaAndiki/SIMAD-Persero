@@ -136,6 +136,18 @@ class SupervisorService {
       message: 'Akun mentor berhasil dihapus',
     });
   }
+
+  /**
+   * GET /supervisors/internships
+   * Mengambil daftar internship yang di-assign ke supervisor (SUPERVISOR).
+   */
+  public async GetInternship(query?:SupervisorQuery): Promise<TResponse<SupervisorAssignmentResponse[]>> {
+    const qs = buildQueryString(query as Record<string, string | number | boolean>);
+    const res = await client.GetResponse<SupervisorAssignmentResponse[]>(`${SUPERVISOR_ENDPOINTS.GET_INTERNSHIPS}${qs}`);
+    return toServiceResponse(res, {
+      message: 'Daftar internship berhasil dimuat',
+    });
+  }
 }
 
 export default new SupervisorService();

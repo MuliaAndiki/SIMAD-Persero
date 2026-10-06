@@ -265,7 +265,7 @@ function TodayCard({
   );
 }
 
-/** Ringkasan bulanan — enam kartu statistik. */
+/** Ringkasan bulanan — enam kartu statistik High-Density. */
 function SummaryGrid({
   summary,
 }: {
@@ -274,18 +274,49 @@ function SummaryGrid({
   if (!summary) return null;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      <StatCard icon={CalendarCheck} label="Total Hari" value={summary.total} tone="primary" />
-      <StatCard icon={CheckCircle2} label="Hadir" value={summary.present} />
-      <StatCard icon={Clock} label="Terlambat" value={summary.late} />
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-6">
+      <StatCard
+        icon={CalendarCheck}
+        label="Total Hari"
+        value={summary.total}
+        description="Hari kerja terdata"
+        tone="primary"
+      />
+      <StatCard
+        icon={CheckCircle2}
+        label="Hadir Tepat"
+        value={summary.present}
+        description="Presensi terverifikasi"
+        tone="success"
+      />
+      <StatCard
+        icon={Clock}
+        label="Terlambat"
+        value={summary.late}
+        description="Lewat toleransi masuk"
+        tone={summary.late > 0 ? 'warning' : 'muted'}
+      />
       <StatCard
         icon={CalendarClock}
         label="Menunggu Review"
         value={summary.pendingReview}
-        tone="muted"
+        description="Pengajuan koreksi"
+        tone={summary.pendingReview > 0 ? 'warning' : 'muted'}
       />
-      <StatCard icon={XCircle} label="Tidak Hadir" value={summary.absent} />
-      <StatCard icon={AlertTriangle} label="Tidak Valid" value={summary.invalid} />
+      <StatCard
+        icon={XCircle}
+        label="Tidak Hadir"
+        value={summary.absent}
+        description="Tanpa keterangan"
+        tone={summary.absent > 0 ? 'destructive' : 'muted'}
+      />
+      <StatCard
+        icon={AlertTriangle}
+        label="Tidak Valid"
+        value={summary.invalid}
+        description="Di luar geofence / GPS"
+        tone={summary.invalid > 0 ? 'destructive' : 'muted'}
+      />
     </div>
   );
 }

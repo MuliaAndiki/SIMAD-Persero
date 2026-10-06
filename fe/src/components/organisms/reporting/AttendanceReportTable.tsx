@@ -15,6 +15,7 @@ import {
 import { ReportError } from '@/components/organisms/reporting/ReportError';
 import { StatusBadge } from '@/components/organisms/table/StatusBadge';
 import { TableEmptyState } from '@/components/organisms/table/TableEmptyState';
+import { TablePagination } from '@/components/organisms/table/TablePagination';
 import Api from '@/services/props.service';
 import type { InternshipResponse } from '@/types/api/internship.types';
 import type { OfficeResponse } from '@/types/api/office.types';
@@ -76,6 +77,12 @@ export interface AttendanceReportTableProps {
   selectedInternshipId: string;
   selectedMonth?: number;
   selectedYear?: number;
+  page?: number;
+  totalPages?: number;
+  totalItems?: number;
+  limit?: number;
+  onPageChange?: (page: number) => void;
+  onLimitChange?: (limit: number) => void;
   onSelectOffice: (id: string) => void;
   onSelectDepartment: (id: string) => void;
   onSelectInternship: (id: string) => void;
@@ -98,6 +105,12 @@ export function AttendanceReportTable({
   selectedInternshipId,
   selectedMonth,
   selectedYear,
+  page = 1,
+  totalPages = 1,
+  totalItems,
+  limit = 10,
+  onPageChange,
+  onLimitChange,
   onSelectOffice,
   onSelectDepartment,
   onSelectInternship,
@@ -593,59 +606,62 @@ export function AttendanceReportTable({
               </Card>
 
               {/* Ringkasan Kehadiran Peserta Terpilih */}
-              <Card className="col-span-1">
-                <CardContent className="p-4 flex h-full flex-col justify-between">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    Ringkasan Kehadiran Peserta
+              <Card className="col-span-1 border-border/70 p-3.5 flex flex-col justify-between shadow-2xs">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Ringkasan Kehadiran
+                  </span>
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                    {Math.round((totalPresent / Math.max(1, filteredRows.length)) * 100)}% Kehadiran
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2 my-2">
+                  <div className="rounded-md border bg-muted/30 p-2">
+                    <div className="text-lg font-bold font-mono text-foreground">{filteredRows.length}</div>
+                    <div className="text-[10px] text-muted-foreground">Total Rekap</div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 my-2">
-                    <div className="rounded-lg bg-muted/40 p-2.5">
-                      <div className="text-lg font-bold text-foreground">{filteredRows.length}</div>
-                      <div className="text-[11px] text-muted-foreground">Total Rekap</div>
+                  <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2">
+                    <div className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                      {totalPresent}
                     </div>
-                    <div className="rounded-lg bg-emerald-500/10 p-2.5">
-                      <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                        {totalPresent}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">Hadir (Present)</div>
-                    </div>
+                    <div className="text-[10px] text-emerald-700 dark:text-emerald-300 font-medium">Hadir Tepat</div>
                   </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    Total Kerja:{' '}
-                    <span className="font-semibold text-foreground">
-                      {Math.round(totalWorkMinutes / 60)} Jam ({totalWorkMinutes} Menit)
-                    </span>
-                  </div>
-                </CardContent>
+                </div>
+                <div className="text-[11px] text-muted-foreground flex items-center justify-between border-t pt-2">
+                  <span>Total Jam Kerja:</span>
+                  <span className="font-semibold text-foreground font-mono">
+                    {Math.round(totalWorkMinutes / 60)} Jam ({totalWorkMinutes} mnt)
+                  </span>
+                </div>
               </Card>
             </div>
           )}
 
           {/* Statistik Global jika melihat semua peserta */}
           {!selectedInternship && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Card className="p-3 shadow-2xs">
-                <div className="text-xs text-muted-foreground">Total Rekap</div>
-                <div className="text-xl font-bold text-foreground mt-0.5">{filteredRows.length}</div>
-                <div className="text-[11px] text-muted-foreground">Catatan kehadiran</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <Card className="p-3 border-border/70 shadow-2xs flex flex-col justify-between">
+                <div className="text-xs font-medium text-muted-foreground">Total Rekap</div>
+                <div className="text-xl font-bold font-mono text-foreground mt-1">{filteredRows.length}</div>
+                <div className="text-[11px] text-muted-foreground">Log kehadiran</div>
               </Card>
-              <Card className="p-3 shadow-2xs bg-emerald-500/5 border-emerald-500/20">
-                <div className="text-xs text-emerald-700 dark:text-emerald-400">Hadir Tepat Waktu</div>
-                <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              <Card className="p-3 border-border/70 shadow-2xs flex flex-col justify-between">
+                <div className="text-xs font-medium text-muted-foreground">Hadir Tepat Waktu</div>
+                <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1">
                   {totalPresent}
                 </div>
                 <div className="text-[11px] text-muted-foreground">Status Present</div>
               </Card>
-              <Card className="p-3 shadow-2xs bg-amber-500/5 border-amber-500/20">
-                <div className="text-xs text-amber-700 dark:text-amber-400">Terlambat</div>
-                <div className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+              <Card className="p-3 border-border/70 shadow-2xs flex flex-col justify-between">
+                <div className="text-xs font-medium text-muted-foreground">Terlambat</div>
+                <div className="text-xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1">
                   {totalLate}
                 </div>
                 <div className="text-[11px] text-muted-foreground">Status Late</div>
               </Card>
-              <Card className="p-3 shadow-2xs">
-                <div className="text-xs text-muted-foreground">Total Jam Kerja</div>
-                <div className="text-xl font-bold text-foreground mt-0.5">
+              <Card className="p-3 border-border/70 shadow-2xs flex flex-col justify-between">
+                <div className="text-xs font-medium text-muted-foreground">Total Jam Kerja</div>
+                <div className="text-xl font-bold font-mono text-foreground mt-1">
                   {Math.round(totalWorkMinutes / 60)} Jam
                 </div>
                 <div className="text-[11px] text-muted-foreground">{totalWorkMinutes} menit kerja</div>
@@ -663,7 +679,14 @@ export function AttendanceReportTable({
                     : 'Seluruh Catatan Riwayat Absensi'}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Menampilkan {filteredRows.length} dari total {rows.length} catatan absensi
+                  {totalItems != null ? (
+                    <>
+                      Menampilkan {filteredRows.length} data di halaman ini dari total {totalItems} catatan absensi
+                      {totalPages > 1 && ` (Halaman ${page} dari ${totalPages})`}
+                    </>
+                  ) : (
+                    <>Menampilkan {filteredRows.length} dari total {rows.length} catatan absensi</>
+                  )}
                 </CardDescription>
               </div>
 
@@ -791,6 +814,21 @@ export function AttendanceReportTable({
                 </div>
               )}
             </CardContent>
+
+            {totalPages > 1 && onPageChange && (
+              <TablePagination
+                page={page}
+                totalPages={totalPages}
+                description={
+                  <span>
+                    Menampilkan baris {((page - 1) * limit) + 1} -{' '}
+                    {Math.min(page * limit, totalItems ?? rows.length)} dari{' '}
+                    <strong className="font-semibold text-foreground">{totalItems ?? rows.length}</strong> catatan absensi
+                  </span>
+                }
+                onPageChange={onPageChange}
+              />
+            )}
           </Card>
         </div>
       )}

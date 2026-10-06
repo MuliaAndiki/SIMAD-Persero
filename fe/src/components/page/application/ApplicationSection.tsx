@@ -1,7 +1,7 @@
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
-import { TableLoader } from '@/components/atoms/loading';
 import { Input } from '@/components/atoms/input';
+import { TableLoader } from '@/components/atoms/loading';
 import {
   Select,
   SelectContent,
@@ -33,16 +33,7 @@ export interface ApplicationSectionState {
 }
 
 export interface ApplicationSectionService {
-  onCreate: (
-    data: Pick<
-      CreateApplicationBody,
-      | 'requestedStartDate'
-      | 'requestedEndDate'
-      | 'motivation'
-      | 'coverLetterFileId'
-      | 'officeLocationId'
-    >,
-  ) => Promise<void>;
+  onCreate: (data: CreateApplicationBody) => Promise<void>;
   onUpdateDraft: (id: string, data: UpdateApplicationBody) => Promise<void>;
   onSubmitDraft: (id: string) => Promise<void>;
   onDeleteDraft: (id: string) => Promise<void>;
@@ -200,7 +191,7 @@ function NewApplicationForm({
     e.preventDefault();
     setLocalError(null);
 
-    if (!cvFile && !facultyFile) {
+    if (!cvFile || !facultyFile) {
       setLocalError('Curriculum Vitae (CV) dan Surat Permohonan Fakultas wajib diunggah.');
       return;
     }
@@ -217,17 +208,22 @@ function NewApplicationForm({
       return;
     }
 
-    const primaryFile = facultyFile || cvFile;
-    if (!primaryFile) return;
-
-    const upload = await service.onUploadFile(primaryFile);
-    if (!upload) return;
+    const [cvUpload, facultyUpload] = await Promise.all([
+      service.onUploadFile(cvFile),
+      service.onUploadFile(facultyFile),
+    ]);
+    if (!cvUpload || !facultyUpload) {
+      setLocalError('Gagal mengunggah dokumen. Silakan coba lagi.');
+      return;
+    }
 
     await service.onCreate({
       requestedStartDate: new Date(startDate).toISOString(),
       requestedEndDate: new Date(endDate).toISOString(),
       motivation: motivation.trim() || undefined,
-      coverLetterFileId: upload.fileId,
+      cvFileId: cvUpload.fileId,
+      facultyLetterFileId: facultyUpload.fileId,
+      coverLetterFileId: facultyUpload.fileId,
       officeLocationId: officeId,
     });
   };
@@ -383,7 +379,15 @@ function NewApplicationForm({
           <div className="flex justify-end border-t pt-4">
             <Button
               type="submit"
-              disabled={isSubmitting || isUploading || (!cvFile && !facultyFile) || !officeId || !startDate || !endDate}
+              disabled={
+                isSubmitting ||
+                isUploading ||
+                !cvFile ||
+                !facultyFile ||
+                !officeId ||
+                !startDate ||
+                !endDate
+              }
             >
               {isUploading
                 ? 'Mengunggah Dokumen…'
@@ -397,4 +401,3 @@ function NewApplicationForm({
     </Card>
   );
 }
-

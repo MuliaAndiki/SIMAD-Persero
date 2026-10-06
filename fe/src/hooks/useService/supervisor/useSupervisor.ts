@@ -5,7 +5,12 @@ import {
   useRemoveAssignment,
   useUpdateSupervisor,
 } from './state/mutate';
-import { useSupervisorDashboard, useSupervisorDetail, useSupervisorList } from './state/query';
+import {
+  useSupervisorDashboard,
+  useSupervisorDetail,
+  useSupervisorInternshipList,
+  useSupervisorList,
+} from './state/query';
 
 export const useSupervisor = () => {
   return {
@@ -13,6 +18,7 @@ export const useSupervisor = () => {
       dashboard: useSupervisorDashboard,
       list: useSupervisorList,
       detail: useSupervisorDetail,
+      internshipList: useSupervisorInternshipList,
     },
     mutate: {
       assign: useAssignIntern,

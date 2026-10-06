@@ -126,6 +126,7 @@ export const queryKey = {
     dashboard: () => ['supervisor', 'dashboard'] as const,
     list: (query?: Record<string, any>) => ['supervisor', 'list', query] as const,
     detail: (supervisorId: string) => ['supervisor', 'detail', supervisorId] as const,
+    internshipList: (query?: Record<string, any>) => ['supervisor', 'internshipList', query] as const,
   },
 
   receptionistRoot: () => ['receptionist'] as const,

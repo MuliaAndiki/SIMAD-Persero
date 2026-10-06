@@ -10,7 +10,7 @@ export default function SupervisorEvaluationsContainer() {
   const api = useApi();
   const ns = useAppNameSpace();
 
-  const internsQuery = api.supervisor.query.list();
+  const internsQuery = api.supervisor.query.internshipList();
   const saveDraftMutation = api.evaluation.mutate.saveDraft();
   const submitFinalMutation = api.evaluation.mutate.submitFinal();
 
@@ -38,9 +38,19 @@ export default function SupervisorEvaluationsContainer() {
     [submitFinalMutation, internsQuery, ns.alert],
   );
 
+  // Normalisasi data dari API response { total: number, intern: Array<{ id, internship: ... }> }
+  const rawData: any = internsQuery.data;
+  const internshipsList = Array.isArray(rawData?.intern)
+    ? rawData.intern
+    : Array.isArray(rawData?.data?.intern)
+      ? rawData.data.intern
+      : Array.isArray(rawData)
+        ? rawData
+        : [];
+
   return (
     <EvaluationsSection
-      internships={internsQuery.data ?? []}
+      internships={internshipsList}
       isPending={internsQuery.isPending}
       onSaveDraft={handleSaveDraft}
       onSubmitFinal={handleSubmitFinal}
