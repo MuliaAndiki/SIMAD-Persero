@@ -17,8 +17,8 @@ class ReportingController {
   public async attendanceReport(c: AppContext) {
     try {
       const query = (c.query ?? {}) as unknown as ReportingQuery;
-      const data = await reportingService.getAttendanceReport(query);
-      return HttpResponse(c).ok(data);
+      const result = await reportingService.getAttendanceReport(query);
+      return HttpResponse(c).ok(result.data, result.meta);
     } catch (error) {
       return this.handleError(c, error);
     }

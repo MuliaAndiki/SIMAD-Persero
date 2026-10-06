@@ -78,14 +78,8 @@ export function OfficeDetailSection({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="outline" asChild>
-            <Link href="/hr_admin/offices">
-              <ArrowLeft className="size-4 mr-1.5" />
-              Kembali
-            </Link>
-          </Button>
           <Button variant="outline" className="text-destructive hover:bg-destructive/10" onClick={onDelete} disabled={isDeleting}>
-            <Trash2 className="size-4 mr-1.5" />
+            <Trash2 className="size-4" />
             Hapus Kantor
           </Button>
           <Button asChild>

@@ -60,21 +60,29 @@ export function StatisticsGrid({ data }: { data: DashboardStatistics }) {
               icon={Users}
               label="Total Pengguna"
               value={data.totalUsers.toLocaleString('id-ID')}
+              description="Akun terdaftar"
+              tone="primary"
             />
             <StatCard
               icon={GraduationCap}
               label="Peserta Magang"
               value={data.totalInterns.toLocaleString('id-ID')}
+              description="Mahasiswa/Siswa"
+              tone="info"
             />
             <StatCard
               icon={Building2}
               label="Bidang / Dept"
               value={data.totalDepartments.toLocaleString('id-ID')}
+              description="Divisi aktif"
+              tone="muted"
             />
             <StatCard
               icon={MapPin}
               label="Lokasi Kantor"
               value={data.totalOffices.toLocaleString('id-ID')}
+              description="Unit PLN terhubung"
+              tone="muted"
             />
           </div>
         </TabsContent>
@@ -85,16 +93,22 @@ export function StatisticsGrid({ data }: { data: DashboardStatistics }) {
               icon={ClipboardList}
               label="Total Pengajuan"
               value={data.totalApplications.toLocaleString('id-ID')}
+              description="Semua periode"
+              tone="muted"
             />
             <StatCard
               icon={FileClock}
               label="Menunggu Review"
               value={data.pendingApplications.toLocaleString('id-ID')}
+              description="Perlu tindakan HR"
+              tone={data.pendingApplications > 0 ? 'warning' : 'muted'}
             />
             <StatCard
               icon={CheckCircle2}
               label="Disetujui"
               value={data.approvedApplications.toLocaleString('id-ID')}
+              description="Lolos seleksi berkas"
+              tone="success"
             />
           </div>
         </TabsContent>
@@ -105,11 +119,15 @@ export function StatisticsGrid({ data }: { data: DashboardStatistics }) {
               icon={Briefcase}
               label="Magang Aktif"
               value={data.activeInternships.toLocaleString('id-ID')}
+              description="Sedang dalam penempatan"
+              tone="primary"
             />
             <StatCard
               icon={Award}
               label="Magang Selesai"
               value={data.completedInternships.toLocaleString('id-ID')}
+              description="Telah menyelesaikan program"
+              tone="success"
             />
           </div>
         </TabsContent>
@@ -120,21 +138,29 @@ export function StatisticsGrid({ data }: { data: DashboardStatistics }) {
               icon={UserCog}
               label="Total Mentor"
               value={data.totalSupervisors.toLocaleString('id-ID')}
+              description="Pembimbing aktif"
+              tone="muted"
             />
             <StatCard
               icon={CalendarCheck}
               label="Total Absensi"
               value={data.totalAttendance.toLocaleString('id-ID')}
+              description="Log terakumulasi"
+              tone="info"
             />
             <StatCard
               icon={CalendarClock}
               label="Absensi Hari Ini"
               value={data.attendanceToday.toLocaleString('id-ID')}
+              description="Presensi masuk hari ini"
+              tone="success"
             />
             <StatCard
               icon={BadgeCheck}
               label="Sertifikat Dibuat"
               value={data.certificatesGenerated.toLocaleString('id-ID')}
+              description="Terbit secara resmi"
+              tone="info"
             />
           </div>
         </TabsContent>

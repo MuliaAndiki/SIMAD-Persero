@@ -1,12 +1,14 @@
-import { Type } from '@sinclair/typebox';
+import { t } from 'elysia';
 
 // ── Query ──────────────────────────────────────────────────────────────
 
-export const ReportingQuery = Type.Object({
-  officeLocationId: Type.Optional(Type.String()),
-  departmentId: Type.Optional(Type.String()),
-  internshipId: Type.Optional(Type.String()),
-  month: Type.Optional(Type.Number()),
-  year: Type.Optional(Type.Number()),
-  format: Type.Optional(Type.String()),
+export const ReportingQuery = t.Object({
+  officeLocationId: t.Optional(t.String()),
+  departmentId: t.Optional(t.String()),
+  internshipId: t.Optional(t.String()),
+  month: t.Optional(t.Numeric({ minimum: 1, maximum: 12 })),
+  year: t.Optional(t.Numeric()),
+  format: t.Optional(t.String()),
+  page: t.Optional(t.Numeric({ minimum: 1 })),
+  limit: t.Optional(t.Numeric({ minimum: 1, maximum: 100 })),
 });

@@ -1,4 +1,5 @@
 import { AppError } from '@/http/error';
+import webPushService from '@/services/webPush.service';
 import type {
   NotificationQuery,
   NotificationResponse,
@@ -236,6 +237,24 @@ class NotificationService {
         })),
       });
     }
+
+    // Trigger Web Push ke perangkat peserta / pengguna (Bulk & Non-blocking)
+    void webPushService
+      .sendBulkPush(
+        {
+          title: notification.title || 'SIMAD - Notifikasi Baru',
+          message: notification.message || '',
+          url: '/notifications',
+          notificationId: notification.id,
+          typeCode: input.typeCode,
+          tag: `notif-${notification.id}`,
+        },
+        input.userIds,
+        Boolean(notification.isBroadcast),
+      )
+      .catch((err) => {
+        console.error('[NotificationService] Background bulk web push failed:', err);
+      });
 
     return this.getById(userId, notification.id);
   }

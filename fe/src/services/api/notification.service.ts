@@ -114,6 +114,44 @@ class NotificationService {
     );
     return toServiceResponse(res, { message: 'Notifikasi berhasil dihapus' });
   }
+
+  /**
+   * GET /notifications/vapid-public-key
+   * Mengambil VAPID Public Key untuk Web Push.
+   */
+  public async GetVapidPublicKey(): Promise<TResponse<{ publicKey: string }>> {
+    const res = await client.GetResponse<{ publicKey: string }>(
+      NOTIFICATION_ENDPOINTS.VAPID_PUBLIC_KEY,
+    );
+    return toServiceResponse(res, {
+      message: 'VAPID Public Key berhasil dimuat',
+    });
+  }
+
+  /**
+   * POST /notifications/subscribe
+   * Mendaftarkan PushSubscription browser/PWA.
+   */
+  public async SubscribePush(
+    body: { endpoint: string; keys: { p256dh: string; auth: string } },
+  ): Promise<TResponse<any>> {
+    const res = await client.PostResponse<any>(NOTIFICATION_ENDPOINTS.SUBSCRIBE, body);
+    return toServiceResponse(res, {
+      message: 'Perangkat berhasil terhubung dengan notifikasi push',
+      statusCode: 201,
+    });
+  }
+
+  /**
+   * POST /notifications/unsubscribe
+   * Membatalkan PushSubscription browser/PWA.
+   */
+  public async UnsubscribePush(body: { endpoint: string }): Promise<TResponse<null>> {
+    const res = await client.PostResponse<null>(NOTIFICATION_ENDPOINTS.UNSUBSCRIBE, body);
+    return toServiceResponse(res, {
+      message: 'Notifikasi push berhasil dimatikan',
+    });
+  }
 }
 
 export default new NotificationService();

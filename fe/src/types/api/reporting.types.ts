@@ -17,6 +17,8 @@ export interface ReportingQuery {
   month?: number;
   year?: number;
   format?: string;
+  page?: number;
+  limit?: number;
 }
 
 // ---------- Response (data dari backend) ----------

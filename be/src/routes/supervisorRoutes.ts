@@ -93,6 +93,10 @@ class SupervisorRouter {
         params: SupervisorAssignmentParam,
       },
     );
+    this.supervisorRouter.get('/internships', (c: AppContext) => supervisorController.getInternshipsBySupervisor(c), {
+      beforeHandle: [verifyToken().beforeHandle, requireRole(['supervisor']).beforeHandle],
+      query:SupervisorListQuery
+    });
   }
 }
 

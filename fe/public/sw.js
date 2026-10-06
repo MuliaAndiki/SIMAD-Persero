@@ -145,6 +145,87 @@ self.addEventListener("message", (event) => {
   }
 });
 
+// ─── PWA Push Notifications ─────────────────────────────────────
+self.addEventListener("push", (event) => {
+  console.log("[SW] Push Notification Received", event);
+
+  let payload = {
+    title: "SIMAD - Notifikasi Baru",
+    message: "Ada pemberitahuan terbaru untuk Anda.",
+    url: "/notifications",
+    tag: "simad-notification",
+  };
+
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      payload = { ...payload, ...data };
+    } catch {
+      payload.message = event.data.text();
+    }
+  }
+
+  const notificationTitle = payload.title || "SIMAD PLN Persero";
+  const notificationOptions = {
+    body: payload.message || payload.body || "Pemberitahuan baru di SIMAD.",
+    icon: payload.icon || "/images/logos.png",
+    badge: payload.badge || "/images/logos.png",
+    tag: payload.tag || "simad-notification",
+    data: {
+      url: payload.url || (payload.data && payload.data.url) || "/notifications",
+      notificationId: payload.notificationId,
+    },
+    vibrate: [200, 100, 200],
+    requireInteraction: false,
+    actions: [
+      { action: "open", title: "Buka Notifikasi" },
+      { action: "close", title: "Tutup" },
+    ],
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(notificationTitle, notificationOptions),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  if (event.action === "close") {
+    return;
+  }
+
+  const targetUrl =
+    event.notification.data?.url ||
+    (event.notification.data && event.notification.data.notificationId
+      ? `/notifications`
+      : "/notifications");
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((windowClients) => {
+        // Jika tab/jendela SIMAD sudah terbuka, fokuskan
+        for (const client of windowClients) {
+          if (
+            client.url.includes("/notifications") ||
+            client.url.includes("/intern") ||
+            client.url.includes("/hr_admin") ||
+            client.url.includes("/supervisor") ||
+            client.url.includes("/dashboard")
+          ) {
+            client.navigate(targetUrl);
+            return client.focus();
+          }
+        }
+        // Jika belum ada jendela aktif, buka jendela baru
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(targetUrl);
+        }
+      }),
+  );
+});
+
 workbox.core.skipWaiting();
 workbox.core.clientsClaim();
 

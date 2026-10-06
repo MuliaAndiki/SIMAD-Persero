@@ -105,48 +105,64 @@ export function ReceptionistDashboardSection({
         )}
       </header>
 
-      {/* Metrics Cards */}
+      {/* High-Density Receptionist Triage Counters */}
       {isInitialLoading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Card className="h-28 animate-pulse bg-muted/40" />
-          <Card className="h-28 animate-pulse bg-muted/40" />
-          <Card className="h-28 animate-pulse bg-muted/40" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Card className="h-20 animate-pulse bg-muted/40" />
+          <Card className="h-20 animate-pulse bg-muted/40" />
+          <Card className="h-20 animate-pulse bg-muted/40" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Card className="flex items-center gap-4 p-5">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Users className="size-6" />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground">Total Magang Aktif</span>
+              <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <Users className="size-3.5" />
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold text-foreground">
+            <div className="mt-2 flex items-baseline justify-between gap-2">
+              <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
                 {data?.activeInternsCount ?? 0}
               </span>
-              <span className="text-xs text-muted-foreground">Total Magang Aktif</span>
+              <span className="text-xs text-muted-foreground">Peserta Terdaftar</span>
             </div>
           </Card>
 
-          <Card className="flex items-center gap-4 p-5">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <UserCheck className="size-6" />
+          <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground">Hadir Hari Ini</span>
+              <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <UserCheck className="size-3.5" />
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold text-foreground">
+            <div className="mt-2 flex items-baseline justify-between gap-2">
+              <span className="text-2xl font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400">
                 {data?.presentTodayCount ?? 0}
               </span>
-              <span className="text-xs text-muted-foreground">Hadir Hari Ini</span>
+              <Badge
+                variant="outline"
+                className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0"
+              >
+                {data && data.activeInternsCount > 0
+                  ? `${Math.round((data.presentTodayCount / data.activeInternsCount) * 100)}% Presensi`
+                  : '0% Presensi'}
+              </Badge>
             </div>
           </Card>
 
-          <Card className="flex items-center gap-4 p-5">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-              <Clock className="size-6" />
+          <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-muted-foreground">Belum Absen Masuk</span>
+              <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <Clock className="size-3.5" />
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold text-foreground">
+            <div className="mt-2 flex items-baseline justify-between gap-2">
+              <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
                 {data?.pendingCheckInCount ?? 0}
               </span>
-              <span className="text-xs text-muted-foreground">Belum Absen Masuk</span>
+              <span className="text-xs text-muted-foreground">Menunggu Masuk</span>
             </div>
           </Card>
         </div>

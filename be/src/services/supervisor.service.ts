@@ -458,6 +458,83 @@ class SupervisorService {
       return true;
     });
   }
+
+  public async getInternshipsBySupervisor(
+    supervisorId: string,
+    query?: { page?: number; limit?: number; status?: string },
+  ) {
+    const page = Math.max(1, Number(query?.page) || 1);
+    const limit = Math.min(500, Math.max(1, Number(query?.limit) || 50));
+    const skip = (page - 1) * limit;
+
+    const statusFilter = InternshipStatus.COMPLETED;
+
+    const where = {
+      supervisorId,
+      internship: {
+        status: statusFilter,
+      },
+    };
+
+    const [total, intern] = await prisma.$transaction([
+      prisma.supervisorAssignment.count({ where }),
+      prisma.supervisorAssignment.findMany({
+        where,
+        select: {
+          id: true,
+          internship: {
+            select: {
+              id: true,
+              status: true,
+              actualStartDate: true,
+              actualEndDate: true,
+              department: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              internProfile: {
+                select: {
+                  institution: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                  user: {
+                    select: {
+                      id: true,
+                      fullName: true,
+                    },
+                  },
+                },
+              },
+              evaluation: {
+                select: {
+                  id: true,
+                  disciplineScore: true,
+                  responsibilityScore: true,
+                  teamworkScore: true,
+                  communicationScore: true,
+                  technicalScore: true,
+                  initiativeScore: true,
+                  finalScore: true,
+                  grade: true,
+                  comments: true,
+                  status: true,
+                },
+              },
+            },
+          },
+        },
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    return { total, intern };
+  }
 }
 
 export default new SupervisorService();

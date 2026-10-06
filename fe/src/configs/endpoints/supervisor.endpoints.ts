@@ -14,6 +14,10 @@ export const SUPERVISOR_ENDPOINTS = {
   LIST: '/supervisors',
   /** POST /supervisors - Create supervisor (HR_ADMIN) */
   CREATE: '/supervisors',
+
+  /** GET /supervisors/internships — Daftar internship yang di-assign ke supervisor (SUPERVISOR) */
+  GET_INTERNSHIPS: '/supervisors/internships',
+
   /** GET /supervisors/:supervisorId — Detail supervisor (HR_ADMIN) */
   DETAIL: (supervisorId: string) => `/supervisors/${supervisorId}`,
   /** UPDATE /supervisors/:supervisorId - Update supervisor (HR_ADMIN) */
@@ -25,4 +29,5 @@ export const SUPERVISOR_ENDPOINTS = {
   /** DELETE /supervisors/:supervisorId/assignments/:assignmentId — Hapus assignment (HR_ADMIN) */
   REMOVE_ASSIGNMENT: (supervisorId: string, assignmentId: string) =>
     `/supervisors/${supervisorId}/assignments/${assignmentId}`,
+
 } as const;

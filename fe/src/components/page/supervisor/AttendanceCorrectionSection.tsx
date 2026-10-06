@@ -110,15 +110,34 @@ export function AttendanceCorrectionSection({
         </p>
       </header>
 
-      {/* Summary card */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4 flex items-center gap-4 bg-amber-500/5 border-amber-500/20">
-          <div className="p-3 rounded-lg bg-amber-500/10 text-amber-600">
-            <Clock className="h-6 w-6" />
+      {/* High-Density Summary info card */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Menunggu Review</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <Clock className="size-3.5" />
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Menunggu Review</p>
-            <h3 className="text-2xl font-bold text-foreground">{pendingCount} Pengajuan</h3>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
+                {pendingCount}
+              </span>
+              <span className="text-xs text-muted-foreground">Pengajuan</span>
+            </div>
+            {pendingCount > 0 ? (
+              <Badge
+                variant="outline"
+                className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] px-1.5 py-0"
+              >
+                Perlu Ditinjau
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[10px] text-muted-foreground px-1.5 py-0">
+                Tidak Ada Antrean
+              </Badge>
+            )}
           </div>
         </Card>
       </div>

@@ -5,7 +5,6 @@ import { Card } from '@/components/atoms/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/atoms/table';
 import type { EvaluationItem } from '@/types/api/evaluation.types';
 import { TableLoader } from '@/components/atoms/loading';
-import { formatDate } from '@/utils/string.format';
 import { Award, CheckCircle2, ClipboardCheck, User } from 'lucide-react';
 
 export interface EvaluationsOverviewSectionProps {
@@ -33,35 +32,62 @@ export function EvaluationsOverviewSection({ evaluations, isPending }: Evaluatio
         </p>
       </header>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4 flex items-center gap-4 bg-primary/5 border-primary/20">
-          <div className="p-3 rounded-lg bg-primary/10 text-primary">
-            <ClipboardCheck className="h-6 w-6" />
+      {/* High-Density Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Total Evaluasi Masuk</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <ClipboardCheck className="size-3.5" />
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Total Evaluasi Masuk</p>
-            <h3 className="text-2xl font-bold text-foreground">{evaluations.length} Peserta</h3>
-          </div>
-        </Card>
-
-        <Card className="p-4 flex items-center gap-4 bg-emerald-500/5 border-emerald-500/20">
-          <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-600">
-            <Award className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Rata-Rata Nilai Akhir</p>
-            <h3 className="text-2xl font-bold text-foreground">{avgFinalScore} / 100</h3>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
+              {evaluations.length}
+            </span>
+            <span className="text-xs text-muted-foreground">Peserta Terdata</span>
           </div>
         </Card>
 
-        <Card className="p-4 flex items-center gap-4 bg-blue-500/5 border-blue-500/20">
-          <div className="p-3 rounded-lg bg-blue-500/10 text-blue-600">
-            <CheckCircle2 className="h-6 w-6" />
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Rata-Rata Nilai Akhir</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <Award className="size-3.5" />
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-muted-foreground">Predikat Grade A</p>
-            <h3 className="text-2xl font-bold text-foreground">{gradeCountA} Peserta</h3>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400">
+                {avgFinalScore}
+              </span>
+              <span className="text-xs text-muted-foreground">/ 100</span>
+            </div>
+            <Badge
+              variant="outline"
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0"
+            >
+              Skor Rata-Rata
+            </Badge>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Predikat Grade A</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-sky-500/10 text-sky-600 dark:text-sky-400">
+              <CheckCircle2 className="size-3.5" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
+              {gradeCountA}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {evaluations.length > 0
+                ? `${Math.round((gradeCountA / evaluations.length) * 100)}% dari total`
+                : '0%'}
+            </span>
           </div>
         </Card>
       </div>

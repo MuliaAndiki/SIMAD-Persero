@@ -84,6 +84,42 @@ class NotificationController {
       return this.handleError(c, error);
     }
   }
+
+  // GET /notifications/vapid-public-key
+  public async getVapidPublicKey(c: AppContext) {
+    try {
+      const { default: webPushService } = await import('@/services/webPush.service');
+      const publicKey = webPushService.getPublicKey();
+      return HttpResponse(c).ok({ publicKey });
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /notifications/subscribe
+  public async subscribePush(c: AppContext) {
+    try {
+      const { default: webPushService } = await import('@/services/webPush.service');
+      const body = c.body as any;
+      const userAgent = (c.headers as any)?.['user-agent'] || undefined;
+      const data = await webPushService.subscribe(c.user!.id, body, userAgent);
+      return HttpResponse(c).created(data, 'Perangkat berhasil terhubung dengan notifikasi push.');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // POST /notifications/unsubscribe
+  public async unsubscribePush(c: AppContext) {
+    try {
+      const { default: webPushService } = await import('@/services/webPush.service');
+      const body = c.body as any;
+      await webPushService.unsubscribe(c.user!.id, body.endpoint);
+      return HttpResponse(c).ok(null, undefined, 'Notifikasi push berhasil dimatikan.');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
 }
 
 export default new NotificationController();

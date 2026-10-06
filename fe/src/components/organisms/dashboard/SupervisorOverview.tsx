@@ -1,84 +1,70 @@
+import { Badge } from '@/components/atoms/badge';
 import { StatCard } from '@/components/organisms/dashboard/StatCard';
 import type { SupervisorDashboardData } from '@/types/api/dashboard.types';
-import { type Variants, motion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, Clock, Users } from 'lucide-react';
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 24,
-    },
-  },
-};
-
 /**
- * SupervisorOverview — ringkasan dashboard supervisor (GET /dashboard/supervisor).
- * Presentasi murni; data disuplai oleh section/container.
+ * SupervisorOverview — ringkasan operasional dashboard supervisor (GET /dashboard/supervisor).
+ * High-Density Enterprise UI.
  */
 export function SupervisorOverview({
   data,
 }: {
   data: SupervisorDashboardData;
 }) {
+  const presenceRatio =
+    data.departmentParticipants > 0
+      ? `${Math.round((data.present / data.departmentParticipants) * 100)}%`
+      : '0%';
+
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-    >
-      <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="transition-all">
-        <StatCard
-          icon={Users}
-          label="Peserta Departemen"
-          value={data.departmentParticipants}
-          description="Peserta magang"
-          className="border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)] bg-gradient-to-br from-card to-blue-500/5"
-          tone="primary"
-        />
-      </motion.div>
-      <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="transition-all">
-        <StatCard
-          icon={CheckCircle2}
-          label="Hadir"
-          value={data.present}
-          description="Sudah masuk"
-          className="border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)] bg-gradient-to-br from-card to-emerald-500/5"
-        />
-      </motion.div>
-      <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="transition-all">
-        <StatCard
-          icon={Clock}
-          label="Belum Masuk"
-          value={data.notCheckedIn}
-          description="Belum hadir"
-          className="border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)] bg-gradient-to-br from-card to-amber-500/5"
-        />
-      </motion.div>
-      <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="transition-all">
-        <StatCard
-          icon={AlertTriangle}
-          label="Absensi Tidak Valid"
-          value={data.invalidAttendance}
-          description="Perlu ditinjau"
-          className="border-rose-500/20 shadow-[0_0_15px_rgba(244,63,94,0.1)] bg-gradient-to-br from-card to-rose-500/5"
-        />
-      </motion.div>
-    </motion.div>
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        icon={Users}
+        label="Peserta Departemen"
+        value={data.departmentParticipants}
+        description="Total anak bimbingan"
+        tone="primary"
+      />
+      <StatCard
+        icon={CheckCircle2}
+        label="Hadir Hari Ini"
+        value={data.present}
+        description={`${presenceRatio} dari total peserta`}
+        tone="success"
+        badge={
+          <Badge
+            variant="outline"
+            className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0"
+          >
+            {presenceRatio}
+          </Badge>
+        }
+      />
+      <StatCard
+        icon={Clock}
+        label="Belum Check-In"
+        value={data.notCheckedIn}
+        description="Belum absen masuk"
+        tone={data.notCheckedIn > 0 ? 'warning' : 'muted'}
+      />
+      <StatCard
+        icon={AlertTriangle}
+        label="Presensi Tidak Valid"
+        value={data.invalidAttendance}
+        description="Perlu review / override"
+        tone={data.invalidAttendance > 0 ? 'destructive' : 'muted'}
+        badge={
+          data.invalidAttendance > 0 ? (
+            <Badge
+              variant="outline"
+              className="border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] px-1.5 py-0"
+            >
+              Perlu Ditinjau
+            </Badge>
+          ) : undefined
+        }
+      />
+    </div>
   );
 }

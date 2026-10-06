@@ -19,7 +19,10 @@ class ReportingService {
    * format=xlsx dikembalikan sebagai JSON — generasi .xlsx adalah future
    * enhancement (konsisten dengan AttendanceService.exportAttendance).
    */
-  public async getAttendanceReport(query: ReportingQuery): Promise<AttendanceReportRow[]> {
+  public async getAttendanceReport(query: ReportingQuery): Promise<{
+    data: AttendanceReportRow[];
+    meta: { page: number; limit: number; total: number; totalPages: number };
+  }> {
     const where: Record<string, unknown> = {};
 
     const internshipWhere: Record<string, unknown> = {};
@@ -38,39 +41,42 @@ class ReportingService {
 
     if (query.month || query.year) {
       const now = new Date();
-      const year = query.year ?? now.getFullYear();
-      const month = query.month ?? now.getMonth() + 1;
+      const year = query.year ? Number(query.year) : now.getFullYear();
+      const month = query.month ? Number(query.month) : now.getMonth() + 1;
       const start = new Date(`${year}-${String(month).padStart(2, '0')}-01`);
-      const end = new Date(year, month, 0);
+      const end = new Date(year, month, 0, 23, 59, 59, 999);
       where.attendanceDate = { gte: start, lte: end };
     }
 
     const page = Math.max(1, Number(query.page) || 1);
-    const limit = Math.min(1000, Math.max(1, Number(query.limit) || 500));
+    const limit = Math.min(100, Math.max(1, Number(query.limit) || 10));
     const skip = (page - 1) * limit;
 
-    const data = await prisma.attendance.findMany({
-      where,
-      skip,
-      take: limit,
-      include: {
-        internship: {
-          include: {
-            internProfile: {
-              include: {
-                user: { select: { fullName: true, email: true } },
-                institution: { select: { name: true } },
+    const [total, data] = await Promise.all([
+      prisma.attendance.count({ where }),
+      prisma.attendance.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          internship: {
+            include: {
+              internProfile: {
+                include: {
+                  user: { select: { fullName: true, email: true } },
+                  institution: { select: { name: true } },
+                },
               },
+              department: { select: { name: true } },
+              officeLocation: { select: { name: true } },
             },
-            department: { select: { name: true } },
-            officeLocation: { select: { name: true } },
           },
         },
-      },
-      orderBy: { attendanceDate: 'desc' },
-    });
+        orderBy: { attendanceDate: 'desc' },
+      }),
+    ]);
 
-    return data.map((a: (typeof data)[number]) => ({
+    const items: AttendanceReportRow[] = data.map((a: (typeof data)[number]) => ({
       date: a.attendanceDate,
       intern: a.internship?.internProfile?.user?.fullName ?? '-',
       email: a.internship?.internProfile?.user?.email ?? '-',
@@ -85,6 +91,16 @@ class ReportingService {
       status: a.attendanceStatus,
       totalWorkMinutes: a.totalWorkMinutes,
     }));
+
+    return {
+      data: items,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /**

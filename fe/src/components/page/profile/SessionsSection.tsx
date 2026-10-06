@@ -139,44 +139,57 @@ export function SessionsSection({ state, service }: SessionsSectionProps) {
         </div>
       </div>
 
-      {/* Metrics Summary Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="bg-card/50 backdrop-blur-sm">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Laptop className="size-6" />
+      {/* High-Density Metrics Summary Grid */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Total Sesi Aktif</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Laptop className="size-3.5" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold text-foreground">{state.sessions.length}</span>
-              <span className="text-xs text-muted-foreground">Total Sesi Aktif</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card/50 backdrop-blur-sm">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <ShieldCheck className="size-6" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-foreground">Sistem Terlindungi</span>
-              <span className="text-xs text-muted-foreground">Enkripsi Token JWT</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card/50 backdrop-blur-sm">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-              <Clock className="size-6" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-medium text-muted-foreground">Sesi Ini Masuk:</span>
-              <span className="text-xs font-semibold text-foreground">
-                {currentSession ? formatDate(currentSession.createdAt) : '-'}
+          </div>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold font-mono tracking-tight text-foreground">
+                {state.sessions.length}
               </span>
+              <span className="text-xs text-muted-foreground">Perangkat</span>
             </div>
-          </CardContent>
+            <span className="text-xs text-muted-foreground">Akses Terhubung</span>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Keamanan Sesi</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <ShieldCheck className="size-3.5" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <span className="text-sm font-semibold text-foreground">Terlindungi</span>
+            <Badge
+              variant="outline"
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0"
+            >
+              JWT Enkripsi
+            </Badge>
+          </div>
+        </Card>
+
+        <Card className="flex flex-col justify-between p-3.5 border-border/70 hover:border-border shadow-2xs">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-muted-foreground">Sesi Masuk Aktif</span>
+            <div className="flex size-6.5 shrink-0 items-center justify-center rounded-md bg-sky-500/10 text-sky-600 dark:text-sky-400">
+              <Clock className="size-3.5" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between gap-2">
+            <span className="text-xs font-semibold text-foreground truncate">
+              {currentSession ? formatDate(currentSession.createdAt) : '-'}
+            </span>
+            <span className="text-[10px] text-muted-foreground shrink-0">Waktu Login</span>
+          </div>
         </Card>
       </div>
 
