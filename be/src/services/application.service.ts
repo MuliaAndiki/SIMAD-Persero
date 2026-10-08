@@ -12,7 +12,7 @@ import {
 import type { AuthUser } from "@/types/auth.types";
 import { InternshipStatus } from "@/types/internship.types";
 import { sendStartDateEmail } from "@/services/email.service";
-import { getLogger } from "../telemetry/otel.config";
+import { getLogger } from "../utils/logger";
 import prisma from "../../prisma/client";
 
 /**

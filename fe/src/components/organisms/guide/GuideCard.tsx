@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/atoms/card";
 import type { GuideItem } from "@/types/api/guide.types";
+import { getGuideCategoryLabel } from "@/utils/guide-category";
 import {
   ArrowRight,
   BookOpen,
@@ -42,25 +43,6 @@ export function GuideCard({ guide, onSelect }: GuideCardProps) {
     }
   };
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case "REGISTRATION":
-        return "Pendaftaran";
-      case "ONBOARDING":
-        return "Orientasi";
-      case "ATTENDANCE":
-        return "Presensi";
-      case "LOGBOOK":
-        return "Jurnal";
-      case "FINAL_REPORT":
-        return "Laporan Akhir";
-      case "CERTIFICATE":
-        return "Sertifikat";
-      default:
-        return category;
-    }
-  };
-
   return (
     <Card
       className="group flex flex-col justify-between overflow-hidden transition-all duration-200 hover:border-primary/50 hover:shadow-md cursor-pointer"
@@ -71,7 +53,7 @@ export function GuideCard({ guide, onSelect }: GuideCardProps) {
           <div className="flex items-center gap-1.5">
             {getCategoryIcon(guide.category)}
             <span className="text-xs font-medium text-muted-foreground">
-              {getCategoryLabel(guide.category)}
+              {getGuideCategoryLabel(guide.category)}
             </span>
           </div>
 

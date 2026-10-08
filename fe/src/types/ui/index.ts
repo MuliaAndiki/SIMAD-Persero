@@ -22,3 +22,43 @@ export interface AlertContexType {
   modal: (p: ModalProps) => void;
   confirm: (p: ModalProps) => Promise<boolean>;
 }
+
+export type GuideCategory =
+  | 'REGISTRATION'
+  | 'ONBOARDING'
+  | 'ATTENDANCE'
+  | 'LOGBOOK'
+  | 'FINAL_REPORT'
+  | 'CERTIFICATE'
+  | 'GENERAL';
+
+export type AttendanceStatus =
+  | 'PRESENT'
+  | 'LATE'
+  | 'COMPLETED'
+  | 'PENDING_REVIEW'
+  | 'INVALID'
+  | 'ABSENT'
+  | 'ON_TIME';
+
+export type InternshipStatus =
+  | 'DRAFT'
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'ACTIVE'
+  | 'COMPLETED'
+  | 'TERMINATED'
+  | 'CERTIFICATE_GENERATED'
+  | 'ARCHIVED';
+
+export interface WorkdayItem {
+  date: Date;
+  key: string;
+  isWorkday: boolean;
+}
+
+export interface QuotaAllocation {
+  departmentId: string;
+  allocated: number;
+}

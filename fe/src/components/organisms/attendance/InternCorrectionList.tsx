@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PhantomSkeleton } from '@/components/atoms/PhantomSkeleton';
 import { useApi } from '@/hooks/useService/useApi';
 import type { AttendanceCorrectionItem } from '@/types/api/correction.types';
+import { getCorrectionStatusLabel, getCorrectionTypeLabel } from '@/utils/correction-labels';
 import {
   AlertCircle,
   Calendar,
@@ -51,46 +52,32 @@ export function InternCorrectionList({
   };
 
   const getStatusBadge = (status: string) => {
+    const label = getCorrectionStatusLabel(status);
     switch (status) {
       case 'APPROVED':
         return (
           <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white">
-            <CheckCircle2 className="mr-1 size-3" /> Disetujui
+            <CheckCircle2 className="mr-1 size-3" /> {label}
           </Badge>
         );
       case 'REJECTED':
         return (
           <Badge variant="destructive">
-            <XCircle className="mr-1 size-3" /> Ditolak
+            <XCircle className="mr-1 size-3" /> {label}
           </Badge>
         );
       case 'CANCELLED':
         return (
           <Badge variant="outline" className="text-muted-foreground">
-            Dibatalkan
+            {label}
           </Badge>
         );
       default:
         return (
           <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-            <Clock className="mr-1 size-3" /> Menunggu Review
+            <Clock className="mr-1 size-3" /> {label}
           </Badge>
         );
-    }
-  };
-
-  const getTypeText = (type: string) => {
-    switch (type) {
-      case 'CHECK_IN':
-        return 'Koreksi Masuk';
-      case 'CHECK_OUT':
-        return 'Koreksi Pulang';
-      case 'BOTH':
-        return 'Koreksi Masuk & Pulang';
-      case 'INVALID_OVERRIDE':
-        return 'Koreksi Presensi Alpa / Invalid';
-      default:
-        return type;
     }
   };
 
@@ -158,7 +145,7 @@ export function InternCorrectionList({
                         : 'Tanggal Presensi'}
                     </span>
                     <Badge variant="outline" className="text-xs">
-                      {getTypeText(item.correctionType)}
+                      {getCorrectionTypeLabel(item.correctionType)}
                     </Badge>
                     {getStatusBadge(item.status)}
                   </div>

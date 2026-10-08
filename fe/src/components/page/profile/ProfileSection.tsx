@@ -27,6 +27,9 @@ import type { ChangeEvent } from 'react';
 import { ActiveSessionsCard } from '@/components/organisms/profile/ActiveSessionsCard';
 import { AppSettingsCard } from '@/components/organisms/profile/AppSettingsCard';
 import { ChangeEmailModal } from '@/components/organisms/profile/ChangeEmailModal';
+import { DASHBOARD_ROLE_LABELS } from '@/configs/app.config';
+import { profileBasePath } from '@/utils/profile-path';
+import { getInitials } from '@/utils/string.format';
 import { PhotoCropper } from './PhotoCropper';
 import type { AuthSession } from '@/types/api/auth.types';
 
@@ -84,42 +87,6 @@ function isValidPhoto(file: File): boolean {
   if (file.type && ALLOWED_PHOTO_TYPES.includes(file.type.toLowerCase())) return true;
   const ext = file.name.split('.').pop()?.toLowerCase();
   return ext ? ALLOWED_PHOTO_EXTENSIONS.includes(ext) : false;
-}
-
-/** Inisial nama untuk fallback avatar. */
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
-}
-
-/** Label role dalam Bahasa Indonesia. */
-function roleLabel(role: string | null): string {
-  switch (role?.toUpperCase()) {
-    case 'INTERN':
-      return 'Peserta Magang';
-    case 'HR_ADMIN':
-      return 'Admin HR';
-    case 'SUPERVISOR':
-      return 'Mentor';
-    default:
-      return role ?? '-';
-  }
-}
-
-/** Base path halaman profil sesuai role — dipakai untuk link aksi terkait. */
-function profileBasePath(role: string | null): string {
-  switch (role?.toUpperCase()) {
-    case 'HR_ADMIN':
-      return '/hr_admin/profile';
-    case 'SUPERVISOR':
-      return '/supervisor/profile';
-    default:
-      return '/intern/profile';
-  }
 }
 
 export function ProfileSection({ state, service }: ProfileSectionProps) {
@@ -201,7 +168,7 @@ export function ProfileSection({ state, service }: ProfileSectionProps) {
             </div>
             <div className="flex flex-col gap-1 rounded-lg border bg-muted/40 p-4">
               <dt className="text-xs text-muted-foreground">Peran</dt>
-              <dd className="text-sm font-medium">{roleLabel(profile.role)}</dd>
+              <dd className="text-sm font-medium">{DASHBOARD_ROLE_LABELS[profile.role?.toUpperCase() as keyof typeof DASHBOARD_ROLE_LABELS] ?? profile.role ?? '-'}</dd>
             </div>
           </dl>
         </CardContent>
@@ -369,7 +336,7 @@ function ProfileIdentityCard({
                 ) : null}
               </>
             ) : (
-              <Badge variant="secondary">{roleLabel(profile.role)}</Badge>
+              <Badge variant="secondary">{DASHBOARD_ROLE_LABELS[profile.role?.toUpperCase() as keyof typeof DASHBOARD_ROLE_LABELS] ?? profile.role ?? '-'}</Badge>
             )}
           </div>
           <p className="flex items-center gap-2 text-sm text-muted-foreground">

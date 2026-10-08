@@ -11,6 +11,8 @@ import {
 } from '@/components/atoms/tooltip';
 import { AttendanceCorrectionDialog } from '@/components/organisms/attendance/AttendanceCorrectionDialog';
 import { InternCorrectionList } from '@/components/organisms/attendance/InternCorrectionList';
+import { buildWorkdays, dateKey } from '@/utils/date-utils';
+import { formatTime } from '@/utils/string.format';
 import Api from '@/services/props.service';
 import type { AttendanceResponse } from '@/types/api/attendance.types';
 import type { AttendanceCorrectionItem } from '@/types/api/correction.types';
@@ -102,51 +104,6 @@ const DAY_CARD_STYLE: Record<DayCardKind, { card: string; text: string; label: s
     label: 'Belum Absen',
   },
 };
-
-function formatTime(value: string | null): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-/** Normalisasi tanggal (ISO / Date) menjadi kunci YYYY-MM-DD. */
-function dateKey(value: string | Date): string {
-  if (typeof value === 'string') {
-    return value.slice(0, 10);
-  }
-  const y = value.getFullYear();
-  const m = String(value.getMonth() + 1).padStart(2, '0');
-  const d = String(value.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-/** Apakah hari Senin–Jumat (hari kerja magang). */
-function isWorkday(date: Date): boolean {
-  const day = date.getDay();
-  return day >= 1 && day <= 5;
-}
-
-/** Daftar hari kerja (Senin–Jumat) pada bulan yang ditampilkan. */
-function buildWorkdays(month: number, year: number, start?: string | null, end?: string | null) {
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const startKey = start ? dateKey(start) : null;
-  const endKey = end ? dateKey(end) : null;
-
-  const days: { date: Date; key: string; dayNumber: number }[] = [];
-  for (let d = 1; d <= daysInMonth; d += 1) {
-    const date = new Date(year, month - 1, d);
-    if (!isWorkday(date)) continue;
-    const key = dateKey(date);
-    if (startKey && key < startKey) continue;
-    if (endKey && key > endKey) continue;
-    days.push({ date, key, dayNumber: d });
-  }
-  return days;
-}
 
 const SKELETON_IDS = ['s1', 's2', 's3', 's4', 's5', 's6'];
 

@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { env } from '@/config/env.config';
 import { generateEmailHtml } from '@/utils/email-template.util';
-import { getLogger } from '../telemetry/otel.config';
+import { getLogger } from '../utils/logger';
 
 interface MailOptions {
   to: string;
