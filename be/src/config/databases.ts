@@ -1,5 +1,5 @@
 import prisma from "prisma/client";
-import { getLogger } from "../telemetry/otel.config";
+import { getLogger } from "../utils/logger";
 
 export async function connectWithRetry(
   retries = 30,

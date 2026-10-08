@@ -1,11 +1,6 @@
 // lifecycle.ts
-import {
-  getLogger,
-  recordRequestEnd,
-  recordRequestStart,
-  statusClass,
-} from '@/telemetry/otel.config';
 import { type Elysia, StatusMap } from 'elysia';
+import { getLogger } from '@/utils/logger';
 import { getFriendlyErrorMessage } from '../http';
 import type { RequestStore } from '../types/request.type';
 
@@ -27,11 +22,7 @@ export class Lifecycle {
       store.startedAt = performance.now();
       store.requestId = crypto.randomUUID();
       c.set.headers['X-Request-Id'] = store.requestId;
-
-      const method = c.request.method;
-      const rawPath = c.path || new URL(c.request.url).pathname;
-      recordRequestStart({ method, route: rawPath });
-      store.route = rawPath;
+      store.route = c.path || new URL(c.request.url).pathname;
     });
 
     const finalize = (c: any, error?: unknown) => {
@@ -39,7 +30,6 @@ export class Lifecycle {
       if (store.finalized) return;
       store.finalized = true;
 
-      const method = c.request.method;
       const matchedRoute = c.route || store.route || c.path;
 
       const status = resolveStatus(c, error);
@@ -47,18 +37,10 @@ export class Lifecycle {
         0,
         Math.round(performance.now() - (store.startedAt ?? performance.now())),
       );
-      const statusCls = statusClass(status);
-
-      recordRequestEnd({
-        method,
-        route: store.route ?? matchedRoute,
-        status,
-        status_class: statusCls,
-      });
 
       const logData = {
         requestId: store.requestId,
-        method,
+        method: c.request.method,
         route: matchedRoute,
         status,
         durationMs,

@@ -3,6 +3,7 @@ import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
 import type { ProfileResponse } from '@/types/api/user.types';
+import { profileBasePath } from '@/utils/profile-path';
 import { AlertCircle, Loader2, Save, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -25,18 +26,6 @@ export interface EditProfileSectionService {
 export interface EditProfileSectionProps {
   state: EditProfileSectionState;
   service: EditProfileSectionService;
-}
-
-/** Base path halaman profil sesuai role — dipakai untuk link kembali. */
-function profileBasePath(role: string | null): string {
-  switch (role?.toUpperCase()) {
-    case 'HR_ADMIN':
-      return '/hr_admin/profile';
-    case 'SUPERVISOR':
-      return '/supervisor/profile';
-    default:
-      return '/intern/profile';
-  }
 }
 
 export function EditProfileSection({ state, service }: EditProfileSectionProps) {

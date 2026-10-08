@@ -21,6 +21,8 @@ import { Badge } from '@/components/atoms/badge';
 import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { InternshipResponse } from '@/types/api/internship.types';
+import { getInternshipStatusLabel } from '@/utils/status-labels';
+import { formatDate } from '@/utils/string.format';
 
 /** State yang disuplai container — section murni presentasi. */
 export interface OnboardingSectionState {
@@ -71,34 +73,6 @@ const PAKAIAN = [
       'Ada 2 opsi: jika ada pengajian pakai batik; jika senam/olahraga pakai training pagi, siang Jumat ganti batik.',
   },
 ];
-
-function formatDate(value: string | null): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
-function internshipStatusLabel(status: string | null): string {
-  switch (status) {
-    case 'PENDING':
-      return 'Menunggu';
-    case 'ACTIVE':
-      return 'Aktif';
-    case 'COMPLETED':
-      return 'Selesai';
-    case 'CERTIFICATE_GENERATED':
-      return 'Sertifikat Dibuat';
-    case 'ARCHIVED':
-      return 'Diarsipkan';
-    default:
-      return status ?? '-';
-  }
-}
 
 /** Skeleton loading halaman onboarding. */
 function OnboardingLoading() {
@@ -296,7 +270,7 @@ function InternshipInfoCard({ internship }: InternshipInfoCardProps) {
           </CardTitle>
           <CardDescription>Periksa data diri dan ketentuan magang.</CardDescription>
         </div>
-        <Badge>{internshipStatusLabel(internship.status)}</Badge>
+        <Badge>{getInternshipStatusLabel(internship.status)}</Badge>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         {/* Ringkasan data magang */}

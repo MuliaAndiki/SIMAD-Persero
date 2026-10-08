@@ -15,6 +15,7 @@ import { Label } from '@/components/atoms/label';
 import { Textarea } from '@/components/atoms/textarea';
 import type { EvaluationItem, SaveEvaluationBody } from '@/types/api/evaluation.types';
 import type { InternshipResponse } from '@/types/api/internship.types';
+import { calcFinalScore, scoreToGrade } from '@/utils/evaluation-grade';
 import { Award, CheckCircle2, ClipboardCheck, Info, User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
@@ -65,23 +66,16 @@ export function EvaluationFormDialog({
     }
   }, [existingEvaluation]);
 
-  const finalScore = Number(
-    (
-      (disciplineScore +
-        responsibilityScore +
-        teamworkScore +
-        communicationScore +
-        technicalScore +
-        initiativeScore) /
-      6
-    ).toFixed(1),
-  );
+  const finalScore = calcFinalScore([
+    disciplineScore,
+    responsibilityScore,
+    teamworkScore,
+    communicationScore,
+    technicalScore,
+    initiativeScore,
+  ]);
 
-  let grade = 'E';
-  if (finalScore >= 85) grade = 'A';
-  else if (finalScore >= 75) grade = 'B';
-  else if (finalScore >= 65) grade = 'C';
-  else if (finalScore >= 50) grade = 'D';
+  const grade = scoreToGrade(finalScore);
 
   const isFinal = existingEvaluation?.status === 'FINAL';
 

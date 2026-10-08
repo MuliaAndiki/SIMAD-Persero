@@ -6,6 +6,8 @@ import { Button } from '@/components/atoms/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/atoms/card';
 import type { AuthSession } from '@/types/api/auth.types';
 import type { AlertContexType } from '@/types/ui';
+import { profileBasePath } from '@/utils/profile-path';
+import { formatDate } from '@/utils/string.format';
 import {
   AlertCircle,
   ArrowLeft,
@@ -41,31 +43,6 @@ export interface SessionsSectionService {
 export interface SessionsSectionProps {
   state: SessionsSectionState;
   service: SessionsSectionService;
-}
-
-/** Base path halaman profil berdasarkan role. */
-function profileBasePath(role?: string | null): string {
-  switch (role?.toUpperCase()) {
-    case 'HR_ADMIN':
-      return '/hr_admin/profile';
-    case 'SUPERVISOR':
-      return '/supervisor/profile';
-    default:
-      return '/intern/profile';
-  }
-}
-
-/** Formatter tanggal dalam Bahasa Indonesia. */
-function formatDate(dateString: string): string {
-  try {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('id-ID', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(date);
-  } catch {
-    return dateString;
-  }
 }
 
 export function SessionsSection({ state, service }: SessionsSectionProps) {

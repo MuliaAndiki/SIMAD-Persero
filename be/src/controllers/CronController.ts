@@ -3,7 +3,7 @@ import type { AppContext } from '@/contex';
 import { HttpResponse } from '@/http';
 import cleanupService from '@/services/cleanup.service';
 import internshipService from '@/services/internship.service';
-import { getLogger } from '@/telemetry/otel.config';
+import { getLogger } from '@/utils/logger';
 
 class CronController {
   /**

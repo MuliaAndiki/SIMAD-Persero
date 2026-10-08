@@ -1,5 +1,5 @@
 import type { AppContext } from '@/contex';
-import { getLogger } from '../telemetry/otel.config';
+import { getLogger } from '../utils/logger';
 import { AppError } from './error';
 import type { ErrorCode } from './error-codes';
 

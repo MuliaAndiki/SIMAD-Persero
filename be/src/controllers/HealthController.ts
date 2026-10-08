@@ -1,7 +1,7 @@
 import { pingDatabase } from '@/config/databases';
 import type { AppContext } from '@/contex';
 import { HttpResponse } from '@/http';
-import { getLogger } from '@/telemetry/otel.config';
+import { getLogger } from '@/utils/logger';
 
 class HealthController {
   /**

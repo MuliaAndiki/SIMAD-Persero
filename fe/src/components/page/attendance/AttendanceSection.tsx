@@ -9,6 +9,9 @@ import type {
   AttendanceSettingInfo,
   AttendanceSummaryResponse,
 } from '@/types/api/attendance.types';
+import { getAttendanceStatusVariant } from '@/utils/attendance-status';
+import { getAttendanceStatusLabel } from '@/utils/status-labels';
+import { formatDate, formatTime } from '@/utils/string.format';
 import {
   AlertTriangle,
   CalendarCheck,
@@ -47,65 +50,6 @@ export interface AttendanceSectionService {
 const PLACEHOLDER_STATS = Array.from({ length: 6 }, (_, i) => ({
   id: `stat-skeleton-${i}`,
 }));
-
-function attendanceStatusLabel(status: string | null): string {
-  switch (status) {
-    case 'PRESENT':
-      return 'Hadir';
-    case 'LATE':
-      return 'Terlambat';
-    case 'COMPLETED':
-      return 'Selesai';
-    case 'PENDING_REVIEW':
-      return 'Menunggu Review';
-    case 'INVALID':
-      return 'Tidak Valid';
-    case 'ABSENT':
-      return 'Tidak Hadir';
-    default:
-      return status ?? '-';
-  }
-}
-
-function attendanceStatusVariant(
-  status: string | null,
-): 'default' | 'secondary' | 'destructive' | 'outline' {
-  switch (status) {
-    case 'PRESENT':
-    case 'COMPLETED':
-      return 'default';
-    case 'LATE':
-    case 'PENDING_REVIEW':
-      return 'secondary';
-    case 'INVALID':
-    case 'ABSENT':
-      return 'destructive';
-    default:
-      return 'outline';
-  }
-}
-
-function formatTime(value: string | null): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
 
 /** Skeleton loading — PhantomSkeleton menimpa kartu statistik dengan shimmer. */
 function AttendanceLoading() {
@@ -185,8 +129,8 @@ function TodayCard({
               <span className="text-muted-foreground">Check-in</span>
               <span className="flex items-center gap-2 font-medium text-foreground">
                 {formatTime(today.checkInAt)}
-                <Badge variant={attendanceStatusVariant(today.checkInStatus)}>
-                  {attendanceStatusLabel(today.checkInStatus)}
+                <Badge variant={getAttendanceStatusVariant(today.checkInStatus)}>
+                  {getAttendanceStatusLabel(today.checkInStatus)}
                 </Badge>
               </span>
             </div>
@@ -194,15 +138,15 @@ function TodayCard({
               <span className="text-muted-foreground">Check-out</span>
               <span className="flex items-center gap-2 font-medium text-foreground">
                 {formatTime(today.checkOutAt)}
-                <Badge variant={attendanceStatusVariant(today.checkOutStatus)}>
-                  {attendanceStatusLabel(today.checkOutStatus)}
+                <Badge variant={getAttendanceStatusVariant(today.checkOutStatus)}>
+                  {getAttendanceStatusLabel(today.checkOutStatus)}
                 </Badge>
               </span>
             </div>
             <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
               <span className="text-muted-foreground">Status</span>
-              <Badge variant={attendanceStatusVariant(today.attendanceStatus)}>
-                {attendanceStatusLabel(today.attendanceStatus)}
+              <Badge variant={getAttendanceStatusVariant(today.attendanceStatus)}>
+                {getAttendanceStatusLabel(today.attendanceStatus)}
               </Badge>
             </div>
           </div>
@@ -341,8 +285,8 @@ function HistoryCard({ history }: { history: AttendanceResponse[] }) {
                   <span className="text-sm font-medium text-foreground">
                     {formatDate(item.attendanceDate)}
                   </span>
-                  <Badge variant={attendanceStatusVariant(item.attendanceStatus)}>
-                    {attendanceStatusLabel(item.attendanceStatus)}
+                  <Badge variant={getAttendanceStatusVariant(item.attendanceStatus)}>
+                    {getAttendanceStatusLabel(item.attendanceStatus)}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">

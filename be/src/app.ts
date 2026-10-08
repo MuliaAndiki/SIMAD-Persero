@@ -1,17 +1,10 @@
 import { opentelemetry } from "@elysia/opentelemetry";
 import cors from "@elysiajs/cors";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import Elysia from "elysia";
 import { helmet } from "elysia-helmet";
 import healthController from "./controllers/HealthController";
 import apiRoutes from "./routes/apiRoutes";
 import cronRoutes from "./routes/cronRoutes";
-import {
-  OTEL_ENABLED,
-  OTEL_ENDPOINT,
-  SERVICE_NAME,
-} from "./telemetry/otel.config";
 import { Lifecycle } from "./utils/lifecycle";
 import { resolveCorsOrigins } from "./utils/cors";
 
@@ -33,25 +26,14 @@ class App {
   private middlewares() {
     this.app.use(helmet());
     this.app.use(cors({ origin: resolveCorsOrigins() }));
-    this.telemetry();
+    // Tracing bawaan Elysia. Tanpa konfigurasi, plugin otomatis memakai
+    // OTLP http/protobuf ke http://localhost:4318 (OTEL_EXPORTER_OTLP_ENDPOINT).
+    // Tanpa collector di sana, span dibuat tapi tidak dikirim ke mana pun.
+    this.app.use(opentelemetry({ serviceName: "simad-be" }));
     const lifecycle = new Lifecycle(this.app);
     lifecycle.setup();
     this.app.use(cronRoutes);
     this.app.use(apiRoutes);
-  }
-
-  private telemetry() {
-    if (!OTEL_ENABLED) return;
-    this.app.use(
-      opentelemetry({
-        serviceName: SERVICE_NAME,
-        spanProcessors: [
-          new BatchSpanProcessor(
-            new OTLPTraceExporter({ url: `${OTEL_ENDPOINT}/v1/traces` }),
-          ),
-        ],
-      }),
-    );
   }
 }
 

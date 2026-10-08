@@ -1,4 +1,4 @@
-import { AppError } from '@/http/error';
+import { AppError } from "@/http/error";
 import {
   type AddSkillsBody,
   type AssignSupervisorBody,
@@ -8,14 +8,13 @@ import {
   InternshipStatus,
   type PickMergeInternship,
   type RescheduleStartDateBody,
-} from '@/types/internship.types';
-import { createAuditLog } from '@/utils/audit.util';
-import type { Prisma } from '@prisma/client';
-import prisma from '../../prisma/client';
-import { getLogger } from '../telemetry/otel.config';
-import attendanceService from './attendance.service';
-import certificateService from './certificate.service';
-import { sendStartDateEmail } from './email.service';
+} from "@/types/internship.types";
+import { createAuditLog } from "@/utils/audit.util";
+import prisma from "../../prisma/client";
+import { getLogger } from "../utils/logger";
+import attendanceService from "./attendance.service";
+import certificateService from "./certificate.service";
+import { sendStartDateEmail } from "./email.service";
 
 /**
  * Service layer for the Internship module.
@@ -82,7 +81,7 @@ class InternshipService {
     });
 
     if (!internship) {
-      throw new AppError(404, 'Internship not found');
+      throw new AppError(404, "Internship not found");
     }
 
     return internship;
@@ -90,9 +89,16 @@ class InternshipService {
 
   // ─── 15.1 Get My Internship ─────────────────────────────────
 
-  public async list(query?: InternshipQuery, userId?: string, userRoles?: string[]) {
-    const isReceptionist = userRoles?.some((r) => r.toLowerCase() === 'receptionist');
-    let officeLocationId: string | undefined = query?.officeLocationId || query?.officeId;
+  public async list(
+    query?: InternshipQuery,
+    userId?: string,
+    userRoles?: string[],
+  ) {
+    const isReceptionist = userRoles?.some(
+      (r) => r.toLowerCase() === "receptionist",
+    );
+    let officeLocationId: string | undefined =
+      query?.officeLocationId || query?.officeId;
 
     if (isReceptionist && userId) {
       const user = await prisma.user.findUnique({
@@ -125,18 +131,34 @@ class InternshipService {
     if (query?.keyword?.trim()) {
       const kw = query.keyword.trim();
       where.OR = [
-        { internProfile: { user: { fullName: { contains: kw, mode: 'insensitive' } } } },
-        { internProfile: { user: { email: { contains: kw, mode: 'insensitive' } } } },
-        { internProfile: { studentNumber: { contains: kw, mode: 'insensitive' } } },
-        { internProfile: { institution: { name: { contains: kw, mode: 'insensitive' } } } },
-        { department: { name: { contains: kw, mode: 'insensitive' } } },
-        { department: { code: { contains: kw, mode: 'insensitive' } } },
-        { officeLocation: { name: { contains: kw, mode: 'insensitive' } } },
+        {
+          internProfile: {
+            user: { fullName: { contains: kw, mode: "insensitive" } },
+          },
+        },
+        {
+          internProfile: {
+            user: { email: { contains: kw, mode: "insensitive" } },
+          },
+        },
+        {
+          internProfile: {
+            studentNumber: { contains: kw, mode: "insensitive" },
+          },
+        },
+        {
+          internProfile: {
+            institution: { name: { contains: kw, mode: "insensitive" } },
+          },
+        },
+        { department: { name: { contains: kw, mode: "insensitive" } } },
+        { department: { code: { contains: kw, mode: "insensitive" } } },
+        { officeLocation: { name: { contains: kw, mode: "insensitive" } } },
         {
           supervisorAssignments: {
             some: {
               isActive: true,
-              supervisor: { fullName: { contains: kw, mode: 'insensitive' } },
+              supervisor: { fullName: { contains: kw, mode: "insensitive" } },
             },
           },
         },
@@ -147,8 +169,8 @@ class InternshipService {
     const limit = Math.min(500, Math.max(1, Number(query?.limit) || 10));
     const shouldIncludeAttendance = Boolean(
       query?.includeAttendance === true ||
-      query?.includeAttendance === 'true' ||
-      isReceptionist,
+        query?.includeAttendance === "true" ||
+        isReceptionist,
     );
     const skip = (page - 1) * limit;
 
@@ -190,7 +212,7 @@ class InternshipService {
           ...(shouldIncludeAttendance
             ? {
                 attendances: {
-                  orderBy: { attendanceDate: 'desc' },
+                  orderBy: { attendanceDate: "desc" },
                   take: 14,
                   select: {
                     id: true,
@@ -206,7 +228,7 @@ class InternshipService {
               }
             : {}),
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
       }),
     ]);
 
@@ -228,12 +250,12 @@ class InternshipService {
     });
 
     if (!profile) {
-      throw new AppError(422, 'Intern profile not found');
+      throw new AppError(422, "Intern profile not found");
     }
 
     const internships = await prisma.internship.findMany({
       where: { internProfileId: profile.id },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         department: { select: { id: true, code: true, name: true } },
         officeLocation: {
@@ -282,9 +304,13 @@ class InternshipService {
         ? {
             ...item.officeLocation,
             latitude:
-              item.officeLocation.latitude != null ? Number(item.officeLocation.latitude) : null,
+              item.officeLocation.latitude != null
+                ? Number(item.officeLocation.latitude)
+                : null,
             longitude:
-              item.officeLocation.longitude != null ? Number(item.officeLocation.longitude) : null,
+              item.officeLocation.longitude != null
+                ? Number(item.officeLocation.longitude)
+                : null,
           }
         : null,
     }));
@@ -298,14 +324,17 @@ class InternshipService {
     // Jika supervisor (dan bukan hr_admin), pastikan internship ini berada di bawah bimbingannya.
     if (
       roles &&
-      !roles.some((r) => r.toLowerCase() === 'hr_admin') &&
-      roles.some((r) => r.toLowerCase() === 'supervisor')
+      !roles.some((r) => r.toLowerCase() === "hr_admin") &&
+      roles.some((r) => r.toLowerCase() === "supervisor")
     ) {
       const isSupervising = internship.supervisorAssignments?.some(
         (sa) => sa.supervisor?.id === userId,
       );
       if (!isSupervising) {
-        throw new AppError(403, 'Access denied. You can only view internships assigned to you');
+        throw new AppError(
+          403,
+          "Access denied. You can only view internships assigned to you",
+        );
       }
     }
 
@@ -318,15 +347,23 @@ class InternshipService {
     const internship = await this.findById(id);
 
     if (internship.status !== InternshipStatus.PENDING) {
-      throw new AppError(400, 'Internship can only be started from PENDING status');
+      throw new AppError(
+        400,
+        "Internship can only be started from PENDING status",
+      );
     }
 
     const actualStartDate = internship.actualStartDate ?? new Date();
-    const endDate = internship.actualEndDate ?? internship.application?.requestedEndDate;
+    const endDate =
+      internship.actualEndDate ?? internship.application?.requestedEndDate;
 
     // Build attendance records outside transaction to avoid holding DB transaction during external API calls
     const initialAttendances = endDate
-      ? await attendanceService.buildInitialAttendances(id, actualStartDate, endDate)
+      ? await attendanceService.buildInitialAttendances(
+          id,
+          actualStartDate,
+          endDate,
+        )
       : [];
 
     return prisma.$transaction(
@@ -346,7 +383,7 @@ class InternshipService {
           internship.status,
           InternshipStatus.ACTIVE,
           userId,
-          'Internship started',
+          "Internship started",
         );
 
         if (initialAttendances.length > 0) {
@@ -394,11 +431,16 @@ class InternshipService {
     for (const internship of dueInternships) {
       try {
         const actualStartDate = internship.actualStartDate ?? now;
-        const endDate = internship.actualEndDate ?? internship.application?.requestedEndDate;
+        const endDate =
+          internship.actualEndDate ?? internship.application?.requestedEndDate;
 
         // Build attendance records outside transaction to avoid holding DB connection
         const initialAttendances = endDate
-          ? await attendanceService.buildInitialAttendances(internship.id, actualStartDate, endDate)
+          ? await attendanceService.buildInitialAttendances(
+              internship.id,
+              actualStartDate,
+              endDate,
+            )
           : [];
 
         await prisma.$transaction(
@@ -418,7 +460,7 @@ class InternshipService {
               internship.status,
               InternshipStatus.ACTIVE,
               null,
-              'Auto-started by scheduled job (start date reached)',
+              "Auto-started by scheduled job (start date reached)",
             );
 
             if (initialAttendances.length > 0) {
@@ -434,7 +476,7 @@ class InternshipService {
       } catch (error) {
         getLogger().error(
           { err: error, internshipId: internship.id },
-          '[internship-cron] Failed to auto-start internship',
+          "[internship-cron] Failed to auto-start internship",
         );
       }
     }
@@ -476,7 +518,9 @@ class InternshipService {
     for (const internship of dueInternships) {
       try {
         const resolvedEndDate =
-          internship.actualEndDate ?? internship.application?.requestedEndDate ?? now;
+          internship.actualEndDate ??
+          internship.application?.requestedEndDate ??
+          now;
 
         await prisma.$transaction(
           async (tx) => {
@@ -485,7 +529,9 @@ class InternshipService {
               data: {
                 status: InternshipStatus.COMPLETED,
                 completedAt: now,
-                ...(internship.actualEndDate ? {} : { actualEndDate: resolvedEndDate }),
+                ...(internship.actualEndDate
+                  ? {}
+                  : { actualEndDate: resolvedEndDate }),
               },
             });
 
@@ -495,7 +541,7 @@ class InternshipService {
               internship.status,
               InternshipStatus.COMPLETED,
               null,
-              'Auto-completed by scheduled job (end date reached)',
+              "Auto-completed by scheduled job (end date reached)",
             );
           },
           { timeout: 30000, maxWait: 10000 },
@@ -504,7 +550,7 @@ class InternshipService {
       } catch (error) {
         getLogger().error(
           { err: error, internshipId: internship.id },
-          '[internship-cron] Failed to auto-complete internship',
+          "[internship-cron] Failed to auto-complete internship",
         );
       }
     }
@@ -537,7 +583,7 @@ class InternshipService {
     const internship = await this.findById(id);
 
     if (internship.status !== InternshipStatus.ACTIVE) {
-      throw new AppError(400, 'Only ACTIVE internships can be finished');
+      throw new AppError(400, "Only ACTIVE internships can be finished");
     }
 
     return prisma.$transaction(async (tx) => {
@@ -555,7 +601,7 @@ class InternshipService {
         InternshipStatus.ACTIVE,
         InternshipStatus.COMPLETED,
         userId,
-        'Internship completed',
+        "Internship completed",
       );
 
       return updated;
@@ -571,19 +617,26 @@ class InternshipService {
       internship.status !== InternshipStatus.ACTIVE &&
       internship.status !== InternshipStatus.COMPLETED
     ) {
-      throw new AppError(400, 'Only ACTIVE or COMPLETED internships can be extended');
+      throw new AppError(
+        400,
+        "Only ACTIVE or COMPLETED internships can be extended",
+      );
     }
 
     const newEndDate = new Date(input.newEndDate);
     if (Number.isNaN(newEndDate.getTime())) {
-      throw new AppError(400, 'Invalid date format for newEndDate');
+      throw new AppError(400, "Invalid date format for newEndDate");
     }
 
     if (internship.actualEndDate && newEndDate <= internship.actualEndDate) {
-      throw new AppError(400, 'New end date must be after the current end date');
+      throw new AppError(
+        400,
+        "New end date must be after the current end date",
+      );
     }
 
-    const currentEndDate = internship.actualEndDate ?? internship.application?.requestedEndDate;
+    const currentEndDate =
+      internship.actualEndDate ?? internship.application?.requestedEndDate;
     const extensionStartDate = currentEndDate
       ? new Date(currentEndDate.getTime() + 24 * 60 * 60 * 1000)
       : (internship.actualStartDate ?? newEndDate);
@@ -591,14 +644,18 @@ class InternshipService {
     // Build initial attendance records for the extended period outside transaction to avoid holding DB connection
     const extendedAttendances =
       extensionStartDate <= newEndDate
-        ? await attendanceService.buildInitialAttendances(id, extensionStartDate, newEndDate)
+        ? await attendanceService.buildInitialAttendances(
+            id,
+            extensionStartDate,
+            newEndDate,
+          )
         : [];
 
     const updated = await prisma.$transaction(
       async (tx) => {
         // Concurrency Lock: Lock per officeLocationId during quota check & extension (OPT-004)
         if (internship.officeLocationId) {
-          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'quota_' + internship.officeLocationId}))`;
+          await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${"quota_" + internship.officeLocationId}))`;
         }
 
         // Re-validasi kuota kantor untuk periode perpanjangan (slot terbatas)
@@ -612,7 +669,9 @@ class InternshipService {
               where: {
                 id: { not: id },
                 officeLocationId: internship.officeLocationId,
-                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                status: {
+                  in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE],
+                },
                 actualStartDate: { lte: newEndDate },
                 actualEndDate: { gte: extensionStartDate },
               },
@@ -648,7 +707,7 @@ class InternshipService {
           internship.status,
           InternshipStatus.ACTIVE,
           userId,
-          `Internship extended to ${input.newEndDate}. ${input.reason || ''}`.trim(),
+          `Internship extended to ${input.newEndDate}. ${input.reason || ""}`.trim(),
         );
 
         return res;
@@ -657,37 +716,50 @@ class InternshipService {
     );
 
     // Synchronize certificate if already exists
-    await certificateService.syncCertificateEndDate(id, newEndDate, userId).catch((err) => {
-      getLogger().warn(
-        { err, internshipId: id },
-        '[internship-extend] Failed to sync certificate end date',
-      );
-    });
+    await certificateService
+      .syncCertificateEndDate(id, newEndDate, userId)
+      .catch((err) => {
+        getLogger().warn(
+          { err, internshipId: id },
+          "[internship-extend] Failed to sync certificate end date",
+        );
+      });
 
     return updated;
   }
 
   // ─── 15.5b Reschedule Start Date (HR_ADMIN) ──────────────────
 
-  public async rescheduleStartDate(id: string, userId: string, input: RescheduleStartDateBody) {
+  public async rescheduleStartDate(
+    id: string,
+    userId: string,
+    input: RescheduleStartDateBody,
+  ) {
     const internship = await this.findById(id);
 
     // Hanya internship PENDING (belum mulai) yang boleh digeser tanggal masuknya.
     if (internship.status !== InternshipStatus.PENDING) {
-      throw new AppError(400, 'Hanya internship berstatus PENDING yang dapat diubah tanggal masuknya');
+      throw new AppError(
+        400,
+        "Hanya internship berstatus PENDING yang dapat diubah tanggal masuknya",
+      );
     }
 
     const newStartDate = new Date(input.newStartDate);
     if (Number.isNaN(newStartDate.getTime())) {
-      throw new AppError(400, 'Invalid date format for newStartDate');
+      throw new AppError(400, "Invalid date format for newStartDate");
     }
 
-    const actualEnd = internship.actualEndDate ?? internship.application?.requestedEndDate;
+    const actualEnd =
+      internship.actualEndDate ?? internship.application?.requestedEndDate;
     if (!actualEnd) {
-      throw new AppError(400, 'Tanggal selesai magang tidak ditemukan');
+      throw new AppError(400, "Tanggal selesai magang tidak ditemukan");
     }
     if (newStartDate >= new Date(actualEnd)) {
-      throw new AppError(400, 'Tanggal masuk baru harus sebelum tanggal selesai');
+      throw new AppError(
+        400,
+        "Tanggal masuk baru harus sebelum tanggal selesai",
+      );
     }
 
     const oldStartDate = internship.actualStartDate;
@@ -695,7 +767,7 @@ class InternshipService {
     const updated = await prisma.$transaction(async (tx) => {
       // Concurrency Lock: Lock per officeLocationId during quota check & rescheduling (OPT-004)
       if (internship.officeLocationId) {
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'quota_' + internship.officeLocationId}))`;
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${"quota_" + internship.officeLocationId}))`;
       }
 
       // Re-validasi kuota untuk periode baru (slot terbatas) secara atomik di dalam transaksi
@@ -710,7 +782,9 @@ class InternshipService {
             where: {
               id: { not: id },
               officeLocationId: internship.officeLocationId,
-              status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+              status: {
+                in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE],
+              },
               actualStartDate: { lte: endDate },
               actualEndDate: { gte: newStartDate },
             },
@@ -731,7 +805,9 @@ class InternshipService {
                 id: { not: id },
                 officeLocationId: internship.officeLocationId,
                 departmentId: internship.departmentId,
-                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                status: {
+                  in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE],
+                },
                 actualStartDate: { lte: endDate },
                 actualEndDate: { gte: newStartDate },
               },
@@ -764,7 +840,7 @@ class InternshipService {
         internship.status,
         internship.status ?? InternshipStatus.PENDING,
         userId,
-        `Tanggal masuk diubah menjadi ${input.newStartDate}. ${input.reason || ''}`.trim(),
+        `Tanggal masuk diubah menjadi ${input.newStartDate}. ${input.reason || ""}`.trim(),
       );
 
       return res;
@@ -779,9 +855,12 @@ class InternshipService {
         applicationNumber: internship.application?.applicationNumber,
         oldStartDate,
         newStartDate,
-        headline: 'Tanggal masuk magang Anda diubah oleh admin.',
+        headline: "Tanggal masuk magang Anda diubah oleh admin.",
       }).catch((err) => {
-        getLogger().warn({ err, internshipId: id }, '[reschedule-start-date] Gagal mengirim email');
+        getLogger().warn(
+          { err, internshipId: id },
+          "[reschedule-start-date] Gagal mengirim email",
+        );
       });
     }
 
@@ -790,7 +869,11 @@ class InternshipService {
 
   // ─── 15.6 Assign Supervisor (HR_ADMIN) ──────────────────────
 
-  public async assignSupervisor(id: string, userId: string, input: AssignSupervisorBody) {
+  public async assignSupervisor(
+    id: string,
+    userId: string,
+    input: AssignSupervisorBody,
+  ) {
     const internship = await this.findById(id);
 
     if (
@@ -798,7 +881,10 @@ class InternshipService {
       internship.status === InternshipStatus.ARCHIVED ||
       internship.status === InternshipStatus.CERTIFICATE_GENERATED
     ) {
-      throw new AppError(400, 'Cannot assign supervisor to a finalized internship');
+      throw new AppError(
+        400,
+        "Cannot assign supervisor to a finalized internship",
+      );
     }
 
     // Validate supervisor user
@@ -810,20 +896,25 @@ class InternshipService {
     });
 
     if (!supervisorUser || !supervisorUser.isActive) {
-      throw new AppError(404, 'Supervisor user not found or inactive');
+      throw new AppError(404, "Supervisor user not found or inactive");
     }
 
-    const isSupervisor = supervisorUser.userRoles.some((ur) => ur.role?.code === 'supervisor');
+    const isSupervisor = supervisorUser.userRoles.some(
+      (ur) => ur.role?.code === "supervisor",
+    );
 
     if (supervisorUser.departmentId !== internship.departmentId) {
       throw new AppError(
         404,
-        'Departement supervisor tidak sesuai, Mohon Untuk Menganti Departement Terlebih Dahulu',
+        "Departement supervisor tidak sesuai, Mohon Untuk Menganti Departement Terlebih Dahulu",
       );
     }
 
     if (!isSupervisor) {
-      throw new AppError(400, 'Selected user does not have the supervisor role');
+      throw new AppError(
+        400,
+        "Selected user does not have the supervisor role",
+      );
     }
 
     return prisma.$transaction(async (tx) => {
@@ -859,7 +950,11 @@ class InternshipService {
 
   // ─── 15.7 Change Department (HR_ADMIN) ──────────────────────
 
-  public async changeDepartment(id: string, userId: string, input: ChangeDepartmentBody) {
+  public async changeDepartment(
+    id: string,
+    userId: string,
+    input: ChangeDepartmentBody,
+  ) {
     const internship = await this.findById(id);
 
     if (
@@ -867,7 +962,10 @@ class InternshipService {
       internship.status === InternshipStatus.ARCHIVED ||
       internship.status === InternshipStatus.CERTIFICATE_GENERATED
     ) {
-      throw new AppError(400, 'Cannot change department for a finalized internship');
+      throw new AppError(
+        400,
+        "Cannot change department for a finalized internship",
+      );
     }
 
     // Validate department
@@ -875,7 +973,7 @@ class InternshipService {
       where: { id: input.departmentId },
     });
     if (!department || !department.isActive) {
-      throw new AppError(404, 'Department not found or inactive');
+      throw new AppError(404, "Department not found or inactive");
     }
 
     // Validate office location (optional)
@@ -885,7 +983,7 @@ class InternshipService {
         where: { id: input.officeLocationId },
       });
       if (!office) {
-        throw new AppError(404, 'Office location not found');
+        throw new AppError(404, "Office location not found");
       }
       officeLocationId = office.id;
     }
@@ -893,7 +991,7 @@ class InternshipService {
     return prisma.$transaction(async (tx) => {
       // Concurrency Lock: Lock per officeLocationId during quota check & department change (OPT-004)
       if (officeLocationId) {
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'quota_' + officeLocationId}))`;
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${"quota_" + officeLocationId}))`;
       }
 
       // Re-validasi kuota di departemen/kantor baru
@@ -912,7 +1010,9 @@ class InternshipService {
               where: {
                 id: { not: id },
                 officeLocationId,
-                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                status: {
+                  in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE],
+                },
                 actualStartDate: { lte: actualEnd },
                 actualEndDate: { gte: actualStart },
               },
@@ -935,7 +1035,9 @@ class InternshipService {
                 id: { not: id },
                 officeLocationId,
                 departmentId: input.departmentId,
-                status: { in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE] },
+                status: {
+                  in: [InternshipStatus.PENDING, InternshipStatus.ACTIVE],
+                },
                 actualStartDate: { lte: actualEnd },
                 actualEndDate: { gte: actualStart },
               },
@@ -982,7 +1084,7 @@ class InternshipService {
     ) {
       throw new AppError(
         400,
-        'Only COMPLETED or CERTIFICATE_GENERATED internships can be archived',
+        "Only COMPLETED or CERTIFICATE_GENERATED internships can be archived",
       );
     }
 
@@ -998,7 +1100,7 @@ class InternshipService {
         internship.status,
         InternshipStatus.ARCHIVED,
         userId,
-        'Internship archived',
+        "Internship archived",
       );
 
       return updated;
@@ -1011,83 +1113,84 @@ class InternshipService {
       where: { userId },
     });
 
-    const [queryInstitutionMajor, queryInternProfile] = await prisma.$transaction(async (tx) => {
-      let major = null;
-      const targetMajorId = payload.majorId || existingProfile?.majorId;
+    const [queryInstitutionMajor, queryInternProfile] =
+      await prisma.$transaction(async (tx) => {
+        let major = null;
+        const targetMajorId = payload.majorId || existingProfile?.majorId;
 
-      if (targetMajorId) {
-        major = await tx.institutionMajor.findUnique({
-          where: { id: targetMajorId },
-        });
-      }
-
-      if (!major && payload.name && payload.institutionId) {
-        major = await tx.institutionMajor.findFirst({
-          where: {
-            institutionId: payload.institutionId,
-            name: { equals: payload.name, mode: 'insensitive' },
-          },
-        });
-
-        if (!major) {
-          major = await tx.institutionMajor.create({
-            data: {
-              name: payload.name,
-              institutionId: payload.institutionId,
-            },
+        if (targetMajorId) {
+          major = await tx.institutionMajor.findUnique({
+            where: { id: targetMajorId },
           });
         }
-      }
 
-      if (major && payload.name && major.name !== payload.name) {
-        major = await tx.institutionMajor.update({
-          where: { id: major.id },
-          data: { name: payload.name },
-        });
-      }
+        if (!major && payload.name && payload.institutionId) {
+          major = await tx.institutionMajor.findFirst({
+            where: {
+              institutionId: payload.institutionId,
+              name: { equals: payload.name, mode: "insensitive" },
+            },
+          });
 
-      if (!major) {
-        throw new AppError(400, 'Informasi jurusan (major) wajib diisi');
-      }
-
-      let birthDate: Date | null = null;
-      if (payload.birthDate) {
-        const parsed = new Date(payload.birthDate);
-        if (!Number.isNaN(parsed.getTime())) {
-          birthDate = parsed;
+          if (!major) {
+            major = await tx.institutionMajor.create({
+              data: {
+                name: payload.name,
+                institutionId: payload.institutionId,
+              },
+            });
+          }
         }
-      }
 
-      const newProfile = await tx.internProfile.upsert({
-        where: { userId },
-        update: {
-          phone: payload.phone,
-          studentNumber: payload.studentNumber,
-          address: payload.address,
-          bio: payload.bio,
-          birthDate,
-          birthPlace: payload.birthPlace,
-          emergencyContact: payload.emergencyContact,
-          gender: payload.gender,
-          institutionId: payload.institutionId,
-          majorId: major.id,
-        },
-        create: {
-          phone: payload.phone,
-          studentNumber: payload.studentNumber,
-          address: payload.address,
-          bio: payload.bio,
-          birthDate,
-          birthPlace: payload.birthPlace,
-          emergencyContact: payload.emergencyContact,
-          gender: payload.gender,
-          userId: userId,
-          institutionId: payload.institutionId,
-          majorId: major.id,
-        },
+        if (major && payload.name && major.name !== payload.name) {
+          major = await tx.institutionMajor.update({
+            where: { id: major.id },
+            data: { name: payload.name },
+          });
+        }
+
+        if (!major) {
+          throw new AppError(400, "Informasi jurusan (major) wajib diisi");
+        }
+
+        let birthDate: Date | null = null;
+        if (payload.birthDate) {
+          const parsed = new Date(payload.birthDate);
+          if (!Number.isNaN(parsed.getTime())) {
+            birthDate = parsed;
+          }
+        }
+
+        const newProfile = await tx.internProfile.upsert({
+          where: { userId },
+          update: {
+            phone: payload.phone,
+            studentNumber: payload.studentNumber,
+            address: payload.address,
+            bio: payload.bio,
+            birthDate,
+            birthPlace: payload.birthPlace,
+            emergencyContact: payload.emergencyContact,
+            gender: payload.gender,
+            institutionId: payload.institutionId,
+            majorId: major.id,
+          },
+          create: {
+            phone: payload.phone,
+            studentNumber: payload.studentNumber,
+            address: payload.address,
+            bio: payload.bio,
+            birthDate,
+            birthPlace: payload.birthPlace,
+            emergencyContact: payload.emergencyContact,
+            gender: payload.gender,
+            userId: userId,
+            institutionId: payload.institutionId,
+            majorId: major.id,
+          },
+        });
+        return [major, newProfile];
       });
-      return [major, newProfile];
-    });
     return [queryInstitutionMajor, queryInternProfile];
   }
   //
@@ -1120,7 +1223,7 @@ class InternshipService {
       page?: number;
       limit?: number;
       sortBy?: string;
-      sortOrder?: 'asc' | 'desc';
+      sortOrder?: "asc" | "desc";
     } = {},
   ) {
     const page = query.page ?? 1;
@@ -1131,23 +1234,28 @@ class InternshipService {
 
     if (query.search) {
       where.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { category: { contains: query.search, mode: 'insensitive' } },
+        { name: { contains: query.search, mode: "insensitive" } },
+        { category: { contains: query.search, mode: "insensitive" } },
       ];
     }
 
     if (query.startDate || query.endDate) {
       where.createdAt = {};
       if (query.startDate)
-        (where.createdAt as Record<string, unknown>).gte = new Date(query.startDate);
-      if (query.endDate) (where.createdAt as Record<string, unknown>).lte = new Date(query.endDate);
+        (where.createdAt as Record<string, unknown>).gte = new Date(
+          query.startDate,
+        );
+      if (query.endDate)
+        (where.createdAt as Record<string, unknown>).lte = new Date(
+          query.endDate,
+        );
     }
 
     const orderBy: Record<string, unknown>[] = [];
     if (query.sortBy) {
-      orderBy.push({ [query.sortBy]: query.sortOrder ?? 'asc' });
+      orderBy.push({ [query.sortBy]: query.sortOrder ?? "asc" });
     } else {
-      orderBy.push({ createdAt: 'asc' });
+      orderBy.push({ createdAt: "asc" });
     }
 
     const [totalData, data] = await prisma.$transaction([
@@ -1174,25 +1282,32 @@ class InternshipService {
 
   public async createSkill(data: { name: string; category: string }) {
     const existing = await prisma.skill.findFirst({
-      where: { name: { equals: data.name, mode: 'insensitive' } },
+      where: { name: { equals: data.name, mode: "insensitive" } },
     });
     if (existing) {
-      throw new AppError(400, 'Skill dengan nama tersebut sudah ada');
+      throw new AppError(400, "Skill dengan nama tersebut sudah ada");
     }
     return await prisma.skill.create({ data });
   }
 
-  public async updateSkill(id: string, data: { name?: string; category?: string }) {
+  public async updateSkill(
+    id: string,
+    data: { name?: string; category?: string },
+  ) {
     const existing = await prisma.skill.findUnique({ where: { id } });
     if (!existing) {
-      throw new AppError(404, 'Skill tidak ditemukan');
+      throw new AppError(404, "Skill tidak ditemukan");
     }
-    if (data.name && existing.name && data.name.toLowerCase() !== existing.name.toLowerCase()) {
+    if (
+      data.name &&
+      existing.name &&
+      data.name.toLowerCase() !== existing.name.toLowerCase()
+    ) {
       const duplicate = await prisma.skill.findFirst({
-        where: { name: { equals: data.name, mode: 'insensitive' } },
+        where: { name: { equals: data.name, mode: "insensitive" } },
       });
       if (duplicate) {
-        throw new AppError(400, 'Skill dengan nama tersebut sudah ada');
+        throw new AppError(400, "Skill dengan nama tersebut sudah ada");
       }
     }
     return await prisma.skill.update({
@@ -1204,7 +1319,7 @@ class InternshipService {
   public async deleteSkill(id: string) {
     const existing = await prisma.skill.findUnique({ where: { id } });
     if (!existing) {
-      throw new AppError(404, 'Skill tidak ditemukan');
+      throw new AppError(404, "Skill tidak ditemukan");
     }
     await prisma.internProfileSkill.deleteMany({ where: { skillId: id } });
     return await prisma.skill.delete({ where: { id } });
@@ -1221,7 +1336,7 @@ class InternshipService {
     });
 
     if (!query) {
-      throw new AppError(400, 'Service Crashes');
+      throw new AppError(400, "Service Crashes");
     }
     return query;
   }
@@ -1233,7 +1348,7 @@ class InternshipService {
     });
 
     if (!profile) {
-      throw new AppError(404, 'Intern profile not found');
+      throw new AppError(404, "Intern profile not found");
     }
 
     const query = await prisma.internProfileSkill.deleteMany({
@@ -1244,7 +1359,7 @@ class InternshipService {
     });
 
     if (query.count === 0) {
-      throw new AppError(404, 'Skill tidak ditemukan di profil magang');
+      throw new AppError(404, "Skill tidak ditemukan di profil magang");
     }
 
     return query;
