@@ -10,27 +10,7 @@ import {
   getAttendanceStatusLabel as attendanceStatusLabel,
   getInternshipStatusLabel as internshipStatusLabel,
 } from '@/utils/status-labels';
-
-function formatTime(value: string | null): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+import { formatDate, formatTime } from '@/utils/string.format';
 
 /**
  * InternOverview — ringkasan dashboard peserta magang (GET /dashboard/intern).

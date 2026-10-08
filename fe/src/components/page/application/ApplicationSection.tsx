@@ -17,6 +17,7 @@ import type {
 } from '@/types/api/application.types';
 import type { OfficeResponse } from '@/types/api/office.types';
 import { cn } from '@/utils/classname';
+import { calculateEndDate } from '@/utils/date-utils';
 import { formatDate } from '@/utils/string.format';
 import { AlertCircle, Building2, UploadCloud } from 'lucide-react';
 import { useState } from 'react';
@@ -115,15 +116,6 @@ const DURATION_OPTIONS = [
   { value: '11', label: '11 Bulan' },
   { value: '12', label: '12 Bulan' },
 ];
-
-function calculateEndDate(startIsoDate: string, monthsStr: string): string {
-  if (!startIsoDate) return '';
-  const d = new Date(startIsoDate);
-  if (Number.isNaN(d.getTime())) return '';
-  const months = Number.parseInt(monthsStr, 10) || 2;
-  d.setMonth(d.getMonth() + months);
-  return d.toISOString().split('T')[0];
-}
 
 function NewApplicationForm({
   service,

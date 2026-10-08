@@ -3,7 +3,7 @@ import { HttpResponse } from '@/http';
 import type { AuthUser } from '@/types/auth.types';
 import { DEFAULT_ROLE_CODE, verifyJwtToken } from '@/utils/auth.util';
 import prisma from '../../prisma/client';
-import { getLogger } from '../telemetry/otel.config';
+import { getLogger } from '../utils/logger';
 
 /**
  * Middleware autentikasi. Memvalidasi Bearer Token (Access Token JWT),

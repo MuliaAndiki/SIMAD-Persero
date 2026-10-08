@@ -15,8 +15,6 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string(),
   RESEND_API_KEY: z.string(),
   GOOGLE_CALENDER_API: z.string(),
-  OTEL_ENDPOINT: z.string().url().optional(),
-  OTEL_ENABLED: z.string().optional(),
   LOG_LEVEL: z.string().optional(),
   CLOUDFLARE_ACCOUNT_ID: z.string(),
   RESEND_FROM_EMAIL: z.string(),

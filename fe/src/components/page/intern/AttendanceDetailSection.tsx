@@ -26,6 +26,14 @@ import {
 } from "@/components/atoms/card";
 import type { AttendanceDetailResponse } from "@/types/api/attendance.types";
 import { AttendanceCorrectionDialog } from "@/components/organisms/attendance/AttendanceCorrectionDialog";
+import { formatMinutes } from "@/components/organisms/attendance/attendance-format";
+import { getAttendanceStatusVariant } from "@/utils/attendance-status";
+import { getAttendanceStatusLabel } from "@/utils/status-labels";
+import {
+  formatDate,
+  formatDistanceMeter,
+  formatTime,
+} from "@/utils/string.format";
 import { FileEdit } from "lucide-react";
 import { useState } from "react";
 
@@ -55,78 +63,6 @@ export interface AttendanceDetailSectionState {
 
 export interface AttendanceDetailSectionProps {
   state: AttendanceDetailSectionState;
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function formatTime(value: string | null): string {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function formatMinutes(value: number | null): string {
-  if (value == null) return "-";
-  const hours = Math.floor(value / 60);
-  const minutes = value % 60;
-  if (hours <= 0) return `${minutes} menit`;
-  return `${hours} jam ${minutes} menit`;
-}
-
-function attendanceStatusLabel(status: string | null): string {
-  switch (status) {
-    case "PRESENT":
-      return "Hadir";
-    case "LATE":
-      return "Terlambat";
-    case "COMPLETED":
-      return "Selesai";
-    case "PENDING_REVIEW":
-      return "Menunggu Review";
-    case "INVALID":
-      return "Tidak Valid";
-    case "ABSENT":
-      return "Tidak Hadir";
-    default:
-      return status ?? "-";
-  }
-}
-
-function attendanceStatusVariant(
-  status: string | null,
-): "default" | "secondary" | "destructive" | "outline" {
-  switch (status) {
-    case "PRESENT":
-    case "COMPLETED":
-      return "default";
-    case "LATE":
-    case "PENDING_REVIEW":
-      return "secondary";
-    case "INVALID":
-    case "ABSENT":
-      return "destructive";
-    default:
-      return "outline";
-  }
-}
-
-function formatDistance(value: number | null): string {
-  if (value == null) return "-";
-  return `${value.toFixed(0)} m`;
 }
 
 /** Fallback skeleton untuk Suspense di halaman detail. */
@@ -194,8 +130,8 @@ function CheckPointCard({
         </CardTitle>
         <CardDescription>
           {status ? (
-            <Badge variant={attendanceStatusVariant(status)}>
-              {attendanceStatusLabel(status)}
+            <Badge variant={getAttendanceStatusVariant(status)}>
+              {getAttendanceStatusLabel(status)}
             </Badge>
           ) : (
             "Belum tercatat"
@@ -216,8 +152,8 @@ function CheckPointCard({
                 : "Di luar area kantor"}
             </span>
             <span className="flex items-center gap-1.5">
-              Jarak {formatDistance(log.distanceMeter)} · Akurasi{" "}
-              {formatDistance(log.accuracyMeter)}
+              Jarak {formatDistanceMeter(log.distanceMeter)} · Akurasi{" "}
+              {formatDistanceMeter(log.accuracyMeter)}
             </span>
           </div>
         ) : null}
@@ -294,8 +230,8 @@ export function AttendanceDetailSection({
                   {formatDate(detail.attendanceDate)}
                 </CardDescription>
               </div>
-              <Badge variant={attendanceStatusVariant(detail.attendanceStatus)}>
-                {attendanceStatusLabel(detail.attendanceStatus)}
+              <Badge variant={getAttendanceStatusVariant(detail.attendanceStatus)}>
+                {getAttendanceStatusLabel(detail.attendanceStatus)}
               </Badge>
             </CardHeader>
             <CardContent className="flex flex-col gap-2 text-sm">
@@ -437,10 +373,10 @@ export function AttendanceDetailSection({
                             {log.insideGeofence
                               ? "Di dalam area"
                               : "Di luar area"}{" "}
-                            · {formatDistance(log.distanceMeter)}
+                            · {formatDistanceMeter(log.distanceMeter)}
                           </span>
                           <span>
-                            Akurasi {formatDistance(log.accuracyMeter)}
+                            Akurasi {formatDistanceMeter(log.accuracyMeter)}
                             {log.fakeGpsDetected
                               ? " · Terdeteksi GPS palsu"
                               : ""}
