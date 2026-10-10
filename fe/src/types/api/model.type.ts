@@ -49,19 +49,6 @@ export interface IUserRole {
   assignedById: string;
 }
 
-export interface IPermission {
-  id: string;
-  code: string;
-  name: string;
-  description: string;
-  createdAt: string;
-}
-
-export interface IRolePermission {
-  roleId: string;
-  permissionId: string;
-}
-
 export interface IRefreshToken {
   id: string;
   userId: string;
@@ -270,7 +257,6 @@ export interface IAttendanceLog {
   ipAddress: string;
   userAgent: string;
   fakeGpsDetected: boolean;
-  photoFileId: string;
   createdAt: string;
 }
 
@@ -284,19 +270,6 @@ export interface IAttendanceOverride {
   createdAt: string;
 }
 
-export interface IAttendanceDevice {
-  id: string;
-  userId: string;
-  deviceName: string;
-  browser: string;
-  platform: string;
-  fingerprint: string;
-  firstLoginAt: string;
-  lastLoginAt: string;
-  isTrusted: boolean;
-  createdAt: string;
-}
-
 export interface IAttendanceViolation {
   id: string;
   attendanceId: string;
@@ -304,18 +277,7 @@ export interface IAttendanceViolation {
   severity: string;
   description: string;
   resolved: boolean;
-  resolvedById: string;
   resolvedAt: string;
-  createdAt: string;
-}
-
-export interface IAttendanceReminder {
-  id: string;
-  internshipId: string;
-  reminderType: string;
-  scheduledAt: string;
-  sentAt: string;
-  status: string;
   createdAt: string;
 }
 
