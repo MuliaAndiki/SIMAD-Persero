@@ -122,11 +122,6 @@ class CleanupService {
                   where: { internshipId },
                 });
 
-                // Delete attendance reminders
-                await tx.attendanceReminder.deleteMany({
-                  where: { internshipId },
-                });
-
                 // Delete supervisor assignments
                 await tx.supervisorAssignment.deleteMany({
                   where: { internshipId },
@@ -189,11 +184,6 @@ class CleanupService {
 
           // Audit logs (keep untuk audit)
           // Skip - biarkan untuk audit trail
-
-          // Attendance devices
-          await tx.attendanceDevice.deleteMany({
-            where: { userId: user.id },
-          });
 
           // Refresh tokens
           await tx.refreshToken.deleteMany({

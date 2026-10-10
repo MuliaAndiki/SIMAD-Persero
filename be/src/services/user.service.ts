@@ -222,11 +222,6 @@ class UserService {
           userId: userId,
         },
       });
-      await tx.attendanceDevice.deleteMany({
-        where: {
-          userId: userId,
-        },
-      });
       await tx.auditLog.create({
         data: {
           userId: userId,

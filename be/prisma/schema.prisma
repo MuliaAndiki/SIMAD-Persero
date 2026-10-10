@@ -24,9 +24,7 @@ model User {
   department                Department?                   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   officeLocation            OfficeLocation?               @relation(fields: [officeId], references: [id], onDelete: Restrict)
   activityLogs              ActivityLog[]
-  trustedDevices            AttendanceDevice[]
   overriddenAttendances     AttendanceOverride[]
-  resolvedViolations        AttendanceViolation[]
   auditLogs                 AuditLog[]
   generatedCertificates     Certificate[]                 @relation("CertificateGeneratedBy")
   approvedCertificates      Certificate[]                 @relation("CertificateApprovedBy")
@@ -55,14 +53,13 @@ model User {
 }
 
 model Role {
-  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code            String           @unique @db.VarChar(50)
-  name            String?          @db.VarChar(100)
-  description     String?
-  createdAt       DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt       DateTime?        @updatedAt @map("updated_at") @db.Timestamp(6)
-  rolePermissions RolePermission[]
-  userRoles       UserRole[]       @relation("UserRoleRole")
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        String     @unique @db.VarChar(50)
+  name        String?    @db.VarChar(100)
+  description String?
+  createdAt   DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime?  @updatedAt @map("updated_at") @db.Timestamp(6)
+  userRoles   UserRole[] @relation("UserRoleRole")
 
   @@map("roles")
 }
@@ -80,28 +77,6 @@ model UserRole {
   @@index([roleId])
   @@index([assignedById])
   @@map("user_roles")
-}
-
-model Permission {
-  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code            String?          @unique @db.VarChar(100)
-  name            String?          @db.VarChar
-  description     String?
-  createdAt       DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
-  rolePermissions RolePermission[]
-
-  @@map("permissions")
-}
-
-model RolePermission {
-  roleId       String     @map("role_id") @db.Uuid
-  permissionId String     @map("permission_id") @db.Uuid
-  permission   Permission @relation(fields: [permissionId], references: [id])
-  role         Role       @relation(fields: [roleId], references: [id])
-
-  @@id([roleId, permissionId])
-  @@index([permissionId])
-  @@map("role_permissions")
 }
 
 model RefreshToken {
@@ -168,13 +143,13 @@ model Skill {
 }
 
 model Department {
-  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code             String            @unique @db.VarChar(50)
-  name             String?           @db.VarChar(150)
+  id               String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String                      @unique @db.VarChar(50)
+  name             String?                     @db.VarChar(150)
   description      String?
-  isActive         Boolean           @default(true) @map("is_active")
-  createdAt        DateTime?         @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt        DateTime?         @updatedAt @map("updated_at") @db.Timestamp(6)
+  isActive         Boolean                     @default(true) @map("is_active")
+  createdAt        DateTime?                   @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime?                   @updatedAt @map("updated_at") @db.Timestamp(6)
   internships      Internship[]
   officeLocations  OfficeLocation[]
   users            User[]
@@ -346,14 +321,14 @@ model ApplicationDocument {
 }
 
 model InternshipQuota {
-  id                    String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  officeLocationId      String                      @unique @map("office_location_id") @db.Uuid
-  totalCapacity         Int                         @default(0) @map("total_capacity")
-  isActive              Boolean                     @default(true) @map("is_active")
-  notes                 String?
-  createdBy             String?                     @map("created_by") @db.Uuid
-  createdAt             DateTime?                   @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt             DateTime?                   @updatedAt @map("updated_at") @db.Timestamp(6)
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  officeLocationId String    @unique @map("office_location_id") @db.Uuid
+  totalCapacity    Int       @default(0) @map("total_capacity")
+  isActive         Boolean   @default(true) @map("is_active")
+  notes            String?
+  createdBy        String?   @map("created_by") @db.Uuid
+  createdAt        DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
 
   officeLocation        OfficeLocation              @relation(fields: [officeLocationId], references: [id], onDelete: Restrict)
   createdByUser         User?                       @relation("QuotaCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
@@ -364,16 +339,16 @@ model InternshipQuota {
 }
 
 model QuotaDepartmentAllocation {
-  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  quotaId      String          @map("quota_id") @db.Uuid
-  departmentId String          @map("department_id") @db.Uuid
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quotaId      String    @map("quota_id") @db.Uuid
+  departmentId String    @map("department_id") @db.Uuid
   capacity     Int
   notes        String?
-  createdAt    DateTime?       @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt    DateTime?       @updatedAt @map("updated_at") @db.Timestamp(6)
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
 
-  quota        InternshipQuota @relation(fields: [quotaId], references: [id], onDelete: Cascade)
-  department   Department      @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  quota      InternshipQuota @relation(fields: [quotaId], references: [id], onDelete: Cascade)
+  department Department      @relation(fields: [departmentId], references: [id], onDelete: Restrict)
 
   @@unique([quotaId, departmentId])
   @@index([departmentId])
@@ -395,7 +370,6 @@ model Internship {
   completedAt           DateTime?                     @map("completed_at") @db.Timestamp(6)
   createdAt             DateTime?                     @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt             DateTime?                     @updatedAt @map("updated_at") @db.Timestamp(6)
-  reminders             AttendanceReminder[]
   attendances           Attendance[]
   certificate           Certificate?
   statusHistories       InternshipStatusHistory[]
@@ -501,13 +475,10 @@ model AttendanceLog {
   ipAddress       String?    @map("ip_address") @db.VarChar(100)
   userAgent       String?    @map("user_agent")
   fakeGpsDetected Boolean    @default(false) @map("fake_gps_detected")
-  photoFileId     String?    @map("photo_file_id") @db.Uuid
   createdAt       DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
   attendance      Attendance @relation(fields: [attendanceId], references: [id])
-  photoFile       File?      @relation("AttendancePhoto", fields: [photoFileId], references: [id], onDelete: Restrict)
 
   @@index([attendanceId])
-  @@index([photoFileId])
   @@map("attendance_logs")
 }
 
@@ -560,23 +531,6 @@ model AttendanceOverride {
   @@map("attendance_overrides")
 }
 
-model AttendanceDevice {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId       String    @map("user_id") @db.Uuid
-  deviceName   String?   @map("device_name") @db.VarChar(255)
-  browser      String?   @db.VarChar(100)
-  platform     String?   @db.VarChar(100)
-  fingerprint  String?   @db.VarChar(255)
-  firstLoginAt DateTime? @map("first_login_at") @db.Timestamp(6)
-  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamp(6)
-  isTrusted    Boolean   @default(false) @map("is_trusted")
-  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
-  user         User      @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@map("attendance_devices")
-}
-
 model AttendanceViolation {
   id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   attendanceId  String     @map("attendance_id") @db.Uuid
@@ -584,29 +538,12 @@ model AttendanceViolation {
   severity      String?    @db.VarChar(20)
   description   String?
   resolved      Boolean    @default(false)
-  resolvedById  String?    @map("resolved_by") @db.Uuid
   resolvedAt    DateTime?  @map("resolved_at") @db.Timestamp(6)
   createdAt     DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
   attendance    Attendance @relation(fields: [attendanceId], references: [id])
-  resolvedBy    User?      @relation(fields: [resolvedById], references: [id], onDelete: Restrict)
 
   @@index([attendanceId])
-  @@index([resolvedById])
   @@map("attendance_violations")
-}
-
-model AttendanceReminder {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  internshipId String     @map("internship_id") @db.Uuid
-  reminderType String?    @map("reminder_type") @db.VarChar(30)
-  scheduledAt  DateTime?  @map("scheduled_at") @db.Timestamp(6)
-  sentAt       DateTime?  @map("sent_at") @db.Timestamp(6)
-  status       String?    @db.VarChar(30)
-  createdAt    DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
-  internship   Internship @relation(fields: [internshipId], references: [id])
-
-  @@index([internshipId])
-  @@map("attendance_reminders")
 }
 
 model File {
@@ -622,7 +559,6 @@ model File {
   uploadedById                String?                       @map("uploaded_by") @db.Uuid
   createdAt                   DateTime?                     @default(now()) @map("created_at") @db.Timestamp(6)
   deletedAt                   DateTime?                     @map("deleted_at") @db.Timestamp(6)
-  attendancePhotos            AttendanceLog[]               @relation("AttendancePhoto")
   certificateTemplates        CertificateTemplate[]
   certificates                Certificate[]                 @relation("CertificateFile")
   uploadedBy                  User?                         @relation("FileUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict)

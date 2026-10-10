@@ -3,7 +3,6 @@
  * ---------------------------------------------------------------
  * Mengisi data master wajib sebelum aplikasi berjalan:
  *   - Role (INTERN, HR_ADMIN, SUPERVISOR, RECEPTIONIST)
- *   - Permission + RolePermission
  *   - EducationLevel, Institution, InstitutionMajor
  *   - Skill
  *   - NotificationType
@@ -61,213 +60,7 @@ const ROLES = [
       "Petugas resepsionis yang dapat melihat kehadiran harian intern.",
   },
 ] as const;
-
-// ─── 2. Permissions ───────────────────────────────────────────────
-const PERMISSIONS = [
-  {
-    code: "APPLICATION_CREATE",
-    name: "Buat Lamaran",
-    description: "Membuat lamaran magang.",
-  },
-  {
-    code: "APPLICATION_VIEW",
-    name: "Lihat Lamaran",
-    description: "Melihat data lamaran magang.",
-  },
-  {
-    code: "APPLICATION_APPROVE",
-    name: "Setujui Lamaran",
-    description: "Menyetujui lamaran magang.",
-  },
-  {
-    code: "APPLICATION_REJECT",
-    name: "Tolak Lamaran",
-    description: "Menolak lamaran magang.",
-  },
-  {
-    code: "ATTENDANCE_CHECK_IN",
-    name: "Check-in",
-    description: "Melakukan absen masuk.",
-  },
-  {
-    code: "ATTENDANCE_CHECK_OUT",
-    name: "Check-out",
-    description: "Melakukan absen keluar.",
-  },
-  {
-    code: "ATTENDANCE_VIEW",
-    name: "Lihat Kehadiran",
-    description: "Melihat data kehadiran.",
-  },
-  {
-    code: "ATTENDANCE_OVERRIDE",
-    name: "Override Kehadiran",
-    description: "Mengubah status kehadiran.",
-  },
-  {
-    code: "ATTENDANCE_EXPORT",
-    name: "Ekspor Kehadiran",
-    description: "Mengekspor laporan kehadiran.",
-  },
-  {
-    code: "INTERNSHIP_VIEW",
-    name: "Lihat Internship",
-    description: "Melihat data internship.",
-  },
-  {
-    code: "INTERNSHIP_MANAGE",
-    name: "Kelola Internship",
-    description: "Mengelola lifecycle internship.",
-  },
-  {
-    code: "SUPERVISOR_VIEW",
-    name: "Lihat Supervisor",
-    description: "Melihat data supervisor.",
-  },
-  {
-    code: "SUPERVISOR_ASSIGN",
-    name: "Assign Supervisor",
-    description: "Menugaskan supervisor ke intern.",
-  },
-  {
-    code: "DEPARTMENT_MANAGE",
-    name: "Kelola Departemen",
-    description: "CRUD master departemen.",
-  },
-  {
-    code: "OFFICE_MANAGE",
-    name: "Kelola Kantor",
-    description: "CRUD master lokasi kantor.",
-  },
-  {
-    code: "CERTIFICATE_VIEW",
-    name: "Lihat Sertifikat",
-    description: "Melihat data sertifikat.",
-  },
-  {
-    code: "CERTIFICATE_GENERATE",
-    name: "Generate Sertifikat",
-    description: "Menerbitkan sertifikat.",
-  },
-  {
-    code: "CERTIFICATE_REGENERATE",
-    name: "Regenerate Sertifikat",
-    description: "Menerbitkan ulang sertifikat.",
-  },
-  {
-    code: "NOTIFICATION_SEND",
-    name: "Kirim Notifikasi",
-    description: "Mengirim notifikasi ke pengguna.",
-  },
-  {
-    code: "REPORT_VIEW",
-    name: "Lihat Laporan",
-    description: "Mengakses modul reporting.",
-  },
-  {
-    code: "AUDIT_LOG_VIEW",
-    name: "Lihat Audit Log",
-    description: "Mengakses modul audit log.",
-  },
-  {
-    code: "USER_MANAGE",
-    name: "Kelola Pengguna",
-    description: "Mengelola data pengguna.",
-  },
-  {
-    code: "DASHBOARD_VIEW",
-    name: "Lihat Dashboard",
-    description: "Mengakses dashboard.",
-  },
-  {
-    code: "FILE_UPLOAD",
-    name: "Upload File",
-    description: "Mengunggah berkas.",
-  },
-  {
-    code: "QUOTA_MANAGE",
-    name: "Kelola Kuota",
-    description: "CRUD alokasi kuota magang.",
-  },
-  {
-    code: "QUOTA_VIEW",
-    name: "Lihat Kuota",
-    description: "Melihat data ketersediaan kuota magang.",
-  },
-  {
-    code: "CORRECTION_SUBMIT",
-    name: "Ajukan Koreksi Absen",
-    description: "Mengajukan permohonan koreksi absensi.",
-  },
-  {
-    code: "CORRECTION_REVIEW",
-    name: "Review Koreksi Absen",
-    description: "Menyetujui atau menolak koreksi absensi.",
-  },
-  {
-    code: "EVALUATION_SUBMIT",
-    name: "Beri Nilai Magang",
-    description: "Memberikan evaluasi dan penilaian magang.",
-  },
-  {
-    code: "EVALUATION_VIEW",
-    name: "Lihat Nilai Magang",
-    description: "Melihat evaluasi dan nilai magang peserta.",
-  },
-  {
-    code: "CERTIFICATE_APPROVE",
-    name: "Approve Sertifikat",
-    description: "Menyetujui penerbitan sertifikat magang.",
-  },
-  {
-    code: "GUIDE_MANAGE",
-    name: "Kelola Panduan",
-    description: "Mengelola materi panduan dan video tutorial.",
-  },
-] as const;
-
-// Role → permission codes
-const ROLE_PERMISSIONS: Record<string, string[]> = {
-  intern: [
-    "APPLICATION_CREATE",
-    "APPLICATION_VIEW",
-    "ATTENDANCE_CHECK_IN",
-    "ATTENDANCE_CHECK_OUT",
-    "ATTENDANCE_VIEW",
-    "CORRECTION_SUBMIT",
-    "INTERNSHIP_VIEW",
-    "EVALUATION_VIEW",
-    "CERTIFICATE_VIEW",
-    "DASHBOARD_VIEW",
-    "FILE_UPLOAD",
-  ],
-  hr_admin: PERMISSIONS.map((p) => p.code),
-  supervisor: [
-    "APPLICATION_VIEW",
-    "ATTENDANCE_VIEW",
-    "ATTENDANCE_OVERRIDE",
-    "CORRECTION_REVIEW",
-    "INTERNSHIP_VIEW",
-    "SUPERVISOR_VIEW",
-    "SUPERVISOR_ASSIGN",
-    "EVALUATION_SUBMIT",
-    "EVALUATION_VIEW",
-    "QUOTA_VIEW",
-    "DEPARTMENT_MANAGE",
-    "OFFICE_MANAGE",
-    "CERTIFICATE_VIEW",
-    "DASHBOARD_VIEW",
-  ],
-  receptionist: [
-    "APPLICATION_VIEW",
-    "ATTENDANCE_VIEW",
-    "INTERNSHIP_VIEW",
-    "QUOTA_VIEW",
-    "DASHBOARD_VIEW",
-  ],
-};
-
-// ─── 3. Master data lain ──────────────────────────────────────────
+// ─── 2. Master data lain ──────────────────────────────────────────
 const EDUCATION_LEVELS = [
   { code: "SMA", name: "Sekolah Menengah Atas" },
   { code: "SMK", name: "Sekolah Menengah Kejuruan" },
@@ -688,45 +481,7 @@ async function main() {
     `  ✓ Role: ${ROLES.length} (INTERN, HR_ADMIN, SUPERVISOR, RECEPTIONIST)`,
   );
 
-  // 2. Permissions
-  const permissionIds = new Map<string, string>();
-  for (const permission of PERMISSIONS) {
-    const saved = await prisma.permission.upsert({
-      where: { code: permission.code },
-      update: { name: permission.name, description: permission.description },
-      create: {
-        code: permission.code,
-        name: permission.name,
-        description: permission.description,
-      },
-    });
-    permissionIds.set(permission.code, saved.id);
-  }
-  console.log(`  ✓ Permission: ${PERMISSIONS.length}`);
-
-  // 3. RolePermissions
-  let rpCount = 0;
-  for (const [roleCode, permissionCodes] of Object.entries(ROLE_PERMISSIONS)) {
-    const roleId = roleIds.get(roleCode);
-    if (!roleId) {
-      continue;
-    }
-    for (const permissionCode of permissionCodes) {
-      const permissionId = permissionIds.get(permissionCode);
-      if (!permissionId) {
-        continue;
-      }
-      await prisma.rolePermission.upsert({
-        where: { roleId_permissionId: { roleId, permissionId } },
-        update: {},
-        create: { roleId, permissionId },
-      });
-      rpCount += 1;
-    }
-  }
-  console.log(`  ✓ RolePermission: ${rpCount}`);
-
-  // 4. EducationLevels
+  // 2. EducationLevels
   const educationIds = new Map<string, string>();
   for (const level of EDUCATION_LEVELS) {
     const saved = await prisma.educationLevel.upsert({
@@ -738,7 +493,7 @@ async function main() {
   }
   console.log(`  ✓ EducationLevel: ${EDUCATION_LEVELS.length}`);
 
-  // 5. Institutions + InstitutionMajors
+  // 3. Institutions + InstitutionMajors
   let institutionCount = 0;
   let majorCount = 0;
   for (const institution of INSTITUTIONS) {
@@ -776,7 +531,7 @@ async function main() {
     `  ✓ Institution: ${institutionCount}, InstitutionMajor: ${majorCount}`,
   );
 
-  // 6. Skills
+  // 4. Skills
   for (const skill of SKILLS) {
     await findOrCreate(
       () => prisma.skill.findFirst({ where: { name: skill.name } }),
@@ -788,7 +543,7 @@ async function main() {
   }
   console.log(`  ✓ Skill: ${SKILLS.length}`);
 
-  // 7. NotificationTypes
+  // 5. NotificationTypes
   for (const type of NOTIFICATION_TYPES) {
     await prisma.notificationType.upsert({
       where: { code: type.code },
@@ -798,7 +553,7 @@ async function main() {
   }
   console.log(`  ✓ NotificationType: ${NOTIFICATION_TYPES.length}`);
 
-  // 8. CertificateTemplate
+  // 6. CertificateTemplate
   const template = await findOrCreate(
     () =>
       prisma.certificateTemplate.findFirst({
@@ -817,7 +572,7 @@ async function main() {
   }
   console.log("  ✓ CertificateTemplate: Template Sertifikat SIMAD");
 
-  // 9. Department + OfficeLocation + AttendanceSetting
+  // 7. Department + OfficeLocation + AttendanceSetting
   for (const department of DEPARTMENTS) {
     await prisma.department.upsert({
       where: { code: department.code },
@@ -897,7 +652,7 @@ async function main() {
     `  ✓ OfficeLocation: ${OFFICES.length}, AttendanceSetting: ${OFFICES.length}`,
   );
 
-  // 10. Admin user (HR_ADMIN)
+  // 8. Admin user (HR_ADMIN)
   const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? "admin@simad.com")
     .toLowerCase()
     .trim();
@@ -932,7 +687,7 @@ async function main() {
   }
   console.log(`  ✓ Admin user: ${adminEmail} (HR_ADMIN)`);
 
-  // 11. Internship Quotas (v1.0.1)
+  // 9. Internship Quotas (v1.0.1)
   const allOffices = await prisma.officeLocation.findMany();
   const allDepartments = await prisma.department.findMany();
   let seededQuotasCount = 0;
@@ -967,7 +722,7 @@ async function main() {
   }
   console.log(`  ✓ InternshipQuota: ${seededQuotasCount} master kuota kantor & alokasi departemen`);
 
-  // 12. Multi-Office Certificate Settings (v1.0.1)
+  // 10. Multi-Office Certificate Settings (v1.0.1)
   for (const office of allOffices) {
     const officeCode = (office.name ?? "OFFICE")
       .replace(/[^A-Za-z0-9]/g, "")
@@ -993,7 +748,7 @@ async function main() {
   }
   console.log(`  ✓ CertificateSetting: ${allOffices.length} setting kantor`);
 
-  // 13. Guide & Tutorial Contents (v1.0.1)
+  // 11. Guide & Tutorial Contents (v1.0.1)
   const GUIDES = [
     {
       title: "Panduan Alur Pendaftaran & Dokumen Wajib",
