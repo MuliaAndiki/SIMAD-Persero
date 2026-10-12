@@ -67,7 +67,7 @@ export type ApproveApplicationBody = {
   departmentId: IDepartment['id'];
   officeLocationId?: IOfficeLocation['id'];
   supervisorId: IUser['id'];
-  actualStartDate?: string;
+  actualStartDate: string;
   actualEndDate?: string;
   notes?: string;
 };

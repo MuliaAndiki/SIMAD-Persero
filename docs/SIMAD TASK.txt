@@ -3,11 +3,15 @@
 - Generator Sertifikat Itu Harus Approve Admin Dikarenakan Harus Dapat Nilai Dari Supervisor 
 - Start Absensi Masuk Peserta magang itu Mulai Jam 8 Maksimal - Done
 - Resepsinis bisa Check Slot Anak magang yang tersedia Di Depetement Yang Tersedia Dikantor - Done
-- Tanggal Masuk Harus Ditentukan admin - karena slot kuota terbatas
+- Tanggal Masuk Harus Ditentukan admin - karena slot kuota terbatas - Done Not Test
 - Peserta Bisa Mengajukan Koreksi Absen - Syaratnya Ada izin ke Supervisor 
 - Tutorial Via Video - done - Belum Ada Dibuatkan
-- Tambah Menu Panduan Di Intern Agar Tidak Kebingunan Sebelum Daftar Dan Setelah Daftar
-- Setiap Bidang Kuota Tanggal Berapa Masuk Serta Tanggal Keluar 
+- Tambah Menu Panduan Di Intern Agar Tidak Kebingunan Sebelum Daftar Dan Setelah Daftar - Done
+- Setiap Bidang Kuota Tanggal Berapa Masuk Serta Tanggal Keluar  - Done
 - CV wajib, surat permohonan dari fakultas wajib - Done
-- Sertifikat Generator Berdaskan Kantor Berbeda Dikarenakan Beda Yang Tanda Tangan 
+- Sertifikat Generator Berdaskan Kantor Berbeda Dikarenakan Beda Yang Tanda Tangan - not
 
+- Sender mail To Mentor - Done
+
+- http://localhost:5000/api/v1/notifications/<notif id> - tidak hilang ketika di hapus dari intern - Done
+- Tidak Adanya Endpoint Khusus untuk Update Status Guide - Done

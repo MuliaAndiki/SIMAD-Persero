@@ -11,7 +11,7 @@ import {
 } from "@/types/application.types";
 import type { AuthUser } from "@/types/auth.types";
 import { InternshipStatus } from "@/types/internship.types";
-import { sendStartDateEmail } from "@/services/email.service";
+import { sendStartDateEmail, sendSupervisorAssignmentEmail } from "@/services/email.service";
 import { getLogger } from "../utils/logger";
 import prisma from "../../prisma/client";
 
@@ -672,13 +672,31 @@ class ApplicationService {
       );
     }
 
-    // Tentukan tanggal aktual yang disetujui HR
-    const actualStart = input.actualStartDate
-      ? new Date(input.actualStartDate)
-      : (app.requestedStartDate ?? new Date());
-    const actualEnd = input.actualEndDate
-      ? new Date(input.actualEndDate)
-      : (app.requestedEndDate ?? new Date());
+    // Tentukan tanggal aktual yang disetujui HR (actualStartDate WAJIB)
+    if (!input.actualStartDate || typeof input.actualStartDate !== "string" || !input.actualStartDate.trim()) {
+      throw new AppError(422, "Tanggal mulai aktual (actualStartDate) wajib diisi saat menyetujui pengajuan");
+    }
+
+    const actualStart = new Date(input.actualStartDate);
+    if (isNaN(actualStart.getTime())) {
+      throw new AppError(422, "Format tanggal mulai aktual (actualStartDate) tidak valid");
+    }
+
+    // actualEndDate opsional — jika kosong, fallback ke requestedEndDate
+    let actualEnd: Date;
+    if (input.actualEndDate) {
+      actualEnd = new Date(input.actualEndDate);
+      if (isNaN(actualEnd.getTime())) {
+        throw new AppError(422, "Format tanggal selesai aktual (actualEndDate) tidak valid");
+      }
+    } else if (app.requestedEndDate) {
+      actualEnd = new Date(app.requestedEndDate);
+      if (isNaN(actualEnd.getTime())) {
+        throw new AppError(422, "Format tanggal selesai pengajuan (requestedEndDate) tidak valid");
+      }
+    } else {
+      throw new AppError(422, "Tanggal selesai aktual (actualEndDate) wajib diisi karena tanggal selesai pengajuan tidak tersedia");
+    }
 
     if (actualStart >= actualEnd) {
       throw new AppError(400, "Tanggal mulai aktual harus sebelum tanggal selesai aktual");
@@ -822,6 +840,25 @@ class ApplicationService {
         headline: "Pengajuan magang Anda telah disetujui.",
       }).catch((err) => {
         getLogger().warn({ err, applicationId: id }, "[approve] Gagal mengirim email tanggal masuk");
+      });
+    }
+
+    // Email penunjukan ke supervisor/mentor yang ditunjuk (best-effort).
+    if (supervisorUser.email) {
+      const officeRecord = officeLocationId
+        ? await prisma.officeLocation.findUnique({ where: { id: officeLocationId } })
+        : null;
+      await sendSupervisorAssignmentEmail({
+        to: supervisorUser.email,
+        supervisorName: supervisorUser.fullName,
+        internName: app.internProfile?.user?.fullName ?? "-",
+        applicationNumber: app.applicationNumber,
+        departmentName: department.name,
+        officeName: officeRecord?.name,
+        startDate: actualStart,
+        endDate: actualEnd,
+      }).catch((err) => {
+        getLogger().warn({ err, applicationId: id }, "[approve] Gagal mengirim email penunjukan supervisor");
       });
     }
 

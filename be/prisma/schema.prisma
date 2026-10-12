@@ -682,6 +682,7 @@ model NotificationRead {
   notificationId String       @map("notification_id") @db.Uuid
   userId         String       @map("user_id") @db.Uuid
   readAt         DateTime?    @map("read_at") @db.Timestamp(6)
+  isDismissed    Boolean      @default(false) @map("is_dismissed")
   notification   Notification @relation(fields: [notificationId], references: [id])
   user           User         @relation(fields: [userId], references: [id])
 

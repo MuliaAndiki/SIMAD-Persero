@@ -5,6 +5,7 @@ import type {
   CreateGuideBody,
   GuideItem,
   UpdateGuideBody,
+  UpdateGuideStatusBody,
 } from '@/types/api/guide.types';
 import { type GuideCacheContext, readGuideSnapshot } from '@/utils/cache/guide.cache';
 
@@ -17,12 +18,16 @@ export function useCreateGuide() {
 }
 
 export function useUpdateGuide() {
-  return useAppMutation<
-    GuideItem,
-    { id: string; body: UpdateGuideBody },
-    GuideCacheContext
-  >({
+  return useAppMutation<GuideItem, { id: string; body: UpdateGuideBody }, GuideCacheContext>({
     mutationFn: ({ id, body }) => Api.Guide.Update(id, body),
+    invalidateKeys: [queryKey.guideRoot()],
+    optimistic: (ns) => ({ previousData: readGuideSnapshot(ns) }),
+  });
+}
+
+export function useUpdateGuideStatus() {
+  return useAppMutation<GuideItem, { id: string; body: UpdateGuideStatusBody }, GuideCacheContext>({
+    mutationFn: ({ id, body }) => Api.Guide.UpdateStatus(id, body),
     invalidateKeys: [queryKey.guideRoot()],
     optimistic: (ns) => ({ previousData: readGuideSnapshot(ns) }),
   });

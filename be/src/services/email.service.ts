@@ -88,6 +88,56 @@ function toDateKey(date: Date | null | undefined): string | null {
   return d.toISOString().slice(0, 10);
 }
 
+export interface SupervisorAssignmentMailInput {
+  to: string;
+  supervisorName: string;
+  internName: string;
+  applicationNumber?: string | null;
+  departmentName?: string | null;
+  officeName?: string | null;
+  startDate: Date;
+  endDate: Date;
+}
+
+/**
+ * Email penunjukan mentor/supervisor pembimbing saat pengajuan disetujui HR.
+ * Best-effort — kegagalan kirim tidak menggagalkan approval (ditangani caller).
+ */
+export async function sendSupervisorAssignmentEmail(
+  input: SupervisorAssignmentMailInput,
+): Promise<void> {
+  const startFmt = formatDateId(input.startDate);
+  const endFmt = formatDateId(input.endDate);
+  const appNo = input.applicationNumber ?? '-';
+  const dept = input.departmentName ?? '-';
+  const office = input.officeName ?? '-';
+
+  const text = `Halo ${input.supervisorName},
+
+Anda ditunjuk sebagai mentor pembimbing peserta magang ${input.internName} (No. Pengajuan: ${appNo}).
+
+Departemen: ${dept}
+Kantor penempatan: ${office}
+Periode magang: ${startFmt} s.d. ${endFmt}
+
+PENTING: Jika email ini tidak muncul di kotak masuk, periksa folder SPAM/promosi agar penunjukan ini tidak kelewat.
+
+Kelola peserta bimbingan Anda di: ${buildFrontendUrl('/supervisor/interns')}`;
+
+  await sendEmail({
+    to: input.to,
+    subject: `Penunjukan Mentor: ${input.internName} (${startFmt})`,
+    text,
+    html: generateEmailHtml({
+      recipientName: input.supervisorName,
+      title: 'Penunjukan Mentor Pembimbing',
+      bodyText: `Anda ditunjuk sebagai mentor pembimbing ${input.internName} (No. Pengajuan: ${appNo}). Departemen: ${dept}. Kantor: ${office}. Periode: ${startFmt} s.d. ${endFmt}. Mohon periksa folder SPAM atau promosi apabila email ini tidak ada di kotak masuk.`,
+      buttonText: 'Kelola Peserta Bimbingan',
+      buttonUrl: buildFrontendUrl('/supervisor/interns'),
+      expiryText: 'Pantau kehadiran dan isi evaluasi peserta tepat waktu.',
+    }),
+  });
+}
 export interface StartDateMailInput {
   to: string;
   fullName: string;

@@ -3,19 +3,13 @@
 import { Button } from '@/components/atoms/button';
 import { ApplicationDetailField } from '@/components/organisms/application/ApplicationDetailField';
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
-import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
-import { getFilePreviewUrl } from '@/utils/file-preview';
-import { formatDate } from '@/utils/string.format';
 import {
-  CalendarCheck,
-  CalendarClock,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  FileText,
-  XCircle,
-} from 'lucide-react';
-import { useState } from 'react';
+  DOCUMENT_LABELS,
+  DocumentPreview,
+} from '@/components/organisms/application/DocumentPreview';
+import type { ApplicationResponse, ApplicationStatusValue } from '@/types/api/application.types';
+import { formatDate } from '@/utils/string.format';
+import { CalendarCheck, CalendarClock, CheckCircle2, FileText, XCircle } from 'lucide-react';
 
 // Hanya SUBMITTED / UNDER_REVIEW yang bisa diapprove/direject —
 // diselaraskan dengan gate backend (application.service.ts approve/reject).
@@ -27,21 +21,15 @@ export interface ApplicationReviewDetailProps {
   onReject: () => void;
 }
 
-/**
- * ApplicationReviewDetail — organism isi dialog review pengajuan.
- * Presentasi murni; status yang bisa direview didefinisikan di sini.
- * Menyediakan preview embed PDF langsung untuk Surat Pengantar Univ.
- */
 export function ApplicationReviewDetail({
   app,
   onApprove,
   onReject,
 }: ApplicationReviewDetailProps) {
-  const [showPdfPreview, setShowPdfPreview] = useState(true);
-
   if (!app) return null;
 
   const reviewable = REVIEWABLE_STATUSES.includes(app.status as ApplicationStatusValue);
+  const documents = (app.documents ?? []).filter((d) => d.file?.url);
 
   return (
     <div className="flex flex-col gap-6">
@@ -108,54 +96,27 @@ export function ApplicationReviewDetail({
         </div>
       )}
 
-      {app.introductionLetterFile &&
-        (() => {
-          const previewUrl = getFilePreviewUrl(app.introductionLetterFile);
-          return (
-            <div className="flex flex-col gap-3 rounded-lg border p-4 bg-card">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <FileText className="size-5 shrink-0 text-primary" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="truncate text-sm font-semibold">
-                      {app.introductionLetterFile.originalName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Surat Pengantar Universitas
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPdfPreview((prev) => !prev)}
-                  >
-                    {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    {showPdfPreview ? 'Tutup Pratinjau' : 'Pratinjau PDF'}
-                  </Button>
-                  {previewUrl && (
-                    <Button asChild variant="outline" size="sm">
-                      <a href={previewUrl} target="_blank" rel="noreferrer">
-                        Buka di Tab Baru
-                      </a>
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {showPdfPreview && previewUrl && (
-                <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
-                  <iframe
-                    src={previewUrl}
-                    className="h-[520px] w-full border-0"
-                    title={`Pratinjau ${app.introductionLetterFile.originalName}`}
-                  />
-                </div>
-              )}
-            </div>
-          );
-        })()}
+      {documents.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          <span className="text-xs font-medium text-muted-foreground">
+            Dokumen Pelamar ({documents.length})
+          </span>
+          {documents.map((doc) => (
+            <DocumentPreview
+              key={doc.id}
+              subtitle={DOCUMENT_LABELS[doc.type] ?? doc.type}
+              file={doc.file!}
+            />
+          ))}
+        </div>
+      ) : (
+        app.introductionLetterFile?.url && (
+          <DocumentPreview
+            subtitle="Surat Pengantar Universitas"
+            file={app.introductionLetterFile}
+          />
+        )
+      )}
 
       {app.status === 'REJECTED' && app.rejectionReason && (
         <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">

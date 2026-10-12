@@ -11,23 +11,17 @@ import { CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
 export interface ApplicationTableProps {
   applications: ApplicationResponse[];
   onSelectApplication: (id: string) => void;
-  onApprove: (app: ApplicationResponse) => void;
-  onReject: (app: ApplicationResponse) => void;
-  isApproving: boolean;
-  isRejecting: boolean;
+  onReviewApplication: (app: ApplicationResponse) => void;
 }
 
 /**
  * ApplicationTable — organism tabel daftar pengajuan magang (HR Admin).
- * Presentasi murni; data & handler disuplai container/section.
+ * Presentasi murni; review/approve/tolak ditangani di halaman detail.
  */
 export function ApplicationTable({
   applications,
   onSelectApplication,
-  onApprove,
-  onReject,
-  isApproving,
-  isRejecting,
+  onReviewApplication,
 }: ApplicationTableProps) {
   return (
     <DataTableCard
@@ -82,8 +76,7 @@ export function ApplicationTable({
                     label: 'Setujui',
                     icon: CheckCircle2,
                     hidden: !reviewable,
-                    disabled: isApproving || isRejecting,
-                    onSelect: () => onApprove(app),
+                    onSelect: () => onReviewApplication(app),
                   },
                   {
                     key: 'reject',
@@ -91,8 +84,7 @@ export function ApplicationTable({
                     icon: XCircle,
                     variant: 'destructive',
                     hidden: !reviewable,
-                    disabled: isApproving || isRejecting,
-                    onSelect: () => onReject(app),
+                    onSelect: () => onReviewApplication(app),
                   },
                 ]}
               />

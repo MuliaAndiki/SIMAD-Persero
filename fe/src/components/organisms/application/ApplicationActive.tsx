@@ -3,15 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { ApplicationSectionService } from '@/components/page/application/ApplicationSection';
 import type { ApplicationResponse } from '@/types/api/application.types';
 import type { OfficeResponse } from '@/types/api/office.types';
-import { getFilePreviewUrl } from '@/utils/file-preview';
 import { formatDate } from '@/utils/string.format';
 import {
   Building2,
   CalendarCheck,
   CalendarClock,
   Edit,
-  Eye,
-  EyeOff,
   FileText,
   Send,
   Trash2,
@@ -20,6 +17,7 @@ import {
 import { useState } from 'react';
 import EditDraftForm from './ApplicationEditForm';
 import { ApplicationStatusBadge } from './ApplicationStatusBadge';
+import { DOCUMENT_LABELS, DocumentPreview } from './DocumentPreview';
 
 interface ApplicationStatusCardProps {
   app: ApplicationResponse;
@@ -36,9 +34,9 @@ const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
   isSubmitting,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [showPdfPreview, setShowPdfPreview] = useState(true);
   const isDraft = app.status === 'DRAFT';
   const isTerminal = app.status === 'APPROVED' || app.status === 'REJECTED';
+  const documents = (app.documents ?? []).filter((d) => d.file?.url);
 
   // Jika sedang edit dan status adalah DRAFT, tampilkan form edit
   if (isDraft && isEditing) {
@@ -101,55 +99,27 @@ const ApplicationStatusCard: React.FC<ApplicationStatusCardProps> = ({
           </div>
         )}
 
-        {app.introductionLetterFile &&
-          (() => {
-            const previewUrl = getFilePreviewUrl(app.introductionLetterFile);
-            return (
-              <div className="flex flex-col gap-3 rounded-lg border p-4 bg-muted/10">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <FileText className="size-5 shrink-0 text-primary" />
-                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="truncate text-sm font-semibold">
-                        {app.introductionLetterFile.originalName}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        Surat Pengantar Universitas
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      type="button"
-                      onClick={() => setShowPdfPreview((prev) => !prev)}
-                    >
-                      {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      {showPdfPreview ? 'Tutup Pratinjau' : 'Pratinjau PDF'}
-                    </Button>
-                    {previewUrl && (
-                      <Button asChild variant="outline" size="sm">
-                        <a href={previewUrl} target="_blank" rel="noreferrer">
-                          Buka di Tab Baru
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {showPdfPreview && previewUrl && (
-                  <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
-                    <iframe
-                      src={previewUrl}
-                      className="h-[520px] w-full border-0"
-                      title={`Pratinjau ${app.introductionLetterFile.originalName}`}
-                    />
-                  </div>
-                )}
-              </div>
-            );
-          })()}
+        {documents.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            <span className="text-xs font-medium text-muted-foreground">
+              Dokumen Pelamar ({documents.length})
+            </span>
+            {documents.map((doc) => (
+              <DocumentPreview
+                key={doc.id}
+                subtitle={DOCUMENT_LABELS[doc.type] ?? doc.type}
+                file={doc.file!}
+              />
+            ))}
+          </div>
+        ) : (
+          app.introductionLetterFile?.url && (
+            <DocumentPreview
+              subtitle="Surat Pengantar Universitas"
+              file={app.introductionLetterFile}
+            />
+          )
+        )}
 
         {app.status === 'REJECTED' && app.rejectionReason && (
           <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">

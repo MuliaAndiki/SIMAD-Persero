@@ -30,6 +30,10 @@ export const UpdateGuideDto = t.Object({
   isPublished: t.Optional(t.Boolean()),
 });
 
+export const UpdateGuideStatusDto = t.Object({
+  isPublished: t.Boolean(),
+});
+
 export const GuideListQuery = t.Object({
   category: t.Optional(t.String()),
   isPublished: t.Optional(t.String()),
