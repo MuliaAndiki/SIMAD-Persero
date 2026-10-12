@@ -146,10 +146,7 @@ class ApplicationService {
    */
   public async Approve(
     params: Pick<ApplicationParams, 'id'>,
-    body: Pick<
-      ApproveApplicationBody,
-      'departmentId' | 'officeLocationId' | 'supervisorId' | 'notes'
-    >,
+    body: ApproveApplicationBody,
   ): Promise<TResponse<ApproveApplicationResponse>> {
     const res = await client.PatchResponse<ApproveApplicationResponse>(
       APPLICATION_ENDPOINTS.APPROVE(params.id),

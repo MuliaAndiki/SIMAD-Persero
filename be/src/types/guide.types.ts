@@ -16,3 +16,7 @@ export interface CreateGuideBody {
 }
 
 export type UpdateGuideBody = Partial<CreateGuideBody>;
+
+export interface UpdateGuideStatusBody {
+  isPublished: boolean;
+}

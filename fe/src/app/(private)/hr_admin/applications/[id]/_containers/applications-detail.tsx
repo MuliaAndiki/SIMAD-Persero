@@ -4,6 +4,7 @@ import {
   type ApproveApplicationFormField,
   type ApproveApplicationFormState,
   syncApproveFormField,
+  toDateInput,
 } from '@/components/organisms/application/ApplicationApproveForm';
 import type {
   RejectApplicationFormField,
@@ -18,6 +19,8 @@ const EMPTY_APPROVE_FORM: ApproveApplicationFormState = {
   departmentId: '',
   officeLocationId: '',
   supervisorId: '',
+  actualStartDate: '',
+  durationMonths: '',
   notes: '',
 };
 
@@ -63,9 +66,15 @@ export default function HrApplicationDetailContainer({ id }: { id: string }) {
   );
 
   const handleOpenApprove = useCallback(() => {
-    setApproveForm(EMPTY_APPROVE_FORM);
+    setApproveForm({
+      ...EMPTY_APPROVE_FORM,
+      officeLocationId:
+        detail.data?.officeLocation?.id ?? (detail.data as any)?.officeLocationId ?? '',
+      actualStartDate: toDateInput(detail.data?.requestedStartDate),
+      actualEndDate: toDateInput(detail.data?.requestedEndDate),
+    });
     setMode('approve');
-  }, []);
+  }, [detail.data]);
 
   const handleOpenReject = useCallback(() => {
     setRejectForm(EMPTY_REJECT_FORM);
@@ -78,12 +87,15 @@ export default function HrApplicationDetailContainer({ id }: { id: string }) {
 
   const handleSubmitApprove = useCallback(async () => {
     if (!id) return;
+    if (!approveForm.actualStartDate || !approveForm.actualStartDate.trim()) return;
     await approve.mutateAsync({
       params: { id },
       body: {
         departmentId: approveForm.departmentId,
         officeLocationId: approveForm.officeLocationId || undefined,
         supervisorId: approveForm.supervisorId,
+        actualStartDate: approveForm.actualStartDate,
+        actualEndDate: approveForm.actualEndDate || undefined,
         notes: approveForm.notes || undefined,
       },
     });

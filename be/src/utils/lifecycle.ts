@@ -62,7 +62,7 @@ export class Lifecycle {
       const error = c.error;
 
       if (code === 'VALIDATION') {
-        c.set.status = 400;
+        c.set.status = 422;
         const formattedErrors = Array.isArray(error?.all)
           ? error.all.map((err: any) => ({
               field: err.path ? String(err.path).replace(/^\//, '') : 'body',
@@ -71,7 +71,7 @@ export class Lifecycle {
           : null;
         const firstErrorMsg = formattedErrors?.[0]?.message;
         return {
-          status: 400,
+          status: 422,
           message: firstErrorMsg || 'Data yang dikirimkan tidak valid atau tidak sesuai format',
           errors: formattedErrors,
         };

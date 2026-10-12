@@ -4,11 +4,13 @@ import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { ApplicationDetailField } from '@/components/organisms/application/ApplicationDetailField';
 import { ApplicationStatusBadge } from '@/components/organisms/application/ApplicationStatusBadge';
+import {
+  DOCUMENT_LABELS,
+  DocumentPreview,
+} from '@/components/organisms/application/DocumentPreview';
 import type { ApplicationResponse } from '@/types/api/application.types';
-import { getFilePreviewUrl } from '@/utils/file-preview';
-import { AlertCircle, ArrowLeft, ExternalLink, Eye, EyeOff, FileText, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, FileText, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 
 export interface ReceptionistApplicationDetailSectionProps {
   application?: ApplicationResponse;
@@ -23,7 +25,6 @@ export function ReceptionistApplicationDetailSection({
   isError,
   errorMessage,
 }: ReceptionistApplicationDetailSectionProps) {
-  const [showPdfPreview, setShowPdfPreview] = useState(true);
   if (isPending) {
     return (
       <section className="flex flex-col gap-6">
@@ -171,56 +172,36 @@ export function ReceptionistApplicationDetailSection({
       </Card>
 
       {/* Documents */}
-      {application.introductionLetterFile &&
-        (() => {
-          const previewUrl = getFilePreviewUrl(application.introductionLetterFile);
-          return (
-            <Card className="flex flex-col gap-4 p-6">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <FileText className="size-5 shrink-0 text-primary" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="truncate text-base font-semibold text-foreground">
-                      {application.introductionLetterFile.originalName || 'Surat Pengantar'}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Surat Pengantar Universitas
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    type="button"
-                    onClick={() => setShowPdfPreview((prev) => !prev)}
-                  >
-                    {showPdfPreview ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    {showPdfPreview ? 'Tutup Pratinjau' : 'Pratinjau Dokumen'}
-                  </Button>
-                  {previewUrl && (
-                    <Button asChild variant="outline" size="sm">
-                      <a href={previewUrl} target="_blank" rel="noreferrer">
-                        <ExternalLink className="mr-1.5 size-4" />
-                        Buka di Tab Baru
-                      </a>
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {showPdfPreview && previewUrl && (
-                <div className="mt-2 w-full overflow-hidden rounded-lg border border-border bg-muted/10 shadow-inner">
-                  <iframe
-                    src={previewUrl}
-                    className="h-[560px] w-full border-0"
-                    title={`Pratinjau ${application.introductionLetterFile.originalName || 'Surat Pengantar'}`}
+      <Card className="flex flex-col gap-4 p-6">
+        <h2 className="text-lg font-semibold text-foreground">Dokumen Pelamar</h2>
+        {(() => {
+          const documents = (application.documents ?? []).filter((d) => d.file?.url);
+          if (documents.length > 0) {
+            return (
+              <div className="flex flex-col gap-3">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Dokumen Pelamar ({documents.length})
+                </span>
+                {documents.map((doc) => (
+                  <DocumentPreview
+                    key={doc.id}
+                    subtitle={DOCUMENT_LABELS[doc.type] ?? doc.type}
+                    file={doc.file!}
                   />
-                </div>
-              )}
-            </Card>
+                ))}
+              </div>
+            );
+          }
+          return (
+            application.introductionLetterFile?.url && (
+              <DocumentPreview
+                subtitle="Surat Pengantar Universitas"
+                file={application.introductionLetterFile}
+              />
+            )
           );
         })()}
+      </Card>
 
       {/* Review Information (if reviewed) */}
       {application.reviewedAt && (

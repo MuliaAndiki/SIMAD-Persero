@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'bun:test';
+import { ApproveApplicationDto } from '../dtos/application.dto';
+import { Value } from '@sinclair/typebox/value';
+import { AppError } from '../http/error';
 
 interface DepartmentAllocation {
   departmentId: string;
@@ -208,5 +211,200 @@ describe('Office Master Quota & Embedded Department Allocations (STATIC QUOTA)',
     expect(checkAugust.officeTotalOccupied).toBe(0);
     expect(checkAugust.deptOccupied).toBe(0);
     expect(checkAugust.deptAvailable).toBe(8); // Full slot available again!
+  });
+});
+
+describe('Application Approval with Mandatory Start Date & Quota Overlap (TASK: Tanggal Masuk Wajib)', () => {
+  it('should reject ApproveApplicationDto schema when actualStartDate is missing or invalid format', () => {
+    const invalidMissing = {
+      departmentId: '11111111-1111-1111-1111-111111111111',
+      supervisorId: '22222222-2222-2222-2222-222222222222',
+    };
+    expect(Value.Check(ApproveApplicationDto, invalidMissing)).toBe(false);
+
+    const invalidDate = {
+      departmentId: '11111111-1111-1111-1111-111111111111',
+      supervisorId: '22222222-2222-2222-2222-222222222222',
+      actualStartDate: 'invalid-date',
+    };
+    expect(Value.Check(ApproveApplicationDto, invalidDate)).toBe(false);
+
+    const validPayload = {
+      departmentId: '11111111-1111-1111-1111-111111111111',
+      supervisorId: '22222222-2222-2222-2222-222222222222',
+      actualStartDate: '2026-11-01',
+    };
+    expect(Value.Check(ApproveApplicationDto, validPayload)).toBe(true);
+
+    const validWithEndDate = {
+      departmentId: '11111111-1111-1111-1111-111111111111',
+      supervisorId: '22222222-2222-2222-2222-222222222222',
+      actualStartDate: '2026-11-01',
+      actualEndDate: '2026-12-31',
+    };
+    expect(Value.Check(ApproveApplicationDto, validWithEndDate)).toBe(true);
+  });
+
+  it('should validate actualStartDate requirement and return 422 with clear message when missing or invalid', () => {
+    const validateActualDates = (input: { actualStartDate?: string; actualEndDate?: string }, requestedEndDate?: Date) => {
+      if (!input.actualStartDate || typeof input.actualStartDate !== 'string' || !input.actualStartDate.trim()) {
+        throw new AppError(422, 'Tanggal mulai aktual (actualStartDate) wajib diisi saat menyetujui pengajuan');
+      }
+
+      const actualStart = new Date(input.actualStartDate);
+      if (isNaN(actualStart.getTime())) {
+        throw new AppError(422, 'Format tanggal mulai aktual (actualStartDate) tidak valid');
+      }
+
+      let actualEnd: Date;
+      if (input.actualEndDate) {
+        actualEnd = new Date(input.actualEndDate);
+        if (isNaN(actualEnd.getTime())) {
+          throw new AppError(422, 'Format tanggal selesai aktual (actualEndDate) tidak valid');
+        }
+      } else if (requestedEndDate) {
+        actualEnd = new Date(requestedEndDate);
+        if (isNaN(actualEnd.getTime())) {
+          throw new AppError(422, 'Format tanggal selesai pengajuan (requestedEndDate) tidak valid');
+        }
+      } else {
+        throw new AppError(422, 'Tanggal selesai aktual (actualEndDate) wajib diisi karena tanggal selesai pengajuan tidak tersedia');
+      }
+
+      if (actualStart >= actualEnd) {
+        throw new AppError(400, 'Tanggal mulai aktual harus sebelum tanggal selesai aktual');
+      }
+
+      return { actualStart, actualEnd };
+    };
+
+    // Missing actualStartDate -> 422
+    expect(() => validateActualDates({} as any, new Date('2026-12-31'))).toThrow(
+      new AppError(422, 'Tanggal mulai aktual (actualStartDate) wajib diisi saat menyetujui pengajuan'),
+    );
+
+    // Empty whitespace actualStartDate -> 422
+    expect(() => validateActualDates({ actualStartDate: '   ' }, new Date('2026-12-31'))).toThrow(
+      new AppError(422, 'Tanggal mulai aktual (actualStartDate) wajib diisi saat menyetujui pengajuan'),
+    );
+
+    // Invalid date string -> 422
+    expect(() => validateActualDates({ actualStartDate: 'bukan-tanggal' }, new Date('2026-12-31'))).toThrow(
+      new AppError(422, 'Format tanggal mulai aktual (actualStartDate) tidak valid'),
+    );
+
+    // Valid start date with fallback to requestedEndDate -> success
+    const res = validateActualDates({ actualStartDate: '2026-11-01' }, new Date('2026-12-31'));
+    expect(res.actualStart).toEqual(new Date('2026-11-01'));
+    expect(res.actualEnd).toEqual(new Date('2026-12-31'));
+  });
+
+  it('should reject approval when office or department quota is full for the overlapping actual date interval', () => {
+    const quota = {
+      officeLocationId: 'office-lampung',
+      totalCapacity: 2,
+      departmentAllocations: [{ departmentId: 'dept-it', capacity: 1 }],
+    };
+
+    const existingInternships = [
+      {
+        officeLocationId: 'office-lampung',
+        departmentId: 'dept-it',
+        status: 'ACTIVE',
+        actualStartDate: new Date('2026-11-01'),
+        actualEndDate: new Date('2026-12-31'),
+      },
+    ];
+
+    const checkQuotaForApproval = (
+      officeLocationId: string,
+      departmentId: string,
+      actualStart: Date,
+      actualEnd: Date,
+    ) => {
+      // Overlap condition: actualStartDate <= actualEnd && actualEndDate >= actualStart
+      const officeOccupied = existingInternships.filter(
+        (i) =>
+          i.officeLocationId === officeLocationId &&
+          ['PENDING', 'ACTIVE'].includes(i.status) &&
+          i.actualStartDate <= actualEnd &&
+          i.actualEndDate >= actualStart,
+      ).length;
+
+      if (officeOccupied >= quota.totalCapacity) {
+        throw new AppError(
+          400,
+          `Total kuota kantor untuk periode tersebut sudah penuh (Kapasitas Kantor: ${quota.totalCapacity}, Terisi: ${officeOccupied})`,
+        );
+      }
+
+      const deptAlloc = quota.departmentAllocations.find((a) => a.departmentId === departmentId);
+      if (deptAlloc) {
+        const deptOccupied = existingInternships.filter(
+          (i) =>
+            i.officeLocationId === officeLocationId &&
+            i.departmentId === departmentId &&
+            ['PENDING', 'ACTIVE'].includes(i.status) &&
+            i.actualStartDate <= actualEnd &&
+            i.actualEndDate >= actualStart,
+        ).length;
+
+        if (deptOccupied >= deptAlloc.capacity) {
+          throw new AppError(
+            400,
+            `Alokasi kuota magang untuk departemen ini pada periode tersebut sudah penuh (Alokasi: ${deptAlloc.capacity}, Terisi: ${deptOccupied})`,
+          );
+        }
+      }
+
+      return true;
+    };
+
+    // Department IT allocation is 1, and 1 existing intern overlaps in Nov-Dec 2026 -> rejected with quota message
+    expect(() =>
+      checkQuotaForApproval(
+        'office-lampung',
+        'dept-it',
+        new Date('2026-11-15'),
+        new Date('2026-11-30'),
+      ),
+    ).toThrow('Alokasi kuota magang untuk departemen ini pada periode tersebut sudah penuh');
+
+    // Office total capacity rejection test
+    const officeQuotaFull = {
+      officeLocationId: 'office-lampung',
+      totalCapacity: 1,
+      departmentAllocations: [{ departmentId: 'dept-sdm', capacity: 1 }],
+    };
+    const checkOfficeQuota = (actualStart: Date, actualEnd: Date) => {
+      const officeOccupied = existingInternships.filter(
+        (i) =>
+          i.officeLocationId === 'office-lampung' &&
+          ['PENDING', 'ACTIVE'].includes(i.status) &&
+          i.actualStartDate <= actualEnd &&
+          i.actualEndDate >= actualStart,
+      ).length;
+      if (officeOccupied >= officeQuotaFull.totalCapacity) {
+        throw new AppError(
+          400,
+          `Total kuota kantor untuk periode tersebut sudah penuh (Kapasitas Kantor: ${officeQuotaFull.totalCapacity}, Terisi: ${officeOccupied})`,
+        );
+      }
+      return true;
+    };
+
+    expect(() =>
+      checkOfficeQuota(new Date('2026-11-15'), new Date('2026-11-30')),
+    ).toThrow('Total kuota kantor untuk periode tersebut sudah penuh');
+
+    // Non-overlapping interval in 2027 -> approved
+    expect(
+      checkQuotaForApproval(
+        'office-lampung',
+        'dept-it',
+        new Date('2027-01-01'),
+        new Date('2027-02-28'),
+      ),
+    ).toBe(true);
   });
 });

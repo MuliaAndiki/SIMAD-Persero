@@ -50,7 +50,27 @@ export function useDeleteNotification() {
     {
       mutationFn: (params) => Api.Notification.Delete(params),
       invalidateKeys: [queryKey.notificationRoot()],
-      optimistic: (ns) => ({ previousData: readNotificationSnapshot(ns) }),
+      optimistic: (ns, variables) => {
+        const previousLists: Array<[readonly unknown[], NotificationResponse[]]> = [];
+        const queries = ns.queryClient.getQueriesData<NotificationResponse[]>({
+          queryKey: ['notification', 'list'],
+        });
+        for (const [key, data] of queries) {
+          if (Array.isArray(data)) {
+            previousLists.push([key, data]);
+            ns.queryClient.setQueryData(
+              key,
+              data.filter((n) => n.id !== variables.notificationId),
+            );
+          }
+        }
+        return { previousData: readNotificationSnapshot(ns), previousLists };
+      },
+      onError: (_err, _vars, context, ns) => {
+        for (const [key, data] of context?.previousLists ?? []) {
+          ns.queryClient.setQueryData(key, data);
+        }
+      },
     },
   );
 }

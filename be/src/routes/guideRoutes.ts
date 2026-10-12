@@ -6,6 +6,7 @@ import {
   GuideListQuery,
   GuideSlugParam,
   UpdateGuideDto,
+  UpdateGuideStatusDto,
 } from '@/dtos/guide.dto';
 import { optionalAuth, requireRole, verifyToken } from '@/middlewares/auth';
 import Elysia from 'elysia';
@@ -57,6 +58,17 @@ class GuideRouter {
         beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
         params: GuideIdParam,
         body: UpdateGuideDto,
+      },
+    );
+
+    // PATCH /guides/:id/status (HR Admin)
+    this.guideRouter.patch(
+      '/:id/status',
+      (c: AppContext) => guideController.updateStatus(c),
+      {
+        beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
+        params: GuideIdParam,
+        body: UpdateGuideStatusDto,
       },
     );
 

@@ -39,7 +39,7 @@ export interface ApplicationSectionService {
   onSubmitDraft: (id: string) => Promise<void>;
   onDeleteDraft: (id: string) => Promise<void>;
   onCancel: (id: string) => Promise<void>;
-  onUploadFile: (file: File) => Promise<{ fileId: string; fileUrl?: string } | null>;
+  onUploadFile: (file: File, kind?: "cv" | "pengantar") => Promise<{ fileId: string; fileUrl?: string } | null>;
   onPreviewFile?: (fileUrl: string) => void;
 }
 
@@ -201,8 +201,8 @@ function NewApplicationForm({
     }
 
     const [cvUpload, facultyUpload] = await Promise.all([
-      service.onUploadFile(cvFile),
-      service.onUploadFile(facultyFile),
+      service.onUploadFile(cvFile, "cv"),
+      service.onUploadFile(facultyFile, "pengantar"),
     ]);
     if (!cvUpload || !facultyUpload) {
       setLocalError('Gagal mengunggah dokumen. Silakan coba lagi.');

@@ -1,43 +1,51 @@
-import { env } from '@/configs/env.config';
-import type { NextConfig } from 'next';
+import { env } from "@/configs/env.config";
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   compiler: {
     styledComponents: true,
   },
+  // ponytail: samakan dengan batas upload form (5MB) — default Next hanya 1MB
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
+  },
   images: {
     // Unoptimized untuk development, optimized untuk production
-    unoptimized: process.env.NODE_ENV === 'development',
+    unoptimized: process.env.NODE_ENV === "development",
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
       {
-        protocol: 'https',
-        hostname: '*.r2.dev',
+        protocol: "https",
+        hostname: "*.r2.dev",
       },
       {
-        protocol: 'https',
-        hostname: '*.cloudflarestorage.com',
+        protocol: "https",
+        hostname: "*.cloudflarestorage.com",
       },
     ],
     // Tambahkan domain R2 ke allowed domains
     domains: [
-      'pub-2f811af54c344a96ad45cb28d7493156.r2.dev',
-      ...(process.env.NEXT_PUBLIC_R2_URL ? [new URL(process.env.NEXT_PUBLIC_R2_URL).hostname] : []),
+      "pub-2f811af54c344a96ad45cb28d7493156.r2.dev",
+      ...(process.env.NEXT_PUBLIC_R2_URL
+        ? [new URL(process.env.NEXT_PUBLIC_R2_URL).hostname]
+        : []),
     ],
   },
   redirects: async () => {
     return [
       {
-        source: '/',
-        destination: env.NEXT_PUBLIC_BASEPATH || '/home',
+        source: "/",
+        destination: env.NEXT_PUBLIC_BASEPATH || "/home",
         permanent: true,
       },
       {
-        source: '/auth/:path*',
-        destination: '/:path*',
+        source: "/auth/:path*",
+        destination: "/:path*",
         permanent: true,
       },
     ];
@@ -46,11 +54,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
           },
         ],
       },

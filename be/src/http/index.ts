@@ -39,6 +39,22 @@ function errorResponse(c: AppContext, status: number, message: string, title?: s
   return c.json?.({ status, title: title || getDefaultErrorTitle(status), message, ...(code ? { code } : {}) }, status);
 }
 
+// ponytail: Prisma BigInt (mis. File.size) meledak di JSON.stringify — sanitasi sekali di sini, bukan per-service
+function sanitizeBigInt<T>(value: T): T {
+  if (typeof value === 'bigint') return Number(value) as T;
+  if (value instanceof Date) return value;
+  if (Array.isArray(value)) return value.map(sanitizeBigInt) as T;
+  if (value && typeof value === 'object') {
+    // Hanya plain object yang di-rebuild — Decimal/class lain dibiarkan (punya toJSON sendiri)
+    const proto = Object.getPrototypeOf(value);
+    if (proto !== Object.prototype && proto !== null) return value;
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) out[k] = sanitizeBigInt(v);
+    return out as T;
+  }
+  return value;
+}
+
 function getDefaultErrorTitle(status: number): string {
   switch (status) {
     case 400: return 'Permintaan Tidak Valid';
@@ -60,12 +76,15 @@ export function HttpResponse(c: AppContext) {
     ok: (data?: any, meta?: any, message = 'Berhasil', title = 'Berhasil') => {
       const responseMeta = isGetRequest(c) ? buildGetResponseMeta(c, meta) : meta;
 
-      return c.json?.({ status: 200, title, message, data, meta: responseMeta }, 200);
+      return c.json?.(
+        { status: 200, title, message, data: sanitizeBigInt(data), meta: sanitizeBigInt(responseMeta) },
+        200,
+      );
     },
     created: (data?: any, message = 'Data berhasil dibuat', title = 'Berhasil Dibuat') =>
-      c.json?.({ status: 201, title, message, data }, 201),
+      c.json?.({ status: 201, title, message, data: sanitizeBigInt(data) }, 201),
     accepted: (data?: any, message = 'Permintaan Anda sedang diproses', title = 'Permintaan Diterima') =>
-      c.json?.({ status: 202, title, message, data }, 202),
+      c.json?.({ status: 202, title, message, data: sanitizeBigInt(data) }, 202),
     noContent: (message = 'Tidak ada konten', title = 'Tidak Ada Konten') => 
       c.json?.({ status: 204, title, message }, 204),
     badRequest: (message = 'Permintaan tidak valid', code?: ErrorCode, title?: string) =>

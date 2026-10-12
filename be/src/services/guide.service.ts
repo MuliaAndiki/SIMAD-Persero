@@ -49,11 +49,12 @@ class GuideService {
    * Mengambil detail panduan berdasarkan slug atau ID.
    */
   public async getBySlug(slugOrId: string, isHrAdmin = false) {
-    const guide = await prisma.guideContent.findFirst({
-      where: {
-        OR: [{ slug: slugOrId }, { id: slugOrId }],
-      },
-    });
+    // ponytail: pg rejects non-uuid in uuid column (P2007) — only match id when uuid-like
+    const or: Array<Record<string, string>> = [{ slug: slugOrId }];
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId)) {
+      or.push({ id: slugOrId });
+    }
+    const guide = await prisma.guideContent.findFirst({ where: { OR: or } });
 
     if (!guide) {
       throw new NotFoundError('Konten panduan tidak ditemukan');
@@ -119,6 +120,21 @@ class GuideService {
     });
 
     return updated;
+  }
+
+  /**
+   * Mengubah status publikasi panduan (HR Admin).
+   */
+  public async updateStatus(id: string, isPublished: boolean) {
+    const existing = await prisma.guideContent.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundError('Konten panduan tidak ditemukan');
+    }
+
+    return prisma.guideContent.update({
+      where: { id },
+      data: { isPublished },
+    });
   }
 
   /**
