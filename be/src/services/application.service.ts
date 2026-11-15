@@ -12,6 +12,7 @@ import {
 import type { AuthUser } from "@/types/auth.types";
 import { InternshipStatus } from "@/types/internship.types";
 import { sendStartDateEmail, sendSupervisorAssignmentEmail } from "@/services/email.service";
+import FileService from "@/services/file.service";
 import { getLogger } from "../utils/logger";
 import prisma from "../../prisma/client";
 
@@ -286,7 +287,15 @@ class ApplicationService {
       data.officeLocationId = input.officeLocationId;
     }
 
-    return prisma.$transaction(async (tx) => {
+    const existingDocs = await prisma.applicationDocument.findMany({
+      where: { applicationId: id },
+      select: { fileId: true },
+    });
+    const candidateOldFileIds = Array.from(
+      new Set([app.introductionLetterFileId, ...existingDocs.map((d) => d.fileId)].filter(Boolean)),
+    );
+
+    const updatedApp = await prisma.$transaction(async (tx) => {
       if (Object.keys(data).length > 0) {
         await tx.internshipApplication.update({ where: { id }, data });
       }
@@ -349,6 +358,22 @@ class ApplicationService {
       });
       return this.serializeApplication(updated);
     });
+
+    const activeFileIds = new Set<string>(
+      [
+        updatedApp?.introductionLetterFile?.id,
+        ...(updatedApp?.documents ?? []).map((doc) => (doc.file as { id?: string } | null)?.id),
+      ].filter((fileId): fileId is string => Boolean(fileId)),
+    );
+
+    const orphanedIds = candidateOldFileIds.filter((oldId) => !activeFileIds.has(oldId));
+    if (orphanedIds.length > 0) {
+      await Promise.all(
+        orphanedIds.map((oldId) => FileService.removeIfUnreferenced(oldId).catch(() => {})),
+      );
+    }
+
+    return updatedApp;
   }
 
   // ─── 14.4 Submit Application ────────────────────────────────
@@ -933,7 +958,20 @@ class ApplicationService {
       throw new AppError(400, "Only DRAFT applications can be deleted");
     }
 
+    const existingDocs = await prisma.applicationDocument.findMany({
+      where: { applicationId: id },
+      select: { fileId: true },
+    });
+    const candidateFileIds = Array.from(
+      new Set([app.introductionLetterFileId, ...existingDocs.map((d) => d.fileId)].filter(Boolean)),
+    );
+
     await prisma.internshipApplication.delete({ where: { id } });
+
+    await Promise.all(
+      candidateFileIds.map((fileId) => FileService.removeIfUnreferenced(fileId).catch(() => {})),
+    );
+
     return { message: "Draft application deleted" };
   }
 

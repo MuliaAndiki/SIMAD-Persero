@@ -28,9 +28,9 @@ export const UpdateProfileDto = t.Partial(
 export const UploadProfilePhotoDto = t.Object({
   photo: t.Optional(
     t.File({
-      type: ['image/jpeg', 'image/png'],
+      type: ['image/jpeg', 'image/png', 'image/webp'],
       maxSize: MAX_FILE_SIZE,
-      description: 'Foto profil JPG/JPEG/PNG maksimal 5 MB',
+      description: 'Foto profil JPG/JPEG/PNG/WebP maksimal 5 MB',
     }),
   ),
   url: t.Optional(t.String({ description: 'Public URL R2 dari foto profil' })),

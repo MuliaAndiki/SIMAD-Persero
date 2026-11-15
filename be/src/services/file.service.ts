@@ -1,12 +1,21 @@
 import { AppError } from '@/http/error';
 import type { AuthUser } from '@/types/auth.types';
 import type { FileResponse, UploadFileInput } from '@/types/file.types';
-import { deleteFromR2, extractR2Key, getR2Object, uploadFile } from '@/utils/r2-utils';
+import {
+  deleteFromR2,
+  extractR2Key,
+  getR2Object,
+  isAllowedR2Key,
+  uploadFile,
+} from '@/utils/r2-utils';
 import {
   ALLOWED_UPLOAD_MIME_TYPES,
   MAX_FILE_SIZE,
+  TEMPLATE_WEBP_MAX_DIMENSION,
   buildPublicId,
   getExtensionFromMime,
+  inferMimeFromFilename,
+  optimizeUploadedMedia,
 } from '@/utils/storage.util';
 import prisma from '../../prisma/client';
 
@@ -47,31 +56,43 @@ class FileService {
 
   // POST /files/upload
   public async upload(uploadedById: string, input: UploadFileInput) {
-    const mimeType = input.mimeType;
-
     if (
-      !ALLOWED_UPLOAD_MIME_TYPES.includes(mimeType as (typeof ALLOWED_UPLOAD_MIME_TYPES)[number])
+      !ALLOWED_UPLOAD_MIME_TYPES.includes(
+        input.mimeType as (typeof ALLOWED_UPLOAD_MIME_TYPES)[number],
+      )
     ) {
-      throw new AppError(422, 'Invalid file type. Allowed: PDF, JPG, JPEG, PNG');
+      throw new AppError(422, 'Invalid file type. Allowed: PDF, JPG, JPEG, PNG, WebP');
     }
 
     if (input.size > MAX_FILE_SIZE) {
       throw new AppError(422, 'File size exceeds the 5 MB limit');
     }
 
-    const extension = getExtensionFromMime(mimeType);
-    const publicId = buildPublicId(input.originalName, mimeType);
+    const maxDimension =
+      input.folder === 'certificate-templates' ? TEMPLATE_WEBP_MAX_DIMENSION : undefined;
+    const { buffer: finalBuffer, mimeType: finalMimeType } = await optimizeUploadedMedia(
+      input.buffer,
+      input.mimeType,
+      maxDimension,
+    );
+
+    if (finalBuffer.length > MAX_FILE_SIZE) {
+      throw new AppError(422, 'File size exceeds the 5 MB limit');
+    }
+
+    const extension = getExtensionFromMime(finalMimeType);
+    const publicId = buildPublicId(input.originalName, finalMimeType);
 
     // Upload to Cloudflare R2 — returns public URL.
-    const r2Url = await uploadFile(input.buffer, publicId, mimeType);
+    const r2Url = await uploadFile(finalBuffer, publicId, finalMimeType, input.folder);
 
     const file = await prisma.file.create({
       data: {
         originalName: input.originalName,
         fileName: publicId,
-        mimeType,
+        mimeType: finalMimeType,
         extension,
-        size: BigInt(input.size),
+        size: BigInt(finalBuffer.length),
         storageProvider: 'r2',
         publicId,
         url: r2Url,
@@ -135,6 +156,39 @@ class FileService {
     return { file: this.serialize(file), url: file.url };
   }
 
+  private async fetchR2Stream(
+    key: string,
+    fallbackMimeType?: string | null,
+    fallbackLength?: number,
+  ) {
+    try {
+      const s3Response = await getR2Object(key);
+      if (!s3Response.Body) {
+        throw new AppError(404, 'File content is empty');
+      }
+
+      const stream = (s3Response.Body as any).transformToWebStream() as ReadableStream;
+      const s3Type = s3Response.ContentType;
+      const inferred = inferMimeFromFilename(key);
+      const contentType =
+        (s3Type && !s3Type.includes('octet-stream') ? s3Type : undefined) ||
+        fallbackMimeType ||
+        (inferred !== 'application/octet-stream' ? inferred : 'application/pdf');
+
+      return {
+        stream,
+        contentType,
+        contentLength: s3Response.ContentLength || fallbackLength,
+      };
+    } catch (error: any) {
+      if (error instanceof AppError) throw error;
+      if (error?.name === 'NoSuchKey' || error?.$metadata?.httpStatusCode === 404) {
+        throw new AppError(404, 'File not found in storage');
+      }
+      throw new AppError(500, 'Failed to retrieve file from storage');
+    }
+  }
+
   // Stream konten file langsung dari R2 via S3 API
   public async getFileStream(id: string) {
     const file = await prisma.file.findUnique({ where: { id } });
@@ -146,26 +200,79 @@ class FileService {
     }
 
     const key = extractR2Key(file.url || file.fileName!);
-    try {
-      const s3Response = await getR2Object(key);
-      if (!s3Response.Body) {
-        throw new AppError(404, 'File content is empty');
-      }
+    const streamData = await this.fetchR2Stream(
+      key,
+      file.mimeType,
+      file.size != null ? Number(file.size) : undefined,
+    );
+    return {
+      file: this.serialize(file),
+      ...streamData,
+    };
+  }
 
-      const stream = (s3Response.Body as any).transformToWebStream();
+  // Stream objek R2 berdasarkan query key, url, atau fileId (untuk endpoint /files/preview)
+  public async getPreviewStream(query: { key?: string; url?: string; fileId?: string }) {
+    if (query.fileId) {
+      const res = await this.getFileStream(query.fileId);
       return {
-        file: this.serialize(file),
-        stream,
-        contentType: s3Response.ContentType || file.mimeType || 'application/pdf',
-        contentLength:
-          s3Response.ContentLength || (file.size != null ? Number(file.size) : undefined),
+        stream: res.stream,
+        contentType: res.contentType,
+        contentLength: res.contentLength,
+        filename: res.file.originalName || res.file.fileName || 'document.pdf',
       };
-    } catch (error: any) {
-      if (error instanceof AppError) throw error;
-      if (error?.name === 'NoSuchKey' || error?.$metadata?.httpStatusCode === 404) {
-        throw new AppError(404, 'File not found in storage');
-      }
-      throw new AppError(500, 'Failed to retrieve file from storage');
+    }
+
+    const raw = query.key || query.url || '';
+    const key = extractR2Key(raw).trim();
+    if (!key) {
+      throw new AppError(400, 'Parameter key, url, atau fileId diperlukan');
+    }
+
+    if (!isAllowedR2Key(key)) {
+      throw new AppError(403, 'Kunci file tidak valid atau di luar folder penyimpanan');
+    }
+
+    const streamData = await this.fetchR2Stream(key);
+    return {
+      ...streamData,
+      filename: key.split('/').pop() || 'document.pdf',
+    };
+  }
+
+  // Hapus file secara aman (soft delete + R2) apabila sudah tidak direferensikan entitas manapun.
+  public async removeIfUnreferenced(fileId: string): Promise<void> {
+    const file = await prisma.file.findUnique({
+      where: { id: fileId },
+      include: {
+        _count: {
+          select: {
+            certificateTemplates: true,
+            certificates: true,
+            applicationLetters: true,
+            avatarUsers: true,
+            applicationDocuments: true,
+            correctionEvidenceFiles: true,
+            certificateSignatures: true,
+            certificateStamps: true,
+            certificateSettingTemplates: true,
+          },
+        },
+      },
+    });
+
+    if (!file || file.deletedAt) return;
+
+    const totalRefs = Object.values(file._count).reduce((sum, count) => sum + count, 0);
+    if (totalRefs > 0) return;
+
+    await prisma.file.update({
+      where: { id: fileId },
+      data: { deletedAt: new Date() },
+    });
+
+    if (file.url && file.storageProvider === 'r2') {
+      await deleteFromR2(file.url).catch(() => {});
     }
   }
 

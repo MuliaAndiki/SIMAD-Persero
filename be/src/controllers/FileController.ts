@@ -2,6 +2,8 @@ import type { AppContext } from '@/contex';
 import { HttpResponse, handleAppError } from '@/http';
 import FileService from '@/services/file.service';
 import type { FileParams } from '@/types/file.types';
+import type { UploadR2Folder } from '@/utils/r2-utils';
+import { inferMimeFromFilename } from '@/utils/storage.util';
 
 /**
  * Controller modul File — tipis.
@@ -15,12 +17,43 @@ class FileController {
     return handleAppError(c, error);
   }
 
+  private streamFileResponse({
+    stream,
+    contentType,
+    contentLength,
+    dispositionType,
+    filename,
+    cacheControl,
+  }: {
+    stream: ReadableStream;
+    contentType: string;
+    contentLength?: number;
+    dispositionType: 'inline' | 'attachment';
+    filename: string;
+    cacheControl?: string;
+  }) {
+    const safeFilename = filename.replace(/["\r\n]/g, '_');
+    const headers: Record<string, string> = {
+      'Content-Type': contentType,
+      'Content-Disposition': `${dispositionType}; filename="${safeFilename}"`,
+      'Accept-Ranges': 'bytes',
+    };
+    if (contentLength) {
+      headers['Content-Length'] = String(contentLength);
+    }
+    if (cacheControl) {
+      headers['Cache-Control'] = cacheControl;
+    }
+    return new Response(stream, { status: 200, headers });
+  }
+
   // POST /files/upload
   public async upload(c: AppContext) {
     try {
       const user = c.user!;
       const body = (c.body || {}) as {
         file?: File;
+        folder?: UploadR2Folder;
         url?: string;
         originalName?: string;
         mimeType?: string;
@@ -43,14 +76,47 @@ class FileController {
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
+      const mimeType =
+        file.type && file.type !== 'application/octet-stream'
+          ? file.type
+          : inferMimeFromFilename(file.name);
+
       const data = await FileService.upload(user.id, {
         originalName: file.name,
-        mimeType: file.type,
+        mimeType,
         size: file.size,
         buffer,
+        folder: body.folder,
       });
 
       return HttpResponse(c).created(data, 'File uploaded successfully');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // GET /files/preview — stream file inline/attachment berdasar key, url, atau fileId
+  public async preview(c: AppContext) {
+    try {
+      const query = (c.query || {}) as {
+        key?: string;
+        url?: string;
+        fileId?: string;
+        download?: string;
+      };
+      const result = await FileService.getPreviewStream(query);
+      const isDownload = query.download === 'true';
+
+      return this.streamFileResponse({
+        stream: result.stream,
+        contentType: result.contentType,
+        contentLength: result.contentLength,
+        dispositionType: isDownload ? 'attachment' : 'inline',
+        filename: result.filename,
+        cacheControl: isDownload
+          ? undefined
+          : 'public, max-age=86400, stale-while-revalidate=3600',
+      });
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -73,16 +139,13 @@ class FileController {
       const { fileId } = c.params as unknown as FileParams;
       const { file, stream, contentType, contentLength } = await FileService.getFileStream(fileId);
 
-      const headers: Record<string, string> = {
-        'Content-Type': contentType,
-        'Content-Disposition': `attachment; filename="${file.originalName || 'downloaded-file'}"`,
-        'Accept-Ranges': 'bytes',
-      };
-      if (contentLength) {
-        headers['Content-Length'] = String(contentLength);
-      }
-
-      return new Response(stream, { status: 200, headers });
+      return this.streamFileResponse({
+        stream,
+        contentType,
+        contentLength,
+        dispositionType: 'attachment',
+        filename: file.originalName || 'downloaded-file',
+      });
     } catch (error) {
       return this.handleError(c, error);
     }
@@ -94,17 +157,14 @@ class FileController {
       const { fileId } = c.params as unknown as FileParams;
       const { file, stream, contentType, contentLength } = await FileService.getFileStream(fileId);
 
-      const headers: Record<string, string> = {
-        'Content-Type': contentType,
-        'Content-Disposition': `inline; filename="${file.originalName || 'file'}"`,
-        'Cache-Control': 'public, max-age=86400',
-        'Accept-Ranges': 'bytes',
-      };
-      if (contentLength) {
-        headers['Content-Length'] = String(contentLength);
-      }
-
-      return new Response(stream, { status: 200, headers });
+      return this.streamFileResponse({
+        stream,
+        contentType,
+        contentLength,
+        dispositionType: 'inline',
+        filename: file.originalName || 'file',
+        cacheControl: 'public, max-age=86400',
+      });
     } catch (error) {
       return this.handleError(c, error);
     }

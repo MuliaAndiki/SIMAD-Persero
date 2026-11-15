@@ -77,7 +77,7 @@ class UserRouter {
         detail: {
           summary: "Upload foto profil",
           description:
-            "Upload foto profil JPG/JPEG/PNG maksimal 5 MB. Foto lama diganti.",
+            "Upload foto profil JPG/JPEG/PNG/WebP maksimal 5 MB. Foto lama diganti.",
           tags: ["User"],
         },
       },

@@ -248,6 +248,35 @@ export async function ClientPost<T>(path: string, data?: unknown): Promise<T> {
   return clientCoreFetch<T>(path, { method: 'POST', body: data });
 }
 
+async function sendFormDataRequest(
+  endpoint: string,
+  formData: FormData,
+  accessToken?: string,
+): Promise<Response> {
+  const internalApiKey =
+    process.env.NEXT_PUBLIC_INTERNAL_API_SECRET ||
+    process.env.NEXT_INTERNAL_API_SECRET ||
+    process.env.INTERNAL_API_SECRET ||
+    process.env.INTERNAL_API_KEY ||
+    '';
+
+  const headers: Record<string, string> = {
+    'x-internal-api-key': internalApiKey,
+  };
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
+  return fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: formData,
+    credentials: 'same-origin',
+    cache: 'no-store',
+  });
+}
+
 /**
  * POST multipart/form-data (upload file).
  *
@@ -267,29 +296,14 @@ export async function ClientPostFormDataResponse<T>(
   }
 
   const endpoint = await buildApiUrl(path);
+  let res = await sendFormDataRequest(endpoint, formData, accessToken);
 
-  const internalApiKey =
-    process.env.NEXT_PUBLIC_INTERNAL_API_SECRET ||
-    process.env.NEXT_INTERNAL_API_SECRET ||
-    process.env.INTERNAL_API_SECRET ||
-    process.env.INTERNAL_API_KEY ||
-    '';
-
-  const headers: Record<string, string> = {
-    'x-internal-api-key': internalApiKey,
-  };
-
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
+  if (res.status === 401) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      res = await sendFormDataRequest(endpoint, formData, getAccessToken());
+    }
   }
-
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    body: formData,
-    credentials: 'same-origin',
-    cache: 'no-store',
-  });
 
   let json: ApiSuccessResponse<T> | any;
   try {

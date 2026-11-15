@@ -15,7 +15,7 @@ const { client } = Api();
 class FileService {
   /**
    * POST /files/upload
-   * Mengunggah file (FormData dengan field 'berkas' atau JSON dengan 'url').
+   * Mengunggah file (FormData dengan field 'file' + opsional 'folder', atau JSON dengan 'url').
    */
   public async Upload(
     payload: FormData | { url: string; originalName?: string; mimeType?: string; size?: number },
