@@ -23,6 +23,27 @@ import prisma from "../../prisma/client";
 class ApplicationService {
   // ─── Helpers ─────────────────────────────────────────────────
 
+  /** Konversi BigInt `file.size` ke `number | null` agar aman diserialisasi oleh `JSON.stringify`. */
+  private serializeApplication<
+    T extends {
+      documents?: Array<{ file?: { size?: bigint | number | null } | null }>;
+    },
+  >(app: T | null) {
+    if (!app?.documents) return app;
+    return {
+      ...app,
+      documents: app.documents.map((doc) => ({
+        ...doc,
+        file: doc.file
+          ? {
+              ...doc.file,
+              size: doc.file.size != null ? Number(doc.file.size) : null,
+            }
+          : doc.file,
+      })),
+    };
+  }
+
   /** Generate a unique application number: APP-YYYYMMDD-XXXX */
   private generateApplicationNumber(): string {
     const now = new Date();
@@ -172,7 +193,7 @@ class ApplicationService {
         });
       }
 
-      return tx.internshipApplication.findUnique({
+      const created = await tx.internshipApplication.findUnique({
         where: { id: app.id },
         include: {
           documents: {
@@ -188,6 +209,7 @@ class ApplicationService {
           officeLocation: { select: { id: true, name: true } },
         },
       });
+      return this.serializeApplication(created);
     });
   }
 
@@ -196,7 +218,7 @@ class ApplicationService {
   public async getMyApplications(userId: string) {
     const internProfileId = await this.getInternProfileId(userId);
 
-    return prisma.internshipApplication.findMany({
+    const apps = await prisma.internshipApplication.findMany({
       where: { internProfileId },
       orderBy: { createdAt: "desc" },
       include: {
@@ -213,6 +235,7 @@ class ApplicationService {
         officeLocation: { select: { id: true, name: true } },
       },
     });
+    return apps.map((app) => this.serializeApplication(app));
   }
 
   // ─── 14.3 Update Draft Application ──────────────────────────
@@ -308,7 +331,7 @@ class ApplicationService {
         });
       }
 
-      return tx.internshipApplication.findUnique({
+      const updated = await tx.internshipApplication.findUnique({
         where: { id },
         include: {
           documents: {
@@ -324,6 +347,7 @@ class ApplicationService {
           officeLocation: { select: { id: true, name: true } },
         },
       });
+      return this.serializeApplication(updated);
     });
   }
 
@@ -526,7 +550,7 @@ class ApplicationService {
     ]);
 
     return {
-      data,
+      data: data.map((app) => this.serializeApplication(app)),
       meta: {
         page,
         limit,
@@ -595,7 +619,7 @@ class ApplicationService {
       }
     }
 
-    return app;
+    return this.serializeApplication(app);
   }
 
   // ─── 14.8 Approve Application (HR) ──────────────────────────

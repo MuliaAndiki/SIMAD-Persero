@@ -55,6 +55,11 @@ function sanitizeBigInt<T>(value: T): T {
   return value;
 }
 
+/** Serialize payload JSON dengan fallback aman untuk nilai `BigInt`. */
+export function stringifyJson(data: unknown): string {
+  return JSON.stringify(data, (_key, value) => (typeof value === 'bigint' ? Number(value) : value));
+}
+
 function getDefaultErrorTitle(status: number): string {
   switch (status) {
     case 400: return 'Permintaan Tidak Valid';

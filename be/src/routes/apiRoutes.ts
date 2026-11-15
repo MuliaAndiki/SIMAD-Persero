@@ -1,3 +1,4 @@
+import { stringifyJson } from '@/http';
 import { InternalApiKey } from '@/middlewares/api-key';
 import Elysia from 'elysia';
 import applicationRoutes from './applicationRoutes';
@@ -29,7 +30,7 @@ class ApiRouter {
   constructor() {
     this.apiRouter = new Elysia({ prefix: '/api/v1' }).derive(() => ({
       json(data: any, status = 200) {
-        return new Response(JSON.stringify(data), {
+        return new Response(stringifyJson(data), {
           status,
           headers: { 'Content-Type': 'application/json' },
         });
