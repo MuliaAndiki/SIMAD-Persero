@@ -21,7 +21,11 @@ import {
 import { Textarea } from '@/components/atoms/textarea';
 import { useApi } from '@/hooks/useService/useApi';
 import type { AttendanceResponse } from '@/types/api/attendance.types';
-import { AttendanceCorrectionType, type AttendanceCorrectionTypeValue } from '@/types/api/correction.types';
+import {
+  AttendanceCorrectionType,
+  type AttendanceCorrectionTypeValue,
+} from '@/types/api/correction.types';
+import { createUploadFormData } from '@/utils/upload-error';
 import { AlertCircle, FileUp, Loader2, UploadCloud } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
@@ -47,7 +51,9 @@ export function AttendanceCorrectionDialog({
   const submitMutation = api.correction.mutate.submit();
   const uploadFileMutation = api.file.mutate.upload();
 
-  const [selectedAttendanceId, setSelectedAttendanceId] = useState<string>(initialAttendanceId ?? '');
+  const [selectedAttendanceId, setSelectedAttendanceId] = useState<string>(
+    initialAttendanceId ?? '',
+  );
   const [correctionType, setCorrectionType] = useState<AttendanceCorrectionTypeValue>(
     AttendanceCorrectionType.BOTH,
   );
@@ -73,8 +79,7 @@ export function AttendanceCorrectionDialog({
 
     try {
       setIsUploading(true);
-      const formData = new FormData();
-      formData.append('berkas', file);
+      const formData = createUploadFormData(file, 'corrections');
       const res = await uploadFileMutation.mutateAsync(formData);
       const uploadedId = (res as any)?.data?.id ?? (res as any)?.id;
       if (uploadedId) {

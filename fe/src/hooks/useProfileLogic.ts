@@ -1,7 +1,6 @@
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useApi } from '@/hooks/useService/useApi';
 import { useCallback, useState } from 'react';
-import { uploadAvatar, deleteObject } from '@/utils/r2-utils';
 
 export function useProfileLogic() {
   const api = useApi();
@@ -23,23 +22,14 @@ export function useProfileLogic() {
   const handleUploadPhoto = useCallback(
     async (file: File) => {
       try {
-        // Delete old avatar photo from R2 if present
-        if (profile.data?.profilePhoto) {
-          await deleteObject(profile.data.profilePhoto).catch((err) => {
-            console.warn('Failed to delete old avatar from R2:', err);
-          });
-        }
-
-        const avatarUrl = await uploadAvatar(file);
-        await uploadPhoto.mutateAsync({
-          url: avatarUrl,
-          originalName: file.name,
-        });
+        const formData = new FormData();
+        formData.append('photo', file);
+        await uploadPhoto.mutateAsync(formData);
       } catch (err) {
-        console.error('Failed to upload avatar to R2:', err);
+        console.error('Failed to upload avatar to backend:', err);
       }
     },
-    [uploadPhoto, profile.data?.profilePhoto],
+    [uploadPhoto],
   );
 
   const handleLogout = useCallback(() => {

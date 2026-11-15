@@ -2,6 +2,7 @@ import { createEnv } from '@t3-oss/env-nextjs';
 import { NEVER, z } from 'zod';
 
 const requiredString = z.string().trim().min(1, 'This field is required');
+const optionalString = z.string().trim().optional();
 
 export const env = createEnv({
   // Server Environment Variables Configuration
@@ -9,15 +10,15 @@ export const env = createEnv({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     AUTH_SECRET_KEY: requiredString,
     NEXT_INTERNAL_API_SECRET: requiredString,
-    NEXT_CLOUDFLARE_ACCOUNT_ID: requiredString,
-    NEXT_ACCESS_KEY_ID: requiredString,
-    NEXT_SECRET_ACCESS_KEY: requiredString,
+    NEXT_CLOUDFLARE_ACCOUNT_ID: optionalString,
+    NEXT_ACCESS_KEY_ID: optionalString,
+    NEXT_SECRET_ACCESS_KEY: optionalString,
   },
 
   // Client Environment Variables Configuration
   client: {
     NEXT_PUBLIC_APP_URL: requiredString.url(),
-    NEXT_PUBLIC_R2_URL: requiredString.url(),
+    NEXT_PUBLIC_R2_URL: optionalString,
     NEXT_PUBLIC_BACKEND_URL: requiredString.url(),
     NEXT_PUBLIC_BASEPATH: requiredString,
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: requiredString,

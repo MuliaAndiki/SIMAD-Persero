@@ -3,8 +3,9 @@
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import { useApi } from '@/hooks/useService/useApi';
 import type { EducationLevelResponse, InstitutionResponse } from '@/types/api/institution.types';
-import { uploadUnivLogo } from '@/utils/r2-utils';
+import { createUploadFormData, getErrorMessage } from '@/utils/upload-error';
 import { GraduationCap, ImagePlus, Loader2, X } from 'lucide-react';
 import { type ChangeEvent, type FormEvent, useState } from 'react';
 
@@ -40,7 +41,10 @@ export function UniversityFormDialog({
   onClose,
   onSubmit,
 }: UniversityFormDialogProps) {
+  const api = useApi();
+  const uploadFileMutation = api.file.mutate.upload();
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   if (!open) return null;
 
@@ -49,17 +53,24 @@ export function UniversityFormDialog({
     if (!file) return;
 
     try {
+      setUploadError(null);
       setIsUploading(true);
-      const url = await uploadUnivLogo(file);
+      const formData = createUploadFormData(file, 'univImage');
+      const res = await uploadFileMutation.mutateAsync(formData);
+      const url = res.data?.url;
+      if (!url) {
+        throw new Error('Respons server tidak menyertakan URL logo.');
+      }
       onFieldChange('logo', url);
     } catch (err) {
-      console.error('Failed to upload logo:', err);
+      setUploadError(getErrorMessage(err, 'Gagal mengunggah logo universitas.'));
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleRemoveLogo = () => {
+    setUploadError(null);
     onFieldChange('logo', '');
   };
 
@@ -115,7 +126,7 @@ export function UniversityFormDialog({
                     <span>{form.logo ? 'Ganti Logo' : 'Upload Logo'}</span>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/png,image/jpeg,image/webp"
                       onChange={handleLogoChange}
                       className="hidden"
                       disabled={isUploading}
@@ -133,7 +144,8 @@ export function UniversityFormDialog({
                     </Button>
                   )}
                 </div>
-                <span className="text-[11px] text-muted-foreground">PNG, JPG, SVG maks 2MB</span>
+                <span className="text-[11px] text-muted-foreground">PNG, JPG, WebP maks 5MB</span>
+                {uploadError && <span className="text-[11px] text-destructive">{uploadError}</span>}
               </div>
             </div>
           </div>

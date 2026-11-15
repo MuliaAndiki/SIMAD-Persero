@@ -1,6 +1,6 @@
 import type { AppContext } from '@/contex';
 import FileController from '@/controllers/FileController';
-import { FileParamsDto, UploadFileDto } from '@/dtos/file.dto';
+import { FileParamsDto, PreviewFileQueryDto, UploadFileDto } from '@/dtos/file.dto';
 import { verifyToken } from '@/middlewares/auth';
 import { RateLimitRule, keyByUser, rateLimit } from '@/middlewares/rateLimit';
 import Elysia from 'elysia';
@@ -9,7 +9,7 @@ import Elysia from 'elysia';
  * Routes modul File.
  * Base URL: /files
  * Sumber aturan: docs/07-api-specification.md §25.
- * Seluruh endpoint membutuhkan Bearer Token (user yang sudah login).
+ * Seluruh endpoint upload/detail/hapus membutuhkan Bearer Token (user yang sudah login).
  */
 class FileRouter {
   public fileRouter;
@@ -29,7 +29,18 @@ class FileRouter {
       ],
       detail: {
         summary: 'Upload file',
-        description: 'Upload file PDF/JPG/JPEG/PNG maksimal 5 MB (multipart/form-data).',
+        description: 'Upload file PDF/JPG/JPEG/PNG/WebP maksimal 5 MB (multipart/form-data).',
+        tags: ['File'],
+      },
+    });
+
+    // GET /files/preview — ditempatkan sebelum /:fileId agar tidak dianggap parameter ID
+    this.fileRouter.get('/preview', (c: AppContext) => FileController.preview(c), {
+      query: PreviewFileQueryDto,
+      detail: {
+        summary: 'Preview atau unduh stream R2',
+        description:
+          'Menampilkan stream objek R2 berdasarkan query key, url, atau fileId (untuk proxy FE internal).',
         tags: ['File'],
       },
     });

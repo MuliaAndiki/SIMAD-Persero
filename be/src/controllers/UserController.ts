@@ -4,6 +4,7 @@ import userService from "@/services/user.service";
 import UserService from "@/services/user.service";
 import type { JwtPayload } from "@/types/auth.types";
 import type { ChangePasswordBody, UpdateProfileBody } from "@/types/user.types";
+import { inferMimeFromFilename } from "@/utils/storage.util";
 
 /**
  * Controller modul User — tipis.
@@ -77,9 +78,14 @@ class UserController {
       }
 
       const buffer = Buffer.from(await photo.arrayBuffer());
+      const mimeType =
+        photo.type && photo.type !== 'application/octet-stream'
+          ? photo.type
+          : inferMimeFromFilename(photo.name);
+
       const data = await UserService.uploadPhoto(user, {
         originalName: photo.name,
-        mimeType: photo.type,
+        mimeType,
         size: photo.size,
         buffer,
       });

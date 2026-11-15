@@ -4,6 +4,7 @@
  * Diturunkan dari base model `IFile` (models.types.ts) memakai Utility Types.
  * Sumber aturan: docs/07-api-specification.md §25.
  */
+import type { UploadR2Folder } from '@/utils/r2-utils';
 import type { IFile } from './models.types';
 
 export type FileParams = {
@@ -16,6 +17,7 @@ export type UploadFileInput = {
   mimeType: string;
   size: number;
   buffer: Buffer;
+  folder?: UploadR2Folder;
 };
 
 export type FileResponse = Omit<IFile, 'deletedAt' | 'size'> & {

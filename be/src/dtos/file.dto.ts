@@ -8,19 +8,39 @@ import { t } from 'elysia';
  * Sumber aturan: docs/07-api-specification.md §25.
  */
 
+export const UploadFolderEnum = t.UnionEnum([
+  'avatars',
+  'cv',
+  'surat-pengantar',
+  'univImage',
+  'certificate-templates',
+  'signatures',
+  'corrections',
+  'fileuniv',
+]);
+
 // POST /files/upload
 export const UploadFileDto = t.Object({
   file: t.Optional(
     t.File({
-      type: ['application/pdf', 'image/jpeg', 'image/png'],
+      type: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
       maxSize: MAX_FILE_SIZE,
-      description: 'File PDF/JPG/JPEG/PNG maksimal 5 MB',
+      description: 'File PDF/JPG/JPEG/PNG/WebP maksimal 5 MB',
     }),
   ),
+  folder: t.Optional(UploadFolderEnum),
   url: t.Optional(t.String({ description: 'Public URL R2 dari file' })),
   originalName: t.Optional(t.String()),
   mimeType: t.Optional(t.String()),
   size: t.Optional(t.Numeric()),
+});
+
+// GET /files/preview
+export const PreviewFileQueryDto = t.Object({
+  key: t.Optional(t.String()),
+  url: t.Optional(t.String()),
+  fileId: t.Optional(t.String()),
+  download: t.Optional(t.String()),
 });
 
 // GET /files/:fileId, GET /files/:fileId/download, DELETE /files/:fileId
