@@ -6,6 +6,7 @@ import type {
   GuideItem,
   GuideQuery,
   UpdateGuideBody,
+  UpdateGuideStatusBody,
 } from '@/types/api/guide.types';
 import { buildQueryString } from '@/utils/query-string';
 import { toServiceResponse } from '@/utils/service-response';
@@ -52,6 +53,19 @@ class GuideService {
     const res = await client.PatchResponse<GuideItem>(GUIDE_ENDPOINTS.UPDATE(id), body);
     return toServiceResponse(res, {
       message: 'Panduan berhasil diperbarui',
+    });
+  }
+
+  /**
+   * PATCH /guides/:id/status
+   */
+  public async UpdateStatus(
+    id: string,
+    body: UpdateGuideStatusBody,
+  ): Promise<TResponse<GuideItem>> {
+    const res = await client.PatchResponse<GuideItem>(GUIDE_ENDPOINTS.UPDATE_STATUS(id), body);
+    return toServiceResponse(res, {
+      message: body.isPublished ? 'Panduan berhasil diterbitkan' : 'Panduan berhasil diarsipkan',
     });
   }
 

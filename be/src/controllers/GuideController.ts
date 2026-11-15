@@ -1,7 +1,12 @@
 import type { AppContext } from '@/contex';
 import { HttpResponse, handleAppError } from '@/http';
 import GuideService from '@/services/guide.service';
-import type { CreateGuideBody, GuideQuery, UpdateGuideBody } from '@/types/guide.types';
+import type {
+  CreateGuideBody,
+  GuideQuery,
+  UpdateGuideBody,
+  UpdateGuideStatusBody,
+} from '@/types/guide.types';
 
 class GuideController {
   private handleError(c: AppContext, error: unknown) {
@@ -50,6 +55,22 @@ class GuideController {
       const body = c.body as UpdateGuideBody;
       const data = await GuideService.update(id, body);
       return HttpResponse(c).ok(data, undefined, 'Panduan berhasil diperbarui');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  // PATCH /guides/:id/status (HR Admin)
+  public async updateStatus(c: AppContext) {
+    try {
+      const { id } = c.params;
+      const body = c.body as UpdateGuideStatusBody;
+      const data = await GuideService.updateStatus(id, body.isPublished);
+      return HttpResponse(c).ok(
+        data,
+        undefined,
+        body.isPublished ? 'Panduan berhasil diterbitkan' : 'Panduan berhasil diarsipkan',
+      );
     } catch (error) {
       return this.handleError(c, error);
     }

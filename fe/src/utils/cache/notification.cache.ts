@@ -4,6 +4,7 @@ import type { NotificationResponse } from '@/types/api/notification.types';
 
 export type NotificationCacheContext = {
   previousData?: NotificationResponse[];
+  previousLists?: Array<[readonly unknown[], NotificationResponse[]]>;
 };
 
 export function readNotificationSnapshot(ns: AppNameSpace): NotificationResponse[] | undefined {

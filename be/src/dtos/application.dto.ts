@@ -34,7 +34,7 @@ export const ApproveApplicationDto = t.Object({
   departmentId: t.String({ format: 'uuid' }),
   officeLocationId: t.Optional(t.String({ format: 'uuid' })),
   supervisorId: t.String({ format: 'uuid' }),
-  actualStartDate: t.Optional(t.String({ format: 'date' })),
+  actualStartDate: t.String({ format: 'date' }),
   actualEndDate: t.Optional(t.String({ format: 'date' })),
   notes: t.Optional(t.String()),
 });

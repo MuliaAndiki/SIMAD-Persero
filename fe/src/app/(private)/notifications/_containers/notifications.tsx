@@ -1,19 +1,24 @@
-'use client';
+"use client";
 
-import { NotificationsSection } from '@/components/page/notifications/NotificationsSection';
-import { useNotification } from '@/hooks/useService/notification/useNotification';
-import { useApi } from '@/hooks/useService/useApi';
-import { toast } from 'sonner';
+import { NotificationsSection } from "@/components/page/notifications/NotificationsSection";
+import { useAppNameSpace } from "@/hooks/useAppNameSpace";
+import { useNotification } from "@/hooks/useService/notification/useNotification";
+import { useApi } from "@/hooks/useService/useApi";
+import { toast } from "sonner";
 
 export default function NotificationsContainer() {
   const api = useApi();
   const notif = useNotification();
+  const ns = useAppNameSpace();
 
   const me = api.auth.query.me();
   const role = me.data?.role;
 
   // Mengambil daftar notifikasi terbaru (limit 100 untuk histori lengkap di laman notifikasi)
-  const notificationsQuery = notif.query.list({ limit: 100 }, { enabled: Boolean(role) });
+  const notificationsQuery = notif.query.list(
+    { limit: 100 },
+    { enabled: Boolean(role) },
+  );
   const unreadQuery = notif.query.unreadCount({ enabled: Boolean(role) });
 
   const markAsReadMutation = notif.mutate.markAsRead();
@@ -30,7 +35,7 @@ export default function NotificationsContainer() {
       { notificationId },
       {
         onError: () => {
-          toast.error('Gagal memperbarui status notifikasi.');
+          toast.error("Gagal memperbarui status notifikasi.");
         },
       },
     );
@@ -40,10 +45,10 @@ export default function NotificationsContainer() {
   const handleMarkAllAsRead = () => {
     markAllAsReadMutation.mutate(undefined, {
       onSuccess: () => {
-        toast.success('Semua notifikasi berhasil ditandai telah dibaca.');
+        toast.success("Semua notifikasi berhasil ditandai telah dibaca.");
       },
       onError: () => {
-        toast.error('Gagal menandai semua notifikasi.');
+        toast.error("Gagal menandai semua notifikasi.");
       },
     });
   };
@@ -54,10 +59,10 @@ export default function NotificationsContainer() {
       { notificationId },
       {
         onSuccess: () => {
-          toast.success('Notifikasi berhasil dihapus dari daftar.');
+          toast.success("Notifikasi berhasil dihapus dari daftar.");
         },
         onError: () => {
-          toast.error('Gagal menghapus notifikasi.');
+          toast.error("Gagal menghapus notifikasi.");
         },
       },
     );
@@ -74,12 +79,12 @@ export default function NotificationsContainer() {
       await sendMutation.mutateAsync({
         title: data.title,
         message: data.message,
-        typeCode: data.typeCode ?? 'ANNOUNCEMENT',
+        typeCode: data.typeCode ?? "ANNOUNCEMENT",
         isBroadcast: true,
       });
-      toast.success('Pengumuman siaran berhasil dikirim ke seluruh pengguna.');
+      toast.success("Pengumuman siaran berhasil dikirim ke seluruh pengguna.");
     } catch (err: any) {
-      toast.error(err?.message || 'Gagal mengirim pengumuman.');
+      toast.error(err?.message || "Gagal mengirim pengumuman.");
       throw err;
     }
   };
@@ -95,6 +100,7 @@ export default function NotificationsContainer() {
         notificationsQuery.refetch();
         unreadQuery.refetch();
       }}
+      alert={ns.alert}
       onMarkAsRead={handleMarkAsRead}
       onMarkAllAsRead={handleMarkAllAsRead}
       onDelete={handleDelete}

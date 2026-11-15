@@ -40,7 +40,7 @@ export interface ApproveApplicationBody {
   departmentId: string;
   officeLocationId?: string;
   supervisorId: string;
-  actualStartDate?: string;
+  actualStartDate: string;
   actualEndDate?: string;
   notes?: string;
 }

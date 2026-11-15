@@ -48,12 +48,17 @@ class NotificationService {
         ...this.notificationInclude,
         notificationReads: {
           where: { userId },
-          select: { readAt: true },
+          select: { readAt: true, isDismissed: true },
         },
       },
     });
 
     if (!notification) {
+      throw new AppError(404, 'Notification not found');
+    }
+
+    // Baris dismissed = sudah dihapus user → anggap tidak ada.
+    if (notification.notificationReads[0]?.isDismissed) {
       throw new AppError(404, 'Notification not found');
     }
 
@@ -68,8 +73,12 @@ class NotificationService {
   }
 
   private buildVisibilityWhere(userId: string): Record<string, unknown> {
+    // ponytail: broadcast tanpa baris read tetap terlihat; baris dismissed menyembunyikan per-user
     return {
-      OR: [{ isBroadcast: true }, { notificationReads: { some: { userId } } }],
+      OR: [
+        { isBroadcast: true, notificationReads: { none: { userId, isDismissed: true } } },
+        { notificationReads: { some: { userId, isDismissed: false } } },
+      ],
     };
   }
 
@@ -179,9 +188,12 @@ class NotificationService {
     await this.findForUser(notificationId, userId);
 
     // Notifikasi tidak dihapus dari database (BR-NOTIF-008 — histori).
-    // Keterkaitan pengguna dihapus sehingga tidak muncul lagi di list.
-    await prisma.notificationRead.deleteMany({
-      where: { notificationId, userId },
+    // Upsert baris dismissed agar broadcast pun hilang per-user
+    // (deleteMany tidak mempan untuk broadcast karena visibility OR isBroadcast).
+    await prisma.notificationRead.upsert({
+      where: { notificationId_userId: { notificationId, userId } },
+      create: { notificationId, userId, isDismissed: true },
+      update: { isDismissed: true },
     });
 
     return { id: notificationId };

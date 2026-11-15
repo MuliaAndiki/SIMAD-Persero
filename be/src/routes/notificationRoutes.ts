@@ -1,12 +1,12 @@
-import type { AppContext } from '@/contex';
-import notificationController from '@/controllers/NotificationController';
+import type { AppContext } from "@/contex";
+import notificationController from "@/controllers/NotificationController";
 import {
   NotificationIdParam,
   NotificationListQuery,
   SendNotificationDto,
-} from '@/dtos/notification.dto';
-import { requireRole, verifyToken } from '@/middlewares/auth';
-import Elysia from 'elysia';
+} from "@/dtos/notification.dto";
+import { requireRole, verifyToken } from "@/middlewares/auth";
+import Elysia from "elysia";
 
 /**
  * Routes modul Notification.
@@ -17,7 +17,7 @@ class NotificationRouter {
   public notificationRouter;
 
   constructor() {
-    this.notificationRouter = new Elysia({ prefix: '/notifications' });
+    this.notificationRouter = new Elysia({ prefix: "/notifications" });
     this.routes();
   }
 
@@ -26,12 +26,13 @@ class NotificationRouter {
 
     // 18.1 GET /notifications (all authenticated roles)
     this.notificationRouter.get(
-      '/',
+      "/",
       (c: AppContext) => notificationController.getMyNotifications(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
         query: NotificationListQuery,
       },
@@ -39,66 +40,78 @@ class NotificationRouter {
 
     // 18.6 GET /notifications/unread-count (all authenticated roles)
     this.notificationRouter.get(
-      '/unread-count',
+      "/unread-count",
       (c: AppContext) => notificationController.unreadCount(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
       },
     );
 
     // 18.4 PATCH /notifications/read-all (all authenticated roles)
     this.notificationRouter.patch(
-      '/read-all',
+      "/read-all",
       (c: AppContext) => notificationController.markAllAsRead(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
       },
     );
 
     // 18.7 POST /notifications/send (HR_ADMIN)
-    this.notificationRouter.post('/send', (c: AppContext) => notificationController.send(c), {
-      beforeHandle: [verifyToken().beforeHandle, requireRole(['hr_admin']).beforeHandle],
-      body: SendNotificationDto,
-    });
+    this.notificationRouter.post(
+      "/send",
+      (c: AppContext) => notificationController.send(c),
+      {
+        beforeHandle: [
+          verifyToken().beforeHandle,
+          requireRole(["hr_admin"]).beforeHandle,
+        ],
+        body: SendNotificationDto,
+      },
+    );
 
     // 18.8 GET /notifications/vapid-public-key (public / all authenticated roles)
     this.notificationRouter.get(
-      '/vapid-public-key',
+      "/vapid-public-key",
       (c: AppContext) => notificationController.getVapidPublicKey(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
       },
     );
 
     // 18.9 POST /notifications/subscribe (all authenticated roles)
     this.notificationRouter.post(
-      '/subscribe',
+      "/subscribe",
       (c: AppContext) => notificationController.subscribePush(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
       },
     );
 
     // 18.10 POST /notifications/unsubscribe (all authenticated roles)
     this.notificationRouter.post(
-      '/unsubscribe',
+      "/unsubscribe",
       (c: AppContext) => notificationController.unsubscribePush(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
       },
     );
@@ -107,12 +120,13 @@ class NotificationRouter {
 
     // 18.2 GET /notifications/:notificationId (all authenticated roles)
     this.notificationRouter.get(
-      '/:notificationId',
+      "/:notificationId",
       (c: AppContext) => notificationController.getById(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
         params: NotificationIdParam,
       },
@@ -120,12 +134,13 @@ class NotificationRouter {
 
     // 18.3 PATCH /notifications/:notificationId/read (all authenticated roles)
     this.notificationRouter.patch(
-      '/:notificationId/read',
+      "/:notificationId/read",
       (c: AppContext) => notificationController.markAsRead(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
         params: NotificationIdParam,
       },
@@ -133,12 +148,13 @@ class NotificationRouter {
 
     // 18.5 DELETE /notifications/:notificationId (all authenticated roles)
     this.notificationRouter.delete(
-      '/:notificationId',
+      "/:notificationId",
       (c: AppContext) => notificationController.remove(c),
       {
         beforeHandle: [
           verifyToken().beforeHandle,
-          requireRole(['intern', 'hr_admin', 'supervisor', 'receptionist']).beforeHandle,
+          requireRole(["intern", "hr_admin", "supervisor", "receptionist"])
+            .beforeHandle,
         ],
         params: NotificationIdParam,
       },

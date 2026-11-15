@@ -2,11 +2,9 @@ import {
   useCreateGuide,
   useDeleteGuide,
   useUpdateGuide,
+  useUpdateGuideStatus,
 } from './state/mutate';
-import {
-  useGuideDetail,
-  useGuideList,
-} from './state/query';
+import { useGuideDetail, useGuideList } from './state/query';
 
 export const useGuide = () => {
   return {
@@ -17,6 +15,7 @@ export const useGuide = () => {
     mutate: {
       create: useCreateGuide,
       update: useUpdateGuide,
+      updateStatus: useUpdateGuideStatus,
       delete: useDeleteGuide,
     },
   };

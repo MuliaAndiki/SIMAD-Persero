@@ -3,6 +3,7 @@
 import { Button } from '@/components/atoms/button';
 import { Card } from '@/components/atoms/card';
 import { Input } from '@/components/atoms/input';
+import { TableLoader } from '@/components/atoms/loading';
 import {
   Select,
   SelectContent,
@@ -10,22 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/atoms/select';
-import {
-  ApplicationApproveForm,
-  type ApproveApplicationFormField,
-  type ApproveApplicationFormState,
-} from '@/components/organisms/application/ApplicationApproveForm';
-import {
-  ApplicationRejectForm,
-  type RejectApplicationFormField,
-  type RejectApplicationFormState,
-} from '@/components/organisms/application/ApplicationRejectForm';
 import { ApplicationTable } from '@/components/organisms/application/ApplicationTable';
-import { TableLoader } from '@/components/atoms/loading';
 import type { ApplicationResponse } from '@/types/api/application.types';
-import type { DepartmentResponse } from '@/types/api/department.types';
-import type { OfficeResponse } from '@/types/api/office.types';
-import type { SupervisorResponse } from '@/types/api/supervisor.types';
 import { AlertCircle, Loader2, Search } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
@@ -38,15 +25,6 @@ export interface ApplicationsSectionState {
   applications: ApplicationResponse[];
   statusFilter: string;
   keyword: string;
-  modalMode: 'approve' | 'reject' | null;
-  targetApplication?: ApplicationResponse | null;
-  approveForm: ApproveApplicationFormState;
-  rejectForm: RejectApplicationFormState;
-  isApproving: boolean;
-  isRejecting: boolean;
-  departments: DepartmentResponse[];
-  offices: OfficeResponse[];
-  supervisors: SupervisorResponse[];
 }
 
 export interface ApplicationsSectionActions {
@@ -54,13 +32,7 @@ export interface ApplicationsSectionActions {
   onKeywordChange: (keyword: string) => void;
   onSearch: () => void;
   onSelectApplication: (id: string) => void;
-  onOpenApprove: (app: ApplicationResponse) => void;
-  onOpenReject: (app: ApplicationResponse) => void;
-  onCloseModal: () => void;
-  onApproveFieldChange: (field: ApproveApplicationFormField, value: string) => void;
-  onRejectFieldChange: (field: RejectApplicationFormField, value: string) => void;
-  onSubmitApprove: () => void | Promise<void>;
-  onSubmitReject: () => void | Promise<void>;
+  onReviewApplication: (app: ApplicationResponse) => void;
 }
 
 export interface ApplicationsSectionProps {
@@ -143,43 +115,8 @@ export function ApplicationsSection({ state, actions }: ApplicationsSectionProps
         <ApplicationTable
           applications={state.applications}
           onSelectApplication={actions.onSelectApplication}
-          onApprove={actions.onOpenApprove}
-          onReject={actions.onOpenReject}
-          isApproving={state.isApproving}
-          isRejecting={state.isRejecting}
+          onReviewApplication={actions.onReviewApplication}
         />
-      )}
-
-      {state.modalMode === 'approve' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
-          <Card className="w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto shadow-xl">
-            <ApplicationApproveForm
-              departments={state.departments}
-              offices={state.offices}
-              supervisors={state.supervisors}
-              targetApplication={state.targetApplication}
-              form={state.approveForm}
-              isSubmitting={state.isApproving}
-              onFieldChange={actions.onApproveFieldChange}
-              onBack={actions.onCloseModal}
-              onSubmit={actions.onSubmitApprove}
-            />
-          </Card>
-        </div>
-      )}
-
-      {state.modalMode === 'reject' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-md p-6">
-            <ApplicationRejectForm
-              form={state.rejectForm}
-              isSubmitting={state.isRejecting}
-              onFieldChange={actions.onRejectFieldChange}
-              onBack={actions.onCloseModal}
-              onSubmit={actions.onSubmitReject}
-            />
-          </Card>
-        </div>
       )}
     </section>
   );

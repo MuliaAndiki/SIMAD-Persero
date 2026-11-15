@@ -11,7 +11,7 @@ import {
 } from "@/types/application.types";
 import type { AuthUser } from "@/types/auth.types";
 import { InternshipStatus } from "@/types/internship.types";
-import { sendStartDateEmail } from "@/services/email.service";
+import { sendStartDateEmail, sendSupervisorAssignmentEmail } from "@/services/email.service";
 import { getLogger } from "../utils/logger";
 import prisma from "../../prisma/client";
 
@@ -22,6 +22,27 @@ import prisma from "../../prisma/client";
  */
 class ApplicationService {
   // ─── Helpers ─────────────────────────────────────────────────
+
+  /** Konversi BigInt `file.size` ke `number | null` agar aman diserialisasi oleh `JSON.stringify`. */
+  private serializeApplication<
+    T extends {
+      documents?: Array<{ file?: { size?: bigint | number | null } | null }>;
+    },
+  >(app: T | null) {
+    if (!app?.documents) return app;
+    return {
+      ...app,
+      documents: app.documents.map((doc) => ({
+        ...doc,
+        file: doc.file
+          ? {
+              ...doc.file,
+              size: doc.file.size != null ? Number(doc.file.size) : null,
+            }
+          : doc.file,
+      })),
+    };
+  }
 
   /** Generate a unique application number: APP-YYYYMMDD-XXXX */
   private generateApplicationNumber(): string {
@@ -172,7 +193,7 @@ class ApplicationService {
         });
       }
 
-      return tx.internshipApplication.findUnique({
+      const created = await tx.internshipApplication.findUnique({
         where: { id: app.id },
         include: {
           documents: {
@@ -188,6 +209,7 @@ class ApplicationService {
           officeLocation: { select: { id: true, name: true } },
         },
       });
+      return this.serializeApplication(created);
     });
   }
 
@@ -196,7 +218,7 @@ class ApplicationService {
   public async getMyApplications(userId: string) {
     const internProfileId = await this.getInternProfileId(userId);
 
-    return prisma.internshipApplication.findMany({
+    const apps = await prisma.internshipApplication.findMany({
       where: { internProfileId },
       orderBy: { createdAt: "desc" },
       include: {
@@ -213,6 +235,7 @@ class ApplicationService {
         officeLocation: { select: { id: true, name: true } },
       },
     });
+    return apps.map((app) => this.serializeApplication(app));
   }
 
   // ─── 14.3 Update Draft Application ──────────────────────────
@@ -308,7 +331,7 @@ class ApplicationService {
         });
       }
 
-      return tx.internshipApplication.findUnique({
+      const updated = await tx.internshipApplication.findUnique({
         where: { id },
         include: {
           documents: {
@@ -324,6 +347,7 @@ class ApplicationService {
           officeLocation: { select: { id: true, name: true } },
         },
       });
+      return this.serializeApplication(updated);
     });
   }
 
@@ -526,7 +550,7 @@ class ApplicationService {
     ]);
 
     return {
-      data,
+      data: data.map((app) => this.serializeApplication(app)),
       meta: {
         page,
         limit,
@@ -595,7 +619,7 @@ class ApplicationService {
       }
     }
 
-    return app;
+    return this.serializeApplication(app);
   }
 
   // ─── 14.8 Approve Application (HR) ──────────────────────────
@@ -672,13 +696,31 @@ class ApplicationService {
       );
     }
 
-    // Tentukan tanggal aktual yang disetujui HR
-    const actualStart = input.actualStartDate
-      ? new Date(input.actualStartDate)
-      : (app.requestedStartDate ?? new Date());
-    const actualEnd = input.actualEndDate
-      ? new Date(input.actualEndDate)
-      : (app.requestedEndDate ?? new Date());
+    // Tentukan tanggal aktual yang disetujui HR (actualStartDate WAJIB)
+    if (!input.actualStartDate || typeof input.actualStartDate !== "string" || !input.actualStartDate.trim()) {
+      throw new AppError(422, "Tanggal mulai aktual (actualStartDate) wajib diisi saat menyetujui pengajuan");
+    }
+
+    const actualStart = new Date(input.actualStartDate);
+    if (isNaN(actualStart.getTime())) {
+      throw new AppError(422, "Format tanggal mulai aktual (actualStartDate) tidak valid");
+    }
+
+    // actualEndDate opsional — jika kosong, fallback ke requestedEndDate
+    let actualEnd: Date;
+    if (input.actualEndDate) {
+      actualEnd = new Date(input.actualEndDate);
+      if (isNaN(actualEnd.getTime())) {
+        throw new AppError(422, "Format tanggal selesai aktual (actualEndDate) tidak valid");
+      }
+    } else if (app.requestedEndDate) {
+      actualEnd = new Date(app.requestedEndDate);
+      if (isNaN(actualEnd.getTime())) {
+        throw new AppError(422, "Format tanggal selesai pengajuan (requestedEndDate) tidak valid");
+      }
+    } else {
+      throw new AppError(422, "Tanggal selesai aktual (actualEndDate) wajib diisi karena tanggal selesai pengajuan tidak tersedia");
+    }
 
     if (actualStart >= actualEnd) {
       throw new AppError(400, "Tanggal mulai aktual harus sebelum tanggal selesai aktual");
@@ -822,6 +864,25 @@ class ApplicationService {
         headline: "Pengajuan magang Anda telah disetujui.",
       }).catch((err) => {
         getLogger().warn({ err, applicationId: id }, "[approve] Gagal mengirim email tanggal masuk");
+      });
+    }
+
+    // Email penunjukan ke supervisor/mentor yang ditunjuk (best-effort).
+    if (supervisorUser.email) {
+      const officeRecord = officeLocationId
+        ? await prisma.officeLocation.findUnique({ where: { id: officeLocationId } })
+        : null;
+      await sendSupervisorAssignmentEmail({
+        to: supervisorUser.email,
+        supervisorName: supervisorUser.fullName,
+        internName: app.internProfile?.user?.fullName ?? "-",
+        applicationNumber: app.applicationNumber,
+        departmentName: department.name,
+        officeName: officeRecord?.name,
+        startDate: actualStart,
+        endDate: actualEnd,
+      }).catch((err) => {
+        getLogger().warn({ err, applicationId: id }, "[approve] Gagal mengirim email penunjukan supervisor");
       });
     }
 
