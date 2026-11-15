@@ -10,6 +10,16 @@ import type { IFile } from './model.type';
 
 // ---------- Payload (request body / path params) ----------
 
+export type UploadR2Folder =
+  | 'avatars'
+  | 'cv'
+  | 'surat-pengantar'
+  | 'univImage'
+  | 'certificate-templates'
+  | 'signatures'
+  | 'corrections'
+  | 'fileuniv';
+
 export interface FileParams {
   fileId: string;
 }

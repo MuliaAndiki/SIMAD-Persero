@@ -1,10 +1,12 @@
+import type { UploadR2Folder } from '@/types/api/file.types';
+
 /**
  * Ekstrak pesan error yang jelas dan tidak ambigu dari exception upload
- * (baik dari Next.js Server Action, jaringan, maupun respons API backend).
+ * (jaringan, validasi file, maupun respons API backend).
  */
 export function getErrorMessage(
   error: unknown,
-  fallback = 'Terjadi kesalahan tidak terduga.',
+  fallback = 'Terjadi kesalahan tidak terduga saat mengunggah berkas.',
 ): string {
   if (error instanceof Error && error.message.trim()) {
     return error.message.trim();
@@ -22,30 +24,24 @@ export function getErrorMessage(
 }
 
 /**
- * Menerjemahkan error transport/Server Action Next.js di production agar pesan
- * tidak berhenti di pesan generik, tetap menyertakan penyebab utamanya.
+ * Membangun `FormData` standar untuk endpoint upload backend (`POST /files/upload`).
+ * Mengisi fallback MIME dari ekstensi file bila browser mengosongkan `file.type`.
  */
-export function describeServerActionUploadError(error: unknown): string {
-  const raw = getErrorMessage(error, 'Server Action upload gagal dijalankan.');
-  const lower = raw.toLowerCase();
-
-  if (
-    lower.includes('413') ||
-    lower.includes('body exceeded') ||
-    lower.includes('payload too large') ||
-    lower.includes('content too large') ||
-    lower.includes('function_payload_too_large')
-  ) {
-    return `Ukuran request melebihi batas payload server Vercel (~4.5 MB): ${raw}`;
+export function createUploadFormData(file: File, folder: UploadR2Folder): FormData {
+  let mimeType = file.type;
+  if (!mimeType || mimeType === 'application/octet-stream') {
+    const lowerName = file.name.toLowerCase();
+    if (lowerName.endsWith('.pdf')) mimeType = 'application/pdf';
+    else if (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) mimeType = 'image/jpeg';
+    else if (lowerName.endsWith('.png')) mimeType = 'image/png';
+    else if (lowerName.endsWith('.webp')) mimeType = 'image/webp';
   }
 
-  if (lower.includes('server components render') || lower.includes('omitted in production')) {
-    return `Server Action melempar error di environment production (detail disensor oleh Next.js): ${raw}`;
-  }
+  const normalizedFile =
+    mimeType && mimeType !== file.type ? new File([file], file.name, { type: mimeType }) : file;
 
-  if (lower.includes('failed to fetch') || lower.includes('networkerror')) {
-    return `Koneksi ke server gagal terhubung: ${raw}`;
-  }
-
-  return raw;
+  const formData = new FormData();
+  formData.append('file', normalizedFile);
+  formData.append('folder', folder);
+  return formData;
 }

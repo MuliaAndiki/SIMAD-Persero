@@ -2,7 +2,7 @@
 
 import { CertificateSettingSection } from '@/components/page/hr_admin/CertificateSettingSection';
 import { useApi } from '@/hooks/useService/useApi';
-import { uploadCertificateTemplate, uploadSignature } from '@/utils/r2-utils';
+import { createUploadFormData, getErrorMessage } from '@/utils/upload-error';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -11,10 +11,14 @@ export default function CertificateSettingContainer() {
   const [selectedOfficeId, setSelectedOfficeId] = useState('ALL');
   const [signerName, setSignerName] = useState('NURLANA');
   const [signerRole, setSignerRole] = useState('Senior Manager Keuangan, Komunikasi & Umum');
-  const [certificateNumberFormat, setCertificateNumberFormat] = useState('SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}');
+  const [certificateNumberFormat, setCertificateNumberFormat] = useState(
+    'SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}',
+  );
   const [signatureUrl, setSignatureUrl] = useState('');
+  const [signatureFileId, setSignatureFileId] = useState<string | undefined>(undefined);
   const [signatureFileName, setSignatureFileName] = useState('');
   const [templateUrl, setTemplateUrl] = useState('');
+  const [templateFileId, setTemplateFileId] = useState<string | undefined>(undefined);
   const [templateFileName, setTemplateFileName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -23,7 +27,6 @@ export default function CertificateSettingContainer() {
   const settingsQuery = api.certificate.query.settings();
   const saveSettingsMutation = api.certificate.mutate.saveSettings();
   const createOfficeSettingMutation = api.certificate.mutate.createOfficeSetting();
-  const updateOfficeSettingMutation = api.certificate.mutate.updateOfficeSetting();
 
   // Load general settings or office specific settings
   useEffect(() => {
@@ -50,47 +53,51 @@ export default function CertificateSettingContainer() {
       });
 
       let updatedSigUrl = signatureUrl;
+      let updatedSigFileId = signatureFileId;
       let updatedSigName = signatureFileName;
       let updatedTplUrl = templateUrl;
+      let updatedTplFileId = templateFileId;
       let updatedTplName = templateFileName;
 
-      // Upload file tanda tangan ke R2 jika ada file baru
+      // Upload file tanda tangan langsung ke backend (BE -> R2 folder signatures/)
       if (data.signatureFile) {
-        toast.loading('Mengunggah tanda tangan ke Cloudflare R2...', {
+        toast.loading('Mengunggah tanda tangan...', {
           id: 'save-cert-setting',
         });
-        updatedSigUrl = await uploadSignature(data.signatureFile);
+        const uploadedSig = await uploadFile.mutateAsync(
+          createUploadFormData(data.signatureFile, 'signatures'),
+        );
+        if (!uploadedSig.data?.url || !uploadedSig.data?.id) {
+          throw new Error('Respons server tidak menyertakan metadata tanda tangan.');
+        }
+
+        updatedSigUrl = uploadedSig.data.url;
+        updatedSigFileId = uploadedSig.data.id;
         updatedSigName = data.signatureFile.name;
 
-        // Catat file di database
-        await uploadFile.mutateAsync({
-          url: updatedSigUrl,
-          originalName: data.signatureFile.name,
-          mimeType: data.signatureFile.type,
-          size: data.signatureFile.size,
-        });
-
         setSignatureUrl(updatedSigUrl);
+        setSignatureFileId(updatedSigFileId);
         setSignatureFileName(updatedSigName);
       }
 
-      // Upload file template ke R2 jika ada file baru
+      // Upload file template langsung ke backend (BE -> R2 folder certificate-templates/)
       if (data.templateFile) {
-        toast.loading('Mengunggah template sertifikat ke Cloudflare R2...', {
+        toast.loading('Mengunggah template sertifikat...', {
           id: 'save-cert-setting',
         });
-        updatedTplUrl = await uploadCertificateTemplate(data.templateFile);
+        const uploadedTpl = await uploadFile.mutateAsync(
+          createUploadFormData(data.templateFile, 'certificate-templates'),
+        );
+        if (!uploadedTpl.data?.url || !uploadedTpl.data?.id) {
+          throw new Error('Respons server tidak menyertakan metadata template.');
+        }
+
+        updatedTplUrl = uploadedTpl.data.url;
+        updatedTplFileId = uploadedTpl.data.id;
         updatedTplName = data.templateFile.name;
 
-        // Catat file di database
-        await uploadFile.mutateAsync({
-          url: updatedTplUrl,
-          originalName: data.templateFile.name,
-          mimeType: data.templateFile.type,
-          size: data.templateFile.size,
-        });
-
         setTemplateUrl(updatedTplUrl);
+        setTemplateFileId(updatedTplFileId);
         setTemplateFileName(updatedTplName);
       }
 
@@ -100,7 +107,10 @@ export default function CertificateSettingContainer() {
           officeLocationId: data.officeLocationId,
           signerName: data.signerName,
           signerRole: data.signerRole,
-          certificateNumberFormat: data.certificateNumberFormat || 'SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}',
+          signatureFileId: updatedSigFileId,
+          templateFileId: updatedTplFileId,
+          certificateNumberFormat:
+            data.certificateNumberFormat || 'SIMAD/{OFFICE_CODE}/{YEAR}/{NUM}',
         });
       } else {
         await saveSettingsMutation.mutateAsync({
@@ -122,7 +132,7 @@ export default function CertificateSettingContainer() {
       });
     } catch (error) {
       console.error('Failed to save certificate settings:', error);
-      toast.error('Gagal menyimpan pengaturan sertifikat', {
+      toast.error(`Gagal menyimpan pengaturan sertifikat: ${getErrorMessage(error)}`, {
         id: 'save-cert-setting',
       });
     } finally {
@@ -132,6 +142,7 @@ export default function CertificateSettingContainer() {
 
   const handleResetTemplate = async () => {
     setTemplateUrl('');
+    setTemplateFileId(undefined);
     setTemplateFileName('');
     try {
       await saveSettingsMutation.mutateAsync({
@@ -148,6 +159,7 @@ export default function CertificateSettingContainer() {
 
   const handleResetSignature = async () => {
     setSignatureUrl('');
+    setSignatureFileId(undefined);
     setSignatureFileName('');
     try {
       await saveSettingsMutation.mutateAsync({

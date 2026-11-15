@@ -4,12 +4,7 @@ import { ApplicationSection } from '@/components/page/application/ApplicationSec
 import { useAppNameSpace } from '@/hooks/useAppNameSpace';
 import { useApi } from '@/hooks/useService/useApi';
 import { getFilePreviewUrl } from '@/utils/file-preview';
-import {
-  type R2UploadActionResult,
-  deleteObject,
-  uploadApplicationDocumentAction,
-} from '@/utils/r2-utils';
-import { describeServerActionUploadError, getErrorMessage } from '@/utils/upload-error';
+import { createUploadFormData, getErrorMessage } from '@/utils/upload-error';
 import { useEffect, useRef } from 'react';
 
 /**
@@ -60,63 +55,19 @@ export default function ApplicationContainer() {
     );
   };
 
-  // Handle uploading file: R2 via Server Action (terstruktur), fallback multipart ke API backend
+  // Unggah file langsung ke endpoint multipart backend (BE akan meneruskan ke R2 sesuai folder)
   const handleUploadFile = async (file: File, kind: 'cv' | 'pengantar' = 'pengantar') => {
     const docLabel = kind === 'cv' ? 'CV' : 'Surat Permohonan Fakultas';
     const sizeMb = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
-    const normalizedMime =
-      file.type ||
-      (file.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
-
-    let r2Result: R2UploadActionResult | null = null;
-    let feError = '';
+    const folder = kind === 'cv' ? 'cv' : 'surat-pengantar';
 
     try {
-      const actionFormData = new FormData();
-      actionFormData.append('file', file);
-      actionFormData.append('kind', kind);
-      r2Result = await uploadApplicationDocumentAction(actionFormData);
-    } catch (err) {
-      feError = describeServerActionUploadError(err);
-    }
-
-    if (r2Result?.ok) {
-      try {
-        const res = await uploadFileMutation.mutateAsync({
-          url: r2Result.url,
-          originalName: file.name,
-          mimeType: normalizedMime,
-          size: file.size,
-        });
-        return { fileId: extractUploadedFileId(res), fileUrl: r2Result.url };
-      } catch (registerErr) {
-        await deleteObject(r2Result.url).catch(() => {});
-        throw new Error(
-          `Gagal mendaftarkan ${docLabel} ("${file.name}", ${sizeMb}) ke server backend: ${getErrorMessage(registerErr)}`,
-        );
-      }
-    }
-
-    const r2FailureReason = r2Result && !r2Result.ok ? r2Result.error : feError;
-    if (r2Result && !r2Result.ok && r2Result.code === 'INVALID_FILE') {
-      throw new Error(
-        `Gagal mengunggah ${docLabel} ("${file.name}", ${sizeMb}): ${r2FailureReason}`,
-      );
-    }
-
-    // Fallback: unggah langsung melalui endpoint backend (mengatasi limit body 4.5 MB Vercel atau missing env R2 FE)
-    try {
-      const fallbackFormData = new FormData();
-      const uploadableFile =
-        file.type === normalizedMime ? file : new File([file], file.name, { type: normalizedMime });
-      fallbackFormData.append('file', uploadableFile);
-
-      const res = await uploadFileMutation.mutateAsync(fallbackFormData);
+      const formData = createUploadFormData(file, folder);
+      const res = await uploadFileMutation.mutateAsync(formData);
       return { fileId: extractUploadedFileId(res), fileUrl: res.data?.url ?? undefined };
     } catch (backendErr) {
-      const beReason = getErrorMessage(backendErr);
       throw new Error(
-        `Gagal mengunggah ${docLabel} ("${file.name}", ${sizeMb}) — [Upload R2 Frontend: ${r2FailureReason}] | [Upload API Backend: ${beReason}]`,
+        `Gagal mengunggah ${docLabel} ("${file.name}", ${sizeMb}): ${getErrorMessage(backendErr)}`,
       );
     }
   };
@@ -148,16 +99,6 @@ export default function ApplicationContainer() {
     },
   ) => {
     try {
-      // Jika ada file baru, hapus file lama dari R2 untuk mencegah double upload
-      if (data.coverLetterFileId) {
-        const app = (myApps.data ?? []).find((a) => a.id === id);
-        if (app?.introductionLetterFile?.url) {
-          await deleteObject(app.introductionLetterFile.url).catch((err) => {
-            console.warn('Failed to delete old file from R2:', err);
-          });
-        }
-      }
-
       await updateMutation.mutateAsync({ params: { id }, body: data });
     } catch {
       // error handled by mutation onError
@@ -182,7 +123,6 @@ export default function ApplicationContainer() {
   };
 
   const handleDeleteDraft = async (id: string) => {
-    const app = (myApps.data ?? []).find((a) => a.id === id);
     const confirmed = await ns.alert.confirm({
       title: 'Hapus Draf Pengajuan?',
       icon: 'warning',
@@ -192,14 +132,6 @@ export default function ApplicationContainer() {
     if (!confirmed) return;
 
     try {
-      // Hapus file dari R2 terlebih dahulu sebelum hapus draft
-      if (app?.introductionLetterFile?.url) {
-        await deleteObject(app.introductionLetterFile.url).catch((err) => {
-          console.warn('Failed to delete file from R2:', err);
-          // Tetap lanjut hapus draft meskipun gagal hapus file
-        });
-      }
-
       await deleteDraftMutation.mutateAsync({ id });
 
       ns.alert.toast({

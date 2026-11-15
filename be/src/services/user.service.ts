@@ -108,7 +108,7 @@ class UserService {
         file.mimeType as (typeof ALLOWED_PHOTO_MIME_TYPES)[number],
       )
     ) {
-      throw new AppError(422, "Invalid photo type. Allowed: JPG, JPEG, PNG");
+      throw new AppError(422, "Invalid photo type. Allowed: JPG, JPEG, PNG, WebP");
     }
     if (file.size > MAX_FILE_SIZE) {
       throw new AppError(422, "Photo size exceeds the 5 MB limit");
@@ -122,7 +122,10 @@ class UserService {
       throw new AppError(404, "Account not found");
     }
 
-    const uploaded = await FileService.upload(user.id, file);
+    const uploaded = await FileService.upload(user.id, {
+      ...file,
+      folder: "avatars",
+    });
 
     await prisma.user.update({
       where: { id: user.id },

@@ -260,13 +260,14 @@ class CertificateService {
     });
   }
 
-  /** Upload file PDF sertifikat lewat FileService. */
+  /** Upload file PDF sertifikat lewat FileService (prefix `sertifikat/`). */
   private async createPdfFile(uploadedById: string, fileName: string, buffer: Buffer) {
     return FileService.upload(uploadedById, {
       originalName: fileName,
       mimeType: 'application/pdf',
       size: buffer.length,
       buffer,
+      folder: 'sertifikat',
     });
   }
 
@@ -613,6 +614,7 @@ class CertificateService {
       signatureUrl: officeSetting.signatureFile?.url ?? undefined,
     });
 
+    const previousFileId = internship.certificate?.fileId ?? null;
     const fileName = `certificate-${certificateNumber.replace(/[\/\\]/g, '-')}.pdf`;
     const file = await this.createPdfFile(userId, fileName, pdfBuffer);
 
@@ -652,6 +654,10 @@ class CertificateService {
 
         return created;
       });
+
+      if (previousFileId && previousFileId !== file.id) {
+        await FileService.removeIfUnreferenced(previousFileId).catch(() => null);
+      }
 
       return this.serialize(certificate);
     } catch (error) {
