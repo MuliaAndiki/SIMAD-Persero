@@ -86,12 +86,27 @@ const EditDraftForm: React.FC<EditDraftFormProps> = ({
 
     // Jika ada file baru, upload dulu
     if (file) {
-      const upload = await service.onUploadFile(file);
-      if (!upload) {
-        setLocalError('Gagal mengunggah berkas baru');
+      try {
+        const upload = await service.onUploadFile(file);
+        if (!upload) {
+          setLocalError(
+            `Gagal mengunggah berkas baru ("${file.name}"): respons layanan upload kosong.`,
+          );
+          return;
+        }
+        updateData.coverLetterFileId = upload.fileId;
+      } catch (err) {
+        const detail =
+          err instanceof Error && err.message
+            ? err.message
+            : 'kesalahan tidak diketahui saat mengunggah berkas';
+        setLocalError(
+          detail.includes(file.name)
+            ? detail
+            : `Gagal mengunggah berkas baru ("${file.name}"): ${detail}`,
+        );
         return;
       }
-      updateData.coverLetterFileId = upload.fileId;
     }
 
     await service.onUpdateDraft(app.id, updateData);
