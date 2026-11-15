@@ -39,7 +39,10 @@ export interface ApplicationSectionService {
   onSubmitDraft: (id: string) => Promise<void>;
   onDeleteDraft: (id: string) => Promise<void>;
   onCancel: (id: string) => Promise<void>;
-  onUploadFile: (file: File, kind?: "cv" | "pengantar") => Promise<{ fileId: string; fileUrl?: string } | null>;
+  onUploadFile: (
+    file: File,
+    kind?: 'cv' | 'pengantar',
+  ) => Promise<{ fileId: string; fileUrl?: string } | null>;
   onPreviewFile?: (fileUrl: string) => void;
 }
 
@@ -155,28 +158,34 @@ function NewApplicationForm({
     }
   };
 
-  const handleCvChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const validateAndSelectPdf = (
+    e: ChangeEvent<HTMLInputElement>,
+    label: string,
+    setFile: (file: File | null) => void,
+  ) => {
     const selected = e.target.files?.[0] ?? null;
-    if (selected && selected.size > 5 * 1024 * 1024) {
-      setLocalError('Ukuran CV maksimal 5MB.');
-      setCvFile(null);
+    if (selected && selected.size === 0) {
+      setLocalError(`${label} tidak boleh kosong (0 byte).`);
+      setFile(null);
       e.target.value = '';
       return;
     }
-    setCvFile(selected);
+    if (selected && selected.size > 5 * 1024 * 1024) {
+      setLocalError(`Ukuran ${label} maksimal 5MB.`);
+      setFile(null);
+      e.target.value = '';
+      return;
+    }
+    setFile(selected);
     setLocalError(null);
   };
 
+  const handleCvChange = (e: ChangeEvent<HTMLInputElement>) => {
+    validateAndSelectPdf(e, 'CV', setCvFile);
+  };
+
   const handleFacultyFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0] ?? null;
-    if (selected && selected.size > 5 * 1024 * 1024) {
-      setLocalError('Ukuran Surat Permohonan Fakultas maksimal 5MB.');
-      setFacultyFile(null);
-      e.target.value = '';
-      return;
-    }
-    setFacultyFile(selected);
-    setLocalError(null);
+    validateAndSelectPdf(e, 'Surat Permohonan Fakultas', setFacultyFile);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -200,12 +209,38 @@ function NewApplicationForm({
       return;
     }
 
-    const [cvUpload, facultyUpload] = await Promise.all([
-      service.onUploadFile(cvFile, "cv"),
-      service.onUploadFile(facultyFile, "pengantar"),
+    const [cvResult, facultyResult] = await Promise.allSettled([
+      service.onUploadFile(cvFile, 'cv'),
+      service.onUploadFile(facultyFile, 'pengantar'),
     ]);
-    if (!cvUpload || !facultyUpload) {
-      setLocalError('Gagal mengunggah dokumen. Silakan coba lagi.');
+
+    const uploadChecks = [
+      { label: 'CV', file: cvFile, result: cvResult },
+      { label: 'Surat Permohonan Fakultas', file: facultyFile, result: facultyResult },
+    ] as const;
+
+    const uploadErrors: string[] = [];
+    for (const { label, file, result } of uploadChecks) {
+      if (result.status === 'rejected') {
+        const detail =
+          result.reason instanceof Error && result.reason.message
+            ? result.reason.message
+            : 'kesalahan tidak diketahui';
+        uploadErrors.push(
+          detail.includes(label) ? detail : `Gagal mengunggah ${label} ("${file.name}"): ${detail}`,
+        );
+      } else if (!result.value) {
+        uploadErrors.push(
+          `Gagal mengunggah ${label} ("${file.name}"): respons layanan upload kosong.`,
+        );
+      }
+    }
+
+    const cvUpload = cvResult.status === 'fulfilled' ? cvResult.value : null;
+    const facultyUpload = facultyResult.status === 'fulfilled' ? facultyResult.value : null;
+
+    if (uploadErrors.length > 0 || !cvUpload || !facultyUpload) {
+      setLocalError(uploadErrors.join(' | '));
       return;
     }
 
