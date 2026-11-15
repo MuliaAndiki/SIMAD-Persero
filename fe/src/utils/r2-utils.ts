@@ -1,11 +1,8 @@
 'use server';
 
-import { env } from '@/configs';
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { PDFDocument } from 'pdf-lib';
-import sharp from 'sharp';
 
-const accountId = process.env.NEXT_CLOUDFLARE_ACCOUNT_ID;
 const bucketName = 'simad';
 const avatarsPrefix = 'avatars';
 const cvPrefix = 'cv';
@@ -18,20 +15,85 @@ const signaturesPrefix = 'signatures';
 const WEBP_MAX_DIMENSION = 1024;
 const WEBP_QUALITY = 80;
 
-const R2_PUBLIC_URL = process.env.NEXT_PUBLIC_R2_URL || '';
+export type R2UploadActionResult =
+  | { ok: true; url: string }
+  | { ok: false; code: 'INVALID_FILE' | 'CONFIG_MISSING' | 'R2_ERROR'; error: string };
 
-const R2 = new S3Client({
-  region: 'auto',
-  endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: env.NEXT_ACCESS_KEY_ID,
-    secretAccessKey: env.NEXT_SECRET_ACCESS_KEY,
-  },
-});
+class R2ConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'R2ConfigError';
+  }
+}
+
+function resolveR2Config() {
+  return {
+    accountId: process.env.NEXT_CLOUDFLARE_ACCOUNT_ID?.trim() || '',
+    accessKeyId: process.env.NEXT_ACCESS_KEY_ID?.trim() || '',
+    secretAccessKey: process.env.NEXT_SECRET_ACCESS_KEY?.trim() || '',
+    publicUrl: (process.env.NEXT_PUBLIC_R2_URL || '').trim().replace(/\/+$/, ''),
+  };
+}
+
+function createR2Client(accountId: string, accessKeyId: string, secretAccessKey: string) {
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${accountId || 'missing'}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+  });
+}
+
+const initialR2Config = resolveR2Config();
+const R2 = createR2Client(
+  initialR2Config.accountId,
+  initialR2Config.accessKeyId,
+  initialR2Config.secretAccessKey,
+);
+
+function getR2Client() {
+  const { accountId, accessKeyId, secretAccessKey, publicUrl } = resolveR2Config();
+  const missing: string[] = [];
+  if (!accountId) missing.push('NEXT_CLOUDFLARE_ACCOUNT_ID');
+  if (!accessKeyId) missing.push('NEXT_ACCESS_KEY_ID');
+  if (!secretAccessKey) missing.push('NEXT_SECRET_ACCESS_KEY');
+
+  if (missing.length > 0) {
+    throw new R2ConfigError(
+      `Konfigurasi Cloudflare R2 belum lengkap di server frontend (${missing.join(', ')})`,
+    );
+  }
+
+  return {
+    client: createR2Client(accountId, accessKeyId, secretAccessKey),
+    accountId,
+    publicUrl,
+  };
+}
+
+function formatR2Error(error: unknown): string {
+  if (error instanceof Error) {
+    const errAny = error as Error & {
+      Code?: string;
+      $metadata?: { httpStatusCode?: number };
+      cause?: { code?: string };
+    };
+    const code = errAny.Code || (errAny.name && errAny.name !== 'Error' ? errAny.name : '');
+    const status = errAny.$metadata?.httpStatusCode;
+    const causeCode = errAny.cause?.code;
+    const tags = [status ? `HTTP ${status}` : '', code, causeCode].filter(Boolean);
+    const prefix = tags.length > 0 ? `[${tags.join(' / ')}] ` : '';
+    return `${prefix}${errAny.message || 'Gagal menghubungi Cloudflare R2'}`;
+  }
+  return 'Kesalahan tidak dikenal saat mengunggah ke Cloudflare R2';
+}
 
 async function putToR2(Key: string, Body: Buffer, ContentType: string): Promise<string> {
-  await R2.send(new PutObjectCommand({ Bucket: bucketName, Key, Body, ContentType }));
-  if (R2_PUBLIC_URL) return `${R2_PUBLIC_URL}/${Key}`;
+  const { client, accountId, publicUrl } = getR2Client();
+  await client.send(new PutObjectCommand({ Bucket: bucketName, Key, Body, ContentType }));
+  if (publicUrl) return `${publicUrl}/${Key}`;
   return `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${Key}`;
 }
 
@@ -47,10 +109,13 @@ async function prepareUpload(file: File, convertPhoto: boolean) {
     const webp = await toWebpBuffer(raw, file.type);
     if (webp) return { body: webp, ext: 'webp', contentType: 'image/webp' };
   }
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
+  const inferredType =
+    file.type || (ext === 'pdf' ? 'application/pdf' : 'application/octet-stream');
   return {
     body: raw,
-    ext: file.name.split('.').pop() || 'bin',
-    contentType: file.type || 'application/octet-stream',
+    ext,
+    contentType: inferredType,
   };
 }
 
@@ -62,6 +127,36 @@ async function uploadDoc(file: File, folder: string): Promise<string> {
     if (small) return putToR2(buildKey(folder, 'pdf'), small, contentType);
   }
   return putToR2(buildKey(folder, ext), body, contentType);
+}
+
+/**
+ * Server Action terstruktur untuk upload dokumen pengajuan magang ke R2.
+ * Mengembalikan hasil error secara eksplisit agar Next.js production tidak menyensor pesan error.
+ */
+export async function uploadApplicationDocumentAction(
+  formData: FormData,
+): Promise<R2UploadActionResult> {
+  const entry = formData.get('file');
+  const kind = formData.get('kind') === 'cv' ? 'cv' : 'pengantar';
+
+  if (!(entry instanceof File) || entry.size <= 0) {
+    return {
+      ok: false,
+      code: 'INVALID_FILE',
+      error: 'File tidak ditemukan atau berukuran 0 byte.',
+    };
+  }
+
+  const folder = kind === 'cv' ? cvPrefix : introductionLetterPrefix;
+  try {
+    const url = await uploadDoc(entry, folder);
+    return { ok: true, url };
+  } catch (error) {
+    if (error instanceof R2ConfigError) {
+      return { ok: false, code: 'CONFIG_MISSING', error: error.message };
+    }
+    return { ok: false, code: 'R2_ERROR', error: formatR2Error(error) };
+  }
 }
 
 async function uploadPhoto(file: File, folder: string): Promise<string> {
@@ -148,6 +243,7 @@ async function toWebpBuffer(input: Buffer, mimeType: string): Promise<Buffer | n
   if (mimeType === 'image/webp' || mimeType === 'image/svg+xml') return null;
   if (mimeType && !mimeType.startsWith('image/')) return null;
   try {
+    const { default: sharp } = await import('sharp');
     return await sharp(input, { animated: false })
       .rotate()
       .resize({
